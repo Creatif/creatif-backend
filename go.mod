@@ -3,6 +3,7 @@ module creatif
 go 1.20
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/microcosm-cc/bluemonday v1.0.25

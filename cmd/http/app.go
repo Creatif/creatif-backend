@@ -20,7 +20,7 @@ func app() {
 		AllowMethods:     []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))
 
-	adminRoutes(srv.Group("/api/v1/admin"))
+	adminRoutes(srv.Group("/api/v1/declaration"))
 
 	server.StartServer(srv)
 }

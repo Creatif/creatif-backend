@@ -1,4 +1,9 @@
 #!/bin/sh
+
+echo "RUNNING MIGRATIONS..."
+cd /app/cmd/migration && go run .
+echo "MIGRATIONS FINISHED!"
+
 _term() {
   kill -TERM "$child" 2>/dev/null
 }
