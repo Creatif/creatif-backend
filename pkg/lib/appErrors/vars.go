@@ -1,0 +1,7 @@
+package appErrors
+
+const VALIDATION_ERROR = 1
+const DATABASE_ERROR = 2
+const APPLICATION_ERROR = 3
+const AUTHORIZATION_ERROR = 4
+const AUTHENTICATION_ERROR = 5

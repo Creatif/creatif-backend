@@ -1,0 +1,15 @@
+var
+assets
+.env
+.env.test
+service_account.json
+firebase/firebase.json
+firebase-debug*
+firestore-debug*
+pubsub-debug*
+database-debug*
+storage.rules
+ui-debug.log
+cmd/http/go_api_build
+.idea
+coverprofile.out
