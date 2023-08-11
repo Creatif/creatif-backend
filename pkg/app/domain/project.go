@@ -27,11 +27,7 @@ func (u *Project) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (Project) TableName() string {
-	return PROJECT_TABLE
-}
-
-func (u Project) WithSchema() string {
-	return fmt.Sprintf("%s.%s", "app", u.TableName())
+	return fmt.Sprintf("%s.%s", "declarations", NODES_TABLE)
 }
 
 func NewProject(name string) Project {

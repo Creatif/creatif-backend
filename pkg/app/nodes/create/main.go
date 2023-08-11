@@ -8,7 +8,7 @@ import (
 )
 
 type Create struct {
-	model CreateProjectModel
+	model CreateNodeModel
 }
 
 func (c Create) Validate() error {
@@ -23,38 +23,38 @@ func (c Create) Authorize() error {
 	return nil
 }
 
-func (c Create) Logic() (domain.Project, error) {
-	model := domain.NewProject(c.model.Name)
+func (c Create) Logic() (domain.Node, error) {
+	model := domain.NewNode(c.model.Name, c.model.Type, c.model.Group, c.model.Behaviour)
 
 	if err := storage.Create(model.TableName(), &model); err != nil {
-		return domain.Project{}, appErrors.NewDatabaseError(err).AddError("Project.Create.Logic", nil)
+		return domain.Node{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
 	}
 
 	return model, nil
 }
 
-func (c Create) Handle() (ProjectView, error) {
+func (c Create) Handle() (View, error) {
 	if err := c.Validate(); err != nil {
-		return ProjectView{}, err
+		return View{}, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return ProjectView{}, err
+		return View{}, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return ProjectView{}, err
+		return View{}, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return ProjectView{}, err
+		return View{}, err
 	}
 
-	return newProjectView(model), nil
+	return newView(model), nil
 }
 
-func New(model CreateProjectModel) pkg.Job[CreateProjectModel, ProjectView, domain.Project] {
+func New(model CreateNodeModel) pkg.Job[CreateNodeModel, View, domain.Node] {
 	return Create{model: model}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
+	"database/sql"
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
@@ -28,7 +29,11 @@ func closeConnection() {
 }
 
 func runMigrations() {
-	createSchemas()
+	sqlDb := createSchemas()
+
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app,declarations,definitions,content;"); err != nil {
+		log.Fatalln(err)
+	}
 
 	if err := storage2.Gorm().AutoMigrate(domain.Project{}); err != nil {
 		closeConnection()
@@ -36,6 +41,15 @@ func runMigrations() {
 	}
 
 	if err := storage2.Gorm().AutoMigrate(domain.User{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO declarations,app,definition,content;"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(domain.Node{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)
 	}
@@ -66,7 +80,7 @@ func db() {
 	}
 }
 
-func createSchemas() {
+func createSchemas() *sql.DB {
 	sqlDb, err := storage2.SQLDB()
 	if err != nil {
 		log.Fatalln(err)
@@ -88,7 +102,5 @@ func createSchemas() {
 		log.Fatalln(err)
 	}
 
-	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app, declarations, definitions, content;"); err != nil {
-		log.Fatalln(err)
-	}
+	return sqlDb
 }

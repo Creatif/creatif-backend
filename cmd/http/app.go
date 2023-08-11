@@ -22,11 +22,15 @@ func app() {
 	}))
 
 	appRoutes(srv.Group("/api/v1/app"))
+	declarationRoutes(srv.Group("/api/v1/declarations"))
 
 	server.StartServer(srv)
 }
 
 func appRoutes(group *echo.Group) {
 	group.POST("/project", handlers.CreateProjectHandler())
+}
 
+func declarationRoutes(group *echo.Group) {
+	group.POST("/node", handlers.CreateNodeHandler())
 }
