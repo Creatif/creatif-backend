@@ -6,8 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func Create[T any](model T) error {
-	res := Gorm().Create(model)
+func Create[T any](table string, model T) error {
+	res := Gorm().Table(table).Create(model)
 	if res.Error != nil {
 		return res.Error
 	}
@@ -15,16 +15,17 @@ func Create[T any](model T) error {
 	return nil
 }
 
-func Update[T any](model T) error {
-	if res := Gorm().Save(model); res.Error != nil {
+func Update[T any](table string, model T) error {
+	if res := Gorm().Table(table).Save(model); res.Error != nil {
 		return res.Error
 	}
 
 	return nil
 }
 
-func Get[T any](ID string, model T, sel ...string) error {
+func Get[T any](table string, ID string, model T, sel ...string) error {
 	if res := Gorm().
+		Table(table).
 		First(model, "id = ?", ID).
 		Select(sel); res.Error != nil {
 		return res.Error
@@ -33,8 +34,8 @@ func Get[T any](ID string, model T, sel ...string) error {
 	return nil
 }
 
-func GetAll[T any](model T) error {
-	res := Gorm().Find(model)
+func GetAll[T any](table string, model T) error {
+	res := Gorm().Table(table).Find(model)
 	if res.Error != nil {
 		return res.Error
 	}
@@ -42,20 +43,20 @@ func GetAll[T any](model T) error {
 	return nil
 }
 
-func Find[T any](fn func(db *gorm.DB) (T, error)) (T, error) {
-	return fn(Gorm())
+func Find[T any](table string, fn func(db *gorm.DB) (T, error)) (T, error) {
+	return fn(Gorm().Table(table))
 }
 
-func Delete(model interface{}) error {
-	if res := Gorm().Delete(model); res.Error != nil {
+func Delete(table string, model interface{}) error {
+	if res := Gorm().Table(table).Delete(model); res.Error != nil {
 		return res.Error
 	}
 
 	return nil
 }
 
-func Transaction(fn func(tx *gorm.DB) error) error {
-	tx := Gorm().Begin()
+func Transaction(table string, fn func(tx *gorm.DB) error) error {
+	tx := Gorm().Table(table).Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()

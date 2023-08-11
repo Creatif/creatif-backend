@@ -28,6 +28,8 @@ func closeConnection() {
 }
 
 func runMigrations() {
+	createSchemas()
+
 	if err := storage2.Gorm().AutoMigrate(domain.Project{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)
@@ -60,6 +62,33 @@ func db() {
 	err := storage2.Connect(dsn)
 
 	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func createSchemas() {
+	sqlDb, err := storage2.SQLDB()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS app"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS declarations"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS definitions"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS content"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app, declarations, definitions, content;"); err != nil {
 		log.Fatalln(err)
 	}
 }

@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
@@ -27,6 +28,10 @@ func (u *Project) BeforeCreate(tx *gorm.DB) (err error) {
 
 func (Project) TableName() string {
 	return PROJECT_TABLE
+}
+
+func (u Project) WithSchema() string {
+	return fmt.Sprintf("%s.%s", "app", u.TableName())
 }
 
 func NewProject(name string) Project {
