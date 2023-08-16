@@ -29,25 +29,26 @@ type AssignNodeBooleanModel struct {
 	Value bool
 }
 
-func NewCreateNodeModel(name, t string, value interface{}) *CreateNodeModel {
+func NewCreateNodeModel(name string, value interface{}) *CreateNodeModel {
 	return &CreateNodeModel{
 		Name:  name,
-		Type:  t,
 		Value: value,
 	}
 }
 
 type View struct {
-	ID    string      `json:"id"`
-	Name  string      `json:"name"`
-	Value interface{} `json:"value"`
+	ID                string      `json:"id"`
+	Name              string      `json:"name"`
+	Value             interface{} `json:"value"`
+	DeclarationNodeID string      `json:"declarationNodeID"`
 }
 
-func newView(model assignments.Node, value interface{}) View {
+func newView(model assignments.Node, value interface{}, declarationNodeID string) View {
 	return View{
-		ID:    model.ID,
-		Name:  model.Name,
-		Value: value,
+		ID:                model.ID,
+		Name:              model.Name,
+		DeclarationNodeID: declarationNodeID,
+		Value:             value,
 	}
 }
 

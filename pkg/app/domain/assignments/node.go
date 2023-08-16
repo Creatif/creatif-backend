@@ -35,9 +35,10 @@ type Node struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
-func NewNode(name string) Node {
+func NewNode(name string, declarationNodeID string) Node {
 	return Node{
-		Name: name,
+		Name:              name,
+		DeclarationNodeID: declarationNodeID,
 	}
 }
 
