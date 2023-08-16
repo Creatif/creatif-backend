@@ -3,6 +3,7 @@ package storage
 import (
 	"creatif/pkg/lib/appErrors"
 	"database/sql"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -34,6 +35,17 @@ func Get[T any](table string, ID string, model T, sel ...string) error {
 	return nil
 }
 
+func GetBy[T any](table string, field string, value interface{}, model T, sel ...string) error {
+	if res := Gorm().
+		Table(table).
+		First(model, fmt.Sprintf("%s = ?", field), value).
+		Select(sel); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
+}
+
 func GetAll[T any](table string, model T) error {
 	res := Gorm().Table(table).Find(model)
 	if res.Error != nil {
@@ -55,8 +67,8 @@ func Delete(table string, model interface{}) error {
 	return nil
 }
 
-func Transaction(table string, fn func(tx *gorm.DB) error) error {
-	tx := Gorm().Table(table).Begin()
+func Transaction(fn func(tx *gorm.DB) error) error {
+	tx := Gorm().Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()

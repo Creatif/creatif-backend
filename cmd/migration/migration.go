@@ -2,6 +2,8 @@ package main
 
 import (
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/domain/assignments"
+	"creatif/pkg/app/domain/declarations"
 	storage2 "creatif/pkg/lib/storage"
 	"database/sql"
 	"fmt"
@@ -31,7 +33,7 @@ func closeConnection() {
 func runMigrations() {
 	sqlDb := createSchemas()
 
-	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app,declarations,definitions,content;"); err != nil {
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app,declarations,assignments,content;"); err != nil {
 		log.Fatalln(err)
 	}
 
@@ -45,11 +47,30 @@ func runMigrations() {
 		log.Fatalln(err)
 	}
 
-	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO declarations,app,definition,content;"); err != nil {
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO declarations,app,assignments,content;"); err != nil {
 		log.Fatalln(err)
 	}
 
-	if err := storage2.Gorm().AutoMigrate(domain.Node{}); err != nil {
+	if err := storage2.Gorm().AutoMigrate(declarations.Node{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO assignments,app,declarations,content;"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(assignments.Node{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(assignments.NodeText{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(assignments.NodeBoolean{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)
 	}
@@ -94,11 +115,15 @@ func createSchemas() *sql.DB {
 		log.Fatalln(err)
 	}
 
-	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS definitions"); err != nil {
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS assignments"); err != nil {
 		log.Fatalln(err)
 	}
 
 	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS content"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("DROP SCHEMA IF EXISTS public"); err != nil {
 		log.Fatalln(err)
 	}
 

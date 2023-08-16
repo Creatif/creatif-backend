@@ -1,7 +1,7 @@
 package create
 
 import (
-	"creatif/pkg/app/domain"
+	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -23,11 +23,11 @@ func (c Create) Authorize() error {
 	return nil
 }
 
-func (c Create) Logic() (domain.Node, error) {
-	model := domain.NewNode(c.model.Name, c.model.Type, c.model.Group, c.model.Behaviour)
+func (c Create) Logic() (declarations.Node, error) {
+	model := declarations.NewNode(c.model.Name, c.model.Type, c.model.Behaviour, c.model.Groups, c.model.Metadata)
 
 	if err := storage.Create(model.TableName(), &model); err != nil {
-		return domain.Node{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
+		return declarations.Node{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
 	}
 
 	return model, nil
@@ -55,6 +55,6 @@ func (c Create) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model CreateNodeModel) pkg.Job[CreateNodeModel, View, domain.Node] {
+func New(model CreateNodeModel) pkg.Job[CreateNodeModel, View, declarations.Node] {
 	return Create{model: model}
 }

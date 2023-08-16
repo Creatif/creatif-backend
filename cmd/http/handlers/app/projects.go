@@ -1,7 +1,8 @@
-package handlers
+package app
 
 import (
 	"creatif/cmd/http/request"
+	"creatif/cmd/http/request/app"
 	projectCreate "creatif/pkg/app/projects/create"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -9,11 +10,11 @@ import (
 
 func CreateProjectHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model request.CreateProject
+		var model app.CreateProject
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		model = request.SanitizeProject(model)
+		model = app.SanitizeProject(model)
 
 		handler := projectCreate.New(projectCreate.NewCreateProjectModel(model.Name))
 

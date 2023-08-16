@@ -1,7 +1,9 @@
 package main
 
 import (
-	"creatif/cmd/http/handlers"
+	app2 "creatif/cmd/http/handlers/app"
+	"creatif/cmd/http/handlers/assignments"
+	"creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/server"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,14 +25,19 @@ func app() {
 
 	appRoutes(srv.Group("/api/v1/app"))
 	declarationRoutes(srv.Group("/api/v1/declarations"))
+	assignmentRoutes(srv.Group("/api/v1/assignments"))
 
 	server.StartServer(srv)
 }
 
 func appRoutes(group *echo.Group) {
-	group.POST("/project", handlers.CreateProjectHandler())
+	group.POST("/project", app2.CreateProjectHandler())
 }
 
 func declarationRoutes(group *echo.Group) {
-	group.POST("/node", handlers.CreateNodeHandler())
+	group.PUT("/node", declarations.CreateNodeHandler())
+}
+
+func assignmentRoutes(group *echo.Group) {
+	group.PUT("/node", assignments.AssignNodeHandler())
 }
