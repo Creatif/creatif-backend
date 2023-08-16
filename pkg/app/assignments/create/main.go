@@ -5,7 +5,6 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -34,7 +33,7 @@ func (c Create) Logic() (assignments.Node, error) {
 	model.DeclarationNodeID = c.model.declarationNode.ID
 
 	err := storage.Transaction(func(tx *gorm.DB) error {
-		var id uuid.UUID
+		var id string
 		if c.model.Type == "text" {
 			requestModel := c.model.Value.(AssignNodeTextModel)
 			textModel := assignments.NewNodeText(requestModel.Value)
@@ -44,7 +43,8 @@ func (c Create) Logic() (assignments.Node, error) {
 				return err
 			}
 
-			id, _ = uuid.FromBytes([]byte(textModel.ID))
+			c.model.assignedValue = textModel.Value
+			id = textModel.ID
 		} else if c.model.Type == "boolean" {
 			requestModel := c.model.Value.(AssignNodeBooleanModel)
 			textModel := assignments.NewNodeBoolean(requestModel.Value)
@@ -54,7 +54,8 @@ func (c Create) Logic() (assignments.Node, error) {
 				return err
 			}
 
-			id, _ = uuid.FromBytes([]byte(textModel.ID))
+			c.model.assignedValue = textModel.Value
+			id = textModel.ID
 		}
 
 		model.ValueID = id
@@ -91,7 +92,7 @@ func (c Create) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model), nil
+	return newView(model, c.model.assignedValue), nil
 }
 
 func New(model *CreateNodeModel) pkg.Job[*CreateNodeModel, View, assignments.Node] {

@@ -15,12 +15,13 @@ type CreateNodeModel struct {
 	Value interface{}
 	Type  string
 
+	assignedValue   interface{}
 	declarationNode declarations.Node
 }
 
 type AssignNodeTextModel struct {
 	Name  string
-	Value string
+	Value []byte
 }
 
 type AssignNodeBooleanModel struct {
@@ -37,14 +38,16 @@ func NewCreateNodeModel(name, t string, value interface{}) *CreateNodeModel {
 }
 
 type View struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID    string      `json:"id"`
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"`
 }
 
-func newView(model assignments.Node) View {
+func newView(model assignments.Node, value interface{}) View {
 	return View{
-		ID:   model.ID,
-		Name: model.Name,
+		ID:    model.ID,
+		Name:  model.Name,
+		Value: value,
 	}
 }
 

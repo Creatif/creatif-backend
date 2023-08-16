@@ -17,7 +17,7 @@ func AssignNodeHandler() func(e echo.Context) error {
 		if model, err := sdk.UnmarshalToStruct[assignments.AssignNodeTextValue](b); err == nil {
 			handler := create.New(create.NewCreateNodeModel(model.Name, "text", create.AssignNodeTextModel{
 				Name:  model.Name,
-				Value: model.Value,
+				Value: []byte(model.Value),
 			}))
 
 			return request.SendResponse[*create.CreateNodeModel](handler, c, http.StatusCreated)

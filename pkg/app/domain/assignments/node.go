@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"fmt"
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
 )
@@ -16,10 +17,11 @@ type Node struct {
 	Name string `gorm:"index;uniqueIndex:unique_node"`
 
 	// TODO: change this to be uuid.UUID when projects and exploration are over, project must exist and be UUID
+	// TODO: remove pointer since now it allows null
 	ProjectID *string `gorm:"uniqueIndex:unique_node"`
 	Project   domain.Project
 
-	ValueID   uuid.UUID
+	ValueID   string
 	ValueType string
 
 	DeclarationNodeID string
@@ -42,10 +44,10 @@ func NewNode(name string) Node {
 type NodeText struct {
 	ID string `gorm:"primarykey"`
 
-	Value string
+	Value datatypes.JSON
 }
 
-func NewNodeText(value string) NodeText {
+func NewNodeText(value []byte) NodeText {
 	return NodeText{
 		Value: value,
 	}
