@@ -26,7 +26,7 @@ func (c Create) Authorize() error {
 func (c Create) Logic() (declarations.Node, error) {
 	model := declarations.NewNode(c.model.Name, c.model.Type, c.model.Behaviour, c.model.Groups, c.model.Metadata)
 
-	if err := storage.Create(model.TableName(), &model); err != nil {
+	if err := storage.Create(model.TableName(), &model, false); err != nil {
 		return declarations.Node{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
 	}
 

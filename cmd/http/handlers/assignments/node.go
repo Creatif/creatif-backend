@@ -15,17 +15,11 @@ func AssignNodeHandler() func(e echo.Context) error {
 		b, _ := io.ReadAll(c.Request().Body)
 
 		if model, err := sdk.UnmarshalToStruct[assignments.AssignNodeTextValue](b); err == nil {
-			handler := create.New(create.NewCreateNodeModel(model.Name, create.AssignNodeTextModel{
-				Name:  model.Name,
-				Value: []byte(model.Value),
-			}))
+			handler := create.New(create.NewCreateNodeModel(model.Name, []byte(model.Value)))
 
 			return request.SendResponse[*create.CreateNodeModel](handler, c, http.StatusCreated)
 		} else if model, err := sdk.UnmarshalToStruct[assignments.AssignNodeBooleanValue](b); err == nil {
-			handler := create.New(create.NewCreateNodeModel(model.Name, create.AssignNodeBooleanModel{
-				Name:  model.Name,
-				Value: model.Value,
-			}))
+			handler := create.New(create.NewCreateNodeModel(model.Name, model.Value))
 
 			return request.SendResponse[*create.CreateNodeModel](handler, c, http.StatusCreated)
 		}

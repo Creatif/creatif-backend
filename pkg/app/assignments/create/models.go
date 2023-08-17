@@ -1,32 +1,22 @@
 package create
 
 import (
-	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/lib/pq"
+	"gorm.io/datatypes"
 )
 
 type CreateNodeModel struct {
 	Name  string
 	Value interface{}
-	Type  string
 
 	assignedValue   interface{}
 	declarationNode declarations.Node
-}
-
-type AssignNodeTextModel struct {
-	Name  string
-	Value []byte
-}
-
-type AssignNodeBooleanModel struct {
-	Name  string
-	Value bool
 }
 
 func NewCreateNodeModel(name string, value interface{}) *CreateNodeModel {
@@ -37,24 +27,31 @@ func NewCreateNodeModel(name string, value interface{}) *CreateNodeModel {
 }
 
 type View struct {
-	ID                string      `json:"id"`
-	Name              string      `json:"name"`
-	Value             interface{} `json:"value"`
-	DeclarationNodeID string      `json:"declarationNodeID"`
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Value     interface{}    `json:"value"`
+	Type      string         // text,image,file,boolean
+	Behaviour string         // readonly,modifiable
+	Groups    pq.StringArray `json:"groups"`
+	Metadata  datatypes.JSON `json:"metadata"`
 }
 
-func newView(model assignments.Node, value interface{}, declarationNodeID string) View {
+func newView(model declarations.Node, value interface{}) View {
 	return View{
-		ID:                model.ID,
-		Name:              model.Name,
-		DeclarationNodeID: declarationNodeID,
-		Value:             value,
+		ID:        model.ID,
+		Name:      model.Name,
+		Value:     value,
+		Type:      model.Type,
+		Behaviour: model.Behaviour,
+		Groups:    model.Groups,
+		Metadata:  model.Metadata,
 	}
 }
 
 func (a *CreateNodeModel) Validate() map[string]string {
 	v := map[string]interface{}{
-		"name": a.Name,
+		"name":             a.Name,
+		"isNodeModifiable": "",
 	}
 
 	if err := validation.Validate(v,
@@ -70,11 +67,31 @@ func (a *CreateNodeModel) Validate() map[string]string {
 
 				return nil
 			})),
+			validation.Key("isNodeModifiable", validation.By(func(value interface{}) error {
+				if a.declarationNode.ID == "" {
+					return nil
+				}
+
+				if a.declarationNode.Behaviour != "modifiable" {
+					return errors.New("This node is 'readonly' and is not modifiable. You can only assign a value to a 'modifiable' node")
+				}
+				return nil
+			})),
 		),
 	); err != nil {
 		var e map[string]string
-		b, _ := json.Marshal(err)
-		json.Unmarshal(b, &e)
+		b, err := json.Marshal(err)
+		if err != nil {
+			return map[string]string{
+				"unrecoverable": "An internal validation error occurred. This should not happen. Please, submit a bug.",
+			}
+		}
+
+		if err := json.Unmarshal(b, &e); err != nil {
+			return map[string]string{
+				"unrecoverable": "An internal validation error occurred. This should not happen. Please, submit a bug.",
+			}
+		}
 
 		return e
 	}

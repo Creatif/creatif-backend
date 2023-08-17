@@ -5,10 +5,16 @@ import (
 	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
-func Create[T any](table string, model T) error {
-	res := Gorm().Table(table).Create(model)
+func Create[T any](table string, model T, upsert bool) error {
+	g := Gorm().Table(table)
+	if upsert {
+		g = g.Clauses(clause.OnConflict{DoNothing: true})
+	}
+
+	res := g.Create(model)
 	if res.Error != nil {
 		return res.Error
 	}
@@ -61,6 +67,14 @@ func Find[T any](table string, fn func(db *gorm.DB) (T, error)) (T, error) {
 
 func Delete(table string, model interface{}) error {
 	if res := Gorm().Table(table).Delete(model); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
+}
+
+func DeleteBy(table string, field string, value interface{}, model interface{}) error {
+	if res := Gorm().Table(table).Where(fmt.Sprintf("%s = ?", field), value).Delete(model); res.Error != nil {
 		return res.Error
 	}
 

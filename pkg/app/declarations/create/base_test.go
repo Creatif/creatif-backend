@@ -29,7 +29,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "ADMIN -> POST/PUT language relations")
+	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

@@ -35,6 +35,7 @@ func NewCreateNodeModel(name, t, behaviour string, groups []string, metadata []b
 }
 
 type View struct {
+	ID        string                 `json:"name"`
 	Name      string                 `json:"name"`
 	Type      string                 `json:"type"`
 	Groups    []string               `json:"groups"`
@@ -47,6 +48,7 @@ type View struct {
 
 func newView(model declarations.Node) View {
 	return View{
+		ID:        model.ID,
 		Name:      model.Name,
 		Type:      model.Type,
 		Groups:    model.Groups,

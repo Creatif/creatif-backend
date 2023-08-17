@@ -1,10 +1,13 @@
 package create
 
 import (
+	"creatif/pkg/app/declarations/create"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
+	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -29,7 +32,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "ADMIN -> POST/PUT language relations")
+	GinkgoRunSpecs(t, "Assignment -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -80,4 +83,42 @@ func _assertValidation(err error, keys []string) {
 			gomega.Expect(keys).Should(gomega.ContainElement(key))
 		}
 	}
+}
+
+func testCreateDeclarationNode(name, t, behaviour string, groups []string, metadata []byte, validation map[string]create.NodeValidation) create.View {
+	handler := create.New(create.NewCreateNodeModel(name, t, behaviour, groups, metadata, validation))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	return view
+}
+
+func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
+	return testCreateDeclarationNode(name, "text", behaviour, []string{}, []byte{}, map[string]create.NodeValidation{})
+}
+
+func testCreateBasicAssignmentTextNode(name string) View {
+	declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
+
+	b, _ := json.Marshal("this is a text node")
+
+	handler := New(NewCreateNodeModel(declarationNode.Name, b))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	return view
+}
+
+func testAssertErrNil(err error) {
+	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testAssertIDValid(id string) {
+	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
+	_, err := uuid.Parse(id)
+	gomega.Expect(err).Should(gomega.BeNil())
 }

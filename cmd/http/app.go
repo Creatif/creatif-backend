@@ -1,7 +1,6 @@
 package main
 
 import (
-	app2 "creatif/cmd/http/handlers/app"
 	"creatif/cmd/http/handlers/assignments"
 	"creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/server"
@@ -31,7 +30,6 @@ func app() {
 }
 
 func appRoutes(group *echo.Group) {
-	group.POST("/project", app2.CreateProjectHandler())
 }
 
 func declarationRoutes(group *echo.Group) {

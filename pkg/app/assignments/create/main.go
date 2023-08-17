@@ -1,11 +1,9 @@
 package create
 
 import (
-	"creatif/pkg/app/domain/assignments"
+	"creatif/pkg/app/assignments/create/services"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/storage"
-	"gorm.io/gorm"
 )
 
 type Create struct {
@@ -28,32 +26,12 @@ func (c Create) Authorize() error {
 	return nil
 }
 
-func (c Create) Logic() (assignments.Node, error) {
-	var model assignments.Node
-	model.DeclarationNodeID = c.model.declarationNode.ID
-
-	err := storage.Transaction(func(tx *gorm.DB) error {
-		if c.model.declarationNode.Type == "text" {
-			m, err := c.saveNodeWithTextModel()
-			if err != nil {
-				return err
-			}
-
-			model = m
-		} else if c.model.declarationNode.Type == "boolean" {
-			m, err := c.saveNodeWithBooleanModel()
-			if err != nil {
-				return err
-			}
-			
-			model = m
-		}
-
-		return nil
-	})
+func (c Create) Logic() (services.AssignmentCreateResult, error) {
+	service := services.NewAssignmentCreate(c.model.declarationNode.Name, c.model.declarationNode.Type, c.model.Value, c.model.declarationNode.ID)
+	model, err := service.CreateOrUpdate()
 
 	if err != nil {
-		return assignments.Node{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
+		return services.AssignmentCreateResult{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
 	}
 
 	return model, nil
@@ -78,69 +56,9 @@ func (c Create) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.assignedValue, c.model.declarationNode.ID), nil
+	return newView(c.model.declarationNode, model.Value), nil
 }
 
-func (c Create) saveTextModel() (string, error) {
-	requestModel := c.model.Value.(AssignNodeTextModel)
-	textModel := assignments.NewNodeText(requestModel.Value)
-	if err := storage.Create(textModel.TableName(), &assignments.NodeText{
-		Value: textModel.Value,
-	}); err != nil {
-		return "", err
-	}
-
-	c.model.assignedValue = textModel.Value
-
-	return textModel.ID, nil
-}
-
-func (c Create) saveBooleanModel() (string, error) {
-	requestModel := c.model.Value.(AssignNodeBooleanModel)
-	textModel := assignments.NewNodeBoolean(requestModel.Value)
-	if err := storage.Create(textModel.TableName(), &assignments.NodeBoolean{
-		Value: textModel.Value,
-	}); err != nil {
-		return "", err
-	}
-
-	c.model.assignedValue = textModel.Value
-
-	return textModel.ID, nil
-}
-
-func (c Create) saveNodeWithTextModel() (assignments.Node, error) {
-	model := assignments.NewNode(c.model.Name, c.model.declarationNode.ID)
-
-	id, err := c.saveTextModel()
-	if err != nil {
-		return assignments.Node{}, err
-	}
-
-	model.ValueID = id
-	if err := storage.Create(model.TableName(), &model); err != nil {
-		return assignments.Node{}, err
-	}
-
-	return model, nil
-}
-
-func (c Create) saveNodeWithBooleanModel() (assignments.Node, error) {
-	model := assignments.NewNode(c.model.Name, c.model.declarationNode.ID)
-
-	id, err := c.saveBooleanModel()
-	if err != nil {
-		return assignments.Node{}, err
-	}
-
-	model.ValueID = id
-	if err := storage.Create(model.TableName(), &model); err != nil {
-		return assignments.Node{}, err
-	}
-
-	return model, nil
-}
-
-func New(model *CreateNodeModel) pkg.Job[*CreateNodeModel, View, assignments.Node] {
+func New(model *CreateNodeModel) pkg.Job[*CreateNodeModel, View, services.AssignmentCreateResult] {
 	return Create{model: model}
 }

@@ -10,6 +10,9 @@ import (
 	"time"
 )
 
+const ValueTextType = "text"
+const ValueBooleanType = "boolean"
+
 // text, image, file, json, code, boolean
 type Node struct {
 	ID string `gorm:"primarykey"`
@@ -21,7 +24,6 @@ type Node struct {
 	ProjectID *string `gorm:"uniqueIndex:unique_node"`
 	Project   domain.Project
 
-	ValueID   string
 	ValueType string
 
 	DeclarationNodeID string
@@ -43,26 +45,30 @@ func NewNode(name string, declarationNodeID string) Node {
 }
 
 type NodeText struct {
-	ID string `gorm:"primarykey"`
+	ID               string `gorm:"primarykey"`
+	AssignmentNodeID string `gorm:"primarykey;autoincrement:false"`
 
 	Value datatypes.JSON
 }
 
-func NewNodeText(value []byte) NodeText {
+func NewNodeText(assignmentNodeID string, value []byte) NodeText {
 	return NodeText{
-		Value: value,
+		Value:            value,
+		AssignmentNodeID: assignmentNodeID,
 	}
 }
 
 type NodeBoolean struct {
-	ID string `gorm:"primarykey"`
+	ID               string `gorm:"primarykey"`
+	AssignmentNodeID string `gorm:"primarykey;autoincrement:false"`
 
 	Value bool
 }
 
-func NewNodeBoolean(value bool) NodeBoolean {
+func NewNodeBoolean(assignmentNodeID string, value bool) NodeBoolean {
 	return NodeBoolean{
-		Value: value,
+		Value:            value,
+		AssignmentNodeID: assignmentNodeID,
 	}
 }
 
