@@ -6,24 +6,30 @@ import (
 	"time"
 )
 
+type ValidationLength struct {
+	Min   int `json:"min"`
+	Max   int `json:"max"`
+	Exact int `json:"exact"`
+}
+
 type NodeValidation struct {
 	Required    bool
-	Length      string
+	Length      ValidationLength
 	ExactValue  string
-	ExactValues string
+	ExactValues []string
 	IsDate      bool
 }
 
 type CreateNodeModel struct {
-	Name       string                    `json:"name"`
-	Type       string                    `json:"type"`
-	Metadata   []byte                    `json:"metadata"`
-	Groups     []string                  `json:"groups"`
-	Behaviour  string                    `json:"behaviour"`
-	Validation map[string]NodeValidation `json:"validation"`
+	Name       string         `json:"name"`
+	Type       string         `json:"type"`
+	Metadata   []byte         `json:"metadata"`
+	Groups     []string       `json:"groups"`
+	Behaviour  string         `json:"behaviour"`
+	Validation NodeValidation `json:"validation"`
 }
 
-func NewCreateNodeModel(name, t, behaviour string, groups []string, metadata []byte, validation map[string]NodeValidation) CreateNodeModel {
+func NewCreateNodeModel(name, t, behaviour string, groups []string, metadata []byte, validation NodeValidation) CreateNodeModel {
 	return CreateNodeModel{
 		Name:       name,
 		Type:       t,
@@ -35,7 +41,7 @@ func NewCreateNodeModel(name, t, behaviour string, groups []string, metadata []b
 }
 
 type View struct {
-	ID        string                 `json:"name"`
+	ID        string                 `json:"id"`
 	Name      string                 `json:"name"`
 	Type      string                 `json:"type"`
 	Groups    []string               `json:"groups"`

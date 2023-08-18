@@ -85,7 +85,7 @@ func _assertValidation(err error, keys []string) {
 	}
 }
 
-func testCreateDeclarationNode(name, t, behaviour string, groups []string, metadata []byte, validation map[string]create.NodeValidation) create.View {
+func testCreateDeclarationNode(name, t, behaviour string, groups []string, metadata []byte, validation create.NodeValidation) create.View {
 	handler := create.New(create.NewCreateNodeModel(name, t, behaviour, groups, metadata, validation))
 
 	view, err := handler.Handle()
@@ -96,11 +96,11 @@ func testCreateDeclarationNode(name, t, behaviour string, groups []string, metad
 }
 
 func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, "text", behaviour, []string{}, []byte{}, map[string]create.NodeValidation{})
+	return testCreateDeclarationNode(name, "text", behaviour, []string{}, []byte{}, create.NodeValidation{})
 }
 
 func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, "boolean", behaviour, []string{}, []byte{}, map[string]create.NodeValidation{})
+	return testCreateDeclarationNode(name, "boolean", behaviour, []string{}, []byte{}, create.NodeValidation{})
 }
 
 func testCreateBasicAssignmentTextNode(name string) View {

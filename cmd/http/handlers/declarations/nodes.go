@@ -17,23 +17,20 @@ func CreateNodeHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeNode(model)
 
-		handler := create.New(create.NewCreateNodeModel(model.Name, model.Type, model.Behaviour, model.Groups, []byte(model.Metadata), func() map[string]create.NodeValidation {
+		handler := create.New(create.NewCreateNodeModel(model.Name, model.Type, model.Behaviour, model.Groups, []byte(model.Metadata), func() create.NodeValidation {
 			requestValidation := model.Validation
-			modelValidation := make(map[string]create.NodeValidation)
 
-			for key, val := range requestValidation {
-				validation := create.NodeValidation{
-					Required:    val.Required,
-					Length:      val.Length,
-					ExactValue:  val.ExactValue,
-					ExactValues: val.ExactValues,
-					IsDate:      val.IsDate,
-				}
-
-				modelValidation[key] = validation
+			return create.NodeValidation{
+				Required: requestValidation.Required,
+				Length: create.ValidationLength{
+					Min:   requestValidation.Length.Min,
+					Max:   requestValidation.Length.Max,
+					Exact: requestValidation.Length.Exact,
+				},
+				ExactValue:  requestValidation.ExactValue,
+				ExactValues: requestValidation.ExactValues,
+				IsDate:      requestValidation.IsDate,
 			}
-
-			return modelValidation
 		}()))
 
 		return request.SendResponse[create.CreateNodeModel](handler, c, http.StatusCreated)
