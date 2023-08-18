@@ -3,6 +3,7 @@ package create
 import (
 	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"github.com/google/uuid"
@@ -28,7 +29,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
 		var assignmentNode assignments.Node
 		gomega.Expect(storage.Gorm().Where("declaration_node_id = ?", node.ID).First(&assignmentNode).Error).Should(gomega.BeNil())
-		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(assignments.ValueTextType))
+		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(constants.ValueTextType))
 
 		var textNode assignments.NodeText
 		gomega.Expect(storage.Gorm().Where("assignment_node_id = ?", assignmentNode.ID).First(&textNode).Error).Should(gomega.BeNil())
@@ -52,7 +53,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
 		var assignmentNode assignments.Node
 		gomega.Expect(storage.Gorm().Where("declaration_node_id = ?", node.ID).First(&assignmentNode).Error).Should(gomega.BeNil())
-		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(assignments.ValueBooleanType))
+		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(constants.ValueBooleanType))
 
 		var booleanNode assignments.NodeBoolean
 		gomega.Expect(storage.Gorm().Where("assignment_node_id = ?", assignmentNode.ID).First(&booleanNode).Error).Should(gomega.BeNil())
@@ -78,7 +79,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
 		var assignmentNode assignments.Node
 		gomega.Expect(storage.Gorm().Where("declaration_node_id = ?", node.ID).First(&assignmentNode).Error).Should(gomega.BeNil())
-		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(assignments.ValueTextType))
+		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(constants.ValueTextType))
 
 		var textNode assignments.NodeText
 		gomega.Expect(storage.Gorm().Where("assignment_node_id = ?", assignmentNode.ID).First(&textNode).Error).Should(gomega.BeNil())
@@ -103,7 +104,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
 		var assignmentNode assignments.Node
 		gomega.Expect(storage.Gorm().Where("declaration_node_id = ?", node.ID).First(&assignmentNode).Error).Should(gomega.BeNil())
-		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(assignments.ValueBooleanType))
+		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(constants.ValueBooleanType))
 
 		var booleanNode assignments.NodeBoolean
 		gomega.Expect(storage.Gorm().Where("assignment_node_id = ?", assignmentNode.ID).First(&booleanNode).Error).Should(gomega.BeNil())
@@ -126,7 +127,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
 		var assignmentNode assignments.Node
 		gomega.Expect(storage.Gorm().Where("declaration_node_id = ?", node.ID).First(&assignmentNode).Error).Should(gomega.BeNil())
-		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(assignments.ValueBooleanType))
+		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(constants.ValueBooleanType))
 
 		var textNode assignments.NodeText
 		gomega.Expect(storage.Gorm().Where("assignment_node_id = ?", assignmentNode.ID).First(&textNode).Error).ShouldNot(gomega.BeNil())
@@ -154,7 +155,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
 		var assignmentNode assignments.Node
 		gomega.Expect(storage.Gorm().Where("declaration_node_id = ?", node.ID).First(&assignmentNode).Error).Should(gomega.BeNil())
-		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(assignments.ValueTextType))
+		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(constants.ValueTextType))
 
 		var textNode assignments.NodeText
 		gomega.Expect(storage.Gorm().Where("assignment_node_id = ?", assignmentNode.ID).First(&textNode).Error).Should(gomega.BeNil())

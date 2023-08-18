@@ -10,9 +10,6 @@ import (
 	"time"
 )
 
-const ValueTextType = "text"
-const ValueBooleanType = "boolean"
-
 // text, image, file, json, code, boolean
 type Node struct {
 	ID string `gorm:"primarykey"`

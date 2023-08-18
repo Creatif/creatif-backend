@@ -3,6 +3,7 @@ package services
 import (
 	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"gorm.io/gorm"
@@ -46,10 +47,10 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 	var nextValue interface{}
 	nextValueType := ""
 	if tOk {
-		nextValueType = assignments.ValueTextType
+		nextValueType = constants.ValueTextType
 		nextValue = nodeTextValue
 	} else if bOk {
-		nextValueType = assignments.ValueBooleanType
+		nextValueType = constants.ValueBooleanType
 		nextValue = nodeBooleanValue
 	}
 
@@ -65,14 +66,14 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 		// record exists
 		if exists.ID != "" {
 			// if the incoming type and current value type are different, remove the difference
-			if exists.ValueType == assignments.ValueTextType && bOk {
+			if exists.ValueType == constants.ValueTextType && bOk {
 				if err := storage.DeleteBy((assignments.NodeText{}).TableName(), "assignment_node_id", exists.ID, &assignments.NodeText{}); err != nil {
 					return err
 				}
 			}
 
 			// if the incoming type and current value type are different, remove the difference
-			if exists.ValueType == assignments.ValueBooleanType && tOk {
+			if exists.ValueType == constants.ValueBooleanType && tOk {
 				if err := storage.DeleteBy((assignments.NodeBoolean{}).TableName(), "assignment_node_id", exists.ID, &assignments.NodeBoolean{}); err != nil {
 					return err
 				}

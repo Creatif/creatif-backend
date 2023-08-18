@@ -2,7 +2,11 @@ package create
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
+	"errors"
+	"fmt"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"time"
 )
 
@@ -38,6 +42,60 @@ func NewCreateNodeModel(name, t, behaviour string, groups []string, metadata []b
 		Validation: validation,
 		Metadata:   metadata,
 	}
+}
+
+func (a *CreateNodeModel) Validate() map[string]string {
+	v := map[string]interface{}{
+		"name":           a.Name,
+		"type":           a.Type,
+		"groups":         a.Groups,
+		"behaviour":      a.Behaviour,
+		"nodeValidation": a.Validation,
+	}
+
+	if err := validation.Validate(v,
+		validation.Map(
+			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("type", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if t != constants.ValueTextType && t != constants.ValueBooleanType {
+					return errors.New(fmt.Sprintf("Invalid value for type. Node type can be 'modifiable' or 'readonly'"))
+				}
+
+				return nil
+			})),
+			validation.Key("groups", validation.When(len(a.Groups) != 0, validation.Each(validation.RuneLength(1, 200)))),
+			validation.Key("behaviour", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if t != constants.ReadonlyBehaviour && t != constants.ModifiableBehaviour {
+					return errors.New(fmt.Sprintf("Invalid value for type. Node type can be 'modifiable' or 'readonly'"))
+				}
+
+				return nil
+			})),
+			validation.Key("nodeValidation", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(NodeValidation)
+
+				if len(t.ExactValue) > 200 {
+					return errors.New("Invalid value for validation.exactValue. validation.exactValue cannot have more than 200 characters")
+				}
+
+				for _, r := range t.ExactValues {
+					if len(r) > 200 {
+						return errors.New("Invalid value for validation.exactValues. Every entry in validation.exactValues array cannot be more than 200 characters")
+					}
+				}
+
+				return nil
+			})),
+		),
+	); err != nil {
+		return sdk.ErrorToResponseError(err)
+	}
+
+	return nil
 }
 
 type View struct {
