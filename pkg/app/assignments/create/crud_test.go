@@ -38,7 +38,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(createdText).Should(gomega.Equal(text))
 	})
 
-	ginkgo.It("should create an assignment boolean node when the node does not exists", ginkgo.Label("assignment", "crud", "success", "1"), func() {
+	ginkgo.It("should create an assignment boolean node when the node does not exists", ginkgo.Label("assignment", "crud", "success", "2"), func() {
 		name := uuid.NewString()
 		declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
 
@@ -60,7 +60,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(booleanNode.Value).Should(gomega.BeTrue())
 	})
 
-	ginkgo.It("should update an assignment text node when the node already exists", ginkgo.Label("assignment", "crud", "success", "2"), func() {
+	ginkgo.It("should update an assignment text node when the node already exists", ginkgo.Label("assignment", "crud", "success", "3"), func() {
 		name := uuid.NewString()
 		testCreateBasicAssignmentTextNode(name)
 		text := "this is a changed text value"
@@ -88,7 +88,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(changedText).Should(gomega.Equal(text))
 	})
 
-	ginkgo.It("should update an assignment boolean node when the node already exists", ginkgo.Label("assignment", "crud", "success", "2"), func() {
+	ginkgo.It("should update an assignment boolean node when the node already exists", ginkgo.Label("assignment", "crud", "success", "4"), func() {
 		name := uuid.NewString()
 		testCreateBasicAssignmentBooleanNode(name, true)
 
@@ -111,7 +111,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(booleanNode.Value).Should(gomega.BeFalse())
 	})
 
-	ginkgo.It("should update an assignment node from text to boolean", ginkgo.Label("assignment", "crud", "success", "3"), func() {
+	ginkgo.It("should update an assignment node from text to boolean", ginkgo.Label("assignment", "crud", "success", "5"), func() {
 		name := uuid.NewString()
 		testCreateBasicAssignmentTextNode(name)
 
@@ -135,5 +135,32 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(storage.Gorm().Where("assignment_node_id = ?", assignmentNode.ID).First(&booleanNode).Error).Should(gomega.BeNil())
 
 		gomega.Expect(booleanNode.Value).Should(gomega.BeTrue())
+	})
+
+	ginkgo.It("should update an assignment node from boolean to text", ginkgo.Label("assignment", "crud", "success", "5"), func() {
+		name := uuid.NewString()
+		testCreateBasicAssignmentBooleanNode(name, true)
+		text := "this is a text value"
+
+		b, _ := json.Marshal(text)
+		handler := New(NewCreateNodeModel(name, b))
+
+		view, err := handler.Handle()
+
+		testAssertErrNil(err)
+		testAssertIDValid(view.ID)
+
+		var node declarations.Node
+		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
+		var assignmentNode assignments.Node
+		gomega.Expect(storage.Gorm().Where("declaration_node_id = ?", node.ID).First(&assignmentNode).Error).Should(gomega.BeNil())
+		gomega.Expect(assignmentNode.ValueType).Should(gomega.Equal(assignments.ValueTextType))
+
+		var textNode assignments.NodeText
+		gomega.Expect(storage.Gorm().Where("assignment_node_id = ?", assignmentNode.ID).First(&textNode).Error).Should(gomega.BeNil())
+
+		var changedText string
+		gomega.Expect(json.Unmarshal(textNode.Value, &changedText))
+		gomega.Expect(changedText).Should(gomega.Equal(text))
 	})
 })

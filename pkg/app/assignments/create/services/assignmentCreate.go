@@ -10,7 +10,7 @@ import (
 
 type AssignmentCreate struct {
 	nodeName          string
-	incomingValueType string
+	existingValueType string
 	value             interface{}
 	declarationNodeID string
 }
@@ -26,7 +26,7 @@ func NewAssignmentCreate(nodeName, valueType string, value interface{}, declarat
 		value:             value,
 		declarationNodeID: declarationNodeID,
 		nodeName:          nodeName,
-		incomingValueType: valueType,
+		existingValueType: valueType,
 	}
 }
 
@@ -79,7 +79,7 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 			}
 
 			// if the incoming type and current value type are the same, only update the value type
-			if a.incomingValueType == exists.ValueType {
+			if a.existingValueType == nextValueType {
 				if tOk {
 					var node assignments.NodeText
 					if err := storage.GetBy(node.TableName(), "assignment_node_id", exists.ID, &node); err != nil {
