@@ -43,7 +43,7 @@ func SanitizeNode(model CreateNode) CreateNode {
 	newNodeValidation.IsDate = model.Validation.IsDate
 	newNodeValidation.ExactValue = p.Sanitize(model.Validation.ExactValue)
 
-	newNodeValidation.ExactValues = sdk.Sanitize(model.Validation.ExactValues, func(k int, v T) T {
+	newNodeValidation.ExactValues = sdk.Sanitize(model.Validation.ExactValues, func(k int, v string) string {
 		return p.Sanitize(v)
 	})
 

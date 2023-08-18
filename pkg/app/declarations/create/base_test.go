@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -80,4 +81,32 @@ func _assertValidation(err error, keys []string) {
 			gomega.Expect(keys).Should(gomega.ContainElement(key))
 		}
 	}
+}
+
+func testCreateDeclarationNode(name, t, behaviour string, groups []string, metadata []byte, validation NodeValidation) View {
+	handler := New(NewCreateNodeModel(name, t, behaviour, groups, metadata, validation))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	return view
+}
+
+func testCreateBasicDeclarationTextNode(name, behaviour string) View {
+	return testCreateDeclarationNode(name, "text", behaviour, []string{}, []byte{}, NodeValidation{})
+}
+
+func testCreateBasicDeclarationBooleanNode(name, behaviour string) View {
+	return testCreateDeclarationNode(name, "boolean", behaviour, []string{}, []byte{}, NodeValidation{})
+}
+
+func testAssertErrNil(err error) {
+	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testAssertIDValid(id string) {
+	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
+	_, err := uuid.Parse(id)
+	gomega.Expect(err).Should(gomega.BeNil())
 }
