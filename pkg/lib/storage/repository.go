@@ -30,7 +30,7 @@ func Update[T any](table string, model T) error {
 	return nil
 }
 
-func Get[T any](table string, ID string, model T, sel ...string) error {
+func Get[T any](table, ID string, model T, sel ...string) error {
 	if res := Gorm().
 		Table(table).
 		First(model, "id = ?", ID).

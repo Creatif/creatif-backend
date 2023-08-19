@@ -29,8 +29,8 @@ type Node struct {
 	Validation datatypes.JSONType[Validation]
 
 	// TODO: change this to be uuid.UUID when projects and exploration are over, project must exist and be UUID
-	ProjectID *string `gorm:"type:uuid;uniqueIndex:unique_node"`
-	Project   domain.Project
+	/*	ProjectID *string `gorm:"type:uuid;uniqueIndex:unique_node"`
+		Project   domain.Project*/
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time

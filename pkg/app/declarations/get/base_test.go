@@ -1,10 +1,12 @@
 package create
 
 import (
+	assignmentsCreate "creatif/pkg/app/assignments/create"
 	"creatif/pkg/app/declarations/create"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
@@ -65,12 +67,10 @@ var _ = GinkgoAfterSuite(func() {
 })
 
 var _ = GinkgoAfterHandler(func() {
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", domain.DECLARATION_NODES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", domain.ASSIGNMENT_NODES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", domain.ASSIGNMENT_NODE_BOOLEAN_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", domain.ASSIGNMENT_NODE_TEXT_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", domain.USERS_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", domain.PROJECT_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.DECLARATION_NODES_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_NODES_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_NODE_BOOLEAN_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_NODE_TEXT_TABLE))
 })
 
 func _assertValidation(err error, keys []string) {
@@ -100,6 +100,32 @@ func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
 
 func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
 	return testCreateDeclarationNode(name, "boolean", behaviour, []string{}, []byte{}, create.NodeValidation{})
+}
+
+func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
+	declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
+
+	b, _ := json.Marshal("this is a text node")
+
+	handler := assignmentsCreate.New(assignmentsCreate.NewCreateNodeModel(declarationNode.Name, b))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	return view
+}
+
+func testCreateBasicAssignmentBooleanNode(name string, value bool) assignmentsCreate.View {
+	declarationNode := testCreateBasicDeclarationBooleanNode(name, "modifiable")
+
+	handler := assignmentsCreate.New(assignmentsCreate.NewCreateNodeModel(declarationNode.Name, value))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	return view
 }
 
 func testAssertErrNil(err error) {

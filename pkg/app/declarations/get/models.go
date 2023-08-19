@@ -1,7 +1,6 @@
 package create
 
 import (
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -27,16 +26,18 @@ type View struct {
 	Groups    []string               `json:"groups"`
 	Behaviour string                 `json:"behaviour"`
 	Metadata  map[string]interface{} `json:"metadata"`
+	Value     interface{}            `json:"value"`
 
 	CreatedAt time.Time `gorm:"<-:create" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.Node) View {
+func newView(model NodeWithValueQuery) View {
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
 		Type:      model.Type,
+		Value:     model.Value,
 		Groups:    model.Groups,
 		Behaviour: model.Behaviour,
 		Metadata:  sdk.UnmarshalToMap([]byte(model.Metadata)),

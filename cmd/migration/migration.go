@@ -1,7 +1,6 @@
 package main
 
 import (
-	"creatif/pkg/app/domain"
 	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
 	storage2 "creatif/pkg/lib/storage"
@@ -32,20 +31,6 @@ func closeConnection() {
 
 func runMigrations() {
 	sqlDb := createSchemas()
-
-	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app,declarations,assignments,content;"); err != nil {
-		log.Fatalln(err)
-	}
-
-	if err := storage2.Gorm().AutoMigrate(domain.Project{}); err != nil {
-		closeConnection()
-		log.Fatalln(err)
-	}
-
-	if err := storage2.Gorm().AutoMigrate(domain.User{}); err != nil {
-		closeConnection()
-		log.Fatalln(err)
-	}
 
 	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO declarations,app,assignments,content;"); err != nil {
 		log.Fatalln(err)
