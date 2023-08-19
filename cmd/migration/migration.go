@@ -41,6 +41,11 @@ func runMigrations() {
 		log.Fatalln(err)
 	}
 
+	if err := storage2.Gorm().AutoMigrate(declarations.Map{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
 	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO assignments,app,declarations,content;"); err != nil {
 		log.Fatalln(err)
 	}
