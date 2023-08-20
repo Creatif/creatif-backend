@@ -12,6 +12,10 @@ type Create struct {
 }
 
 func (c Create) Validate() error {
+	if errs := c.model.Validate(); errs != nil {
+		return appErrors.NewValidationError(errs)
+	}
+
 	return nil
 }
 

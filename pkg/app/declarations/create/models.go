@@ -70,7 +70,7 @@ func (a *CreateNodeModel) Validate() map[string]string {
 				t := value.(string)
 
 				if t != constants.ReadonlyBehaviour && t != constants.ModifiableBehaviour {
-					return errors.New(fmt.Sprintf("Invalid value for type. Node type can be 'modifiable' or 'readonly'"))
+					return errors.New(fmt.Sprintf("Invalid value for behaviour. Node type can be 'modifiable' or 'readonly'"))
 				}
 
 				return nil

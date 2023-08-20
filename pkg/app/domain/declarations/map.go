@@ -11,17 +11,16 @@ import (
 type Map struct {
 	ID string `gorm:"primarykey"`
 
-	NodeID string
-	Node   Node `gorm:"foreignKey:NodeID"`
+	Name string `gorm:"uniqueIndex"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
-func NewMap(nodeId string) Map {
+func NewMap(name string) Map {
 	return Map{
-		NodeID: nodeId,
+		Name: name,
 	}
 }
 
@@ -32,5 +31,5 @@ func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (Map) TableName() string {
-	return fmt.Sprintf("%s.%s", "declarations", domain.NODE_MAPS_TABLE)
+	return fmt.Sprintf("%s.%s", "declarations", domain.NODE_MAP_TABLE)
 }

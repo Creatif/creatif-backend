@@ -1,31 +1,51 @@
 package create
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
+	"creatif/pkg/lib/storage"
 	"errors"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"gorm.io/gorm"
 )
 
 type CreateMapModel struct {
-	Names []string `json:"name"`
+	Nodes []string `json:"nodes"`
+	Name  string   `json:"name"`
 }
 
-func NewCreateMapModel(names []string) CreateMapModel {
+func NewCreateMapModel(name string, nodes []string) CreateMapModel {
 	return CreateMapModel{
-		Names: names,
+		Nodes: nodes,
+		Name:  name,
 	}
 }
 
 func (a *CreateMapModel) Validate() map[string]string {
 	v := map[string]interface{}{
-		"names":    a.Names,
-		"validNum": a.Names,
+		"uniqueName": a.Name,
+		"nodes":      a.Nodes,
+		"validNum":   a.Nodes,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("groups", validation.When(len(a.Names) != 0, validation.Each(is.UUID))),
+			validation.Key("uniqueName", validation.By(func(value interface{}) error {
+				name := value.(string)
+
+				maps := make([]declarations.Map, 0)
+				if err := storage.GetBy((&declarations.Map{}).TableName(), "name", name, &maps); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+					return errors.New("Map with this name already exists")
+				}
+
+				if len(maps) != 0 {
+					return errors.New("Map with this name already exists")
+				}
+
+				return nil
+			})),
+			validation.Key("nodes", validation.When(len(a.Nodes) != 0, validation.Each(is.UUID))),
 			validation.Key("validNum", validation.By(func(value interface{}) error {
 				names := value.([]string)
 				if len(names) > 100 {
@@ -43,11 +63,13 @@ func (a *CreateMapModel) Validate() map[string]string {
 }
 
 type View struct {
-	Names []string `json:"names"`
+	Name  string   `json:"name"`
+	Nodes []string `json:"nodes"`
 }
 
-func newView(names []string) View {
+func newView(name string, nodes []string) View {
 	return View{
-		Names: names,
+		Name:  name,
+		Nodes: nodes,
 	}
 }
