@@ -3,56 +3,33 @@ package services
 import (
 	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/storage"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 )
 
 type AssignmentCreate struct {
 	nodeName          string
-	existingValueType string
-	value             interface{}
+	value             []byte
 	declarationNodeID string
 }
 
 type AssignmentCreateResult struct {
-	Node      assignments.Node
-	Value     interface{}
-	ValueType string
+	Node  assignments.Node
+	Value interface{}
 }
 
-func NewAssignmentCreate(nodeName, valueType string, value interface{}, declarationNodeID string) AssignmentCreate {
+func NewAssignmentCreate(nodeName string, value []byte, declarationNodeID string) AssignmentCreate {
 	return AssignmentCreate{
 		value:             value,
 		declarationNodeID: declarationNodeID,
 		nodeName:          nodeName,
-		existingValueType: valueType,
 	}
 }
 
-/*
-*
- 1. Assignment node not exists, create new node together with the value node
- 2. Assignment node exists:
-    2.1. Check if the incoming value type is different from the current value type. If so, delete the value type
-    2.2 If incoming value type and existing value type are the same, only update the value type
-    2.3 If the incoming vlaue type and existing value type are not the same, create a new value type (the old one was already
-    deleted in 2.1)
-*/
 func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 	model := assignments.NewNode(a.nodeName, a.declarationNodeID)
-	nodeTextValue, tOk := a.value.([]byte)
-	nodeBooleanValue, bOk := a.value.(bool)
-	var nextValue interface{}
-	nextValueType := ""
-	if tOk {
-		nextValueType = constants.ValueTextType
-		nextValue = nodeTextValue
-	} else if bOk {
-		nextValueType = constants.ValueBooleanType
-		nextValue = nodeBooleanValue
-	}
 
 	var exists assignments.Node
 	res := storage.Gorm().Where("name = ?", a.nodeName).First(&exists)
@@ -62,93 +39,31 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 		return AssignmentCreateResult{}, res.Error
 	}
 
+	var createdOrUpdatedValue []byte
+
 	if err := storage.Transaction(func(tx *gorm.DB) error {
-		// record exists
+		// record exists, update the value node
 		if exists.ID != "" {
-			// if the incoming type and current value type are different, remove the difference
-			if exists.ValueType == constants.ValueTextType && bOk {
-				if err := storage.DeleteBy((assignments.NodeText{}).TableName(), "assignment_node_id", exists.ID, &assignments.NodeText{}); err != nil {
-					return err
-				}
+			if res := tx.Table((&assignments.ValueNode{}).TableName()).Where("assignment_node_id", exists.ID).Update("value", a.value); res.Error != nil {
+				return res.Error
 			}
 
-			// if the incoming type and current value type are different, remove the difference
-			if exists.ValueType == constants.ValueBooleanType && tOk {
-				if err := storage.DeleteBy((assignments.NodeBoolean{}).TableName(), "assignment_node_id", exists.ID, &assignments.NodeBoolean{}); err != nil {
-					return err
-				}
-			}
-
-			// if the incoming type and current value type are the same, only update the value type
-			if a.existingValueType == nextValueType {
-				if tOk {
-					var node assignments.NodeText
-					if err := storage.GetBy(node.TableName(), "assignment_node_id", exists.ID, &node); err != nil {
-						return err
-					}
-
-					node.Value = nodeTextValue
-					if err := storage.Update(node.TableName(), &node); err != nil {
-						return err
-					}
-				}
-
-				if bOk {
-					var node assignments.NodeBoolean
-					if err := storage.GetBy(node.TableName(), "assignment_node_id", exists.ID, &node); err != nil {
-						return err
-					}
-
-					node.Value = nodeBooleanValue
-					if err := storage.Update(node.TableName(), &node); err != nil {
-						return err
-					}
-				}
-				// if the are different, create a new value node, existing value node is already deleted
-			} else {
-				exists.ValueType = nextValueType
-
-				if tOk {
-					valueNode := assignments.NewNodeText(exists.ID, nodeTextValue)
-					if err := storage.Create(valueNode.TableName(), &valueNode, false); err != nil {
-						return err
-					}
-				}
-
-				if bOk {
-					valueNode := assignments.NewNodeBoolean(exists.ID, nodeBooleanValue)
-					if err := storage.Create(valueNode.TableName(), &valueNode, false); err != nil {
-						return err
-					}
-				}
-
-				if err := storage.Update(exists.TableName(), &exists); err != nil {
-					return err
-				}
-			}
-
-			return nil
+			createdOrUpdatedValue = a.value
 		}
 
-		// record does not exist
+		// record does not exist, create assignment node and value node
 		if exists.ID == "" {
-			model.ValueType = nextValueType
-
-			if err := storage.Create(model.TableName(), &model, false); err != nil {
-				return err
+			node := assignments.NewNode(a.nodeName, a.declarationNodeID)
+			if res := tx.Create(&node); res != nil {
+				return res.Error
 			}
 
-			if tOk {
-				node := assignments.NewNodeText(model.ID, nodeTextValue)
-				if err := storage.Create(node.TableName(), &node, false); err != nil {
-					return err
-				}
-			} else if bOk {
-				node := assignments.NewNodeBoolean(model.ID, nodeBooleanValue)
-				if err := storage.Create(node.TableName(), &node, false); err != nil {
-					return err
-				}
+			valueNode := assignments.NewValueNode(node.ID, a.value)
+			if res := tx.Create(&valueNode); res.Error != nil {
+				return res.Error
 			}
+
+			createdOrUpdatedValue = valueNode.Value
 		}
 
 		return nil
@@ -156,18 +71,25 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 		return a.error(err)
 	}
 
+	var v interface{}
+	if createdOrUpdatedValue != nil {
+		if err := json.Unmarshal(createdOrUpdatedValue, &v); err != nil {
+			return AssignmentCreateResult{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Service.AssignmentCreate", nil)
+		}
+	} else {
+		v = createdOrUpdatedValue
+	}
+
 	if exists.ID != "" {
 		return AssignmentCreateResult{
-			Node:      exists,
-			Value:     nextValue,
-			ValueType: nextValueType,
+			Node:  exists,
+			Value: v,
 		}, nil
 	}
 
 	return AssignmentCreateResult{
-		Node:      model,
-		Value:     nextValue,
-		ValueType: nextValueType,
+		Node:  model,
+		Value: v,
 	}, nil
 }
 

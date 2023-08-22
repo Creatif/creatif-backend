@@ -1,27 +1,23 @@
 package services
 
 import (
-	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
-	"fmt"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"time"
 )
 
 type Node struct {
-	ID string
+	ID string `gorm:"primarykey"`
 
-	Name      string
-	Type      string // text,image,file,boolean
-	Behaviour string // readonly,modifiable
-	Groups    pq.StringArray
+	Name      string         `gorm:"index;uniqueIndex:unique_node"`
+	Type      string         // text,image,file,boolean
+	Behaviour string         // readonly,modifiable
+	Groups    pq.StringArray `gorm:"type:text[]"` // if groups is set, group should be invalidated
 	Metadata  datatypes.JSON
-	Value     interface{}
+	Value     datatypes.JSON
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -42,7 +38,7 @@ func (g GetService) GetNode(byId func(id string) (declarations.Node, error), byN
 			return Node{}, err
 		}
 
-		return queryValue(node)
+		return queryValue(node.ID)
 	}
 
 	node, err := byName(g.id)
@@ -50,51 +46,19 @@ func (g GetService) GetNode(byId func(id string) (declarations.Node, error), byN
 		return Node{}, err
 	}
 
-	return queryValue(node)
+	return queryValue(node.ID)
 }
 
-func assignTableToQuery(table string) string {
-	return fmt.Sprintf(`
-SELECT ant.* FROM %s AS ant
-	INNER JOIN assignments.nodes AS an ON an.id = ant.assignment_node_id
-	INNER JOIN declarations.nodes AS dn ON dn.id = an.declaration_node_id
-	WHERE dn.id = ?
-`, table)
-}
-
-func queryValue(node declarations.Node) (Node, error) {
-	serviceNode := declarationNodeToServiceNode(node)
-
-	var textNode assignments.NodeText
-	var boolNode assignments.NodeBoolean
-	if serviceNode.Type == constants.ValueTextType {
-		if res := storage.Gorm().Raw(assignTableToQuery("assignments.node_text"), serviceNode.ID).
-			Scan(&textNode); res.Error != nil {
-			return Node{}, appErrors.NewDatabaseError(res.Error).AddError("Node.Get.Logic", nil)
-		}
-
-		serviceNode.Value = textNode.Value
-	} else if serviceNode.Type == constants.ValueBooleanType {
-		if res := storage.Gorm().Raw(assignTableToQuery("assignments.node_boolean"), serviceNode.ID).Scan(&boolNode); res.Error != nil {
-			return Node{}, appErrors.NewDatabaseError(res.Error).AddError("Node.Get.Logic", nil)
-		}
-
-		serviceNode.Value = boolNode.Value
+func queryValue(nodeId string) (Node, error) {
+	var node Node
+	if res := storage.Gorm().Raw(`
+SELECT n.id, n.name, n.type, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, vn.value FROM declarations.nodes AS n
+	INNER JOIN assignments.nodes AS an ON n.id = an.declaration_node_id
+	INNER JOIN assignments.value_node AS vn ON an.id = vn.assignment_node_id
+	WHERE n.id = ?
+`, nodeId).Scan(&node); res.Error != nil {
+		return Node{}, res.Error
 	}
 
-	return serviceNode, nil
-}
-
-func declarationNodeToServiceNode(node declarations.Node) Node {
-	return Node{
-		ID:        node.ID,
-		Name:      node.Name,
-		Type:      node.Type,
-		Behaviour: node.Behaviour,
-		Groups:    node.Groups,
-		Metadata:  node.Metadata,
-		Value:     nil,
-		CreatedAt: node.CreatedAt,
-		UpdatedAt: node.UpdatedAt,
-	}
+	return node, nil
 }

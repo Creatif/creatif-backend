@@ -14,13 +14,8 @@ func AssignNodeHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		b, _ := io.ReadAll(c.Request().Body)
 
-		// TODO: try sanitizing a byte array which is a json when the frontend is finished
 		if model, err := sdk.UnmarshalToStruct[assignments.AssignNodeTextValue](b); err == nil {
 			handler := create.New(create.NewCreateNodeModel(model.Name, []byte(model.Value)))
-
-			return request.SendResponse[*create.CreateNodeModel](handler, c, http.StatusCreated)
-		} else if model, err := sdk.UnmarshalToStruct[assignments.AssignNodeBooleanValue](b); err == nil {
-			handler := create.New(create.NewCreateNodeModel(model.Name, model.Value))
 
 			return request.SendResponse[*create.CreateNodeModel](handler, c, http.StatusCreated)
 		}

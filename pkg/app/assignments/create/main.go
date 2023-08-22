@@ -27,9 +27,8 @@ func (c Create) Authorize() error {
 }
 
 func (c Create) Logic() (services.AssignmentCreateResult, error) {
-	service := services.NewAssignmentCreate(c.model.declarationNode.Name, c.model.declarationNode.Type, c.model.Value, c.model.declarationNode.ID)
+	service := services.NewAssignmentCreate(c.model.Name, c.model.Value, c.model.declarationNode.ID)
 	model, err := service.CreateOrUpdate()
-
 	if err != nil {
 		return services.AssignmentCreateResult{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
 	}

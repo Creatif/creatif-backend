@@ -57,16 +57,16 @@ func (c Main) Logic() ([]string, error) {
 
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		m := declarations.NewMap(c.model.Name)
-		if err := storage.Create((&declarations.Map{}).TableName(), &m, false); err != nil {
-			return err
+		if res := tx.Create(&m); res.Error != nil {
+			return res.Error
 		}
 
 		for _, mapNode := range mapNodes {
 			mapNode.MapID = m.ID
 		}
 
-		if err := storage.Create((declarations.MapNode{}).TableName(), &mapNodes, false); err != nil {
-			return err
+		if res := tx.Create(&mapNodes); res.Error != nil {
+			return res.Error
 		}
 
 		return nil

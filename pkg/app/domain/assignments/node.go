@@ -20,13 +20,8 @@ type Node struct {
 	/*	ProjectID *string `gorm:"uniqueIndex:unique_node"`
 		Project   domain.Project*/
 
-	ValueType string
-
 	DeclarationNodeID string
 	DeclarationNode   declarations.Node `gorm:"foreignKey:DeclarationNodeID"`
-
-	NodeText    *NodeText    `gorm:"-"`
-	NodeBoolean *NodeBoolean `gorm:"-"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time

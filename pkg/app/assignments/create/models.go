@@ -13,13 +13,13 @@ import (
 
 type CreateNodeModel struct {
 	Name  string
-	Value interface{}
+	Value []byte
 
 	assignedValue   interface{}
 	declarationNode declarations.Node
 }
 
-func NewCreateNodeModel(name string, value interface{}) *CreateNodeModel {
+func NewCreateNodeModel(name string, value []byte) *CreateNodeModel {
 	return &CreateNodeModel{
 		Name:  name,
 		Value: value,

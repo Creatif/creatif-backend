@@ -60,12 +60,7 @@ func runMigrations() {
 		log.Fatalln(err)
 	}
 
-	if err := storage2.Gorm().AutoMigrate(assignments.NodeText{}); err != nil {
-		closeConnection()
-		log.Fatalln(err)
-	}
-
-	if err := storage2.Gorm().AutoMigrate(assignments.NodeBoolean{}); err != nil {
+	if err := storage2.Gorm().AutoMigrate(assignments.ValueNode{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)
 	}

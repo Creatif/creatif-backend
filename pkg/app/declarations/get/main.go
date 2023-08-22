@@ -6,6 +6,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
+	"encoding/json"
 )
 
 type Main struct {
@@ -30,7 +31,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (NodeWithValueQuery, error) {
 	serviceModel, err := services.NewGetService(c.model.ID).GetNode(func(id string) (declarations.Node, error) {
 		var node declarations.Node
-		if err := storage.Get((&declarations.Node{}).TableName(), c.model.ID, &node, "ID", "Name", "Type", "Behaviour", "Groups", "Metadata"); err != nil {
+		if err := storage.Get((&declarations.Node{}).TableName(), c.model.ID, &node, "ID"); err != nil {
 			return declarations.Node{}, appErrors.NewDatabaseError(err).AddError("Node.Get.Logic", nil)
 		}
 
@@ -38,12 +39,21 @@ func (c Main) Logic() (NodeWithValueQuery, error) {
 	}, func(name string) (declarations.Node, error) {
 		var node declarations.Node
 
-		if err := storage.GetBy((&declarations.Node{}).TableName(), "name", c.model.ID, &node, "ID", "Name", "Type", "Behaviour", "Groups", "Metadata"); err != nil {
+		if err := storage.GetBy((&declarations.Node{}).TableName(), "name", c.model.ID, &node, "ID"); err != nil {
 			return declarations.Node{}, appErrors.NewDatabaseError(err).AddError("Node.Get.Logic", nil)
 		}
 
 		return node, nil
 	})
+
+	var v interface{}
+	if serviceModel.Value != nil {
+		if err := json.Unmarshal(serviceModel.Value, &v); err != nil {
+			return NodeWithValueQuery{}, appErrors.NewDatabaseError(err).AddError("Node.Get.Logic", nil)
+		}
+	} else {
+		v = serviceModel.Value
+	}
 
 	return NodeWithValueQuery{
 		ID:        serviceModel.ID,
@@ -52,7 +62,7 @@ func (c Main) Logic() (NodeWithValueQuery, error) {
 		Behaviour: serviceModel.Behaviour,
 		Groups:    serviceModel.Groups,
 		Metadata:  serviceModel.Metadata,
-		Value:     serviceModel.Value,
+		Value:     v,
 		CreatedAt: serviceModel.CreatedAt,
 		UpdatedAt: serviceModel.UpdatedAt,
 	}, err

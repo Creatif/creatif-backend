@@ -1,10 +1,8 @@
 package create
 
 import (
-	"encoding/json"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"gorm.io/datatypes"
 )
 
 var _ = ginkgo.Describe("Declaration node tests", func() {
@@ -42,9 +40,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(node.Name).Should(gomega.Equal(name))
 
-		var b string
-		gomega.Expect(json.Unmarshal(node.Value.(datatypes.JSON), &b)).Should(gomega.BeNil())
-		gomega.Expect(b).Should(gomega.Equal("this is a text node"))
+		gomega.Expect(node.Value).Should(gomega.Equal("this is a text node"))
 	})
 
 	ginkgo.It("should return a text node with value queried by name and a text value", func() {
@@ -57,9 +53,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(node.Name).Should(gomega.Equal(name))
 
-		var b string
-		gomega.Expect(json.Unmarshal(node.Value.(datatypes.JSON), &b)).Should(gomega.BeNil())
-		gomega.Expect(b).Should(gomega.Equal("this is a text node"))
+		gomega.Expect(node.Value).Should(gomega.Equal("this is a text node"))
 	})
 
 	ginkgo.It("should return a text node with value queried by ID and a boolean value", func() {
