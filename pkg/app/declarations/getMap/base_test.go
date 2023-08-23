@@ -3,6 +3,7 @@ package create
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"
 	"creatif/pkg/app/declarations/create"
+	mapsCreate "creatif/pkg/app/declarations/maps"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
@@ -70,6 +71,8 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.DECLARATION_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_VALUE_NODE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
 
 func _assertValidation(err error, keys []string) {
@@ -124,6 +127,19 @@ func testCreateBasicAssignmentBooleanNode(name string, value bool) assignmentsCr
 	view, err := handler.Handle()
 	testAssertErrNil(err)
 	testAssertIDValid(view.ID)
+
+	return view
+}
+
+func testCreateMap(name string, mapIds []string) mapsCreate.View {
+	handler := mapsCreate.New(mapsCreate.NewCreateMapModel(name, mapIds))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
+	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(len(mapIds)))
 
 	return view
 }

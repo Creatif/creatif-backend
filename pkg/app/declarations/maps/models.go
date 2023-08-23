@@ -15,6 +15,12 @@ type CreateMapModel struct {
 	Name  string   `json:"name"`
 }
 
+type LogicResult struct {
+	ID    string
+	Nodes []string
+	Name  string
+}
+
 func NewCreateMapModel(name string, nodes []string) CreateMapModel {
 	return CreateMapModel{
 		Nodes: nodes,
@@ -34,12 +40,8 @@ func (a *CreateMapModel) Validate() map[string]string {
 			validation.Key("uniqueName", validation.By(func(value interface{}) error {
 				name := value.(string)
 
-				maps := make([]declarations.Map, 0)
-				if err := storage.GetBy((&declarations.Map{}).TableName(), "name", name, &maps); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-					return errors.New("Map with this name already exists")
-				}
-
-				if len(maps) != 0 {
+				var m declarations.Map
+				if err := storage.GetBy((&declarations.Map{}).TableName(), "name", name, &m); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 					return errors.New("Map with this name already exists")
 				}
 
@@ -62,14 +64,21 @@ func (a *CreateMapModel) Validate() map[string]string {
 	return nil
 }
 
+type NamesOnlyView struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type View struct {
+	ID    string   `json:"id"`
 	Name  string   `json:"name"`
 	Nodes []string `json:"nodes"`
 }
 
-func newView(name string, nodes []string) View {
+func newView(model LogicResult) View {
 	return View{
-		Name:  name,
-		Nodes: nodes,
+		ID:    model.ID,
+		Name:  model.Name,
+		Nodes: model.Nodes,
 	}
 }

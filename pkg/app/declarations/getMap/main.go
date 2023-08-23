@@ -4,6 +4,8 @@ import (
 	"creatif/pkg/app/declarations/getMap/services"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/sdk"
+	"encoding/json"
 	"errors"
 )
 
@@ -34,6 +36,28 @@ func (c Main) Logic() (LogicModel, error) {
 		var convertedErr appErrors.AppError[struct{}]
 		errors.As(err, &convertedErr)
 		return LogicModel{}, convertedErr.AddError("GetMap.Get.Logic", nil)
+	}
+
+	for key, val := range models {
+		if found := sdk.Search(val, "value"); found != nil {
+			v := []byte(found.(string))
+			var conv interface{}
+			if err := json.Unmarshal(v, &conv); err != nil {
+				return LogicModel{}, appErrors.NewApplicationError(err).AddError("GetMap.Get.Logic", nil)
+			}
+
+			models[key]["value"] = conv
+		}
+
+		if found := sdk.Search(val, "groups"); found != nil {
+			v := []byte(found.(string))
+			var conv interface{}
+			if err := json.Unmarshal(v, &conv); err != nil {
+				return LogicModel{}, appErrors.NewApplicationError(err).AddError("GetMap.Get.Logic", nil)
+			}
+
+			models[key]["groups"] = conv
+		}
 	}
 
 	return LogicModel{

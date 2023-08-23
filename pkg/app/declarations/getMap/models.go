@@ -29,9 +29,11 @@ type GetMapModel struct {
 	// TODO: Add project ID prop here
 }
 
-func NewGetMapModel(id string) GetMapModel {
+func NewGetMapModel(id string, ret string, fields []string) GetMapModel {
 	return GetMapModel{
 		ID:          id,
+		Return:      ret,
+		Fields:      fields,
 		validFields: validFields,
 	}
 }

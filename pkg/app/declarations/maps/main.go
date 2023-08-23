@@ -29,15 +29,15 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() ([]string, error) {
+func (c Main) Logic() (LogicResult, error) {
 	var nodes []declarations.Node
 
 	if res := storage.Gorm().Select("ID").Where("ID IN (?)", c.model.Nodes).Find(&nodes); res.Error != nil {
-		return []string{}, appErrors.NewDatabaseError(res.Error).AddError("Node.Create.Logic", nil)
+		return LogicResult{}, appErrors.NewDatabaseError(res.Error).AddError("Node.Create.Logic", nil)
 	}
 
 	if len(nodes) != len(c.model.Nodes) {
-		return []string{}, appErrors.NewValidationError(map[string]string{
+		return LogicResult{}, appErrors.NewValidationError(map[string]string{
 			"validNum": "Found invalid number of nodes. Some of the nodes you provided do not exist.",
 		})
 	}
@@ -45,7 +45,7 @@ func (c Main) Logic() ([]string, error) {
 	if !sdk.Every(nodes, func(idx int, value declarations.Node) bool {
 		return sdk.Includes(c.model.Nodes, value.ID)
 	}) {
-		return []string{}, appErrors.NewValidationError(map[string]string{
+		return LogicResult{}, appErrors.NewValidationError(map[string]string{
 			"validNum": "Found invalid number of nodes. Some of the nodes you provided do not exist.",
 		})
 	}
@@ -55,8 +55,8 @@ func (c Main) Logic() ([]string, error) {
 		return &m
 	})
 
+	m := declarations.NewMap(c.model.Name)
 	if err := storage.Transaction(func(tx *gorm.DB) error {
-		m := declarations.NewMap(c.model.Name)
 		if res := tx.Create(&m); res.Error != nil {
 			return res.Error
 		}
@@ -71,10 +71,16 @@ func (c Main) Logic() ([]string, error) {
 
 		return nil
 	}); err != nil {
-		return []string{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
+		return LogicResult{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
 	}
 
-	return c.model.Nodes, nil
+	return LogicResult{
+		ID: m.ID,
+		Nodes: sdk.Map(mapNodes, func(idx int, value *declarations.MapNode) string {
+			return value.ID
+		}),
+		Name: m.Name,
+	}, nil
 }
 
 func (c Main) Handle() (View, error) {
@@ -96,9 +102,9 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(c.model.Name, model), nil
+	return newView(model), nil
 }
 
-func New(model CreateMapModel) pkg.Job[CreateMapModel, View, []string] {
+func New(model CreateMapModel) pkg.Job[CreateMapModel, View, LogicResult] {
 	return Main{model: model}
 }
