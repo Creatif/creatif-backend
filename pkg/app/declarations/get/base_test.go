@@ -1,4 +1,4 @@
-package create
+package get
 
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"

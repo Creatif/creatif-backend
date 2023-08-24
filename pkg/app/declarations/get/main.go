@@ -1,4 +1,4 @@
-package create
+package get
 
 import (
 	"creatif/pkg/app/declarations/get/services"

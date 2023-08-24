@@ -1,4 +1,4 @@
-package create
+package get
 
 import (
 	"github.com/onsi/ginkgo/v2"
