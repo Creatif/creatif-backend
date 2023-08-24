@@ -1,4 +1,4 @@
-package create
+package getMap
 
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"

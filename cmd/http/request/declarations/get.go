@@ -5,7 +5,7 @@ import (
 )
 
 type GetNode struct {
-	ID string `param:"name"`
+	ID string `param:"id"`
 }
 
 func SanitizeGetNode(model GetNode) GetNode {

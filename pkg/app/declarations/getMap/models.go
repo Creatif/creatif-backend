@@ -1,4 +1,4 @@
-package create
+package getMap
 
 import (
 	"creatif/pkg/app/domain/declarations"
@@ -17,7 +17,7 @@ var validFields = []string{
 
 type GetMapModel struct {
 	// this can be map name or an id of the map
-	ID string `json:"id"`
+	ID string
 	// this can be, 'full' | names
 	Return string
 	// this can be individual fields of the node to return, reduces returned data

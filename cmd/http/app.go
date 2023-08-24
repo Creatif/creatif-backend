@@ -35,6 +35,8 @@ func appRoutes(group *echo.Group) {
 func declarationRoutes(group *echo.Group) {
 	group.PUT("/node", declarations.CreateNodeHandler())
 	group.GET("/node/:id", declarations.GetNodeHandler())
+	// TODO test on frontend if query parameters work
+	group.GET("/node/map", declarations.GetMapHandler())
 }
 
 func assignmentRoutes(group *echo.Group) {

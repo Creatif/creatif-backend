@@ -1,4 +1,4 @@
-package create
+package getMap
 
 import (
 	"creatif/pkg/app/declarations/getMap/services"
