@@ -4,9 +4,9 @@ import (
 	"creatif/pkg/app/declarations/getMap/services"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type Main struct {
@@ -31,38 +31,44 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, err
 	}
 
-	models, err := services.Execute(m.ID, services.CreateStrategy(c.model.Return, c.model.Fields))
+	strategy := services.CreateStrategy(c.model.Return, c.model.Fields)
+	models, err := services.Execute(m.ID, strategy)
 	if err != nil {
 		var convertedErr appErrors.AppError[struct{}]
 		errors.As(err, &convertedErr)
 		return LogicModel{}, convertedErr.AddError("GetMap.Get.Logic", nil)
 	}
 
-	for key, val := range models {
-		if found := sdk.Search(val, "value"); found != nil {
-			v := []byte(found.(string))
+	nodes := make([]FullNode, 0)
+	for _, model := range models {
+		node := FullNode{
+			ID:        model.ID,
+			Name:      model.Name,
+			Type:      model.Type,
+			Behaviour: model.Behaviour,
+			Groups:    model.Groups,
+			Metadata:  model.Metadata,
+			CreatedAt: model.CreatedAt,
+			UpdatedAt: model.UpdatedAt,
+		}
+
+		if model.Value != nil {
 			var conv interface{}
-			if err := json.Unmarshal(v, &conv); err != nil {
+			if err := json.Unmarshal(model.Value, &conv); err != nil {
+				fmt.Println("VALUE ERROR")
 				return LogicModel{}, appErrors.NewApplicationError(err).AddError("GetMap.Get.Logic", nil)
 			}
 
-			models[key]["value"] = conv
+			node.Value = conv
 		}
 
-		if found := sdk.Search(val, "groups"); found != nil {
-			v := []byte(found.(string))
-			var conv interface{}
-			if err := json.Unmarshal(v, &conv); err != nil {
-				return LogicModel{}, appErrors.NewApplicationError(err).AddError("GetMap.Get.Logic", nil)
-			}
-
-			models[key]["groups"] = conv
-		}
+		nodes = append(nodes, node)
 	}
 
 	return LogicModel{
-		nodeMap: m,
-		nodes:   models,
+		nodeMap:  m,
+		nodes:    nodes,
+		strategy: strategy.Name(),
 	}, nil
 }
 

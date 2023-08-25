@@ -5,7 +5,7 @@ import (
 )
 
 type GetMap struct {
-	ID     string `query:"id"`
+	ID     string `param:"id"`
 	Return string `query:"return"`
 	Fields string `query:"fields"`
 }

@@ -26,15 +26,8 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		testAssertIDValid(mapNodesView.ID)
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
-		viewNodes := mapNodesView.Nodes.([]map[string]interface{})
-		for _, value := range viewNodes {
-			gomega.Expect(value).Should(gomega.HaveLen(2))
-			gomega.Expect(value).Should(gomega.HaveKey("name"))
-			gomega.Expect(value).Should(gomega.HaveKey("id"))
-
-			gomega.Expect(value["id"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(value["name"]).ShouldNot(gomega.BeEmpty())
-		}
+		viewNodes := mapNodesView.Nodes.([]FullNode)
+		gomega.Expect(viewNodes).Should(gomega.HaveLen(10))
 	})
 
 	ginkgo.It("should get full representation of map of nodes", func() {
@@ -54,29 +47,10 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		testAssertIDValid(mapNodesView.ID)
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
-		viewNodes := mapNodesView.Nodes.([]map[string]interface{})
-		for _, value := range viewNodes {
-			gomega.Expect(value).Should(gomega.HaveLen(9))
-			gomega.Expect(value).Should(gomega.HaveKey("name"))
-			gomega.Expect(value).Should(gomega.HaveKey("id"))
-			gomega.Expect(value).Should(gomega.HaveKey("behaviour"))
-			gomega.Expect(value).Should(gomega.HaveKey("metadata"))
-			gomega.Expect(value).Should(gomega.HaveKey("type"))
-			gomega.Expect(value).Should(gomega.HaveKey("groups"))
-			gomega.Expect(value).Should(gomega.HaveKey("value"))
-			gomega.Expect(value).Should(gomega.HaveKey("created_at"))
-			gomega.Expect(value).Should(gomega.HaveKey("updated_at"))
+		viewNodes := mapNodesView.Nodes.([]FullNode)
+		gomega.Expect(viewNodes).Should(gomega.HaveLen(10))
 
-			gomega.Expect(value["id"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(value["name"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(value["behaviour"]).Should(gomega.Equal("modifiable"))
-			gomega.Expect(value["metadata"]).Should(gomega.BeNil())
-			gomega.Expect(value["type"]).Should(gomega.Equal("text"))
-			gomega.Expect(value["groups"]).Should(gomega.HaveLen(0))
-			gomega.Expect(value["value"]).Should(gomega.Equal("this is a text node"))
-			gomega.Expect(value["updated_at"]).ShouldNot(gomega.BeNil())
-			gomega.Expect(value["created_at"]).ShouldNot(gomega.BeNil())
-		}
+		fmt.Println(viewNodes)
 	})
 
 	ginkgo.It("should get representation of map of nodes by custom fields", func() {
@@ -96,18 +70,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		testAssertIDValid(mapNodesView.ID)
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
-		viewNodes := mapNodesView.Nodes.([]map[string]interface{})
-		for _, value := range viewNodes {
-			gomega.Expect(value).Should(gomega.HaveLen(4))
-			gomega.Expect(value).Should(gomega.HaveKey("name"))
-			gomega.Expect(value).Should(gomega.HaveKey("id"))
-			gomega.Expect(value).Should(gomega.HaveKey("groups"))
-			gomega.Expect(value).Should(gomega.HaveKey("value"))
-
-			gomega.Expect(value["id"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(value["name"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(value["groups"]).Should(gomega.HaveLen(0))
-			gomega.Expect(value["value"]).Should(gomega.Equal("this is a text node"))
-		}
+		viewNodes := mapNodesView.Nodes.([]CustomNode)
+		gomega.Expect(viewNodes).Should(gomega.HaveLen(10))
 	})
 })

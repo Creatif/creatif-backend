@@ -34,9 +34,9 @@ func appRoutes(group *echo.Group) {
 
 func declarationRoutes(group *echo.Group) {
 	group.PUT("/node", declarations.CreateNodeHandler())
-	group.PUT("/node/map", declarations.CreateMapHandler())
+	group.PUT("/map", declarations.CreateMapHandler())
 	group.GET("/node/:id", declarations.GetNodeHandler())
-	group.GET("/node/map", declarations.GetMapHandler())
+	group.GET("/map/:id", declarations.GetMapHandler())
 }
 
 func assignmentRoutes(group *echo.Group) {

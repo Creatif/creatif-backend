@@ -16,6 +16,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(node.Name).Should(gomega.Equal(name))
 		gomega.Expect(node.Value).Should(gomega.BeNil())
+		gomega.Expect(node.Groups).Should(gomega.HaveLen(3))
 	})
 
 	ginkgo.It("should return a text node with value queried by name and an empty value", func() {

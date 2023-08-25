@@ -96,7 +96,11 @@ func testCreateDeclarationNode(name, t, behaviour string, groups []string, metad
 }
 
 func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, "text", behaviour, []string{}, []byte{}, create.NodeValidation{})
+	return testCreateDeclarationNode(name, "text", behaviour, []string{
+		"one",
+		"two",
+		"three",
+	}, []byte{}, create.NodeValidation{})
 }
 
 func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {

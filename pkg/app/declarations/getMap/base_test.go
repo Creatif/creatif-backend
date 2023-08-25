@@ -97,7 +97,11 @@ func testCreateDeclarationNode(name, t, behaviour string, groups []string, metad
 }
 
 func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, "text", behaviour, []string{}, []byte{}, create.NodeValidation{})
+	return testCreateDeclarationNode(name, "text", behaviour, []string{
+		"groupOne",
+		"groupTwo",
+		"groupThree",
+	}, []byte{}, create.NodeValidation{})
 }
 
 func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
@@ -107,7 +111,15 @@ func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
 func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
 	declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
 
-	b, _ := json.Marshal("this is a text node")
+	b, _ := json.Marshal(map[string]interface{}{
+		"value": "value",
+		"subField": map[string]interface{}{
+			"field1": 34,
+			"field2": "string",
+			"field3": []string{"one", "two", "three"},
+			"field4": []int{1, 2, 3, 4},
+		},
+	})
 
 	handler := assignmentsCreate.New(assignmentsCreate.NewCreateNodeModel(declarationNode.Name, b))
 
