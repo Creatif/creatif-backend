@@ -49,8 +49,6 @@ var _ = ginkgo.Describe("GET map tests", func() {
 
 		viewNodes := mapNodesView.Nodes.([]FullNode)
 		gomega.Expect(viewNodes).Should(gomega.HaveLen(10))
-
-		fmt.Println(viewNodes)
 	})
 
 	ginkgo.It("should get representation of map of nodes by custom fields", func() {

@@ -1,6 +1,8 @@
 package services
 
 import (
+	"creatif/pkg/app/domain/assignments"
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
 	"fmt"
 	"strings"
@@ -16,7 +18,7 @@ type FullQueryStrategy struct {
 }
 
 func (f FullQueryStrategy) GetQuery() string {
-	return `SELECT 
+	return fmt.Sprintf(`SELECT 
     n.id, 
     n.name, 
     n.groups, 
@@ -26,13 +28,19 @@ func (f FullQueryStrategy) GetQuery() string {
     n.metadata, 
     n.created_at, 
     n.updated_at
-		FROM declarations.map_nodes AS mn
-		INNER JOIN declarations.nodes AS n ON n.id = mn.node_id
-		INNER JOIN declarations.node_map AS m ON m.id = mn.map_id
-		INNER JOIN assignments.nodes AS an ON an.declaration_node_id = n.id
-		INNER JOIN assignments.value_node AS vn ON vn.assignment_node_id = an.id
+		FROM %s AS mn
+		INNER JOIN %s AS n ON n.id = mn.node_id
+		INNER JOIN %s AS m ON m.id = mn.map_id
+		INNER JOIN %s AS an ON an.declaration_node_id = n.id
+		INNER JOIN %s AS vn ON vn.assignment_node_id = an.id
 		WHERE m.id = ?
-`
+`,
+		(declarations.MapNode{}).TableName(),
+		(declarations.Node{}).TableName(),
+		(declarations.Map{}).TableName(),
+		(assignments.Node{}).TableName(),
+		(assignments.ValueNode{}).TableName(),
+	)
 }
 
 func (f FullQueryStrategy) Name() string {
@@ -44,16 +52,22 @@ type NamesOnlyQueryStrategy struct {
 }
 
 func (f NamesOnlyQueryStrategy) GetQuery() string {
-	return `SELECT 
-    n.id,
+	return fmt.Sprintf(`SELECT 
+    n.id, 
     n.name
-		FROM declarations.map_nodes AS mn
-		INNER JOIN declarations.nodes AS n ON n.id = mn.node_id
-		INNER JOIN declarations.node_map AS m ON m.id = mn.map_id
-		INNER JOIN assignments.nodes AS an ON an.declaration_node_id = n.id
-		INNER JOIN assignments.value_node AS vn ON vn.assignment_node_id = an.id
+		FROM %s AS mn
+		INNER JOIN %s AS n ON n.id = mn.node_id
+		INNER JOIN %s AS m ON m.id = mn.map_id
+		INNER JOIN %s AS an ON an.declaration_node_id = n.id
+		INNER JOIN %s AS vn ON vn.assignment_node_id = an.id
 		WHERE m.id = ?
-`
+`,
+		(declarations.MapNode{}).TableName(),
+		(declarations.Node{}).TableName(),
+		(declarations.Map{}).TableName(),
+		(assignments.Node{}).TableName(),
+		(assignments.ValueNode{}).TableName(),
+	)
 }
 
 func (f NamesOnlyQueryStrategy) Name() string {
@@ -82,13 +96,20 @@ func (c CustomFieldsQueryStrategy) GetQuery() string {
 SELECT 
     n.id, 
     n.name %s
-		FROM declarations.map_nodes AS mn
-		INNER JOIN declarations.nodes AS n ON n.id = mn.node_id
-		INNER JOIN declarations.node_map AS m ON m.id = mn.map_id
-		INNER JOIN assignments.nodes AS an ON an.declaration_node_id = n.id
-		INNER JOIN assignments.value_node AS vn ON vn.assignment_node_id = an.id
+		FROM %s AS mn
+		INNER JOIN %s AS n ON n.id = mn.node_id
+		INNER JOIN %s AS m ON m.id = mn.map_id
+		INNER JOIN %s AS an ON an.declaration_node_id = n.id
+		INNER JOIN %s AS vn ON vn.assignment_node_id = an.id
 		WHERE m.id = ?
-`, fields)
+`,
+		fields,
+		(declarations.MapNode{}).TableName(),
+		(declarations.Node{}).TableName(),
+		(declarations.Map{}).TableName(),
+		(assignments.Node{}).TableName(),
+		(assignments.ValueNode{}).TableName(),
+	)
 }
 
 func (c CustomFieldsQueryStrategy) Name() string {

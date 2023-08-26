@@ -19,12 +19,12 @@ func main() {
 }
 
 func closeConnection() {
-	sql, err := storage2.SQLDB()
+	s, err := storage2.SQLDB()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	if err := sql.Close(); err != nil {
+	if err := s.Close(); err != nil {
 		log.Fatalln(err)
 	}
 }
@@ -56,6 +56,16 @@ func runMigrations() {
 	}
 
 	if err := storage2.Gorm().AutoMigrate(assignments.Node{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(assignments.MapNode{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(assignments.MapValueNode{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)
 	}

@@ -111,10 +111,10 @@ func Gorm() *gorm.DB {
 }
 
 func SQLDB() (*sql.DB, error) {
-	sql, err := Gorm().DB()
+	s, err := Gorm().DB()
 	if err != nil {
 		return nil, appErrors.NewDatabaseError(err)
 	}
 
-	return sql, nil
+	return s, nil
 }
