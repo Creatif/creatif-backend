@@ -41,4 +41,5 @@ func declarationRoutes(group *echo.Group) {
 
 func assignmentRoutes(group *echo.Group) {
 	group.PUT("/node", assignments.AssignNodeHandler())
+	group.PUT("/map", assignments.AssignMapValueHandler())
 }

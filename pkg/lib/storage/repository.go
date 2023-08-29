@@ -42,14 +42,12 @@ func Get[T any](table, ID string, model T, sel ...string) error {
 }
 
 func GetBy[T any](table string, field string, value interface{}, model T, sel ...string) error {
-	if res := Gorm().
+	res := Gorm().
 		Table(table).
 		First(model, fmt.Sprintf("%s = ?", field), value).
-		Select(sel); res.Error != nil {
-		return res.Error
-	}
+		Select(sel)
 
-	return nil
+	return res.Error
 }
 
 func GetAll[T any](table string, model T) error {

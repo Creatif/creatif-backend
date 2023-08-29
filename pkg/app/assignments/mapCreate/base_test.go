@@ -3,6 +3,7 @@ package mapCreate
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"
 	"creatif/pkg/app/declarations/create"
+	mapsCreate "creatif/pkg/app/declarations/maps"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -116,6 +117,18 @@ func testCreateBasicAssignmentBooleanNode(name string, value bool) assignmentsCr
 	view, err := handler.Handle()
 	testAssertErrNil(err)
 	testAssertIDValid(view.ID)
+
+	return view
+}
+
+func testCreateMap(name string, nodes []string) mapsCreate.View {
+	handler := mapsCreate.New(mapsCreate.NewCreateMapModel(name, nodes))
+
+	view, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
+	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(len(nodes)))
 
 	return view
 }

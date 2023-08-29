@@ -1,6 +1,7 @@
 package maps
 
 import (
+	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -66,6 +67,16 @@ func (c Main) Logic() (LogicResult, error) {
 		}
 
 		if res := tx.Create(&mapNodes); res.Error != nil {
+			return res.Error
+		}
+
+		assignmentNode := assignments.NewMapNode(m.Name, m.ID)
+		if res := tx.Create(&assignmentNode); res.Error != nil {
+			return res.Error
+		}
+
+		assignmentNodeValue := assignments.NewMapValueNode(assignmentNode.ID, nil)
+		if res := tx.Create(&assignmentNodeValue); res.Error != nil {
 			return res.Error
 		}
 
