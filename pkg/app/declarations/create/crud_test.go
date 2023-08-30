@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		gomega.Expect(view.Name).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("modifiable"))
@@ -27,7 +27,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		gomega.Expect(view.Name).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("modifiable"))

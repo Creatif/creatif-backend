@@ -19,7 +19,7 @@ type Validation struct {
 }
 
 type Node struct {
-	ID string `gorm:"primarykey"`
+	ID uuid.UUID `gorm:"primarykey;type:uuid"`
 
 	Name       string         `gorm:"index;uniqueIndex:unique_node"`
 	Type       string         // text,image,file,boolean
@@ -38,7 +38,7 @@ type Node struct {
 }
 
 func (u *Node) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New().String()
+	u.ID = uuid.New()
 
 	return
 }

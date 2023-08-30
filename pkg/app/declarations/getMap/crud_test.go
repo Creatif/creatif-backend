@@ -16,14 +16,14 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		}
 
 		view := testCreateMap("mapName", sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID
+			return value.ID.String()
 		}))
 
-		handler := New(NewGetMapModel(view.ID, "", []string{}))
+		handler := New(NewGetMapModel(view.ID.String(), "", []string{}))
 
 		mapNodesView, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(mapNodesView.ID)
+		testAssertIDValid(mapNodesView.ID.String())
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
 		viewNodes := mapNodesView.Nodes.([]FullNode)
@@ -37,14 +37,14 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		}
 
 		view := testCreateMap("mapName", sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID
+			return value.ID.String()
 		}))
 
-		handler := New(NewGetMapModel(view.ID, "full", []string{}))
+		handler := New(NewGetMapModel(view.ID.String(), "full", []string{}))
 
 		mapNodesView, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(mapNodesView.ID)
+		testAssertIDValid(mapNodesView.ID.String())
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
 		viewNodes := mapNodesView.Nodes.([]FullNode)
@@ -58,14 +58,14 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		}
 
 		view := testCreateMap("mapName", sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID
+			return value.ID.String()
 		}))
 
-		handler := New(NewGetMapModel(view.ID, "", []string{"groups", "value"}))
+		handler := New(NewGetMapModel(view.ID.String(), "", []string{"groups", "value"}))
 
 		mapNodesView, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(mapNodesView.ID)
+		testAssertIDValid(mapNodesView.ID.String())
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
 		viewNodes := mapNodesView.Nodes.([]CustomNode)

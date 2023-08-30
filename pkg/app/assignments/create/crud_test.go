@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -41,7 +41,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -63,7 +63,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		view, err := handler.Handle()
 
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -83,7 +83,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		view, err := handler.Handle()
 
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -104,7 +104,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		view, err := handler.Handle()
 
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -125,7 +125,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		view, err := handler.Handle()
 
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())

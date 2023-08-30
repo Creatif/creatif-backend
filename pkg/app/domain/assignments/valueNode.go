@@ -9,13 +9,13 @@ import (
 )
 
 type ValueNode struct {
-	ID               string `gorm:"primarykey"`
-	AssignmentNodeID string `gorm:"primarykey;autoincrement:false"`
+	ID               uuid.UUID `gorm:"primarykey;type:uuid"`
+	AssignmentNodeID uuid.UUID `gorm:"type:uuid"`
 
 	Value datatypes.JSON
 }
 
-func NewValueNode(assignmentNodeID string, value datatypes.JSON) ValueNode {
+func NewValueNode(assignmentNodeID uuid.UUID, value datatypes.JSON) ValueNode {
 	return ValueNode{
 		Value:            value,
 		AssignmentNodeID: assignmentNodeID,
@@ -23,7 +23,7 @@ func NewValueNode(assignmentNodeID string, value datatypes.JSON) ValueNode {
 }
 
 func (u *ValueNode) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New().String()
+	u.ID = uuid.New()
 
 	return
 }

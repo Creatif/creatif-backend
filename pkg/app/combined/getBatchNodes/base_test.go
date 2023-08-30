@@ -1,10 +1,10 @@
-package mapCreate
+package getBatchNodes
 
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"
 	"creatif/pkg/app/declarations/create"
-	mapsCreate "creatif/pkg/app/declarations/maps"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -33,7 +33,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Map assignment -> CRUD tests")
+	GinkgoRunSpecs(t, "Combined -> getBatchNodes tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -76,6 +76,17 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
 
+func _assertValidation(err error, keys []string) {
+	validationError, ok := err.(appErrors.AppError[map[string]string])
+	if ok {
+		data := validationError.Data()
+
+		for key := range data {
+			gomega.Expect(keys).Should(gomega.ContainElement(key))
+		}
+	}
+}
+
 func testCreateDeclarationNode(name, t, behaviour string, groups []string, metadata []byte, validation create.NodeValidation) create.View {
 	handler := create.New(create.NewCreateNodeModel(name, t, behaviour, groups, metadata, validation))
 
@@ -87,7 +98,11 @@ func testCreateDeclarationNode(name, t, behaviour string, groups []string, metad
 }
 
 func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, "text", behaviour, []string{}, []byte{}, create.NodeValidation{})
+	return testCreateDeclarationNode(name, "text", behaviour, []string{
+		"one",
+		"two",
+		"three",
+	}, []byte{}, create.NodeValidation{})
 }
 
 func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
@@ -117,18 +132,6 @@ func testCreateBasicAssignmentBooleanNode(name string, value bool) assignmentsCr
 	view, err := handler.Handle()
 	testAssertErrNil(err)
 	testAssertIDValid(view.ID.String())
-
-	return view
-}
-
-func testCreateMap(name string, nodes []string) mapsCreate.View {
-	handler := mapsCreate.New(mapsCreate.NewCreateMapModel(name, nodes))
-
-	view, err := handler.Handle()
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(len(nodes)))
 
 	return view
 }

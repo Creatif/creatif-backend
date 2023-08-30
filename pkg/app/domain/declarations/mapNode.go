@@ -9,27 +9,27 @@ import (
 )
 
 type MapNode struct {
-	ID string `gorm:"primarykey"`
+	ID uuid.UUID `gorm:"primarykey;type:uuid"`
 
-	NodeID string
-	Node   Node `gorm:"foreignKey:NodeID"`
+	NodeID uuid.UUID `gorm:"type:uuid"`
+	Node   Node      `gorm:"foreignKey:NodeID"`
 
-	MapID string
-	Map   Map `gorm:"foreignKey:MapID"`
+	MapID uuid.UUID `gorm:"type:uuid"`
+	Map   Map       `gorm:"foreignKey:MapID"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
-func NewMapNode(nodeId string) MapNode {
+func NewMapNode(nodeId uuid.UUID) MapNode {
 	return MapNode{
 		NodeID: nodeId,
 	}
 }
 
 func (u *MapNode) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New().String()
+	u.ID = uuid.New()
 
 	return
 }

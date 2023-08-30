@@ -17,7 +17,7 @@ var _ = ginkgo.Describe("Assignment map CRUD tests", func() {
 		}
 
 		m := testCreateMap("mapName", sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID
+			return value.ID.String()
 		}))
 
 		b, _ := json.Marshal("this is a text value")
@@ -26,7 +26,7 @@ var _ = ginkgo.Describe("Assignment map CRUD tests", func() {
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID)
+		testAssertIDValid(view.ID.String())
 
 		var value string
 		testAssertErrNil(json.Unmarshal(view.Value.([]byte), &value))

@@ -90,7 +90,7 @@ func testCreateDeclarationNode(name, t, behaviour string, groups []string, metad
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
+	testAssertIDValid(view.ID.String())
 
 	return view
 }

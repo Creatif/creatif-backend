@@ -44,7 +44,7 @@ func (c Main) Logic() (LogicResult, error) {
 	}
 
 	if !sdk.Every(nodes, func(idx int, value declarations.Node) bool {
-		return sdk.Includes(c.model.Nodes, value.ID)
+		return sdk.Includes(c.model.Nodes, value.ID.String())
 	}) {
 		return LogicResult{}, appErrors.NewValidationError(map[string]string{
 			"validNum": "Found invalid number of nodes. Some of the nodes you provided do not exist.",
@@ -88,7 +88,7 @@ func (c Main) Logic() (LogicResult, error) {
 	return LogicResult{
 		ID: m.ID,
 		Nodes: sdk.Map(mapNodes, func(idx int, value *declarations.MapNode) string {
-			return value.ID
+			return value.ID.String()
 		}),
 		Name: m.Name,
 	}, nil

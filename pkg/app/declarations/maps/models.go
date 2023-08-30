@@ -7,6 +7,7 @@ import (
 	"errors"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +17,7 @@ type CreateMapModel struct {
 }
 
 type LogicResult struct {
-	ID    string
+	ID    uuid.UUID
 	Nodes []string
 	Name  string
 }
@@ -65,14 +66,14 @@ func (a *CreateMapModel) Validate() map[string]string {
 }
 
 type NamesOnlyView struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type View struct {
-	ID    string   `json:"id"`
-	Name  string   `json:"name"`
-	Nodes []string `json:"nodes"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Nodes []string  `json:"nodes"`
 }
 
 func newView(model LogicResult) View {

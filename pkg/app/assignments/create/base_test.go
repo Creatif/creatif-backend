@@ -91,7 +91,7 @@ func testCreateDeclarationNode(name, t, behaviour string, groups []string, metad
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
+	testAssertIDValid(view.ID.String())
 
 	return view
 }
@@ -113,7 +113,7 @@ func testCreateBasicAssignmentTextNode(name string) View {
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
+	testAssertIDValid(view.ID.String())
 
 	return view
 }
@@ -126,7 +126,7 @@ func testCreateBasicAssignmentBooleanNode(name string, value bool) View {
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
+	testAssertIDValid(view.ID.String())
 
 	return view
 }

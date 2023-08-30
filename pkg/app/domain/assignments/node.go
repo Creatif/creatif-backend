@@ -11,7 +11,7 @@ import (
 
 // text, image, file, json, code, boolean
 type Node struct {
-	ID string `gorm:"primarykey"`
+	ID uuid.UUID `gorm:"primarykey;type:uuid"`
 
 	Name string `gorm:"index;uniqueIndex:unique_node"`
 
@@ -20,7 +20,7 @@ type Node struct {
 	/*	ProjectID *string `gorm:"uniqueIndex:unique_node"`
 		Project   domain.Project*/
 
-	DeclarationNodeID string
+	DeclarationNodeID uuid.UUID         `gorm:"type:uuid"`
 	DeclarationNode   declarations.Node `gorm:"foreignKey:DeclarationNodeID"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
@@ -28,7 +28,7 @@ type Node struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
-func NewNode(name string, declarationNodeID string) Node {
+func NewNode(name string, declarationNodeID uuid.UUID) Node {
 	return Node{
 		Name:              name,
 		DeclarationNodeID: declarationNodeID,
@@ -36,7 +36,7 @@ func NewNode(name string, declarationNodeID string) Node {
 }
 
 func (u *Node) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New().String()
+	u.ID = uuid.New()
 
 	return
 }

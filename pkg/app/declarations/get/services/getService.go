@@ -6,13 +6,14 @@ import (
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"time"
 )
 
 type Node struct {
-	ID string `gorm:"primarykey"`
+	ID uuid.UUID `gorm:"primarykey"`
 
 	Name      string         `gorm:"index;uniqueIndex:unique_node"`
 	Type      string         // text,image,file,boolean
@@ -51,13 +52,12 @@ func (g GetService) GetNode(byId func(id string) (declarations.Node, error), byN
 	return queryValue(node.ID)
 }
 
-func queryValue(nodeId string) (Node, error) {
+func queryValue(nodeId uuid.UUID) (Node, error) {
 	var node Node
-	if res := storage.Gorm().Raw(fmt.Sprintf(`
-SELECT n.id, n.name, n.type, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, vn.value FROM declarations.nodes AS n
-	INNER JOIN %s AS an ON n.id = an.declaration_node_id
-	INNER JOIN %s AS vn ON an.id = vn.assignment_node_id
-	WHERE n.id = ?
+	if res := storage.Gorm().Raw(fmt.Sprintf(`SELECT n.id, n.name, n.type, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, vn.value FROM declarations.nodes AS n
+INNER JOIN %s AS an ON n.id = an.declaration_node_id
+INNER JOIN %s AS vn ON an.id = vn.assignment_node_id
+WHERE n.id = ?
 `, (assignments.Node{}).TableName(), (assignments.ValueNode{}).TableName()), nodeId).Scan(&node); res.Error != nil {
 		return Node{}, res.Error
 	}

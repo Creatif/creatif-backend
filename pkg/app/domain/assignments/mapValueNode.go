@@ -9,13 +9,13 @@ import (
 )
 
 type MapValueNode struct {
-	ID               string `gorm:"primarykey"`
-	AssignmentNodeID string `gorm:"primarykey;autoincrement:false"`
+	ID               uuid.UUID `gorm:"primarykey;type:uuid"`
+	AssignmentNodeID uuid.UUID `gorm:"type:uuid"`
 
 	Value datatypes.JSON
 }
 
-func NewMapValueNode(assignmentNodeID string, value datatypes.JSON) MapValueNode {
+func NewMapValueNode(assignmentNodeID uuid.UUID, value datatypes.JSON) MapValueNode {
 	return MapValueNode{
 		Value:            value,
 		AssignmentNodeID: assignmentNodeID,
@@ -23,7 +23,7 @@ func NewMapValueNode(assignmentNodeID string, value datatypes.JSON) MapValueNode
 }
 
 func (u *MapValueNode) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New().String()
+	u.ID = uuid.New()
 
 	return
 }

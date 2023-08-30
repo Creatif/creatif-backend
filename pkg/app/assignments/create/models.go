@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 )
@@ -27,7 +28,7 @@ func NewCreateNodeModel(name string, value []byte) *CreateNodeModel {
 }
 
 type View struct {
-	ID        string         `json:"id"`
+	ID        uuid.UUID      `json:"id"`
 	Name      string         `json:"name"`
 	Value     interface{}    `json:"value"`
 	Type      string         // text,image,file,boolean
@@ -68,7 +69,7 @@ func (a *CreateNodeModel) Validate() map[string]string {
 				return nil
 			})),
 			validation.Key("isNodeModifiable", validation.By(func(value interface{}) error {
-				if a.declarationNode.ID == "" {
+				if a.declarationNode.ID.String() == "" {
 					return nil
 				}
 

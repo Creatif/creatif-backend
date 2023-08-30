@@ -9,7 +9,7 @@ import (
 )
 
 type Map struct {
-	ID string `gorm:"primarykey"`
+	ID uuid.UUID `gorm:"primarykey;type:uuid"`
 
 	Name string `gorm:"uniqueIndex"`
 
@@ -25,7 +25,7 @@ func NewMap(name string) Map {
 }
 
 func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New().String()
+	u.ID = uuid.New()
 
 	return
 }
