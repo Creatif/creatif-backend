@@ -109,10 +109,10 @@ func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
 	return testCreateDeclarationNode(name, "boolean", behaviour, []string{}, []byte{}, create.NodeValidation{})
 }
 
-func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
+func testCreateBasicAssignmentTextNode(name string, value interface{}) assignmentsCreate.View {
 	declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
 
-	b, _ := json.Marshal("this is a text node")
+	b, _ := json.Marshal(value)
 
 	handler := assignmentsCreate.New(assignmentsCreate.NewCreateNodeModel(declarationNode.Name, b))
 

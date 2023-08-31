@@ -2,13 +2,18 @@ package getBatchNodes
 
 import (
 	pkg "creatif/pkg/lib"
+	"creatif/pkg/lib/appErrors"
 )
 
 type Main struct {
-	model GetBatchedNodesModel
+	model *GetBatchedNodesModel
 }
 
 func (c Main) Validate() error {
+	if errs := c.model.Validate(); errs != nil {
+		return appErrors.NewValidationError(errs)
+	}
+
 	return nil
 }
 
@@ -20,8 +25,13 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() ([]NodeWithValueQuery, error) {
-	return []NodeWithValueQuery{}, nil
+func (c Main) Logic() ([]Node, error) {
+	nodes, err := queryValue(c.model.nodeIds)
+	if err != nil {
+		return nil, err
+	}
+
+	return nodes, nil
 }
 
 func (c Main) Handle() (map[string]View, error) {
@@ -46,6 +56,6 @@ func (c Main) Handle() (map[string]View, error) {
 	return newView(model), nil
 }
 
-func New(model GetBatchedNodesModel) pkg.Job[GetBatchedNodesModel, map[string]View, []NodeWithValueQuery] {
+func New(model *GetBatchedNodesModel) pkg.Job[*GetBatchedNodesModel, map[string]View, []Node] {
 	return Main{model: model}
 }
