@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
+	"time"
 )
 
 type CreateNodeModel struct {
@@ -31,10 +32,11 @@ type View struct {
 	ID        uuid.UUID      `json:"id"`
 	Name      string         `json:"name"`
 	Value     interface{}    `json:"value"`
-	Type      string         // text,image,file,boolean
 	Behaviour string         // readonly,modifiable
 	Groups    pq.StringArray `json:"groups"`
 	Metadata  datatypes.JSON `json:"metadata"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
 }
 
 func newView(model declarations.Node, value interface{}) View {
@@ -42,10 +44,11 @@ func newView(model declarations.Node, value interface{}) View {
 		ID:        model.ID,
 		Name:      model.Name,
 		Value:     value,
-		Type:      model.Type,
 		Behaviour: model.Behaviour,
 		Groups:    model.Groups,
 		Metadata:  model.Metadata,
+		CreatedAt: model.CreatedAt,
+		UpdatedAt: model.UpdatedAt,
 	}
 }
 

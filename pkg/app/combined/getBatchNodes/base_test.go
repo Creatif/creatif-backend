@@ -3,6 +3,7 @@ package getBatchNodes
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"
 	"creatif/pkg/app/declarations/create"
+	mapsCreate "creatif/pkg/app/declarations/maps"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
@@ -87,8 +88,8 @@ func _assertValidation(err error, keys []string) {
 	}
 }
 
-func testCreateDeclarationNode(name, t, behaviour string, groups []string, metadata []byte, validation create.NodeValidation) create.View {
-	handler := create.New(create.NewCreateNodeModel(name, t, behaviour, groups, metadata, validation))
+func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte, validation create.NodeValidation) create.View {
+	handler := create.New(create.NewCreateNodeModel(name, behaviour, groups, metadata, validation))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -98,7 +99,7 @@ func testCreateDeclarationNode(name, t, behaviour string, groups []string, metad
 }
 
 func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, "text", behaviour, []string{
+	return testCreateDeclarationNode(name, behaviour, []string{
 		"one",
 		"two",
 		"three",
@@ -106,7 +107,20 @@ func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
 }
 
 func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, "boolean", behaviour, []string{}, []byte{}, create.NodeValidation{})
+	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{}, create.NodeValidation{})
+}
+
+func testCreateMap(name string, nodeIds []string) mapsCreate.View {
+	handler := mapsCreate.New(mapsCreate.NewCreateMapModel(name, nodeIds))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID.String())
+
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
+	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(len(nodeIds)))
+
+	return view
 }
 
 func testCreateBasicAssignmentTextNode(name string, value interface{}) assignmentsCreate.View {

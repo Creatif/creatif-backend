@@ -37,7 +37,6 @@ func newView(model NodeWithValueQuery) View {
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
-		Type:      model.Type,
 		Value:     model.Value,
 		Groups:    model.Groups,
 		Behaviour: model.Behaviour,

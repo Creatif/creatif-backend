@@ -24,7 +24,6 @@ func (f FullQueryStrategy) GetQuery() string {
     n.groups, 
     n.behaviour, 
     vn.value,
-    n.type,
     n.metadata, 
     n.created_at, 
     n.updated_at
@@ -131,7 +130,6 @@ func CreateStrategy(returnType string, chosenFields []string) QueryStrategy {
 			validFields: []string{
 				"id",
 				"name",
-				"type",
 				"behaviour",
 				"metadata",
 				"groups",

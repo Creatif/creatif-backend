@@ -22,7 +22,6 @@ type Node struct {
 	ID uuid.UUID `gorm:"primarykey;type:uuid"`
 
 	Name       string         `gorm:"index;uniqueIndex:unique_node"`
-	Type       string         // text,image,file,boolean
 	Behaviour  string         // readonly,modifiable
 	Groups     pq.StringArray `gorm:"type:text[]"` // if groups is set, group should be invalidated
 	Metadata   datatypes.JSON
@@ -47,10 +46,9 @@ func (Node) TableName() string {
 	return fmt.Sprintf("%s.%s", "declarations", domain.DECLARATION_NODES_TABLE)
 }
 
-func NewNode(name, t, behaviour string, groups []string, metadata []byte) Node {
+func NewNode(name, behaviour string, groups []string, metadata []byte) Node {
 	return Node{
 		Name:      name,
-		Type:      t,
 		Groups:    groups,
 		Behaviour: behaviour,
 		Metadata:  metadata,

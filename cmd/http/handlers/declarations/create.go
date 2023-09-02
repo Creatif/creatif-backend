@@ -17,7 +17,7 @@ func CreateNodeHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeNode(model)
 
-		handler := create.New(create.NewCreateNodeModel(model.Name, model.Type, model.Behaviour, model.Groups, []byte(model.Metadata), func() create.NodeValidation {
+		handler := create.New(create.NewCreateNodeModel(model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), func() create.NodeValidation {
 			requestValidation := model.Validation
 
 			return create.NodeValidation{

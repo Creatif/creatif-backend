@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/assignments/create"
 	"creatif/pkg/lib/sdk"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -53,10 +54,62 @@ var _ = ginkgo.Describe("Batch nodes tests", func() {
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
-		viewKeys := sdk.Keys(views)
+		nodes := views["nodes"]
+		viewKeys := sdk.Keys(nodes.(map[string][]View))
 
 		for _, viewName := range viewKeys {
 			gomega.Expect(sdk.Includes(names, viewName)).Should(gomega.BeTrue())
 		}
+	})
+
+	ginkgo.It("should get a batch of maps with full data", func() {
+		maps := make([]string, 0)
+		for i := 0; i < 5; i++ {
+			maps = append(maps, fmt.Sprintf("name-%d", i))
+		}
+
+		for _, m := range maps {
+			textNodes := make([]create.View, 0)
+			booleanNodes := make([]create.View, 0)
+			jsonNodes := make([]create.View, 0)
+
+			for a := 0; a < 10; a++ {
+				textNodes = append(textNodes, testCreateBasicAssignmentTextNode(uuid.NewString(), "this is a text node"))
+			}
+
+			for a := 0; a < 10; a++ {
+				booleanNodes = append(booleanNodes, testCreateBasicAssignmentBooleanNode(uuid.NewString(), false))
+			}
+
+			for a := 0; a < 10; a++ {
+				jsonNodes = append(jsonNodes, testCreateBasicAssignmentTextNode(uuid.NewString(), map[string]interface{}{
+					"one":   "one",
+					"two":   []string{"one", "two"},
+					"three": []int{1, 2, 3, 4},
+					"four":  583,
+				}))
+			}
+
+			unified := make([]create.View, 0)
+			unified = append(unified, textNodes...)
+			unified = append(unified, booleanNodes...)
+			unified = append(unified, jsonNodes...)
+
+			testCreateMap(m, sdk.Map(unified, func(idx int, value create.View) string {
+				return value.ID.String()
+			}))
+		}
+
+		model := make(map[string]string)
+		for _, name := range maps {
+			model[name] = "map"
+		}
+
+		handler := New(NewGetBatchedNodesModel(model))
+		views, err := handler.Handle()
+		testAssertErrNil(err)
+
+		gomega.Expect(views).Should(gomega.HaveKey("nodes"))
+		gomega.Expect(views).Should(gomega.HaveKey("maps"))
 	})
 })

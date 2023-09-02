@@ -25,16 +25,52 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() ([]Node, error) {
-	nodes, err := queryValue(c.model.nodeIds)
-	if err != nil {
-		return nil, err
+func (c Main) Logic() (map[string]interface{}, error) {
+	nodes := make([]Node, 0)
+	if len(c.model.nodeIds) > 0 {
+		n, err := queryNodesValue(c.model.nodeIds)
+		if err != nil {
+			return nil, err
+		}
+
+		nodes = append(nodes, n...)
 	}
 
-	return nodes, nil
+	maps := make([]MapNode, 0)
+	if len(c.model.mapIds) > 0 {
+		n, err := queryMapValues(c.model.mapIds)
+		if err != nil {
+			return nil, err
+		}
+
+		maps = append(maps, n...)
+	}
+
+	mapNodes := make(map[string][]Node)
+	for _, mapNode := range maps {
+		if _, ok := mapNodes[mapNode.Name]; !ok {
+			mapNodes[mapNode.Name] = make([]Node, 0)
+		}
+
+		mapNodes[mapNode.Name] = append(mapNodes[mapNode.Name], Node{
+			ID:        mapNode.ID,
+			Name:      mapNode.Name,
+			Behaviour: mapNode.Behaviour,
+			Groups:    mapNode.Groups,
+			Metadata:  mapNode.Metadata,
+			Value:     mapNode.Value,
+			CreatedAt: mapNode.CreatedAt,
+			UpdatedAt: mapNode.UpdatedAt,
+		})
+	}
+
+	return map[string]interface{}{
+		"nodes": nodes,
+		"maps":  mapNodes,
+	}, nil
 }
 
-func (c Main) Handle() (map[string]View, error) {
+func (c Main) Handle() (map[string]interface{}, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -56,6 +92,6 @@ func (c Main) Handle() (map[string]View, error) {
 	return newView(model), nil
 }
 
-func New(model *GetBatchedNodesModel) pkg.Job[*GetBatchedNodesModel, map[string]View, []Node] {
+func New(model *GetBatchedNodesModel) pkg.Job[*GetBatchedNodesModel, map[string]interface{}, map[string]interface{}] {
 	return Main{model: model}
 }

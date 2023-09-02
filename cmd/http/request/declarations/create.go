@@ -7,7 +7,6 @@ import (
 
 type CreateNode struct {
 	Name       string         `json:"name"`
-	Type       string         `json:"type"`
 	Groups     []string       `json:"groups"`
 	Behaviour  string         `json:"behaviour"`
 	Validation NodeValidation `json:"validation"`
@@ -31,7 +30,6 @@ type NodeValidation struct {
 func SanitizeNode(model CreateNode) CreateNode {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
-	model.Type = p.Sanitize(model.Type)
 	model.Behaviour = p.Sanitize(model.Behaviour)
 
 	model.Groups = sdk.Sanitize(model.Groups, func(k int, v string) string {

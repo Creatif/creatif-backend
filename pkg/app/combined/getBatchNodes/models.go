@@ -45,7 +45,6 @@ type View struct {
 	ID uuid.UUID `json:"id"`
 
 	Name      string         `json:"name"`
-	Type      string         `json:"type"`
 	Behaviour string         `json:"behaviour"`
 	Groups    pq.StringArray `json:"groups"`
 	Metadata  interface{}    `json:"metadata"`
@@ -55,23 +54,59 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model []Node) map[string]View {
-	nodes := make(map[string]View)
-	for _, m := range model {
-		nodes[m.Name] = View{
-			ID:        m.ID,
-			Name:      m.Name,
-			Type:      m.Type,
-			Behaviour: m.Behaviour,
-			Groups:    m.Groups,
-			Metadata:  m.Metadata,
-			Value:     m.Value,
-			CreatedAt: m.CreatedAt,
-			UpdatedAt: m.UpdatedAt,
+func newView(model map[string]interface{}) map[string]interface{} {
+	view := make(map[string]interface{})
+	nodes := model["nodes"]
+	convertedNodes, ok := nodes.([]Node)
+	if ok {
+		nodeView := make(map[string][]View)
+		for _, n := range convertedNodes {
+			if _, ok := nodeView[n.Name]; !ok {
+				nodeView[n.Name] = make([]View, 0)
+			}
+
+			nodeView[n.Name] = append(nodeView[n.Name], View{
+				ID:        n.ID,
+				Name:      n.Name,
+				Behaviour: n.Behaviour,
+				Groups:    n.Groups,
+				Metadata:  n.Metadata,
+				Value:     n.Value,
+				CreatedAt: n.CreatedAt,
+				UpdatedAt: n.UpdatedAt,
+			})
 		}
+
+		view["nodes"] = nodeView
 	}
 
-	return nodes
+	maps := model["maps"]
+	convertedMaps, ok := maps.(map[string][]Node)
+
+	if ok {
+		resolvedMaps := make(map[string][]View)
+		for key, mapNodes := range convertedMaps {
+			a := make([]View, 0)
+			for _, n := range mapNodes {
+				a = append(a, View{
+					ID:        n.ID,
+					Name:      n.Name,
+					Behaviour: n.Behaviour,
+					Groups:    n.Groups,
+					Metadata:  n.Metadata,
+					Value:     n.Value,
+					CreatedAt: n.CreatedAt,
+					UpdatedAt: n.UpdatedAt,
+				})
+			}
+
+			resolvedMaps[key] = a
+		}
+
+		view["maps"] = resolvedMaps
+	}
+
+	return view
 }
 
 func (a *GetBatchedNodesModel) Validate() map[string]string {

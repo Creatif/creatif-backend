@@ -30,7 +30,7 @@ func (c Create) Authorize() error {
 }
 
 func (c Create) Logic() (declarations.Node, error) {
-	model := declarations.NewNode(c.model.Name, c.model.Type, c.model.Behaviour, c.model.Groups, c.model.Metadata)
+	model := declarations.NewNode(c.model.Name, c.model.Behaviour, c.model.Groups, c.model.Metadata)
 
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&model); res.Error != nil {

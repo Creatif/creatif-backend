@@ -44,7 +44,6 @@ func (c Main) Logic() (LogicModel, error) {
 		node := FullNode{
 			ID:        model.ID,
 			Name:      model.Name,
-			Type:      model.Type,
 			Behaviour: model.Behaviour,
 			Groups:    model.Groups,
 			Metadata:  model.Metadata,

@@ -11,7 +11,6 @@ import (
 var validFields = []string{
 	"id",
 	"name",
-	"type",
 	"behaviour",
 	"metadata",
 	"groups",
@@ -51,7 +50,6 @@ type FullNode struct {
 	ID string `json:"id" gorm:"primarykey"`
 
 	Name      string         `json:"name" gorm:"index;uniqueIndex:unique_node"`
-	Type      string         `json:"type"`
 	Value     interface{}    `json:"value"`
 	Behaviour string         `json:"behaviour"`
 	Groups    pq.StringArray `json:"groups" gorm:"type:text[]"` // if groups is set, group should be invalidated
@@ -65,7 +63,6 @@ type CustomNode struct {
 	ID string `json:"id"`
 
 	Name      string         `json:"name"`
-	Type      string         `json:"type,omitempty"`
 	Behaviour string         `json:"behaviour,omitempty"`
 	Value     datatypes.JSON `json:"value"`
 	Groups    pq.StringArray `json:"groups,omitempty" gorm:"type:text[]"` // if groups is set, group should be invalidated
@@ -106,7 +103,6 @@ func newView(model LogicModel) View {
 			views = append(views, CustomNode{
 				ID:        n.ID,
 				Name:      n.Name,
-				Type:      n.Type,
 				Behaviour: n.Behaviour,
 				Groups:    n.Groups,
 				Metadata:  n.Metadata,

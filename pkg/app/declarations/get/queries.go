@@ -11,7 +11,6 @@ type NodeWithValueQuery struct {
 	ID uuid.UUID
 
 	Name      string
-	Type      string // text,image,file,boolean
 	Behaviour string // readonly,modifiable
 	Groups    pq.StringArray
 	Metadata  datatypes.JSON

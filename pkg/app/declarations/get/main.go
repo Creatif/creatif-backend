@@ -58,7 +58,6 @@ func (c Main) Logic() (NodeWithValueQuery, error) {
 	return NodeWithValueQuery{
 		ID:        serviceModel.ID,
 		Name:      serviceModel.Name,
-		Type:      serviceModel.Type,
 		Behaviour: serviceModel.Behaviour,
 		Groups:    serviceModel.Groups,
 		Metadata:  serviceModel.Metadata,

@@ -16,7 +16,6 @@ type Node struct {
 	ID uuid.UUID `gorm:"primarykey"`
 
 	Name      string         `gorm:"index;uniqueIndex:unique_node"`
-	Type      string         // text,image,file,boolean
 	Behaviour string         // readonly,modifiable
 	Groups    pq.StringArray `gorm:"type:text[]"` // if groups is set, group should be invalidated
 	Metadata  datatypes.JSON
@@ -54,7 +53,7 @@ func (g GetService) GetNode(byId func(id string) (declarations.Node, error), byN
 
 func queryValue(nodeId uuid.UUID) (Node, error) {
 	var node Node
-	if res := storage.Gorm().Raw(fmt.Sprintf(`SELECT n.id, n.name, n.type, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, vn.value FROM declarations.nodes AS n
+	if res := storage.Gorm().Raw(fmt.Sprintf(`SELECT n.id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, vn.value FROM declarations.nodes AS n
 INNER JOIN %s AS an ON n.id = an.declaration_node_id
 INNER JOIN %s AS vn ON an.id = vn.assignment_node_id
 WHERE n.id = ?

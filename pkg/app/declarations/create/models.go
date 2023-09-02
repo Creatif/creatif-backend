@@ -34,10 +34,9 @@ type CreateNodeModel struct {
 	Validation NodeValidation `json:"validation"`
 }
 
-func NewCreateNodeModel(name, t, behaviour string, groups []string, metadata []byte, validation NodeValidation) CreateNodeModel {
+func NewCreateNodeModel(name, behaviour string, groups []string, metadata []byte, validation NodeValidation) CreateNodeModel {
 	return CreateNodeModel{
 		Name:       name,
-		Type:       t,
 		Behaviour:  behaviour,
 		Groups:     groups,
 		Validation: validation,
@@ -48,7 +47,6 @@ func NewCreateNodeModel(name, t, behaviour string, groups []string, metadata []b
 func (a *CreateNodeModel) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":           a.Name,
-		"type":           a.Type,
 		"groups":         a.Groups,
 		"behaviour":      a.Behaviour,
 		"nodeValidation": a.Validation,
@@ -57,15 +55,6 @@ func (a *CreateNodeModel) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
-			validation.Key("type", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if t != constants.ValueTextType && t != constants.ValueBooleanType {
-					return errors.New(fmt.Sprintf("Invalid value for type. Node type can be 'modifiable' or 'readonly'"))
-				}
-
-				return nil
-			})),
 			validation.Key("groups", validation.When(len(a.Groups) != 0, validation.Each(validation.RuneLength(1, 200)))),
 			validation.Key("behaviour", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)
@@ -115,7 +104,6 @@ func newView(model declarations.Node) View {
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
-		Type:      model.Type,
 		Groups:    model.Groups,
 		Behaviour: model.Behaviour,
 		Metadata:  sdk.UnmarshalToMap([]byte(model.Metadata)),

@@ -65,11 +65,6 @@ func (a *CreateMapModel) Validate() map[string]string {
 	return nil
 }
 
-type NamesOnlyView struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-}
-
 type View struct {
 	ID    uuid.UUID `json:"id"`
 	Name  string    `json:"name"`
