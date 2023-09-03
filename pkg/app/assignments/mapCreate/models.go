@@ -3,7 +3,6 @@ package mapCreate
 import (
 	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"errors"
@@ -64,14 +63,8 @@ func (a *AssignValueModel) Validate() map[string]string {
 			validation.Key("name", validation.Required, validation.Length(0, 200), validation.By(func(value interface{}) error {
 				name := value.(string)
 				node := declarations.Map{}
-				if sdk.IsValidUuid(name) {
-					if err := storage.Get(node.TableName(), name, &node); err != nil {
-						return errors.New(fmt.Sprintf("Cannot find declaration map with ID %s", a.Name))
-					}
-				} else {
-					if err := storage.GetBy(node.TableName(), "name", name, &node); err != nil {
-						return errors.New(fmt.Sprintf("Cannot find declaration map with name or ID %s", a.Name))
-					}
+				if err := storage.GetBy(node.TableName(), "name", name, &node); err != nil {
+					return errors.New(fmt.Sprintf("Cannot find declaration map with name %s", a.Name))
 				}
 
 				a.workingMap = node

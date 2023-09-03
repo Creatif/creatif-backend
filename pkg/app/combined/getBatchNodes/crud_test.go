@@ -96,7 +96,7 @@ var _ = ginkgo.Describe("Batch nodes tests", func() {
 			unified = append(unified, jsonNodes...)
 
 			testCreateMap(m, sdk.Map(unified, func(idx int, value create.View) string {
-				return value.ID.String()
+				return value.Name
 			}))
 		}
 

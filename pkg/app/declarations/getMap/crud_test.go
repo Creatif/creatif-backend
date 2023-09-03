@@ -16,7 +16,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		}
 
 		view := testCreateMap("mapName", sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID.String()
+			return value.Name
 		}))
 
 		handler := New(NewGetMapModel(view.ID.String(), "", []string{}))
@@ -37,7 +37,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		}
 
 		view := testCreateMap("mapName", sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID.String()
+			return value.Name
 		}))
 
 		handler := New(NewGetMapModel(view.ID.String(), "full", []string{}))
@@ -58,7 +58,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		}
 
 		view := testCreateMap("mapName", sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID.String()
+			return value.Name
 		}))
 
 		handler := New(NewGetMapModel(view.ID.String(), "", []string{"groups", "value"}))

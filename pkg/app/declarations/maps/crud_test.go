@@ -20,7 +20,7 @@ var _ = ginkgo.Describe("Map node tests", func() {
 		}
 
 		ids := sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID.String()
+			return value.Name
 		})
 
 		handler := New(NewCreateMapModel(name, ids))

@@ -91,7 +91,6 @@ func (a *CreateNodeModel) Validate() map[string]string {
 type View struct {
 	ID        uuid.UUID              `json:"id"`
 	Name      string                 `json:"name"`
-	Type      string                 `json:"type"`
 	Groups    []string               `json:"groups"`
 	Behaviour string                 `json:"behaviour"`
 	Metadata  map[string]interface{} `json:"metadata"`

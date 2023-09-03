@@ -33,19 +33,11 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (LogicResult, error) {
 	var nodes []declarations.Node
 
-	if res := storage.Gorm().Select("ID").Where("ID IN (?)", c.model.Nodes).Find(&nodes); res.Error != nil {
+	if res := storage.Gorm().Select("ID").Where("name IN (?)", c.model.Nodes).Find(&nodes); res.Error != nil {
 		return LogicResult{}, appErrors.NewDatabaseError(res.Error).AddError("Node.Create.Logic", nil)
 	}
 
 	if len(nodes) != len(c.model.Nodes) {
-		return LogicResult{}, appErrors.NewValidationError(map[string]string{
-			"validNum": "Found invalid number of nodes. Some of the nodes you provided do not exist.",
-		})
-	}
-
-	if !sdk.Every(nodes, func(idx int, value declarations.Node) bool {
-		return sdk.Includes(c.model.Nodes, value.ID.String())
-	}) {
 		return LogicResult{}, appErrors.NewValidationError(map[string]string{
 			"validNum": "Found invalid number of nodes. Some of the nodes you provided do not exist.",
 		})

@@ -17,7 +17,7 @@ var _ = ginkgo.Describe("Assignment map CRUD tests", func() {
 		}
 
 		m := testCreateMap("mapName", sdk.Map(nodes, func(idx int, value create.View) string {
-			return value.ID.String()
+			return value.Name
 		}))
 
 		b, _ := json.Marshal("this is a text value")

@@ -17,7 +17,7 @@ func app() {
 	srv := setupServer()
 	srv.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowCredentials: true,
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderCookie, echo.HeaderAccessControlAllowCredentials},
 		AllowMethods:     []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))

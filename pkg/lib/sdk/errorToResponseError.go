@@ -1,6 +1,8 @@
 package sdk
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 func ErrorToResponseError(err error) map[string]string {
 	var e map[string]string

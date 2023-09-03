@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/lib/storage"
 	"errors"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -32,7 +31,6 @@ func NewCreateMapModel(name string, nodes []string) CreateMapModel {
 func (a *CreateMapModel) Validate() map[string]string {
 	v := map[string]interface{}{
 		"uniqueName": a.Name,
-		"nodes":      a.Nodes,
 		"validNum":   a.Nodes,
 	}
 
@@ -48,11 +46,10 @@ func (a *CreateMapModel) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("nodes", validation.When(len(a.Nodes) != 0, validation.Each(is.UUID))),
 			validation.Key("validNum", validation.By(func(value interface{}) error {
 				names := value.([]string)
 				if len(names) > 100 {
-					return errors.New("Number of combined node cannot be higher than 100")
+					return errors.New("Number of nodes cannot be higher than 100")
 				}
 
 				return nil
