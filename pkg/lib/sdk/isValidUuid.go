@@ -1,8 +1,8 @@
 package sdk
 
-import "github.com/google/uuid"
+import "github.com/segmentio/ksuid"
 
 func IsValidUuid(u string) bool {
-	_, err := uuid.Parse(u)
+	_, err := ksuid.Parse(u)
 	return err == nil
 }

@@ -3,8 +3,8 @@ package declarations
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
@@ -19,7 +19,7 @@ type Validation struct {
 }
 
 type Node struct {
-	ID uuid.UUID `gorm:"primarykey;type:uuid"`
+	ID ksuid.KSUID `gorm:"primarykey;type:text CHECK(length(id)=27)"`
 
 	Name       string         `gorm:"index;uniqueIndex:unique_node"`
 	Behaviour  string         // readonly,modifiable
@@ -27,7 +27,7 @@ type Node struct {
 	Metadata   datatypes.JSON
 	Validation datatypes.JSONType[Validation]
 
-	// TODO: change this to be uuid.UUID when projects and exploration are over, project must exist and be UUID
+	// TODO: change this to be ksuid.KSUID when projects and exploration are over, project must exist and be UUID
 	/*	ProjectID *string `gorm:"type:uuid;uniqueIndex:unique_node"`
 		Project   domain.Project*/
 
@@ -37,7 +37,7 @@ type Node struct {
 }
 
 func (u *Node) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New()
+	u.ID = ksuid.New()
 
 	return
 }

@@ -2,8 +2,8 @@ package getMap
 
 import (
 	"creatif/pkg/app/domain/declarations"
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
@@ -73,7 +73,7 @@ type CustomNode struct {
 }
 
 type View struct {
-	ID    uuid.UUID   `json:"id"`
+	ID    ksuid.KSUID `json:"id"`
 	Name  string      `json:"name"`
 	Nodes interface{} `json:"nodes"`
 }

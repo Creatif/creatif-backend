@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
@@ -29,7 +29,7 @@ func NewCreateNodeModel(name string, value []byte) *CreateNodeModel {
 }
 
 type View struct {
-	ID        uuid.UUID      `json:"id"`
+	ID        ksuid.KSUID    `json:"id"`
 	Name      string         `json:"name"`
 	Value     interface{}    `json:"value"`
 	Behaviour string         // readonly,modifiable

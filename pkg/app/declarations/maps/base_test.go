@@ -6,10 +6,10 @@ import (
 	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
+	"github.com/segmentio/ksuid"
 	"log"
 	"os"
 	"testing"
@@ -109,6 +109,6 @@ func testAssertErrNil(err error) {
 
 func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
-	_, err := uuid.Parse(id)
+	_, err := ksuid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
 }

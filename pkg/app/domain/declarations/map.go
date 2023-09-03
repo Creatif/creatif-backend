@@ -3,13 +3,13 @@ package declarations
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
-	"github.com/google/uuid"
+	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type Map struct {
-	ID uuid.UUID `gorm:"primarykey;type:uuid"`
+	ID ksuid.KSUID `gorm:"primarykey;type:text CHECK(length(id)=27)"`
 
 	Name string `gorm:"uniqueIndex"`
 
@@ -25,7 +25,7 @@ func NewMap(name string) Map {
 }
 
 func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New()
+	u.ID = ksuid.New()
 
 	return
 }

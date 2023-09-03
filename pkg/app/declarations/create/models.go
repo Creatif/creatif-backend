@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/google/uuid"
+	"github.com/segmentio/ksuid"
 	"time"
 )
 
@@ -89,7 +89,7 @@ func (a *CreateNodeModel) Validate() map[string]string {
 }
 
 type View struct {
-	ID        uuid.UUID              `json:"id"`
+	ID        ksuid.KSUID            `json:"id"`
 	Name      string                 `json:"name"`
 	Groups    []string               `json:"groups"`
 	Behaviour string                 `json:"behaviour"`

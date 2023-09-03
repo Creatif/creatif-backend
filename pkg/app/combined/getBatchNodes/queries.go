@@ -5,14 +5,14 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/storage"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
 
 type Node struct {
-	ID uuid.UUID `gorm:"primarykey"`
+	ID ksuid.KSUID `gorm:"primarykey"`
 
 	Name      string `gorm:"index;uniqueIndex:unique_node"`
 	Behaviour string
@@ -25,7 +25,7 @@ type Node struct {
 }
 
 type MapNode struct {
-	ID uuid.UUID `gorm:"primarykey"`
+	ID ksuid.KSUID `gorm:"primarykey"`
 
 	MapName   string
 	Name      string `gorm:"index;uniqueIndex:unique_node"`
@@ -38,7 +38,7 @@ type MapNode struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func queryNodesValue(nodeIds []uuid.UUID) ([]Node, error) {
+func queryNodesValue(nodeIds []ksuid.KSUID) ([]Node, error) {
 	var nodes []Node
 	if res := storage.Gorm().Raw(fmt.Sprintf(`SELECT n.id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, vn.value FROM declarations.nodes AS n
 INNER JOIN %s AS an ON n.id = an.declaration_node_id
@@ -51,7 +51,7 @@ WHERE n.id IN (?)
 	return nodes, nil
 }
 
-func queryMapValues(mapIds []uuid.UUID) ([]MapNode, error) {
+func queryMapValues(mapIds []ksuid.KSUID) ([]MapNode, error) {
 	sql := fmt.Sprintf(`SELECT 
     n.id, 
     m.name AS mapName,

@@ -2,7 +2,7 @@ package pagination
 
 import (
 	"creatif/pkg/lib/sdk"
-	"github.com/google/uuid"
+	"github.com/segmentio/ksuid"
 	"time"
 )
 
@@ -25,7 +25,7 @@ func NewPaginationModel(withValue bool, sortField, sortOrder string, limit int) 
 }
 
 type ViewWithoutValue struct {
-	ID        uuid.UUID              `json:"id"`
+	ID        ksuid.KSUID            `json:"id"`
 	Name      string                 `json:"name"`
 	Type      string                 `json:"type"`
 	Groups    []string               `json:"groups"`
@@ -37,7 +37,7 @@ type ViewWithoutValue struct {
 }
 
 type View struct {
-	ID        uuid.UUID              `json:"id"`
+	ID        ksuid.KSUID            `json:"id"`
 	Name      string                 `json:"name"`
 	Type      string                 `json:"type"`
 	Groups    []string               `json:"groups"`

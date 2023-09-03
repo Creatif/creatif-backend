@@ -3,33 +3,33 @@ package declarations
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
-	"github.com/google/uuid"
+	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type MapNode struct {
-	ID uuid.UUID `gorm:"primarykey;type:uuid"`
+	ID ksuid.KSUID `gorm:"primarykey;type:text CHECK(length(id)=27)"`
 
-	NodeID uuid.UUID `gorm:"type:uuid"`
-	Node   Node      `gorm:"foreignKey:NodeID"`
+	NodeID ksuid.KSUID `gorm:"type:text CHECK(length(node_id)=27)"`
+	Node   Node        `gorm:"foreignKey:NodeID"`
 
-	MapID uuid.UUID `gorm:"type:uuid"`
-	Map   Map       `gorm:"foreignKey:MapID"`
+	MapID ksuid.KSUID `gorm:"type:text CHECK(length(map_id)=27)"`
+	Map   Map         `gorm:"foreignKey:MapID"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
-func NewMapNode(nodeId uuid.UUID) MapNode {
+func NewMapNode(nodeId ksuid.KSUID) MapNode {
 	return MapNode{
 		NodeID: nodeId,
 	}
 }
 
 func (u *MapNode) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New()
+	u.ID = ksuid.New()
 
 	return
 }

@@ -1,14 +1,14 @@
 package get
 
 import (
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
 
 type NodeWithValueQuery struct {
-	ID uuid.UUID
+	ID ksuid.KSUID
 
 	Name      string
 	Behaviour string // readonly,modifiable

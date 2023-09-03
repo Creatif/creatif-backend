@@ -6,14 +6,14 @@ import (
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
 
 type Node struct {
-	ID uuid.UUID `gorm:"primarykey"`
+	ID ksuid.KSUID `gorm:"primarykey"`
 
 	Name      string         `gorm:"index;uniqueIndex:unique_node"`
 	Behaviour string         // readonly,modifiable
@@ -51,7 +51,7 @@ func (g GetService) GetNode(byId func(id string) (declarations.Node, error), byN
 	return queryValue(node.ID)
 }
 
-func queryValue(nodeId uuid.UUID) (Node, error) {
+func queryValue(nodeId ksuid.KSUID) (Node, error) {
 	var node Node
 	if res := storage.Gorm().Raw(fmt.Sprintf(`SELECT n.id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, vn.value FROM declarations.nodes AS n
 INNER JOIN %s AS an ON n.id = an.declaration_node_id

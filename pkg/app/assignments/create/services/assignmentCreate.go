@@ -6,14 +6,14 @@ import (
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"errors"
-	"github.com/google/uuid"
+	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 )
 
 type AssignmentCreate struct {
 	nodeName          string
 	value             []byte
-	declarationNodeID uuid.UUID
+	declarationNodeID ksuid.KSUID
 }
 
 type AssignmentCreateResult struct {
@@ -21,7 +21,7 @@ type AssignmentCreateResult struct {
 	Value interface{}
 }
 
-func NewAssignmentCreate(nodeName string, value []byte, declarationNodeID uuid.UUID) AssignmentCreate {
+func NewAssignmentCreate(nodeName string, value []byte, declarationNodeID ksuid.KSUID) AssignmentCreate {
 	return AssignmentCreate{
 		value:             value,
 		declarationNodeID: declarationNodeID,

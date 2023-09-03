@@ -2,14 +2,14 @@ package create
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
+	"github.com/segmentio/ksuid"
 )
 
 var _ = ginkgo.Describe("Declaration node tests", func() {
 	ginkgo.It("should create a text declaration node", func() {
-		name := uuid.NewString()
+		name := ksuid.New().String()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
 			"two":  "three",
@@ -30,7 +30,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 	})
 
 	ginkgo.It("should create a boolean declaration node", func() {
-		name := uuid.NewString()
+		name := ksuid.New().String()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
 			"two":  "three",
