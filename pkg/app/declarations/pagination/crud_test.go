@@ -1,4 +1,4 @@
-package get
+package pagination
 
 import (
 	"github.com/onsi/ginkgo/v2"

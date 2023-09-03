@@ -1,4 +1,4 @@
-package get
+package pagination
 
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"

@@ -31,7 +31,7 @@ type Node struct {
 	/*	ProjectID *string `gorm:"type:uuid;uniqueIndex:unique_node"`
 		Project   domain.Project*/
 
-	CreatedAt time.Time `gorm:"<-:create"`
+	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }

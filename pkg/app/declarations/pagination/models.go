@@ -1,4 +1,4 @@
-package get
+package pagination
 
 import (
 	"creatif/pkg/lib/sdk"
@@ -49,15 +49,32 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model NodeWithValueQuery) View {
-	return View{
-		ID:        model.ID,
-		Name:      model.Name,
-		Value:     model.Value,
-		Groups:    model.Groups,
-		Behaviour: model.Behaviour,
-		Metadata:  sdk.UnmarshalToMap([]byte(model.Metadata)),
-		CreatedAt: model.CreatedAt,
-		UpdatedAt: model.UpdatedAt,
+func newView(model interface{}) []View {
+	if m, ok := model.([]NodeWithoutValue); ok {
+		return sdk.Map(m, func(idx int, value NodeWithoutValue) View {
+			return View{
+				ID:        value.ID,
+				Name:      value.Name,
+				Groups:    value.Groups,
+				Behaviour: value.Behaviour,
+				Metadata:  sdk.UnmarshalToMap([]byte(value.Metadata)),
+				CreatedAt: value.CreatedAt,
+				UpdatedAt: value.UpdatedAt,
+			}
+		})
 	}
+
+	m := model.([]NodeWithValue)
+	return sdk.Map(m, func(idx int, value NodeWithValue) View {
+		return View{
+			ID:        value.ID,
+			Name:      value.Name,
+			Groups:    value.Groups,
+			Value:     value.Value,
+			Behaviour: value.Behaviour,
+			Metadata:  sdk.UnmarshalToMap([]byte(value.Metadata)),
+			CreatedAt: value.CreatedAt,
+			UpdatedAt: value.UpdatedAt,
+		}
+	})
 }
