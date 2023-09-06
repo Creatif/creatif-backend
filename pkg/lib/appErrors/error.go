@@ -94,6 +94,18 @@ func NewDatabaseError(err error) AppError[struct{}] {
 	}
 }
 
+func NewNotFoundError(err error) AppError[struct{}] {
+	errs := make([]error, 0)
+	errs = append(errs, err)
+
+	return &appError[struct{}]{
+		data:   struct{}{},
+		t:      NOT_FOUND_ERROR,
+		errors: errs,
+		stack:  nil,
+	}
+}
+
 func NewApplicationError(err error) AppError[struct{}] {
 	errs := make([]error, 0)
 	errs = append(errs, err)
