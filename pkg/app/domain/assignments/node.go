@@ -21,11 +21,10 @@ type Node struct {
 		Project   domain.Project*/
 
 	DeclarationNodeID ksuid.KSUID       `gorm:"type:text CHECK(length(declaration_node_id)=27)"`
-	DeclarationNode   declarations.Node `gorm:"foreignKey:DeclarationNodeID"`
+	DeclarationNode   declarations.Node `gorm:"foreignKey:DeclarationNodeID;constraint:OnDelete:CASCADE"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func NewNode(name string, declarationNodeID ksuid.KSUID) Node {

@@ -25,7 +25,6 @@ type MapNode struct {
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func NewMapNode(name string, mapNodeID ksuid.KSUID) MapNode {

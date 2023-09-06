@@ -15,7 +15,6 @@ type Map struct {
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func NewMap(name string) Map {

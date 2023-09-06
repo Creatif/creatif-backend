@@ -33,7 +33,6 @@ type Node struct {
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func (u *Node) BeforeCreate(tx *gorm.DB) (err error) {

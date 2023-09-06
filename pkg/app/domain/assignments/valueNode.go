@@ -10,7 +10,7 @@ import (
 
 type ValueNode struct {
 	ID               ksuid.KSUID `gorm:"primarykey;type:text CHECK(length(id)=27)"`
-	AssignmentNodeID ksuid.KSUID `gorm:"type:text CHECK(length(assignment_node_id)=27)"`
+	AssignmentNodeID ksuid.KSUID `gorm:"type:text CHECK(length(assignment_node_id)=27);constraint:OnDelete:CASCADE"`
 
 	Value datatypes.JSON
 }
