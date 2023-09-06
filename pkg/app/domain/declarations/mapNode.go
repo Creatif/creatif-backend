@@ -9,12 +9,12 @@ import (
 )
 
 type MapNode struct {
-	ID ksuid.KSUID `gorm:"primarykey;type:text CHECK(length(id)=27)"`
+	ID ksuid.KSUID `gorm:"primarykey;type:text;check:length(id)=27"`
 
-	NodeID ksuid.KSUID `gorm:"type:text CHECK(length(node_id)=27)"`
+	NodeID ksuid.KSUID `gorm:"type:text;check:length(id)=27"`
 	Node   Node        `gorm:"foreignKey:NodeID"`
 
-	MapID ksuid.KSUID `gorm:"type:text CHECK(length(map_id)=27)"`
+	MapID ksuid.KSUID `gorm:"type:text;check:length(id)=27"`
 	Map   Map         `gorm:"foreignKey:MapID"`
 
 	CreatedAt time.Time `gorm:"<-:create"`

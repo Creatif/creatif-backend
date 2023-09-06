@@ -1,33 +1,33 @@
 package pagination
 
-type Cursor struct {
-	next      *string
-	prev      *string
-	direction string // forward or backwards
-}
+const ASC = "ASC"
+const DESC = "DESC"
 
-type Rule struct {
+const DIRECTION_FORWARD = "forward"
+const DIRECTION_BACKWARDS = "backwards"
+
+type orderByRule struct {
 	field   string
 	orderBy string
 }
 
 type Pagination struct {
+	table  string
 	sql    string
-	rules  []Rule
-	cursor Cursor
+	cursor string
+	rule   orderByRule
 }
 
-func NewCursor(next string, prev string) Cursor {
-	return Cursor{
-		next: &next,
-		prev: &prev,
-	}
-}
-
-func NewPagination(sql string, rules []Rule, cursor Cursor) Pagination {
+func NewPagination(table, sql string, rules orderByRule, cursor string) Pagination {
 	return Pagination{
+		table:  table,
 		sql:    sql,
-		rules:  rules,
+		rule:   rules,
 		cursor: cursor,
 	}
+}
+
+func (p Pagination) Create() (string, error) {
+
+	return "", nil
 }

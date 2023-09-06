@@ -12,6 +12,7 @@ type PaginationModel struct {
 	SortField string
 	Limit     int
 	SortOrder string
+	Cursor    string
 	// TODO: Add project ID prop here
 }
 
