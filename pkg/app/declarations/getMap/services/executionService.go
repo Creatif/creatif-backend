@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"github.com/lib/pq"
-	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
@@ -23,7 +22,7 @@ type Node struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func Execute(mapId ksuid.KSUID, strategy QueryStrategy) ([]Node, error) {
+func Execute(mapId string, strategy QueryStrategy) ([]Node, error) {
 	var node []Node
 	if res := storage.Gorm().Raw(strategy.GetQuery(), mapId).Scan(&node); res.Error != nil {
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("getMap.Services.Execute", nil)

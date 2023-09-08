@@ -2,20 +2,20 @@ package assignments
 
 import (
 	"creatif/pkg/app/domain"
+	"creatif/pkg/lib/sdk"
 	"fmt"
-	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type MapValueNode struct {
-	ID               ksuid.KSUID `gorm:"primarykey;type:text CHECK(length(id)=27)"`
-	AssignmentNodeID ksuid.KSUID `gorm:"type:text CHECK(length(assignment_node_id)=27)"`
+	ID               string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	AssignmentNodeID string `gorm:"type:text CHECK(length(assignment_node_id)=26)"`
 
 	Value datatypes.JSON
 }
 
-func NewMapValueNode(assignmentNodeID ksuid.KSUID, value datatypes.JSON) MapValueNode {
+func NewMapValueNode(assignmentNodeID string, value datatypes.JSON) MapValueNode {
 	return MapValueNode{
 		Value:            value,
 		AssignmentNodeID: assignmentNodeID,
@@ -23,9 +23,14 @@ func NewMapValueNode(assignmentNodeID ksuid.KSUID, value datatypes.JSON) MapValu
 }
 
 func (u *MapValueNode) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = ksuid.New()
+	id, err := sdk.NewULID()
+	if err != nil {
+		return err
+	}
 
-	return
+	u.ID = id
+
+	return nil
 }
 
 func (MapValueNode) TableName() string {

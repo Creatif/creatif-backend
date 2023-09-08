@@ -15,7 +15,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(updated.ID.String())
+		testAssertIDValid(updated.ID)
 
 		gomega.Expect(view.ID).Should(gomega.Equal(updated.ID))
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
@@ -34,7 +34,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(updated.ID.String())
+		testAssertIDValid(updated.ID)
 
 		gomega.Expect(view.ID).Should(gomega.Equal(updated.ID))
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
@@ -57,7 +57,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(updated.ID.String())
+		testAssertIDValid(updated.ID)
 
 		gomega.Expect(view.ID).Should(gomega.Equal(updated.ID))
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))

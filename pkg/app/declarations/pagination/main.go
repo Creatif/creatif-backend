@@ -1,7 +1,9 @@
 package pagination
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
+	"creatif/pkg/lib/sdk/pagination"
 )
 
 type Main struct {
@@ -20,6 +22,9 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
+	p := pagination.NewPagination((declarations.Node{}).TableName(), "nothing", pagination.NewOrderByRule(c.model.SortField, c.model.SortOrder), "")
+	p.Create()
+
 	return nil, nil
 }
 
@@ -36,13 +41,13 @@ func (c Main) Handle() ([]View, error) {
 		return []View{}, err
 	}
 
-	model, err := c.Logic()
+	_, err := c.Logic()
 
 	if err != nil {
 		return []View{}, err
 	}
 
-	return newView(model), nil
+	return []View{}, nil
 }
 
 func New(model PaginationModel) pkg.Job[PaginationModel, []View, interface{}] {

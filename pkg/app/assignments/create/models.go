@@ -8,7 +8,6 @@ import (
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/lib/pq"
-	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
@@ -29,7 +28,7 @@ func NewCreateNodeModel(name string, value []byte) *CreateNodeModel {
 }
 
 type View struct {
-	ID        ksuid.KSUID    `json:"id"`
+	ID        string         `json:"id"`
 	Name      string         `json:"name"`
 	Value     interface{}    `json:"value"`
 	Behaviour string         // readonly,modifiable
@@ -72,7 +71,7 @@ func (a *CreateNodeModel) Validate() map[string]string {
 				return nil
 			})),
 			validation.Key("isNodeModifiable", validation.By(func(value interface{}) error {
-				if a.declarationNode.ID.String() == "" {
+				if a.declarationNode.ID == "" {
 					return nil
 				}
 

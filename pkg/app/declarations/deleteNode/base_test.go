@@ -7,9 +7,9 @@ import (
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/oklog/ulid/v2"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/segmentio/ksuid"
 	"log"
 	"os"
 	"testing"
@@ -90,7 +90,7 @@ func testCreateDeclarationNode(name, behaviour string, groups []string, metadata
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	return view
 }
@@ -109,6 +109,6 @@ func testAssertErrNil(err error) {
 
 func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
-	_, err := ksuid.Parse(id)
+	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
 }

@@ -80,7 +80,7 @@ func (c Main) Logic() (LogicResult, error) {
 	return LogicResult{
 		ID: m.ID,
 		Nodes: sdk.Map(mapNodes, func(idx int, value *declarations.MapNode) string {
-			return value.ID.String()
+			return value.ID
 		}),
 		Name: m.Name,
 	}, nil

@@ -1,15 +1,15 @@
 package create
 
 import (
+	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/segmentio/ksuid"
 )
 
 var _ = ginkgo.Describe("Declaration node tests", func() {
 	ginkgo.It("should create a text declaration node", func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
 			"two":  "three",
@@ -19,7 +19,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("modifiable"))
@@ -30,7 +30,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 	})
 
 	ginkgo.It("should create a boolean declaration node", func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
 			"two":  "three",
@@ -40,7 +40,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("modifiable"))

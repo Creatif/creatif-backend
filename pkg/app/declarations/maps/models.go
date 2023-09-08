@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/lib/storage"
 	"errors"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +15,7 @@ type CreateMapModel struct {
 }
 
 type LogicResult struct {
-	ID    ksuid.KSUID
+	ID    string
 	Nodes []string
 	Name  string
 }
@@ -63,9 +62,9 @@ func (a *CreateMapModel) Validate() map[string]string {
 }
 
 type View struct {
-	ID    ksuid.KSUID `json:"id"`
-	Name  string      `json:"name"`
-	Nodes []string    `json:"nodes"`
+	ID    string   `json:"id"`
+	Name  string   `json:"name"`
+	Nodes []string `json:"nodes"`
 }
 
 func newView(model LogicResult) View {

@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/segmentio/ksuid"
 	"time"
 )
 
@@ -21,7 +20,7 @@ func NewGetNodeModel(id string) GetNodeModel {
 }
 
 type View struct {
-	ID        ksuid.KSUID            `json:"id"`
+	ID        string                 `json:"id"`
 	Name      string                 `json:"name"`
 	Type      string                 `json:"type"`
 	Groups    []string               `json:"groups"`

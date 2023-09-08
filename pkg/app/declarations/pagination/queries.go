@@ -2,13 +2,12 @@ package pagination
 
 import (
 	"github.com/lib/pq"
-	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
 
 type NodeWithValue struct {
-	ID ksuid.KSUID `gorm:"primarykey;type:char(27)"`
+	ID string `gorm:"primarykey;type:char(27)"`
 
 	Name      string         `gorm:"index;uniqueIndex:unique_node"`
 	Behaviour string         // readonly,modifiable
@@ -21,7 +20,7 @@ type NodeWithValue struct {
 }
 
 type NodeWithoutValue struct {
-	ID ksuid.KSUID `gorm:"primarykey"`
+	ID string `gorm:"primarykey"`
 
 	Name      string         `gorm:"index;uniqueIndex:unique_node"`
 	Behaviour string         // readonly,modifiable

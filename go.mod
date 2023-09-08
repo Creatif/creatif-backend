@@ -36,6 +36,7 @@ require (
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/oklog/ulid/v2 v2.1.0 // indirect
 	github.com/pilagod/gorm-cursor-paginator/v2 v2.4.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/segmentio/ksuid v1.0.4 // indirect

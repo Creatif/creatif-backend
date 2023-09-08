@@ -10,7 +10,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 		name := "node"
 		createdNode := testCreateBasicDeclarationTextNode("node", "modifiable")
 
-		handler := New(NewGetNodeModel(createdNode.ID.String()))
+		handler := New(NewGetNodeModel(createdNode.ID))
 		node, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
@@ -35,7 +35,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 		name := "node"
 		createdNode := testCreateBasicAssignmentTextNode("node")
 
-		handler := New(NewGetNodeModel(createdNode.ID.String()))
+		handler := New(NewGetNodeModel(createdNode.ID))
 		node, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
@@ -61,7 +61,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 		name := "node"
 		createdNode := testCreateBasicAssignmentBooleanNode("node", true)
 
-		handler := New(NewGetNodeModel(createdNode.ID.String()))
+		handler := New(NewGetNodeModel(createdNode.ID))
 		node, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())

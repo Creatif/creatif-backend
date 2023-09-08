@@ -6,14 +6,13 @@ import (
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"errors"
-	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 )
 
 type AssignmentCreate struct {
 	nodeName          string
 	value             []byte
-	declarationNodeID ksuid.KSUID
+	declarationNodeID string
 }
 
 type AssignmentCreateResult struct {
@@ -21,7 +20,7 @@ type AssignmentCreateResult struct {
 	Value interface{}
 }
 
-func NewAssignmentCreate(nodeName string, value []byte, declarationNodeID ksuid.KSUID) AssignmentCreate {
+func NewAssignmentCreate(nodeName string, value []byte, declarationNodeID string) AssignmentCreate {
 	return AssignmentCreate{
 		value:             value,
 		declarationNodeID: declarationNodeID,
@@ -36,7 +35,7 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 	res := storage.Gorm().Where("name = ?", a.nodeName).First(&exists)
 
 	// any other error than record not exists if a failure and processing should not continue
-	if exists.ID.String() == "" && !errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	if exists.ID == "" && !errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return AssignmentCreateResult{}, res.Error
 	}
 
@@ -44,7 +43,7 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		// record exists, update the value node
-		if exists.ID.String() != "" {
+		if exists.ID != "" {
 			if res := tx.Table((&assignments.ValueNode{}).TableName()).Where("assignment_node_id", exists.ID).Update("value", a.value); res.Error != nil {
 				return res.Error
 			}
@@ -53,7 +52,7 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 		}
 
 		// record does not exist, create assignment node and value node
-		if exists.ID.String() == "" {
+		if exists.ID == "" {
 			node := assignments.NewNode(a.nodeName, a.declarationNodeID)
 			if res := tx.Create(&node); res != nil {
 				return res.Error
@@ -81,7 +80,7 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 		v = createdOrUpdatedValue
 	}
 
-	if exists.ID.String() != "" {
+	if exists.ID != "" {
 		return AssignmentCreateResult{
 			Node:  exists,
 			Value: v,

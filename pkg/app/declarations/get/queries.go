@@ -2,13 +2,12 @@ package get
 
 import (
 	"github.com/lib/pq"
-	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"time"
 )
 
 type NodeWithValueQuery struct {
-	ID ksuid.KSUID
+	ID string
 
 	Name      string
 	Behaviour string // readonly,modifiable

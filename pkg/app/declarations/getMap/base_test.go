@@ -10,9 +10,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/oklog/ulid/v2"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/segmentio/ksuid"
 	"log"
 	"os"
 	"testing"
@@ -93,7 +93,7 @@ func testCreateDeclarationNode(name, behaviour string, groups []string, metadata
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	return view
 }
@@ -127,7 +127,7 @@ func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	return view
 }
@@ -140,7 +140,7 @@ func testCreateBasicAssignmentBooleanNode(name string, value bool) assignmentsCr
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	return view
 }
@@ -150,7 +150,7 @@ func testCreateMap(name string, nodeIds []string) mapsCreate.View {
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
 	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(len(nodeIds)))
@@ -164,6 +164,6 @@ func testAssertErrNil(err error) {
 
 func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
-	_, err := ksuid.Parse(id)
+	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
 }

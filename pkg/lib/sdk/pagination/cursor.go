@@ -6,16 +6,16 @@ import (
 )
 
 type Cursor struct {
-	ID        string `json:"id"`
-	CreatedAt string `json:"createdAt"`
-	Direction string `json:"direction"`
+	ID      string `json:"id"`
+	Field   string `json:"field"`
+	OrderBy string `json:"orderBy"`
 }
 
-func NewCursor(id, createdAt, direction string) Cursor {
+func NewCursor(id, field, orderBy string) Cursor {
 	return Cursor{
-		ID:        id,
-		CreatedAt: createdAt,
-		Direction: direction,
+		ID:      id,
+		Field:   field,
+		OrderBy: orderBy,
 	}
 }
 
@@ -53,7 +53,7 @@ func getPaginationOperator(direction string, sortOrder string) (string, string) 
 	if direction == DIRECTION_BACKWARDS && sortOrder == "asc" {
 		return "<", "desc"
 	}
-	if !direction == DIRECTION_BACKWARDS && sortOrder == "desc" {
+	if direction != DIRECTION_BACKWARDS && sortOrder == "desc" {
 		return ">", "asc"
 	}
 

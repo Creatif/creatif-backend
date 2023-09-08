@@ -19,11 +19,11 @@ var _ = ginkgo.Describe("GET map tests", func() {
 			return value.Name
 		}))
 
-		handler := New(NewGetMapModel(view.ID.String(), "", []string{}))
+		handler := New(NewGetMapModel(view.ID, "", []string{}))
 
 		mapNodesView, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(mapNodesView.ID.String())
+		testAssertIDValid(mapNodesView.ID)
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
 		viewNodes := mapNodesView.Nodes.([]FullNode)
@@ -40,11 +40,11 @@ var _ = ginkgo.Describe("GET map tests", func() {
 			return value.Name
 		}))
 
-		handler := New(NewGetMapModel(view.ID.String(), "full", []string{}))
+		handler := New(NewGetMapModel(view.ID, "full", []string{}))
 
 		mapNodesView, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(mapNodesView.ID.String())
+		testAssertIDValid(mapNodesView.ID)
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
 		viewNodes := mapNodesView.Nodes.([]FullNode)
@@ -61,11 +61,11 @@ var _ = ginkgo.Describe("GET map tests", func() {
 			return value.Name
 		}))
 
-		handler := New(NewGetMapModel(view.ID.String(), "", []string{"groups", "value"}))
+		handler := New(NewGetMapModel(view.ID, "", []string{"groups", "value"}))
 
 		mapNodesView, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(mapNodesView.ID.String())
+		testAssertIDValid(mapNodesView.ID)
 		gomega.Expect(mapNodesView.Nodes).Should(gomega.HaveLen(len(nodes)))
 
 		viewNodes := mapNodesView.Nodes.([]CustomNode)

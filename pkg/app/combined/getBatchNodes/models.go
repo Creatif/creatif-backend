@@ -9,7 +9,6 @@ import (
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/lib/pq"
-	"github.com/segmentio/ksuid"
 	"time"
 )
 
@@ -21,8 +20,8 @@ type node struct {
 type GetBatchedNodesModel struct {
 	Nodes []node
 
-	mapIds  []ksuid.KSUID
-	nodeIds []ksuid.KSUID
+	mapIds  []string
+	nodeIds []string
 }
 
 func NewGetBatchedNodesModel(nodes map[string]string) *GetBatchedNodesModel {
@@ -42,7 +41,7 @@ func NewGetBatchedNodesModel(nodes map[string]string) *GetBatchedNodesModel {
 }
 
 type View struct {
-	ID ksuid.KSUID `json:"id"`
+	ID string `json:"id"`
 
 	Name      string         `json:"name"`
 	Behaviour string         `json:"behaviour"`
@@ -172,11 +171,11 @@ func (a *GetBatchedNodesModel) Validate() map[string]string {
 					return errors.New("One of the node or map names given is invalid or does not exist.")
 				}
 
-				a.nodeIds = sdk.Map(foundNodes, func(idx int, value declarations.Node) ksuid.KSUID {
+				a.nodeIds = sdk.Map(foundNodes, func(idx int, value declarations.Node) string {
 					return value.ID
 				})
 
-				a.mapIds = sdk.Map(maps, func(idx int, value declarations.Map) ksuid.KSUID {
+				a.mapIds = sdk.Map(maps, func(idx int, value declarations.Map) string {
 					return value.ID
 				})
 

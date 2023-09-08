@@ -6,13 +6,14 @@ import (
 	mapsCreate "creatif/pkg/app/declarations/maps"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/oklog/ulid/v2"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/segmentio/ksuid"
 	"log"
 	"os"
 	"testing"
@@ -77,6 +78,12 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
 
+func testUniqueName() string {
+	uid, err := sdk.NewULID()
+	gomega.Expect(err).Should(gomega.BeNil())
+	return uid
+}
+
 func _assertValidation(err error, keys []string) {
 	validationError, ok := err.(appErrors.AppError[map[string]string])
 	if ok {
@@ -93,7 +100,7 @@ func testCreateDeclarationNode(name, behaviour string, groups []string, metadata
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	return view
 }
@@ -115,7 +122,7 @@ func testCreateMap(name string, nodeIds []string) mapsCreate.View {
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
 	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(len(nodeIds)))
@@ -132,7 +139,7 @@ func testCreateBasicAssignmentTextNode(name string, value interface{}) assignmen
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	return view
 }
@@ -145,7 +152,7 @@ func testCreateBasicAssignmentBooleanNode(name string, value bool) assignmentsCr
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(view.ID.String())
+	testAssertIDValid(view.ID)
 
 	return view
 }
@@ -156,6 +163,6 @@ func testAssertErrNil(err error) {
 
 func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
-	_, err := ksuid.Parse(id)
+	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
 }

@@ -26,7 +26,7 @@ var _ = ginkgo.Describe("Assignment map CRUD tests", func() {
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		var value string
 		testAssertErrNil(json.Unmarshal(view.Value.([]byte), &value))

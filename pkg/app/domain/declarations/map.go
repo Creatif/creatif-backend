@@ -2,14 +2,14 @@ package declarations
 
 import (
 	"creatif/pkg/app/domain"
+	"creatif/pkg/lib/sdk"
 	"fmt"
-	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type Map struct {
-	ID ksuid.KSUID `gorm:"primarykey;type:text CHECK(length(id)=27)"`
+	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
 	Name string `gorm:"uniqueIndex"`
 
@@ -24,9 +24,14 @@ func NewMap(name string) Map {
 }
 
 func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = ksuid.New()
+	id, err := sdk.NewULID()
+	if err != nil {
+		return err
+	}
 
-	return
+	u.ID = id
+
+	return nil
 }
 
 func (Map) TableName() string {

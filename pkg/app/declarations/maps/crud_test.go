@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/segmentio/ksuid"
 )
 
 var _ = ginkgo.Describe("Map node tests", func() {
 	ginkgo.It("should create a map out of declaration nodes", func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		nodes := make([]create.View, 0)
 		for i := 0; i < 20; i++ {
 			view := testCreateBasicDeclarationTextNode(fmt.Sprintf("name-%d", i), "modifiable")

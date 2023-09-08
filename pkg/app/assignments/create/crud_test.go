@@ -3,16 +3,16 @@ package create
 import (
 	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/segmentio/ksuid"
 )
 
 var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 	ginkgo.It("should create an assignment text node when the node does not exists", ginkgo.Label("assignment", "crud", "success", "1"), func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
 
 		text := "this is a text node"
@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -33,7 +33,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 	})
 
 	ginkgo.It("should create an assignment boolean node when the node does not exists", ginkgo.Label("assignment", "crud", "success", "2"), func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
 
 		b, _ := json.Marshal(false)
@@ -41,7 +41,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -52,7 +52,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 	})
 
 	ginkgo.It("should update an assignment text node when the node already exists", ginkgo.Label("assignment", "crud", "success", "3"), func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		testCreateBasicAssignmentTextNode(name)
 		text := "this is a changed text value"
 
@@ -63,7 +63,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		view, err := handler.Handle()
 
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -74,7 +74,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 	})
 
 	ginkgo.It("should update an assignment boolean node when the node already exists", ginkgo.Label("assignment", "crud", "success", "4"), func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		testCreateBasicAssignmentBooleanNode(name, true)
 
 		b, _ := json.Marshal(false)
@@ -83,7 +83,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		view, err := handler.Handle()
 
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -95,7 +95,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 	})
 
 	ginkgo.It("should update an assignment node from text to boolean", ginkgo.Label("assignment", "crud", "success", "5"), func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		testCreateBasicAssignmentTextNode(name)
 
 		b, _ := json.Marshal(false)
@@ -104,7 +104,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		view, err := handler.Handle()
 
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())
@@ -115,7 +115,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 	})
 
 	ginkgo.It("should update an assignment node from boolean to text", ginkgo.Label("assignment", "crud", "success", "5"), func() {
-		name := ksuid.New().String()
+		name, _ := sdk.NewULID()
 		testCreateBasicAssignmentBooleanNode(name, true)
 		text := "this is a text value"
 
@@ -125,7 +125,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		view, err := handler.Handle()
 
 		testAssertErrNil(err)
-		testAssertIDValid(view.ID.String())
+		testAssertIDValid(view.ID)
 
 		var node declarations.Node
 		gomega.Expect(storage.Gorm().Where("id = ?", view.ID).First(&node).Error).Should(gomega.BeNil())

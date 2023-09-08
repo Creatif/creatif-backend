@@ -2,35 +2,40 @@ package declarations
 
 import (
 	"creatif/pkg/app/domain"
+	"creatif/pkg/lib/sdk"
 	"fmt"
-	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type MapNode struct {
-	ID ksuid.KSUID `gorm:"primarykey;type:text;check:length(id)=27"`
+	ID string `gorm:"primarykey;type:text;check:length(id)=26"`
 
-	NodeID ksuid.KSUID `gorm:"type:text;check:length(id)=27"`
-	Node   Node        `gorm:"foreignKey:NodeID"`
+	NodeID string `gorm:"type:text;check:length(id)=26"`
+	Node   Node   `gorm:"foreignKey:NodeID"`
 
-	MapID ksuid.KSUID `gorm:"type:text;check:length(id)=27"`
-	Map   Map         `gorm:"foreignKey:MapID"`
+	MapID string `gorm:"type:text;check:length(id)=26"`
+	Map   Map    `gorm:"foreignKey:MapID"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }
 
-func NewMapNode(nodeId ksuid.KSUID) MapNode {
+func NewMapNode(nodeId string) MapNode {
 	return MapNode{
 		NodeID: nodeId,
 	}
 }
 
 func (u *MapNode) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = ksuid.New()
+	id, err := sdk.NewULID()
+	if err != nil {
+		return err
+	}
 
-	return
+	u.ID = id
+
+	return nil
 }
 
 func (MapNode) TableName() string {

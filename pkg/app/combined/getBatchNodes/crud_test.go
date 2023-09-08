@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/segmentio/ksuid"
 )
 
 var _ = ginkgo.Describe("Batch nodes tests", func() {
@@ -74,15 +73,15 @@ var _ = ginkgo.Describe("Batch nodes tests", func() {
 			jsonNodes := make([]create.View, 0)
 
 			for a := 0; a < 10; a++ {
-				textNodes = append(textNodes, testCreateBasicAssignmentTextNode(ksuid.New().String(), "this is a text node"))
+				textNodes = append(textNodes, testCreateBasicAssignmentTextNode(testUniqueName(), "this is a text node"))
 			}
 
 			for a := 0; a < 10; a++ {
-				booleanNodes = append(booleanNodes, testCreateBasicAssignmentBooleanNode(ksuid.New().String(), false))
+				booleanNodes = append(booleanNodes, testCreateBasicAssignmentBooleanNode(testUniqueName(), false))
 			}
 
 			for a := 0; a < 10; a++ {
-				jsonNodes = append(jsonNodes, testCreateBasicAssignmentTextNode(ksuid.New().String(), map[string]interface{}{
+				jsonNodes = append(jsonNodes, testCreateBasicAssignmentTextNode(testUniqueName(), map[string]interface{}{
 					"one":   "one",
 					"two":   []string{"one", "two"},
 					"three": []int{1, 2, 3, 4},

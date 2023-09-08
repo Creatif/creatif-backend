@@ -9,13 +9,13 @@ RUN apk add build-base
 
 RUN go env -w GOPATH=/app
 
-COPY ./go.mod .
-COPY ./go.sum .
+COPY go.mod .
+COPY go.sum .
 RUN go mod download && go mod tidy
 
 RUN go install github.com/githubnemo/CompileDaemon@latest
 
-COPY ./ .
+COPY . .
 
 RUN go install github.com/onsi/ginkgo/v2/ginkgo
 EXPOSE 3002
