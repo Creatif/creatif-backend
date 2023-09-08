@@ -5,21 +5,25 @@ import (
 	"encoding/json"
 )
 
-type Cursor struct {
+type cursor struct {
 	ID      string `json:"id"`
 	Field   string `json:"field"`
 	OrderBy string `json:"orderBy"`
 }
 
-func NewCursor(id, field, orderBy string) Cursor {
-	return Cursor{
+func newCursor(id, field, orderBy string) cursor {
+	return cursor{
 		ID:      id,
 		Field:   field,
 		OrderBy: orderBy,
 	}
 }
 
-func encodeCursor(c Cursor) (string, error) {
+func resolveCursor(id, field, orderBy string) (string, error) {
+	return encodeCursor(newCursor(id, field, orderBy))
+}
+
+func encodeCursor(c cursor) (string, error) {
 	serializedCursor, err := json.Marshal(c)
 	if err != nil {
 		return "", err
@@ -29,15 +33,15 @@ func encodeCursor(c Cursor) (string, error) {
 	return encodedCursor, nil
 }
 
-func decodeCursor(c string) (Cursor, error) {
+func decodeCursor(c string) (cursor, error) {
 	decodedCursor, err := base64.StdEncoding.DecodeString(c)
 	if err != nil {
-		return Cursor{}, err
+		return cursor{}, err
 	}
 
-	var cur Cursor
+	var cur cursor
 	if err := json.Unmarshal(decodedCursor, &cur); err != nil {
-		return Cursor{}, err
+		return cursor{}, err
 	}
 
 	return cur, nil

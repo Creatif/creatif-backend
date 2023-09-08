@@ -2,6 +2,7 @@ package pagination
 
 import (
 	"creatif/pkg/lib/sdk"
+	"creatif/pkg/lib/sdk/pagination"
 	"time"
 )
 
@@ -24,16 +25,14 @@ func NewModel(withValue bool, sortField, sortOrder string, limit int) Pagination
 	}
 }
 
-type ViewWithoutValue struct {
-	ID        string                 `json:"id"`
-	Name      string                 `json:"name"`
-	Type      string                 `json:"type"`
-	Groups    []string               `json:"groups"`
-	Behaviour string                 `json:"behaviour"`
-	Metadata  map[string]interface{} `json:"metadata"`
+type LogicModelWithoutValue struct {
+	nodes          []NodeWithoutValue
+	paginationInfo pagination.PaginationInfo
+}
 
-	CreatedAt time.Time `gorm:"<-:create" json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+type LogicModelWithValue struct {
+	nodes          []NodeWithValue
+	paginationInfo pagination.PaginationInfo
 }
 
 type View struct {
@@ -43,15 +42,27 @@ type View struct {
 	Groups    []string               `json:"groups"`
 	Behaviour string                 `json:"behaviour"`
 	Metadata  map[string]interface{} `json:"metadata"`
-	Value     interface{}            `json:"value"`
+	Value     interface{}            `json:"value,omitempty"`
 
 	CreatedAt time.Time `gorm:"<-:create" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model interface{}) []View {
-	if m, ok := model.([]NodeWithoutValue); ok {
-		return sdk.Map(m, func(idx int, value NodeWithoutValue) View {
+type ViewPaginationInfo struct {
+	Next    string `json:"next"`
+	Prev    string `json:"prev"`
+	NextURL string `json:"nextURL"`
+	PrevURL string `json:"prevURL"`
+}
+
+type PaginatedView struct {
+	Items          []View             `json:"items"`
+	PaginationInfo ViewPaginationInfo `json:"paginationInfo"`
+}
+
+func newView(model interface{}) PaginatedView {
+	if m, ok := model.(LogicModelWithoutValue); ok {
+		views := sdk.Map(m.nodes, func(idx int, value NodeWithoutValue) View {
 			return View{
 				ID:        value.ID,
 				Name:      value.Name,
@@ -62,10 +73,20 @@ func newView(model interface{}) []View {
 				UpdatedAt: value.UpdatedAt,
 			}
 		})
+
+		return PaginatedView{
+			Items: views,
+			PaginationInfo: ViewPaginationInfo{
+				Next:    m.paginationInfo.Next,
+				Prev:    m.paginationInfo.Prev,
+				NextURL: m.paginationInfo.NextURL,
+				PrevURL: m.paginationInfo.PrevURL,
+			},
+		}
 	}
 
-	m := model.([]NodeWithValue)
-	return sdk.Map(m, func(idx int, value NodeWithValue) View {
+	m := model.(LogicModelWithValue)
+	views := sdk.Map(m.nodes, func(idx int, value NodeWithValue) View {
 		return View{
 			ID:        value.ID,
 			Name:      value.Name,
@@ -77,4 +98,14 @@ func newView(model interface{}) []View {
 			UpdatedAt: value.UpdatedAt,
 		}
 	})
+
+	return PaginatedView{
+		Items: views,
+		PaginationInfo: ViewPaginationInfo{
+			Next:    m.paginationInfo.Next,
+			Prev:    m.paginationInfo.Prev,
+			NextURL: m.paginationInfo.NextURL,
+			PrevURL: m.paginationInfo.PrevURL,
+		},
+	}
 }
