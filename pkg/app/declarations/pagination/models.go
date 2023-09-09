@@ -13,15 +13,17 @@ type PaginationModel struct {
 	Limit     int
 	SortOrder string
 	Cursor    string
+	Direction string
 	// TODO: Add project ID prop here
 }
 
-func NewModel(withValue bool, sortField, sortOrder string, limit int) PaginationModel {
+func NewModel(withValue bool, sortField, sortOrder, direction, cursor string, limit int) PaginationModel {
 	return PaginationModel{
 		WithValue: withValue,
 		SortField: sortField,
 		Limit:     limit,
 		SortOrder: sortOrder,
+		Direction: direction,
 	}
 }
 

@@ -15,11 +15,23 @@ func getInitialID(table, orderBy string) (string, error) {
 	return model.ID, nil
 }
 
-func getOperator(direction, orderBy string) string {
+func getInitialOperator(direction, orderBy string) string {
 	if direction == DIRECTION_FORWARD && orderBy == DESC {
 		return "<="
 	} else if direction == DIRECTION_FORWARD && orderBy == ASC {
 		return ">="
+	} else if direction == DIRECTION_BACKWARDS && orderBy == DESC {
+		return ""
+	}
+
+	return ""
+}
+
+func getOperator(direction, orderBy string) string {
+	if direction == DIRECTION_FORWARD && orderBy == DESC {
+		return "<"
+	} else if direction == DIRECTION_FORWARD && orderBy == ASC {
+		return ">"
 	} else if direction == DIRECTION_BACKWARDS && orderBy == DESC {
 		return ""
 	}

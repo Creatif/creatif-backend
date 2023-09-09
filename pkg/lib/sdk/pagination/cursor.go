@@ -11,16 +11,38 @@ type cursor struct {
 	OrderBy string `json:"orderBy"`
 }
 
-func newCursor(id, field, orderBy string) cursor {
-	return cursor{
+func (c *cursor) String() (string, error) {
+	return encodeCursor(*c)
+}
+
+func CursorFromString(cur string) (*cursor, error) {
+	return decodeCursor(cur)
+}
+
+func CursorFromData(id, field, orderBy string) *cursor {
+	return &cursor{
 		ID:      id,
 		Field:   field,
 		OrderBy: orderBy,
 	}
 }
 
-func resolveCursor(id, field, orderBy string) (string, error) {
-	return encodeCursor(newCursor(id, field, orderBy))
+func (c *cursor) encode() (string, error) {
+	serializedCursor, err := json.Marshal(c)
+	if err != nil {
+		return "", err
+	}
+
+	encodedCursor := base64.StdEncoding.EncodeToString(serializedCursor)
+	return encodedCursor, nil
+}
+
+func NewCursor(current string, id, field, orderBy string) (*cursor, error) {
+	if current != "" {
+		return CursorFromString(current)
+	}
+
+	return CursorFromData(id, field, orderBy), nil
 }
 
 func encodeCursor(c cursor) (string, error) {
@@ -33,33 +55,16 @@ func encodeCursor(c cursor) (string, error) {
 	return encodedCursor, nil
 }
 
-func decodeCursor(c string) (cursor, error) {
+func decodeCursor(c string) (*cursor, error) {
 	decodedCursor, err := base64.StdEncoding.DecodeString(c)
 	if err != nil {
-		return cursor{}, err
+		return nil, err
 	}
 
 	var cur cursor
 	if err := json.Unmarshal(decodedCursor, &cur); err != nil {
-		return cursor{}, err
+		return nil, err
 	}
 
-	return cur, nil
-}
-
-func getPaginationOperator(direction string, sortOrder string) (string, string) {
-	if direction == DIRECTION_FORWARD && sortOrder == "asc" {
-		return ">", ""
-	}
-	if direction == DIRECTION_FORWARD && sortOrder == "desc" {
-		return "<", ""
-	}
-	if direction == DIRECTION_BACKWARDS && sortOrder == "asc" {
-		return "<", "desc"
-	}
-	if direction != DIRECTION_BACKWARDS && sortOrder == "desc" {
-		return ">", "asc"
-	}
-
-	return "", ""
+	return &cur, nil
 }
