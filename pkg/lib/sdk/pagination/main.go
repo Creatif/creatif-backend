@@ -31,72 +31,62 @@ func NewOrderByRule(field, orderBy string) orderByRule {
 type Pagination struct {
 	table     string
 	sql       string
+	nextId    string
+	prevId    string
 	limit     int
-	cursor    string
 	rule      orderByRule
 	direction string
 }
 
-func NewPagination(table, sql string, rules orderByRule, cursor string, limit int, direction string) *Pagination {
+func NewPagination(table, sql string, rules orderByRule, nextId, prevId, direction string, limit int) *Pagination {
 	return &Pagination{
 		table:     table,
 		sql:       sql,
 		rule:      rules,
-		limit:     limit,
+		nextId:    nextId,
+		prevId:    prevId,
 		direction: direction,
-		cursor:    cursor,
+		limit:     limit,
 	}
 }
 
 func (p Pagination) Paginate(model interface{}) error {
-	isFirstPage := p.cursor == ""
+	isFirstPage := p.nextId == "" && p.prevId == ""
 	if isFirstPage {
 		id, err := getInitialID(p.table, p.rule.orderBy)
 		if err != nil {
 			return err
 		}
 
-		cur, err := NewCursor(p.cursor, id, p.rule.field, p.rule.orderBy)
-		if err != nil {
-			return err
-		}
-
 		operator := getInitialOperator(DIRECTION_FORWARD, p.rule.orderBy)
-		if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, operator, cur.ID, cur.Field, cur.OrderBy, p.limit)).Scan(model); res.Error != nil {
+		if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, operator, id, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
 			return res.Error
 		}
 
 		return nil
 	}
 
-	var cur *cursor
-	cur, err := NewCursor(p.cursor, "", p.rule.field, p.rule.orderBy)
-	if err != nil {
-		return err
+	operator := getOperator(p.direction, p.rule.orderBy)
+	if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, operator, p.nextId, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
+		return res.Error
 	}
 
-	operator := getOperator(p.direction, cur.OrderBy)
-	if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, operator, cur.ID, cur.Field, cur.OrderBy, p.limit)).Scan(model); res.Error != nil {
-		return cursor{}, res.Error
-	}
-
-	return cur, nil
+	return nil
 }
 
-func (p Pagination) PaginationInfo(prevCur cursor, nextId string) (PaginationInfo, error) {
-	nextCursor, err := resolveCursor(nextId, prevCur.Field, prevCur.OrderBy)
+func (p Pagination) PaginationInfo(nextId, prevId string) (PaginationInfo, error) {
+	nextCursor, err := encodeCursor(CursorFromData(nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_FORWARD, p.limit))
 	if err != nil {
 		return PaginationInfo{}, err
 	}
-
-	prev, err := encodeCursor(prevCur)
+	prevCursor, err := encodeCursor(CursorFromData(nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_BACKWARDS, p.limit))
 	if err != nil {
 		return PaginationInfo{}, err
 	}
 
 	return PaginationInfo{
 		Next:    nextCursor,
-		Prev:    prev,
+		Prev:    prevCursor,
 		NextURL: "",
 		PrevURL: "",
 	}, nil

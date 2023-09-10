@@ -7,23 +7,24 @@ import (
 )
 
 type PaginationModel struct {
-	// this can be project name
 	WithValue bool
-	SortField string
-	Limit     int
-	SortOrder string
-	Cursor    string
+	NextID    string
+	PrevID    string
+	Field     string
+	OrderBy   string
 	Direction string
-	// TODO: Add project ID prop here
+	Limit     int
 }
 
-func NewModel(withValue bool, sortField, sortOrder, direction, cursor string, limit int) PaginationModel {
+func NewModel(withValue bool, nextId, prevId, field, orderBy, direction string, limit int) PaginationModel {
 	return PaginationModel{
 		WithValue: withValue,
-		SortField: sortField,
-		Limit:     limit,
-		SortOrder: sortOrder,
+		NextID:    nextId,
+		PrevID:    prevId,
+		Field:     field,
+		OrderBy:   orderBy,
 		Direction: direction,
+		Limit:     limit,
 	}
 }
 

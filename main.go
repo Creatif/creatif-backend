@@ -1,21 +1,17 @@
+// from blog of http://angelonotes.blogspot.com/2015/09/golang-utf16-utf8.html
 package main
 
 import (
-	"bytes"
-	"crypto/rand"
 	"fmt"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 )
 
 func main() {
-	c := 10
-	b := make([]byte, c)
-	_, err := rand.Read(b)
-	if err != nil {
-		fmt.Println("error:", err)
-		return
-	}
-	// The slice should now contain random bytes instead of only zeroes.
-	fmt.Println(bytes.Equal(b, make([]byte, c)))
+	bs_UTF16LE, _, _ := transform.Bytes(unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder(), []byte("測試"))
+	bs_UTF16BE, _, _ := transform.Bytes(unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM).NewEncoder(), []byte("測試"))
+	bs_UTF8LE, _, _ := transform.Bytes(unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewDecoder(), bs_UTF16LE)
+	bs_UTF8BE, _, _ := transform.Bytes(unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM).NewDecoder(), bs_UTF16BE)
 
-	fmt.Println(b)
+	fmt.Printf("%s\n%s\n%s\n%s\n", bs_UTF16LE, bs_UTF16BE, bs_UTF8LE, bs_UTF8BE)
 }
