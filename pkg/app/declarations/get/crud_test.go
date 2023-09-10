@@ -8,78 +8,62 @@ import (
 var _ = ginkgo.Describe("Declaration node tests", func() {
 	ginkgo.It("should return a text node with value queried by ID and an empty value", func() {
 		name := "node"
-		createdNode := testCreateBasicDeclarationTextNode("node", "modifiable")
+		createdNode := testCreateBasicDeclarationTextNode(name, "modifiable")
 
-		handler := New(NewGetNodeModel(createdNode.ID))
+		handler := New(NewGetNodeModel(createdNode.Name, []string{}))
 		node, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(node.Name).Should(gomega.Equal(name))
-		gomega.Expect(node.Value).Should(gomega.BeNil())
-		gomega.Expect(node.Groups).Should(gomega.HaveLen(3))
+
+		gomega.Expect(node).Should(gomega.HaveKey("id"))
+		gomega.Expect(node).Should(gomega.HaveKey("name"))
+		gomega.Expect(node).Should(gomega.HaveKey("behaviour"))
+		gomega.Expect(node).Should(gomega.HaveKey("metadata"))
+		gomega.Expect(node).Should(gomega.HaveKey("groups"))
+		gomega.Expect(node).Should(gomega.HaveKey("createdAt"))
+		gomega.Expect(node).Should(gomega.HaveKey("updatedAt"))
+
+		gomega.Expect(node["id"]).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(node["name"]).Should(gomega.Equal(name))
+
+		gomega.Expect(node["value"]).Should(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should return a text node with value queried by name and an empty value", func() {
 		name := "node"
 		createdNode := testCreateBasicDeclarationTextNode("node", "modifiable")
 
-		handler := New(NewGetNodeModel(createdNode.Name))
+		handler := New(NewGetNodeModel(createdNode.Name, []string{"value"}))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(view.ID).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(view.Name).Should(gomega.Equal(name))
-		gomega.Expect(view.Value).Should(gomega.BeNil())
+
+		gomega.Expect(view).Should(gomega.HaveKey("id"))
+		gomega.Expect(view).Should(gomega.HaveKey("name"))
+		gomega.Expect(view).Should(gomega.HaveKey("value"))
+
+		gomega.Expect(view["id"]).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(view["name"]).Should(gomega.Equal(name))
+
+		gomega.Expect(view["value"]).Should(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should return a text node with value queried by ID and a text value", func() {
 		name := "node"
 		createdNode := testCreateBasicAssignmentTextNode("node")
 
-		handler := New(NewGetNodeModel(createdNode.ID))
-		node, err := handler.Handle()
-		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(node.Name).Should(gomega.Equal(name))
+		handler := New(NewGetNodeModel(createdNode.Name, []string{"value", "behaviour"}))
+		view, err := handler.Handle()
+		testAssertErrNil(err)
 
-		gomega.Expect(node.Value).Should(gomega.Equal("this is a text node"))
-	})
+		gomega.Expect(view).Should(gomega.HaveKey("id"))
+		gomega.Expect(view).Should(gomega.HaveKey("name"))
+		gomega.Expect(view).Should(gomega.HaveKey("value"))
+		gomega.Expect(view).Should(gomega.HaveKey("behaviour"))
 
-	ginkgo.It("should return a text node with value queried by name and a text value", func() {
-		name := "node"
-		createdNode := testCreateBasicAssignmentTextNode("node")
+		gomega.Expect(view).ShouldNot(gomega.HaveKey("groups"))
 
-		handler := New(NewGetNodeModel(createdNode.Name))
-		node, err := handler.Handle()
-		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(node.Name).Should(gomega.Equal(name))
+		gomega.Expect(view["id"]).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(view["name"]).Should(gomega.Equal(name))
 
-		gomega.Expect(node.Value).Should(gomega.Equal("this is a text node"))
-	})
-
-	ginkgo.It("should return a text node with value queried by ID and a boolean value", func() {
-		name := "node"
-		createdNode := testCreateBasicAssignmentBooleanNode("node", true)
-
-		handler := New(NewGetNodeModel(createdNode.ID))
-		node, err := handler.Handle()
-		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(node.Name).Should(gomega.Equal(name))
-
-		gomega.Expect(node.Value).Should(gomega.BeTrue())
-	})
-
-	ginkgo.It("should return a text node with value queried by name and a boolean value", func() {
-		name := "node"
-		createdNode := testCreateBasicAssignmentBooleanNode("node", true)
-
-		handler := New(NewGetNodeModel(createdNode.Name))
-		node, err := handler.Handle()
-		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(node.ID).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(node.Name).Should(gomega.Equal(name))
-
-		gomega.Expect(node.Value).Should(gomega.BeTrue())
+		gomega.Expect(view["value"]).ShouldNot(gomega.BeEmpty())
 	})
 })

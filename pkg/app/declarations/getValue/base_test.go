@@ -1,4 +1,4 @@
-package get
+package getValue
 
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"

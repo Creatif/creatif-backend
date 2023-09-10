@@ -17,7 +17,7 @@ func GetNodeHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeGetNode(model)
 
-		handler := get.New(get.NewGetNodeModel(model.ID))
+		handler := get.New(get.NewGetNodeModel(model.ID, model.Fields))
 
 		return request.SendResponse[get.GetNodeModel](handler, c, http.StatusCreated)
 	}

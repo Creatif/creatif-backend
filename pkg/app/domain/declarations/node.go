@@ -14,7 +14,7 @@ type Validation struct {
 	Required    bool
 	Length      string
 	ExactValue  string
-	ExactValues string
+	ExactValues []string
 	IsDate      bool
 }
 

@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 type Main struct {
@@ -54,7 +53,6 @@ func (c Main) Logic() (LogicModel, error) {
 		if model.Value != nil {
 			var conv interface{}
 			if err := json.Unmarshal(model.Value, &conv); err != nil {
-				fmt.Println("VALUE ERROR")
 				return LogicModel{}, appErrors.NewApplicationError(err).AddError("GetMap.Get.Logic", nil)
 			}
 

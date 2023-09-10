@@ -1,12 +1,13 @@
-package get
+package getValue
 
 import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"gorm.io/datatypes"
 )
 
 type Main struct {
-	model GetNodeModel
+	model Model
 }
 
 func (c Main) Validate() error {
@@ -25,10 +26,10 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (Node, error) {
-	return queryValue(c.model.ID, c.model.Fields)
+	return queryValue(c.model.ID)
 }
 
-func (c Main) Handle() (map[string]interface{}, error) {
+func (c Main) Handle() (datatypes.JSON, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -47,9 +48,9 @@ func (c Main) Handle() (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	return newView(model, c.model.Fields), nil
+	return newView(model), nil
 }
 
-func New(model GetNodeModel) pkg.Job[GetNodeModel, map[string]interface{}, Node] {
+func New(model Model) pkg.Job[Model, datatypes.JSON, Node] {
 	return Main{model: model}
 }
