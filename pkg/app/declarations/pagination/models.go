@@ -7,7 +7,6 @@ import (
 )
 
 type PaginationModel struct {
-	WithValue bool
 	NextID    string
 	PrevID    string
 	Field     string
@@ -16,9 +15,8 @@ type PaginationModel struct {
 	Limit     int
 }
 
-func NewModel(withValue bool, nextId, prevId, field, orderBy, direction string, limit int) PaginationModel {
+func NewModel(nextId, prevId, field, orderBy, direction string, limit int) PaginationModel {
 	return PaginationModel{
-		WithValue: withValue,
 		NextID:    nextId,
 		PrevID:    prevId,
 		Field:     field,

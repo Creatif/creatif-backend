@@ -42,9 +42,14 @@ func (c Main) Logic() (interface{}, error) {
 	}
 
 	var paginationInfo pagination.PaginationInfo
-	if len(nodes) > 0 {
-		// TODO: handle case where the number of nodes is less than the limit
+	if len(nodes) < c.model.Limit {
+		info, err := p.PaginationInfo("", nodes[0].ID)
+		if err != nil {
+			return nil, appErrors.NewDatabaseError(err).AddError("pagination.declarationsNode", nil)
+		}
 
+		paginationInfo = info
+	} else if len(nodes) > 0 {
 		info, err := p.PaginationInfo(nodes[len(nodes)-1].ID, nodes[0].ID)
 		if err != nil {
 			return nil, appErrors.NewDatabaseError(err).AddError("pagination.declarationsNode", nil)

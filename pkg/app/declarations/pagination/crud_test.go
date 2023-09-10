@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Declaration node pagination tests", func() {
 			testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i))
 		}
 
-		handler := New(NewModel(false, "", "", "created_at", "desc", pagination.DIRECTION_FORWARD, limit))
+		handler := New(NewModel("", "", "created_at", "desc", pagination.DIRECTION_FORWARD, limit))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -32,7 +32,7 @@ var _ = ginkgo.Describe("Declaration node pagination tests", func() {
 			testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i))
 		}
 
-		handler := New(NewModel(false, "", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit))
+		handler := New(NewModel("", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -41,6 +41,24 @@ var _ = ginkgo.Describe("Declaration node pagination tests", func() {
 		gomega.Expect(views.Items[len(views.Items)-1].Name).Should(gomega.Equal("name-9"))
 
 		gomega.Expect(views.PaginationInfo.Next).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(views.PaginationInfo.Prev).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("nextUrl in pagination info should be an empty string if number of items is less than limit", func() {
+		limit := 10
+		for i := 0; i < 5; i++ {
+			testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i))
+		}
+
+		handler := New(NewModel("", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit))
+		views, err := handler.Handle()
+		testAssertErrNil(err)
+
+		gomega.Expect(len(views.Items)).Should(gomega.Equal(5))
+		gomega.Expect(views.Items[0].Name).Should(gomega.Equal("name-0"))
+		gomega.Expect(views.Items[len(views.Items)-1].Name).Should(gomega.Equal("name-4"))
+
+		gomega.Expect(views.PaginationInfo.Next).Should(gomega.BeEmpty())
 		gomega.Expect(views.PaginationInfo.Prev).ShouldNot(gomega.BeEmpty())
 	})
 })

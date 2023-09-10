@@ -75,10 +75,16 @@ func (p Pagination) Paginate(model interface{}) error {
 }
 
 func (p Pagination) PaginationInfo(nextId, prevId string) (PaginationInfo, error) {
-	nextCursor, err := encodeCursor(CursorFromData(nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_FORWARD, p.limit))
-	if err != nil {
-		return PaginationInfo{}, err
+	var nextCursor string
+	if nextId != "" {
+		n, err := encodeCursor(CursorFromData(nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_FORWARD, p.limit))
+		if err != nil {
+			return PaginationInfo{}, err
+		}
+
+		nextCursor = n
 	}
+
 	prevCursor, err := encodeCursor(CursorFromData(nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_BACKWARDS, p.limit))
 	if err != nil {
 		return PaginationInfo{}, err
