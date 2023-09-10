@@ -11,7 +11,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 	ginkgo.It("should update the name of the declaration node", func() {
 		view := testCreateBasicDeclarationTextNode("name", "modifiable")
 
-		handler := New(NewModel("name", "newName", "readonly", []string{}, []byte{}, nil))
+		handler := New(NewModel([]string{"name", "behaviour"}, "name", "newName", "readonly", []string{}, []byte{}))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -25,12 +25,13 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 		testAssertErrNil(res.Error)
 
 		gomega.Expect(checkModel.Name).Should(gomega.Equal("newName"))
+		gomega.Expect(checkModel.Behaviour).Should(gomega.Equal("readonly"))
 	})
 
 	ginkgo.It("should update the groups of the declaration node", func() {
 		view := testCreateBasicDeclarationTextNode("name", "modifiable")
 
-		handler := New(NewModel("name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, nil))
+		handler := New(NewModel([]string{"name", "groups"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -53,7 +54,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 	ginkgo.It("should update the behaviour of the declaration node", func() {
 		view := testCreateBasicDeclarationTextNode("name", "modifiable")
 
-		handler := New(NewModel("name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, nil))
+		handler := New(NewModel([]string{"name", "behaviour", "groups"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)

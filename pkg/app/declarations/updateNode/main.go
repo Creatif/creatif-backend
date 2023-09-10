@@ -5,6 +5,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
+	"gorm.io/gorm/clause"
 )
 
 type Main struct {
@@ -29,31 +30,42 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (declarations.Node, error) {
 	var existing declarations.Node
-	if err := storage.GetBy((declarations.Node{}).TableName(), "name", c.model.Name, &existing); err != nil {
+	if err := storage.GetBy((declarations.Node{}).TableName(), "name", c.model.Name, &existing, "id"); err != nil {
 		return declarations.Node{}, appErrors.NewNotFoundError(err).AddError("updateNode.Logic", nil)
 	}
 
-	if c.model.UpdatingName != "" {
-		existing.Name = c.model.UpdatingName
+	for _, f := range c.model.Fields {
+		if f == "name" {
+			existing.Name = c.model.Values.Name
+		}
+
+		if f == "metadata" {
+			existing.Metadata = c.model.Values.Metadata
+		}
+
+		if f == "groups" {
+			existing.Groups = c.model.Values.Groups
+		}
+
+		if f == "behaviour" {
+			existing.Behaviour = c.model.Values.Behaviour
+		}
 	}
 
-	if len(c.model.Metadata) != 0 {
-		existing.Metadata = c.model.Metadata
-	}
-
-	if len(c.model.Behaviour) != 0 {
-		existing.Behaviour = c.model.Behaviour
-	}
-
-	if len(c.model.Groups) != 0 {
-		existing.Groups = c.model.Groups
-	}
-
-	if res := storage.Gorm().Save(&existing); res.Error != nil {
+	var updated declarations.Node
+	if res := storage.Gorm().Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
+		{Name: "id"},
+		{Name: "name"},
+		{Name: "behaviour"},
+		{Name: "metadata"},
+		{Name: "groups"},
+		{Name: "created_at"},
+		{Name: "updated_at"},
+	}}).Where("id = ?", existing.ID).Select(c.model.Fields).Updates(existing); res.Error != nil {
 		return declarations.Node{}, appErrors.NewApplicationError(res.Error).AddError("updateNode.Logic", nil)
 	}
 
-	return existing, nil
+	return updated, nil
 }
 
 func (c Main) Handle() (View, error) {

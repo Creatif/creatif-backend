@@ -9,8 +9,16 @@ import (
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"gorm.io/gorm"
+	"strings"
 	"time"
 )
+
+var validUpdateableFields = []string{
+	"name",
+	"metadata",
+	"groups",
+	"behaviour",
+}
 
 type ValidationLength struct {
 	Min   int `json:"min"`
@@ -26,39 +34,58 @@ type NodeValidation struct {
 	IsDate      bool
 }
 
-type Model struct {
-	Name         string          `json:"name"`
-	UpdatingName string          `json:"updatingName,omitempty"`
-	Metadata     []byte          `json:"metadata,omitempty"`
-	Groups       []string        `json:"groups,omitempty"`
-	Behaviour    string          `json:"behaviour,omitempty"`
-	Validation   *NodeValidation `json:"validation,omitempty"`
+type ModelValues struct {
+	Name      string   `json:"name"`
+	Metadata  []byte   `json:"metadata"`
+	Groups    []string `json:"groups"`
+	Behaviour string   `json:"behaviour"`
 }
 
-func NewModel(name, updatingName, behaviour string, groups []string, metadata []byte, validation *NodeValidation) Model {
+type Model struct {
+	Fields []string
+	Name   string
+	Values ModelValues
+}
+
+func NewModel(fields []string, name, updatingName, behaviour string, groups []string, metadata []byte) Model {
 	return Model{
-		Name:         name,
-		UpdatingName: updatingName,
-		Behaviour:    behaviour,
-		Groups:       groups,
-		Validation:   validation,
-		Metadata:     metadata,
+		Fields: fields,
+		Name:   name,
+		Values: ModelValues{
+			Name:      updatingName,
+			Metadata:  metadata,
+			Groups:    groups,
+			Behaviour: behaviour,
+		},
 	}
 }
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"name":               a.Name,
-		"groups":             a.Groups,
-		"behaviour":          a.Behaviour,
-		"nodeValidation":     a.Validation,
-		"updatingNameExists": a.UpdatingName,
+		"fieldsValid":        a.Fields,
+		"name":               a.Values.Name,
+		"groups":             a.Values.Groups,
+		"behaviour":          a.Values.Behaviour,
+		"updatingNameExists": a.Values.Name,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
-			validation.Key("groups", validation.When(len(a.Groups) != 0, validation.Each(validation.RuneLength(1, 200)))),
+			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
+				t := value.([]string)
+
+				if len(t) == 0 || len(t) > 4 {
+					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
+				}
+
+				if !sdk.ArrEqual(t, validUpdateableFields) {
+					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
+				}
+
+				return nil
+			})),
+			validation.Key("groups", validation.When(len(a.Values.Groups) != 0, validation.Each(validation.RuneLength(1, 200)))),
 			validation.Key("behaviour", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)
 
@@ -68,26 +95,7 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("nodeValidation", validation.By(func(value interface{}) error {
-				t := value.(*NodeValidation)
-
-				if t == nil {
-					return nil
-				}
-
-				if len(t.ExactValue) > 200 {
-					return errors.New("Invalid value for validation.exactValue. validation.exactValue cannot have more than 200 characters")
-				}
-
-				for _, r := range t.ExactValues {
-					if len(r) > 200 {
-						return errors.New("Invalid value for validation.exactValues. Every entry in validation.exactValues array cannot be more than 200 characters")
-					}
-				}
-
-				return nil
-			})),
-			validation.Key("updatingNameExists", validation.When(a.UpdatingName != "", validation.Required, validation.RuneLength(1, 200)), validation.By(func(value interface{}) error {
+			validation.Key("updatingNameExists", validation.When(a.Values.Name != "", validation.Required, validation.RuneLength(1, 200)), validation.By(func(value interface{}) error {
 				t := value.(string)
 
 				if t == "" {
