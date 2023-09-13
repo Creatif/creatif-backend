@@ -108,19 +108,6 @@ func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
 	return view
 }
 
-func testCreateBasicAssignmentBooleanNode(name string, value bool) assignmentsCreate.View {
-	declarationNode := testCreateBasicDeclarationBooleanNode(name, "modifiable")
-
-	b, _ := json.Marshal(value)
-	handler := assignmentsCreate.New(assignmentsCreate.NewCreateNodeModel(declarationNode.Name, b))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
-
 func testCreateMap(name string, nodes []string) mapsCreate.View {
 	handler := mapsCreate.New(mapsCreate.NewCreateMapModel(name, nodes))
 

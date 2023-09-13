@@ -2,7 +2,6 @@ package create
 
 import (
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -73,17 +72,6 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
 
-func _assertValidation(err error, keys []string) {
-	validationError, ok := err.(appErrors.AppError[map[string]string])
-	if ok {
-		data := validationError.Data()
-
-		for key := range data {
-			gomega.Expect(keys).Should(gomega.ContainElement(key))
-		}
-	}
-}
-
 func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte, validation NodeValidation) View {
 	handler := New(NewCreateNodeModel(name, behaviour, groups, metadata, validation))
 
@@ -92,14 +80,6 @@ func testCreateDeclarationNode(name, behaviour string, groups []string, metadata
 	testAssertIDValid(view.ID)
 
 	return view
-}
-
-func testCreateBasicDeclarationTextNode(name, behaviour string) View {
-	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{}, NodeValidation{})
-}
-
-func testCreateBasicDeclarationBooleanNode(name, behaviour string) View {
-	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{}, NodeValidation{})
 }
 
 func testAssertErrNil(err error) {

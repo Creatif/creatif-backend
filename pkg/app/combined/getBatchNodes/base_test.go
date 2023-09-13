@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/declarations/create"
 	mapsCreate "creatif/pkg/app/declarations/maps"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -82,17 +81,6 @@ func testUniqueName() string {
 	uid, err := sdk.NewULID()
 	gomega.Expect(err).Should(gomega.BeNil())
 	return uid
-}
-
-func _assertValidation(err error, keys []string) {
-	validationError, ok := err.(appErrors.AppError[map[string]string])
-	if ok {
-		data := validationError.Data()
-
-		for key := range data {
-			gomega.Expect(keys).Should(gomega.ContainElement(key))
-		}
-	}
 }
 
 func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte, validation create.NodeValidation) create.View {

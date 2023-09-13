@@ -3,7 +3,6 @@ package create
 import (
 	"creatif/pkg/app/declarations/create"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/appErrors"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -74,17 +73,6 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
-
-func _assertValidation(err error, keys []string) {
-	validationError, ok := err.(appErrors.AppError[map[string]string])
-	if ok {
-		data := validationError.Data()
-
-		for key := range data {
-			gomega.Expect(keys).Should(gomega.ContainElement(key))
-		}
-	}
-}
 
 func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte, validation create.NodeValidation) create.View {
 	handler := create.New(create.NewCreateNodeModel(name, behaviour, groups, metadata, validation))
