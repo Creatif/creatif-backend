@@ -55,6 +55,8 @@ func (a *CreateNodeModel) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":             a.Name,
 		"isNodeModifiable": "",
+		"value":            a.Value,
+		"isValueNull":      a.Value,
 	}
 
 	if err := validation.Validate(v,
@@ -67,6 +69,16 @@ func (a *CreateNodeModel) Validate() map[string]string {
 				}
 
 				a.declarationNode = node
+
+				return nil
+			})),
+			validation.Key("value", validation.Required),
+			validation.Key("isValueNull", validation.By(func(value interface{}) error {
+				v := value.([]byte)
+
+				if string(v) == "null" {
+					return errors.New("null is not a valid value. Send an empty string if you want to set an empty value.")
+				}
 
 				return nil
 			})),
