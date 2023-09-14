@@ -9,9 +9,22 @@ import (
 	"gorm.io/gorm"
 )
 
+type NodeModel struct {
+	Name      string   `json:"name"`
+	Type      string   `json:"type"`
+	Metadata  []byte   `json:"metadata"`
+	Groups    []string `json:"groups"`
+	Behaviour string   `json:"behaviour"`
+}
+
+type Entry struct {
+	Type  string
+	Model interface{}
+}
+
 type Model struct {
-	Nodes []string `json:"nodes"`
-	Name  string   `json:"name"`
+	Entries []Entry `json:"entries"`
+	Name    string  `json:"name"`
 }
 
 type LogicResult struct {
@@ -22,8 +35,7 @@ type LogicResult struct {
 
 func NewModel(name string, nodes []string) Model {
 	return Model{
-		Nodes: nodes,
-		Name:  name,
+		Name: name,
 	}
 }
 

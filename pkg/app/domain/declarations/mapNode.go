@@ -4,26 +4,37 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/sdk"
 	"fmt"
+	"github.com/lib/pq"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
 )
 
 type MapNode struct {
-	ID string `gorm:"primarykey;type:text;check:length(id)=26"`
+	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	NodeID string `gorm:"type:text;check:length(id)=26"`
-	Node   Node   `gorm:"foreignKey:NodeID"`
+	Name      string `gorm:"index;uniqueIndex:unique_node"`
+	Behaviour string
+	Groups    pq.StringArray `gorm:"type:text[]"`
+	Metadata  datatypes.JSON
 
 	MapID string `gorm:"type:text;check:length(id)=26"`
 	Map   Map    `gorm:"foreignKey:MapID"`
 
-	CreatedAt time.Time `gorm:"<-:create"`
+	// TODO: change this to be string when projects and exploration are over, project must exist and be UUID
+	/*	ProjectID *string `gorm:"type:uuid;uniqueIndex:unique_node"`
+		Project   domain.Project*/
+
+	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
 }
 
-func NewMapNode(nodeId string) MapNode {
+func NewMapNode(name, behaviour string, metadata datatypes.JSON, groups pq.StringArray) MapNode {
 	return MapNode{
-		NodeID: nodeId,
+		Name:      name,
+		Behaviour: behaviour,
+		Metadata:  metadata,
+		Groups:    groups,
 	}
 }
 
