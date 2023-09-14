@@ -28,7 +28,7 @@ func (c Main) Logic() (interface{}, error) {
 	p := pagination.NewPagination(
 		tableName,
 		fmt.Sprintf("SELECT id, name, behaviour, groups, metadata FROM %s", tableName),
-		pagination.NewOrderByRule(c.model.Field, c.model.OrderBy),
+		pagination.NewOrderByRule(c.model.Field, c.model.OrderBy, "groups", c.model.Groups),
 		c.model.NextID,
 		c.model.PrevID,
 		c.model.Direction,
@@ -42,7 +42,14 @@ func (c Main) Logic() (interface{}, error) {
 	}
 
 	var paginationInfo pagination.PaginationInfo
-	if len(nodes) < c.model.Limit {
+	if len(nodes) == 0 {
+		info, err := p.PaginationInfo("", "")
+		if err != nil {
+			return nil, appErrors.NewDatabaseError(err).AddError("pagination.declarationsNode", nil)
+		}
+
+		paginationInfo = info
+	} else if len(nodes) < c.model.Limit {
 		info, err := p.PaginationInfo("", nodes[0].ID)
 		if err != nil {
 			return nil, appErrors.NewDatabaseError(err).AddError("pagination.declarationsNode", nil)

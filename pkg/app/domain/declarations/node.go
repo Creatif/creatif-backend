@@ -21,9 +21,9 @@ type Validation struct {
 type Node struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	Name       string         `gorm:"index;uniqueIndex:unique_node"`
-	Behaviour  string         // readonly,modifiable
-	Groups     pq.StringArray `gorm:"type:text[]"` // if groups is set, group should be invalidated
+	Name       string `gorm:"index;uniqueIndex:unique_node"`
+	Behaviour  string
+	Groups     pq.StringArray `gorm:"type:text[]"`
 	Metadata   datatypes.JSON
 	Validation datatypes.JSONType[Validation]
 

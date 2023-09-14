@@ -12,10 +12,11 @@ type PaginationModel struct {
 	Field     string
 	OrderBy   string
 	Direction string
+	Groups    []string
 	Limit     int
 }
 
-func NewModel(nextId, prevId, field, orderBy, direction string, limit int) PaginationModel {
+func NewModel(nextId, prevId, field, orderBy, direction string, limit int, groups []string) PaginationModel {
 	return PaginationModel{
 		NextID:    nextId,
 		PrevID:    prevId,
@@ -23,6 +24,7 @@ func NewModel(nextId, prevId, field, orderBy, direction string, limit int) Pagin
 		OrderBy:   orderBy,
 		Direction: direction,
 		Limit:     limit,
+		Groups:    groups,
 	}
 }
 

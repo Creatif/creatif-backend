@@ -17,14 +17,18 @@ type SortableIDModel struct {
 }
 
 type orderByRule struct {
-	field   string
-	orderBy string
+	field      string
+	orderBy    string
+	groups     []string
+	groupField string
 }
 
-func NewOrderByRule(field, orderBy string) orderByRule {
+func NewOrderByRule(field, orderBy, groupField string, groups []string) orderByRule {
 	return orderByRule{
-		field:   field,
-		orderBy: strings.ToUpper(orderBy),
+		field:      field,
+		groupField: groupField,
+		groups:     groups,
+		orderBy:    strings.ToUpper(orderBy),
 	}
 }
 
@@ -59,8 +63,15 @@ func (p Pagination) Paginate(model interface{}) error {
 		}
 
 		operator := getInitialOperator(DIRECTION_FORWARD, p.rule.orderBy)
-		if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, operator, id, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
-			return res.Error
+		if len(p.rule.groups) > 0 {
+			groups := strings.Join(p.rule.groups, ",")
+			if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' AND '{%s}'::text[] && %s ORDER BY %s %s LIMIT %d", p.sql, operator, id, groups, p.rule.groupField, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
+				return res.Error
+			}
+		} else {
+			if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, operator, id, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
+				return res.Error
+			}
 		}
 
 		return nil
@@ -85,9 +96,14 @@ func (p Pagination) PaginationInfo(nextId, prevId string) (PaginationInfo, error
 		nextCursor = n
 	}
 
-	prevCursor, err := encodeCursor(CursorFromData(nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_BACKWARDS, p.limit))
-	if err != nil {
-		return PaginationInfo{}, err
+	var prevCursor string
+	if prevId != "" {
+		n, err := encodeCursor(CursorFromData(nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_BACKWARDS, p.limit))
+		if err != nil {
+			return PaginationInfo{}, err
+		}
+		
+		prevCursor = n
 	}
 
 	return PaginationInfo{
