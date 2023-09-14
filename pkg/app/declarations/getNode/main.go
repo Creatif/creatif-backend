@@ -16,6 +16,7 @@ func (c Main) Validate() error {
 
 	return nil
 }
+
 func (c Main) Authenticate() error {
 	return nil
 }
