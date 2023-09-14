@@ -1,4 +1,4 @@
-package get
+package getNode
 
 import (
 	pkg "creatif/pkg/lib"

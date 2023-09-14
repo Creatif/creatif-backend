@@ -79,7 +79,7 @@ func newView(model map[string]interface{}) map[string]interface{} {
 		view["nodes"] = nodeView
 	}
 
-	maps := model["maps"]
+	maps := model["mapCreate"]
 	convertedMaps, ok := maps.(map[string][]Node)
 
 	if ok {
@@ -102,7 +102,7 @@ func newView(model map[string]interface{}) map[string]interface{} {
 			resolvedMaps[key] = a
 		}
 
-		view["maps"] = resolvedMaps
+		view["mapCreate"] = resolvedMaps
 	}
 
 	return view

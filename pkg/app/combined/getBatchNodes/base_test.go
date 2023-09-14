@@ -3,7 +3,7 @@ package getBatchNodes
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"
 	"creatif/pkg/app/declarations/create"
-	mapsCreate "creatif/pkg/app/declarations/maps"
+	mapsCreate "creatif/pkg/app/declarations/mapCreate"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"

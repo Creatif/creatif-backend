@@ -1,4 +1,4 @@
-package get
+package getNode
 
 import (
 	"github.com/onsi/ginkgo/v2"

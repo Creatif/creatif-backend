@@ -9,7 +9,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Batch nodes tests", func() {
-	ginkgo.It("should get a batch of nodes with full data", func() {
+	ginkgo.It("should getNode a batch of nodes with full data", func() {
 		textNodes := make([]create.View, 0)
 		booleanNodes := make([]create.View, 0)
 		jsonNodes := make([]create.View, 0)
@@ -61,7 +61,7 @@ var _ = ginkgo.Describe("Batch nodes tests", func() {
 		}
 	})
 
-	ginkgo.It("should get a batch of maps with full data", func() {
+	ginkgo.It("should getNode a batch of mapCreate with full data", func() {
 		maps := make([]string, 0)
 		for i := 0; i < 5; i++ {
 			maps = append(maps, fmt.Sprintf("name-%d", i))
@@ -109,6 +109,6 @@ var _ = ginkgo.Describe("Batch nodes tests", func() {
 		testAssertErrNil(err)
 
 		gomega.Expect(views).Should(gomega.HaveKey("nodes"))
-		gomega.Expect(views).Should(gomega.HaveKey("maps"))
+		gomega.Expect(views).Should(gomega.HaveKey("mapCreate"))
 	})
 })

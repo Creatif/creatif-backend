@@ -1,4 +1,4 @@
-package maps
+package mapCreate
 
 import (
 	"creatif/pkg/app/domain/declarations"

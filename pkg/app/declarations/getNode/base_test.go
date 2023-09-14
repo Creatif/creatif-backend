@@ -1,4 +1,4 @@
-package get
+package getNode
 
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"

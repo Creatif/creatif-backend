@@ -65,8 +65,8 @@ func (c Main) Logic() (map[string]interface{}, error) {
 	}
 
 	return map[string]interface{}{
-		"nodes": nodes,
-		"maps":  mapNodes,
+		"nodes":     nodes,
+		"mapCreate": mapNodes,
 	}, nil
 }
 

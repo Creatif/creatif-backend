@@ -9,7 +9,7 @@ import (
 )
 
 var _ = ginkgo.Describe("GET map tests", func() {
-	ginkgo.It("should get names only (default) representation of map of nodes", func() {
+	ginkgo.It("should getNode names only (default) representation of map of nodes", func() {
 		nodes := make([]create.View, 0)
 		for i := 0; i < 10; i++ {
 			nodes = append(nodes, testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i)))
@@ -30,7 +30,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		gomega.Expect(viewNodes).Should(gomega.HaveLen(10))
 	})
 
-	ginkgo.It("should get full representation of map of nodes", func() {
+	ginkgo.It("should getNode full representation of map of nodes", func() {
 		nodes := make([]create.View, 0)
 		for i := 0; i < 10; i++ {
 			nodes = append(nodes, testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i)))
@@ -51,7 +51,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		gomega.Expect(viewNodes).Should(gomega.HaveLen(10))
 	})
 
-	ginkgo.It("should get representation of map of nodes by custom fields", func() {
+	ginkgo.It("should getNode representation of map of nodes by custom fields", func() {
 		nodes := make([]create.View, 0)
 		for i := 0; i < 10; i++ {
 			nodes = append(nodes, testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i)))

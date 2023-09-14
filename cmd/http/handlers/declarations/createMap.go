@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/declarations/maps"
+	"creatif/pkg/app/declarations/mapCreate"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,8 +17,8 @@ func CreateMapHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeMapModel(model)
 
-		handler := maps.New(maps.NewCreateMapModel(model.Name, model.Nodes))
+		handler := mapCreate.New(mapCreate.NewCreateMapModel(model.Name, model.Nodes))
 
-		return request.SendResponse[maps.CreateMapModel](handler, c, http.StatusCreated)
+		return request.SendResponse[mapCreate.CreateMapModel](handler, c, http.StatusCreated)
 	}
 }
