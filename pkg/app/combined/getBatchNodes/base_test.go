@@ -106,7 +106,7 @@ func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
 }
 
 func testCreateMap(name string, nodeIds []string) mapsCreate.View {
-	handler := mapsCreate.New(mapsCreate.NewCreateMapModel(name, nodeIds))
+	handler := mapsCreate.New(mapsCreate.NewModel(name, nodeIds))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

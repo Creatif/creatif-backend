@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type CreateMapModel struct {
+type Model struct {
 	Nodes []string `json:"nodes"`
 	Name  string   `json:"name"`
 }
@@ -20,14 +20,14 @@ type LogicResult struct {
 	Name  string
 }
 
-func NewCreateMapModel(name string, nodes []string) CreateMapModel {
-	return CreateMapModel{
+func NewModel(name string, nodes []string) Model {
+	return Model{
 		Nodes: nodes,
 		Name:  name,
 	}
 }
 
-func (a *CreateMapModel) Validate() map[string]string {
+func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"uniqueName": a.Name,
 		"validNum":   a.Nodes,

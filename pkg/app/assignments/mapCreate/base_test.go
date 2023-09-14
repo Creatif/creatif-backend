@@ -109,7 +109,7 @@ func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
 }
 
 func testCreateMap(name string, nodes []string) mapsCreate.View {
-	handler := mapsCreate.New(mapsCreate.NewCreateMapModel(name, nodes))
+	handler := mapsCreate.New(mapsCreate.NewModel(name, nodes))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

@@ -11,7 +11,7 @@ import (
 )
 
 type Main struct {
-	model CreateMapModel
+	model Model
 }
 
 func (c Main) Validate() error {
@@ -108,6 +108,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model CreateMapModel) pkg.Job[CreateMapModel, View, LogicResult] {
+func New(model Model) pkg.Job[Model, View, LogicResult] {
 	return Main{model: model}
 }

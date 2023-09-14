@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("Map node tests", func() {
 			return value.Name
 		})
 
-		handler := New(NewCreateMapModel(name, ids))
+		handler := New(NewModel(name, ids))
 
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())

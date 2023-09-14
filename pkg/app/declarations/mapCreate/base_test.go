@@ -87,10 +87,6 @@ func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
 	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{}, create.NodeValidation{})
 }
 
-func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{}, create.NodeValidation{})
-}
-
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }
