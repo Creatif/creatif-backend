@@ -33,9 +33,10 @@ type LogicResult struct {
 	Name  string
 }
 
-func NewModel(name string, nodes []string) Model {
+func NewModel(name string, entries []Entry) Model {
 	return Model{
-		Name: name,
+		Name:    name,
+		Entries: entries,
 	}
 }
 

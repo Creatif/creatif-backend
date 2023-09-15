@@ -5,8 +5,25 @@ import (
 )
 
 type CreateMap struct {
-	Nodes []string `json:"nodes"`
-	Name  string   `json:"name"`
+	Entries []Entry `json:"entries"`
+	Name    string  `json:"name"`
+}
+
+type MapNodeModel struct {
+	Name      string   `json:"name"`
+	Type      string   `json:"type"`
+	Metadata  []byte   `json:"metadata"`
+	Groups    []string `json:"groups"`
+	Behaviour string   `json:"behaviour"`
+}
+
+type Entry struct {
+	Type  string
+	Model interface{}
+}
+
+func (u *CreateMap) UnmarshalJSON(b []byte) error {
+	return nil
 }
 
 func SanitizeMapModel(model CreateMap) CreateMap {
