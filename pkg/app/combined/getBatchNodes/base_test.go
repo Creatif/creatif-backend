@@ -71,7 +71,6 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.DECLARATION_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_MAP_VALUE_NODE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_MAP_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_VALUE_NODE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
@@ -106,7 +105,37 @@ func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
 }
 
 func testCreateMap(name string, nodeIds []string) mapsCreate.View {
-	handler := mapsCreate.New(mapsCreate.NewModel(name, nodeIds))
+	entries := make([]mapsCreate.Entry, 0)
+
+	m := map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+	}
+
+	b, err := json.Marshal(m)
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	for i := 0; i < 100; i++ {
+		nodeModel := mapsCreate.NodeModel{
+			Name:     fmt.Sprintf("name-%d", i),
+			Metadata: b,
+			Groups: []string{
+				"one",
+				"two",
+				"three",
+			},
+			Behaviour: "modifiable",
+		}
+
+		entries = append(entries, mapsCreate.Entry{
+			Type:  "node",
+			Model: nodeModel,
+		})
+	}
+
+	handler := mapsCreate.New(mapsCreate.NewModel(name, entries))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

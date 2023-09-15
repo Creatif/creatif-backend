@@ -11,10 +11,10 @@ import (
 
 type NodeModel struct {
 	Name      string   `json:"name"`
-	Type      string   `json:"type"`
 	Metadata  []byte   `json:"metadata"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
+	Value     []byte   `json:"value"`
 }
 
 type Entry struct {
@@ -29,7 +29,7 @@ type Model struct {
 
 type LogicResult struct {
 	ID    string
-	Nodes []string
+	Nodes []map[string]string
 	Name  string
 }
 
@@ -42,8 +42,9 @@ func NewModel(name string, entries []Entry) Model {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"uniqueName": a.Name,
-		"validNum":   a.Nodes,
+		"uniqueName":     a.Name,
+		"validNum":       a.Entries,
+		"validNodeNames": a.Entries,
 	}
 
 	if err := validation.Validate(v,
@@ -59,11 +60,24 @@ func (a *Model) Validate() map[string]string {
 				return nil
 			})),
 			validation.Key("validNum", validation.By(func(value interface{}) error {
-				names := value.([]string)
-				if len(names) > 100 {
-					return errors.New("Number of nodes cannot be higher than 100")
+				if len(a.Entries) > 1000 {
+					return errors.New("Number of map values cannot be larger than 1000.")
 				}
 
+				return nil
+			})),
+			validation.Key("validNodeNames", validation.By(func(value interface{}) error {
+				m := make(map[string]int)
+				for _, entry := range a.Entries {
+					if entry.Type == "node" {
+						o := entry.Model.(NodeModel)
+						m[o.Name] = 0
+					}
+				}
+
+				if len(m) != len(a.Entries) {
+					return errors.New("Some node/map names are not unique. All node/map names must be unique.")
+				}
 				return nil
 			})),
 		),
@@ -75,9 +89,9 @@ func (a *Model) Validate() map[string]string {
 }
 
 type View struct {
-	ID    string   `json:"id"`
-	Name  string   `json:"name"`
-	Nodes []string `json:"nodes"`
+	ID    string              `json:"id"`
+	Name  string              `json:"name"`
+	Nodes []map[string]string `json:"nodes"`
 }
 
 func newView(model LogicResult) View {

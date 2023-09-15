@@ -1,15 +1,12 @@
 package getMap
 
 import (
-	"creatif/pkg/app/declarations/getMap/services"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"encoding/json"
-	"errors"
 )
 
 type Main struct {
-	model GetMapModel
+	model Model
 }
 
 func (c Main) Validate() error {
@@ -25,47 +22,19 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
-	m, err := services.GetMap(c.model.ID)
+	m, err := queryMap(c.model.Name)
 	if err != nil {
+		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
+	}
+
+	var nodes []Node
+	if err := queryNodes(m.ID, c.model.Fields, &nodes); err != nil {
 		return LogicModel{}, err
 	}
 
-	strategy := services.CreateStrategy(c.model.Return, c.model.Fields)
-	models, err := services.Execute(m.ID, strategy)
-	if err != nil {
-		var convertedErr appErrors.AppError[struct{}]
-		errors.As(err, &convertedErr)
-		return LogicModel{}, convertedErr.AddError("GetMap.Get.Logic", nil)
-	}
-
-	nodes := make([]FullNode, 0)
-	for _, model := range models {
-		node := FullNode{
-			ID:        model.ID,
-			Name:      model.Name,
-			Behaviour: model.Behaviour,
-			Groups:    model.Groups,
-			Metadata:  model.Metadata,
-			CreatedAt: model.CreatedAt,
-			UpdatedAt: model.UpdatedAt,
-		}
-
-		if model.Value != nil {
-			var conv interface{}
-			if err := json.Unmarshal(model.Value, &conv); err != nil {
-				return LogicModel{}, appErrors.NewApplicationError(err).AddError("GetMap.Get.Logic", nil)
-			}
-
-			node.Value = conv
-		}
-
-		nodes = append(nodes, node)
-	}
-
 	return LogicModel{
-		nodeMap:  m,
-		nodes:    nodes,
-		strategy: strategy.Name(),
+		nodeMap: m,
+		nodes:   nodes,
 	}, nil
 }
 
@@ -88,9 +57,9 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model), nil
+	return newView(model, c.model.Fields), nil
 }
 
-func New(model GetMapModel) pkg.Job[GetMapModel, View, LogicModel] {
+func New(model Model) pkg.Job[Model, View, LogicModel] {
 	return Main{model: model}
 }

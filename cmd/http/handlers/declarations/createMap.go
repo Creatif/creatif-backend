@@ -17,7 +17,24 @@ func CreateMapHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeMapModel(model)
 
-		handler := mapCreate.New(mapCreate.NewModel(model.Name, model.Nodes))
+		serviceEntries := make([]mapCreate.Entry, 0)
+		for _, entry := range model.Entries {
+
+			m, ok := entry.Model.(declarations.MapNodeModel)
+			if ok {
+				serviceEntries = append(serviceEntries, mapCreate.Entry{
+					Type: entry.Type,
+					Model: mapCreate.NodeModel{
+						Name:      m.Name,
+						Metadata:  m.Metadata,
+						Groups:    m.Groups,
+						Behaviour: m.Behaviour,
+					},
+				})
+			}
+		}
+
+		handler := mapCreate.New(mapCreate.NewModel(model.Name, serviceEntries))
 
 		return request.SendResponse[mapCreate.Model](handler, c, http.StatusCreated)
 	}

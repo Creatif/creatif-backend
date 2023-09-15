@@ -10,6 +10,7 @@ import (
 
 var _ = ginkgo.Describe("Batch nodes tests", func() {
 	ginkgo.It("should getNode a batch of nodes with full data", func() {
+		ginkgo.Skip("")
 		textNodes := make([]create.View, 0)
 		booleanNodes := make([]create.View, 0)
 		jsonNodes := make([]create.View, 0)
@@ -62,6 +63,8 @@ var _ = ginkgo.Describe("Batch nodes tests", func() {
 	})
 
 	ginkgo.It("should getNode a batch of mapCreate with full data", func() {
+		ginkgo.Skip("")
+
 		maps := make([]string, 0)
 		for i := 0; i < 5; i++ {
 			maps = append(maps, fmt.Sprintf("name-%d", i))

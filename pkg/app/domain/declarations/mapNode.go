@@ -17,6 +17,7 @@ type MapNode struct {
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
 	Metadata  datatypes.JSON
+	Value     datatypes.JSON
 
 	MapID string `gorm:"type:text;check:length(id)=26"`
 	Map   Map    `gorm:"foreignKey:MapID"`
@@ -29,12 +30,14 @@ type MapNode struct {
 	UpdatedAt time.Time
 }
 
-func NewMapNode(name, behaviour string, metadata datatypes.JSON, groups pq.StringArray) MapNode {
+func NewMapNode(mapId, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) MapNode {
 	return MapNode{
+		MapID:     mapId,
 		Name:      name,
 		Behaviour: behaviour,
 		Metadata:  metadata,
 		Groups:    groups,
+		Value:     value,
 	}
 }
 

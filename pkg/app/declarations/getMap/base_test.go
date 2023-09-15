@@ -70,7 +70,6 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.DECLARATION_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_MAP_VALUE_NODE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_MAP_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_VALUE_NODE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
@@ -120,15 +119,64 @@ func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
 	return view
 }
 
-func testCreateMap(name string, nodeIds []string) mapsCreate.View {
-	handler := mapsCreate.New(mapsCreate.NewModel(name, nodeIds))
+func testCreateMap(name string, nodesNum int) mapsCreate.View {
+	entries := make([]mapsCreate.Entry, 0)
+
+	m := map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+	}
+
+	b, err := json.Marshal(m)
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	for i := 0; i < nodesNum; i++ {
+		var value interface{}
+		value = "my value"
+		if i%2 == 0 {
+			value = true
+		}
+
+		if i%3 == 0 {
+			value = map[string]interface{}{
+				"one":   "one",
+				"two":   []string{"one", "two", "three"},
+				"three": []int{1, 2, 3},
+				"four":  453,
+			}
+		}
+
+		v, err := json.Marshal(value)
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		nodeModel := mapsCreate.NodeModel{
+			Name:     fmt.Sprintf("name-%d", i),
+			Metadata: b,
+			Groups: []string{
+				"one",
+				"two",
+				"three",
+			},
+			Value:     v,
+			Behaviour: "modifiable",
+		}
+
+		entries = append(entries, mapsCreate.Entry{
+			Type:  "node",
+			Model: nodeModel,
+		})
+	}
+
+	handler := mapsCreate.New(mapsCreate.NewModel(name, entries))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
 	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(len(nodeIds)))
+	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(nodesNum))
 
 	return view
 }

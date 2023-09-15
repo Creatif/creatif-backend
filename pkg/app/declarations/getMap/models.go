@@ -8,8 +8,6 @@ import (
 )
 
 var validFields = []string{
-	"id",
-	"name",
 	"behaviour",
 	"metadata",
 	"groups",
@@ -17,27 +15,25 @@ var validFields = []string{
 	"updated_at",
 }
 
-type GetMapModel struct {
-	// this can be map name or an id of the map
-	ID string
-	// this can be, 'full' | names
-	Return string
-	// this can be individual fields of the node to return, reduces returned data
-	// if the user needs only metadata, only metadata will be returned
-	// name is always returned
+type Model struct {
+	Name   string
 	Fields []string
 
 	validFields []string
 	// TODO: Add project ID prop here
 }
 
-func NewGetMapModel(id string, ret string, fields []string) GetMapModel {
-	return GetMapModel{
-		ID:          id,
-		Return:      ret,
+func NewModel(name string, fields []string) Model {
+	return Model{
+		Name:        name,
 		Fields:      fields,
 		validFields: validFields,
 	}
+}
+
+type LogicModel struct {
+	nodeMap declarations.Map
+	nodes   []Node
 }
 
 type NamesOnlyView struct {
@@ -45,81 +41,75 @@ type NamesOnlyView struct {
 	Name string `json:"name"`
 }
 
-type FullNode struct {
+type Node struct {
 	ID string `json:"id" gorm:"primarykey"`
 
 	Name      string         `json:"name" gorm:"index;uniqueIndex:unique_node"`
-	Value     interface{}    `json:"value"`
+	Value     datatypes.JSON `json:"value"`
 	Behaviour string         `json:"behaviour"`
-	Groups    pq.StringArray `json:"groups" gorm:"type:text[]"` // if groups is set, group should be invalidated
+	Groups    pq.StringArray `json:"groups" gorm:"type:text[]"`
 	Metadata  datatypes.JSON `json:"metadata"`
 
 	CreatedAt time.Time `json:"createdAt" gorm:"<-:create"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-type CustomNode struct {
-	ID string `json:"id"`
-
-	Name      string         `json:"name"`
-	Behaviour string         `json:"behaviour,omitempty"`
-	Value     datatypes.JSON `json:"value"`
-	Groups    pq.StringArray `json:"groups,omitempty" gorm:"type:text[]"` // if groups is set, group should be invalidated
-	Metadata  datatypes.JSON `json:"metadata,omitempty"`
-
-	CreatedAt time.Time `json:"createdAt,omitempty" gorm:"<-:create"`
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
-}
-
 type View struct {
-	ID    string      `json:"id"`
-	Name  string      `json:"name"`
-	Nodes interface{} `json:"nodes"`
+	ID    string                   `json:"id"`
+	Name  string                   `json:"name"`
+	Nodes []map[string]interface{} `json:"nodes"`
+
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model LogicModel) View {
-	view := View{
-		ID:   model.nodeMap.ID,
-		Name: model.nodeMap.Name,
-	}
+func newView(model LogicModel, returnFields []string) View {
+	m := make([]map[string]interface{}, 0)
 
-	if model.strategy == "namesOnlyStrategy" {
-		views := make([]NamesOnlyView, 0)
-		for _, n := range model.nodes {
-			views = append(views, NamesOnlyView{
-				ID:   n.ID,
-				Name: n.Name,
-			})
+	for _, n := range model.nodes {
+		o := make(map[string]interface{})
+
+		o["id"] = n.ID
+		o["name"] = n.Name
+
+		for _, f := range returnFields {
+			if f == "groups" {
+				o["groups"] = n.Groups
+			}
+
+			if f == "value" {
+				o["value"] = n.Value
+			}
+
+			if f == "behaviour" {
+				o["behaviour"] = n.Behaviour
+			}
+
+			if f == "metadata" {
+				o["metadata"] = n.Metadata
+			}
+
+			if f == "value" {
+				o["value"] = n.Value
+			}
+
+			if f == "created_at" {
+				o["createdAt"] = n.CreatedAt
+			}
+
+			if f == "updated_at" {
+				o["updatedAt"] = n.UpdatedAt
+			}
 		}
 
-		view.Nodes = views
-		return view
+		m = append(m, o)
 	}
 
-	if model.strategy == "customFieldsStrategy" {
-		views := make([]CustomNode, 0)
-		for _, n := range model.nodes {
-			views = append(views, CustomNode{
-				ID:        n.ID,
-				Name:      n.Name,
-				Behaviour: n.Behaviour,
-				Groups:    n.Groups,
-				Metadata:  n.Metadata,
-				CreatedAt: n.CreatedAt,
-				UpdatedAt: n.UpdatedAt,
-			})
-		}
-
-		view.Nodes = views
-		return view
+	return View{
+		ID:        model.nodeMap.ID,
+		Name:      model.nodeMap.Name,
+		Nodes:     m,
+		CreatedAt: model.nodeMap.CreatedAt,
+		UpdatedAt: model.nodeMap.UpdatedAt,
 	}
-
-	view.Nodes = model.nodes
-	return view
-}
-
-type LogicModel struct {
-	nodeMap  declarations.Map
-	nodes    []FullNode
-	strategy string
 }

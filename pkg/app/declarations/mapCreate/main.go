@@ -1,8 +1,11 @@
 package mapCreate
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/storage"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -26,7 +29,54 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicResult, error) {
-	return LogicResult{}, nil
+	newMap := declarations.NewMap(c.model.Name)
+
+	names := make([]map[string]string, 0)
+	if err := storage.Transaction(func(tx *gorm.DB) error {
+		if res := tx.Create(&newMap); res.Error != nil {
+			return res.Error
+		}
+
+		domainEntries := make([]declarations.MapNode, 0)
+		entries := c.model.Entries
+		for _, entry := range entries {
+			if entry.Type == "node" {
+				m := entry.Model.(NodeModel)
+
+				domainEntries = append(domainEntries, declarations.NewMapNode(
+					newMap.ID,
+					m.Name,
+					m.Behaviour,
+					m.Metadata,
+					m.Groups,
+					m.Value,
+				))
+			}
+		}
+
+		if res := tx.Create(&domainEntries); res.Error != nil {
+			return res.Error
+		}
+
+		for _, d := range domainEntries {
+			if d.ID != "" {
+				names = append(names, map[string]string{
+					"name": d.Name,
+					"type": "node",
+				})
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return LogicResult{}, appErrors.NewDatabaseError(err).AddError("mapCreate.Logic", nil)
+	}
+
+	return LogicResult{
+		ID:    newMap.ID,
+		Name:  newMap.Name,
+		Nodes: names,
+	}, nil
 }
 
 func (c Main) Handle() (View, error) {
