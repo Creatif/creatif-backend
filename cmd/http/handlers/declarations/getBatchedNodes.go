@@ -21,8 +21,8 @@ func GetBatchedNodesHandler() func(e echo.Context) error {
 			serviceModel[m.Name] = m.Type
 		}
 
-		handler := getBatchNodes.New(getBatchNodes.NewGetBatchedNodesModel(serviceModel))
+		handler := getBatchNodes.New(getBatchNodes.NewModel(serviceModel))
 
-		return request.SendResponse[*getBatchNodes.GetBatchedNodesModel](handler, c, http.StatusCreated)
+		return request.SendResponse[*getBatchNodes.Model](handler, c, http.StatusCreated)
 	}
 }
