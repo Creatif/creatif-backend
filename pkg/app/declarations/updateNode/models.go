@@ -20,20 +20,6 @@ var validUpdateableFields = []string{
 	"behaviour",
 }
 
-type ValidationLength struct {
-	Min   int `json:"min"`
-	Max   int `json:"max"`
-	Exact int `json:"exact"`
-}
-
-type NodeValidation struct {
-	Required    bool
-	Length      ValidationLength
-	ExactValue  string
-	ExactValues []string
-	IsDate      bool
-}
-
 type ModelValues struct {
 	Name      string   `json:"name"`
 	Metadata  []byte   `json:"metadata"`
@@ -124,7 +110,7 @@ type View struct {
 	Behaviour string                 `json:"behaviour"`
 	Metadata  map[string]interface{} `json:"metadata"`
 
-	CreatedAt time.Time `gorm:"<-:create" json:"createdAt"`
+	CreatedAt time.Time `gorm:"<-:createNode" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 

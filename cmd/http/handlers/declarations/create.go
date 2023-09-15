@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	create "creatif/pkg/app/declarations/create"
+	create "creatif/pkg/app/declarations/createNode"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,22 +17,8 @@ func CreateNodeHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeNode(model)
 
-		handler := create.New(create.NewCreateNodeModel(model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), func() create.NodeValidation {
-			requestValidation := model.Validation
+		handler := create.New(create.NewModel(model.Name, model.Behaviour, model.Groups, []byte(model.Metadata)))
 
-			return create.NodeValidation{
-				Required: requestValidation.Required,
-				Length: create.ValidationLength{
-					Min:   requestValidation.Length.Min,
-					Max:   requestValidation.Length.Max,
-					Exact: requestValidation.Length.Exact,
-				},
-				ExactValue:  requestValidation.ExactValue,
-				ExactValues: requestValidation.ExactValues,
-				IsDate:      requestValidation.IsDate,
-			}
-		}()))
-
-		return request.SendResponse[create.CreateNodeModel](handler, c, http.StatusCreated)
+		return request.SendResponse[create.Model](handler, c, http.StatusCreated)
 	}
 }

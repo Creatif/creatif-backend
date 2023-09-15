@@ -26,7 +26,7 @@ type MapNode struct {
 	/*	ProjectID *string `gorm:"type:uuid;uniqueIndex:unique_node"`
 		Project   domain.Project*/
 
-	CreatedAt time.Time `gorm:"<-:create;index"`
+	CreatedAt time.Time `gorm:"<-:createNode;index"`
 	UpdatedAt time.Time
 }
 

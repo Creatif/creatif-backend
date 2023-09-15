@@ -11,7 +11,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Assignment CRUD success test", func() {
-	ginkgo.It("should create an assignment text node when the node does not exists", ginkgo.Label("assignment", "crud", "success", "1"), func() {
+	ginkgo.It("should createNode an assignment text node when the node does not exists", ginkgo.Label("assignment", "crud", "success", "1"), func() {
 		name, _ := sdk.NewULID()
 		declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
 
@@ -32,7 +32,7 @@ var _ = ginkgo.Describe("Assignment CRUD success test", func() {
 		gomega.Expect(view.Value).Should(gomega.Equal(text))
 	})
 
-	ginkgo.It("should create an assignment boolean node when the node does not exists", ginkgo.Label("assignment", "crud", "success", "2"), func() {
+	ginkgo.It("should createNode an assignment boolean node when the node does not exists", ginkgo.Label("assignment", "crud", "success", "2"), func() {
 		name, _ := sdk.NewULID()
 		declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
 

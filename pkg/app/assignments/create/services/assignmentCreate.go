@@ -51,7 +51,7 @@ func (a AssignmentCreate) CreateOrUpdate() (AssignmentCreateResult, error) {
 			createdOrUpdatedValue = a.value
 		}
 
-		// record does not exist, create assignment node and value node
+		// record does not exist, createNode assignment node and value node
 		if exists.ID == "" {
 			node := assignments.NewNode(a.nodeName, a.declarationNodeID)
 			if res := tx.Create(&node); res != nil {

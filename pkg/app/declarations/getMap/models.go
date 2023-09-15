@@ -51,7 +51,7 @@ type Node struct {
 	Groups    pq.StringArray `json:"groups" gorm:"type:text[]"`
 	Metadata  datatypes.JSON `json:"metadata"`
 
-	CreatedAt time.Time `json:"createdAt" gorm:"<-:create"`
+	CreatedAt time.Time `json:"createdAt" gorm:"<-:createNode"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 

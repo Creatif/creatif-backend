@@ -1,7 +1,7 @@
 package getMap
 
 import (
-	"creatif/pkg/app/declarations/create"
+	"creatif/pkg/app/declarations/createNode"
 	mapsCreate "creatif/pkg/app/declarations/mapCreate"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
@@ -74,26 +74,14 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
 
-func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte, validation create.NodeValidation) create.View {
-	handler := create.New(create.NewCreateNodeModel(name, behaviour, groups, metadata, validation))
+func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte) createNode.View {
+	handler := createNode.New(createNode.NewModel(name, behaviour, groups, metadata))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
 	testAssertIDValid(view.ID)
 
 	return view
-}
-
-func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, behaviour, []string{
-		"groupOne",
-		"groupTwo",
-		"groupThree",
-	}, []byte{}, create.NodeValidation{})
-}
-
-func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{}, create.NodeValidation{})
 }
 
 func testCreateMap(name string, nodesNum int) mapsCreate.View {

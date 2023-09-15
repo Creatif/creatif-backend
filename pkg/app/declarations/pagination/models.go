@@ -47,7 +47,7 @@ type View struct {
 	Metadata  map[string]interface{} `json:"metadata"`
 	Value     interface{}            `json:"value,omitempty"`
 
-	CreatedAt time.Time `gorm:"<-:create" json:"createdAt"`
+	CreatedAt time.Time `gorm:"<-:createNode" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 

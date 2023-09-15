@@ -1,7 +1,7 @@
 package main
 
 import (
-	"creatif/pkg/app/declarations/create"
+	"creatif/pkg/app/declarations/createNode"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -26,12 +26,12 @@ func createDeclarationNodesWithoutValue(num int) {
 			"four":  4,
 		})
 
-		handler := create.New(create.NewCreateNodeModel(
+		handler := createNode.New(createNode.NewCreateNodeModel(
 			fmt.Sprintf("name-%d", i),
 			"modifiable",
 			[]string{"one", "two", "three"},
 			b,
-			create.NodeValidation{},
+			createNode.NodeValidation{},
 		))
 
 		_, err := handler.Handle()

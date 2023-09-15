@@ -1,4 +1,4 @@
-package create
+package createNode
 
 import (
 	"creatif/pkg/lib/sdk"
@@ -8,14 +8,14 @@ import (
 )
 
 var _ = ginkgo.Describe("Declaration node tests", func() {
-	ginkgo.It("should create a text declaration node", func() {
+	ginkgo.It("should createNode a text declaration node", func() {
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewCreateNodeModel(name, "modifiable", []string{"one", "two", "three"}, b, NodeValidation{}))
+		handler := New(NewModel(name, "modifiable", []string{"one", "two", "three"}, b))
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
@@ -29,14 +29,14 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 		gomega.Expect(view.UpdatedAt).ShouldNot(gomega.BeNil())
 	})
 
-	ginkgo.It("should create a boolean declaration node", func() {
+	ginkgo.It("should createNode a boolean declaration node", func() {
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewCreateNodeModel(name, "modifiable", []string{"one", "two", "three"}, b, NodeValidation{}))
+		handler := New(NewModel(name, "modifiable", []string{"one", "two", "three"}, b))
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)

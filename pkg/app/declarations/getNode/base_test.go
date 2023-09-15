@@ -2,7 +2,7 @@ package getNode
 
 import (
 	assignmentsCreate "creatif/pkg/app/assignments/create"
-	"creatif/pkg/app/declarations/create"
+	"creatif/pkg/app/declarations/createNode"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -74,8 +74,8 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
 
-func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte, validation create.NodeValidation) create.View {
-	handler := create.New(create.NewCreateNodeModel(name, behaviour, groups, metadata, validation))
+func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte) createNode.View {
+	handler := createNode.New(createNode.NewModel(name, behaviour, groups, metadata))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -84,7 +84,7 @@ func testCreateDeclarationNode(name, behaviour string, groups []string, metadata
 	return view
 }
 
-func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
+func testCreateBasicDeclarationTextNode(name, behaviour string) createNode.View {
 	m := map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -99,11 +99,11 @@ func testCreateBasicDeclarationTextNode(name, behaviour string) create.View {
 		"one",
 		"two",
 		"three",
-	}, b, create.NodeValidation{})
+	}, b)
 }
 
-func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
-	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{}, create.NodeValidation{})
+func testCreateBasicDeclarationBooleanNode(name, behaviour string) createNode.View {
+	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{})
 }
 
 func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {

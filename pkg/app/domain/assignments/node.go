@@ -23,7 +23,7 @@ type Node struct {
 	DeclarationNodeID string            `gorm:"type:text CHECK(length(declaration_node_id)=26)"`
 	DeclarationNode   declarations.Node `gorm:"foreignKey:DeclarationNodeID;constraint:OnDelete:CASCADE"`
 
-	CreatedAt time.Time `gorm:"<-:create"`
+	CreatedAt time.Time `gorm:"<-:createNode"`
 	UpdatedAt time.Time
 }
 

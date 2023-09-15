@@ -8,7 +8,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Map node tests", func() {
-	ginkgo.It("should create a map with only node entries", func() {
+	ginkgo.It("should createNode a map with only node entries", func() {
 		entries := make([]Entry, 0)
 
 		m := map[string]interface{}{

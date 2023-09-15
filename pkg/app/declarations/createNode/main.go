@@ -1,4 +1,4 @@
-package create
+package createNode
 
 import (
 	"creatif/pkg/app/domain/assignments"
@@ -10,7 +10,7 @@ import (
 )
 
 type Create struct {
-	model CreateNodeModel
+	model Model
 }
 
 func (c Create) Validate() error {
@@ -77,6 +77,6 @@ func (c Create) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model CreateNodeModel) pkg.Job[CreateNodeModel, View, declarations.Node] {
+func New(model Model) pkg.Job[Model, View, declarations.Node] {
 	return Create{model: model}
 }

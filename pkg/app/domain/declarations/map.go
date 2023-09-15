@@ -13,7 +13,7 @@ type Map struct {
 
 	Name string `gorm:"uniqueIndex"`
 
-	CreatedAt time.Time `gorm:"<-:create"`
+	CreatedAt time.Time `gorm:"<-:createNode"`
 	UpdatedAt time.Time
 }
 
