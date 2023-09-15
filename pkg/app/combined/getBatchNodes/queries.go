@@ -23,7 +23,7 @@ type Node struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-type MapNode struct {
+type QueriesMapNode struct {
 	ID string `gorm:"primarykey"`
 
 	MapName   string
@@ -50,35 +50,28 @@ WHERE n.id IN (?)
 	return nodes, nil
 }
 
-func queryMapValues(mapIds []string) ([]MapNode, error) {
-	sql := fmt.Sprintf(`SELECT 
-    n.id, 
+func queryMapNodes(mapIds []string, model interface{}) error {
+	sql := fmt.Sprintf(`
+SELECT 
+    n.id,
+    n.name,
     m.name AS mapName,
-    n.name, 
-    n.groups, 
-    n.behaviour, 
-    vn.value,
-    n.metadata, 
-    n.created_at, 
+    n.groups,
+    n.metadata,
+    n.value,
+    n.created_at,
     n.updated_at
-		FROM %s AS mn
-		INNER JOIN %s AS n ON n.id = mn.node_id
-		INNER JOIN %s AS m ON m.id = mn.map_id
-		INNER JOIN %s AS an ON an.declaration_node_id = n.id
-		INNER JOIN %s AS vn ON vn.assignment_node_id = an.id
-		WHERE m.id IN (?)
+		FROM %s AS m
+		INNER JOIN %s AS n ON m.id = n.map_id
+		WHERE m.id IN(?)
 `,
-		(declarations.MapNode{}).TableName(),
-		(declarations.Node{}).TableName(),
 		(declarations.Map{}).TableName(),
-		(assignments.Node{}).TableName(),
-		(assignments.ValueNode{}).TableName(),
+		(declarations.MapNode{}).TableName(),
 	)
 
-	var nodes []MapNode
-	if res := storage.Gorm().Raw(sql, mapIds).Scan(&nodes); res.Error != nil {
-		return nil, res.Error
+	if res := storage.Gorm().Raw(sql, mapIds).Scan(model); res.Error != nil {
+		return res.Error
 	}
 
-	return nodes, nil
+	return nil
 }

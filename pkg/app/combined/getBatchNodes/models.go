@@ -17,14 +17,14 @@ type node struct {
 	Type string
 }
 
-type GetBatchedNodesModel struct {
+type Model struct {
 	Nodes []node
 
 	mapIds  []string
 	nodeIds []string
 }
 
-func NewGetBatchedNodesModel(nodes map[string]string) *GetBatchedNodesModel {
+func NewModel(nodes map[string]string) *Model {
 	models := make([]node, len(nodes))
 	count := 0
 	for name, t := range nodes {
@@ -35,7 +35,7 @@ func NewGetBatchedNodesModel(nodes map[string]string) *GetBatchedNodesModel {
 		count++
 	}
 
-	return &GetBatchedNodesModel{
+	return &Model{
 		Nodes: models,
 	}
 }
@@ -79,7 +79,7 @@ func newView(model map[string]interface{}) map[string]interface{} {
 		view["nodes"] = nodeView
 	}
 
-	maps := model["mapCreate"]
+	maps := model["maps"]
 	convertedMaps, ok := maps.(map[string][]Node)
 
 	if ok {
@@ -102,13 +102,13 @@ func newView(model map[string]interface{}) map[string]interface{} {
 			resolvedMaps[key] = a
 		}
 
-		view["mapCreate"] = resolvedMaps
+		view["maps"] = resolvedMaps
 	}
 
 	return view
 }
 
-func (a *GetBatchedNodesModel) Validate() map[string]string {
+func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"validNodes": a.Nodes,
 		"validNames": a.Nodes,

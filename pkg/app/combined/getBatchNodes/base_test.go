@@ -104,7 +104,7 @@ func testCreateBasicDeclarationBooleanNode(name, behaviour string) create.View {
 	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{}, create.NodeValidation{})
 }
 
-func testCreateMap(name string, nodeIds []string) mapsCreate.View {
+func testCreateMap(name string, nodesNum int) mapsCreate.View {
 	entries := make([]mapsCreate.Entry, 0)
 
 	m := map[string]interface{}{
@@ -117,7 +117,25 @@ func testCreateMap(name string, nodeIds []string) mapsCreate.View {
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < nodesNum; i++ {
+		var value interface{}
+		value = "my value"
+		if i%2 == 0 {
+			value = true
+		}
+
+		if i%3 == 0 {
+			value = map[string]interface{}{
+				"one":   "one",
+				"two":   []string{"one", "two", "three"},
+				"three": []int{1, 2, 3},
+				"four":  453,
+			}
+		}
+
+		v, err := json.Marshal(value)
+		gomega.Expect(err).Should(gomega.BeNil())
+
 		nodeModel := mapsCreate.NodeModel{
 			Name:     fmt.Sprintf("name-%d", i),
 			Metadata: b,
@@ -126,6 +144,7 @@ func testCreateMap(name string, nodeIds []string) mapsCreate.View {
 				"two",
 				"three",
 			},
+			Value:     v,
 			Behaviour: "modifiable",
 		}
 
@@ -142,7 +161,7 @@ func testCreateMap(name string, nodeIds []string) mapsCreate.View {
 	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(len(nodeIds)))
+	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(nodesNum))
 
 	return view
 }

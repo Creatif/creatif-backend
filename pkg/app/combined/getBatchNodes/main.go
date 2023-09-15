@@ -6,7 +6,7 @@ import (
 )
 
 type Main struct {
-	model *GetBatchedNodesModel
+	model *Model
 }
 
 func (c Main) Validate() error {
@@ -36,14 +36,11 @@ func (c Main) Logic() (map[string]interface{}, error) {
 		nodes = append(nodes, n...)
 	}
 
-	maps := make([]MapNode, 0)
+	maps := make([]QueriesMapNode, 0)
 	if len(c.model.mapIds) > 0 {
-		n, err := queryMapValues(c.model.mapIds)
-		if err != nil {
+		if err := queryMapNodes(c.model.mapIds, &maps); err != nil {
 			return nil, err
 		}
-
-		maps = append(maps, n...)
 	}
 
 	mapNodes := make(map[string][]Node)
@@ -65,8 +62,8 @@ func (c Main) Logic() (map[string]interface{}, error) {
 	}
 
 	return map[string]interface{}{
-		"nodes":     nodes,
-		"mapCreate": mapNodes,
+		"nodes": nodes,
+		"maps":  mapNodes,
 	}, nil
 }
 
@@ -92,6 +89,6 @@ func (c Main) Handle() (map[string]interface{}, error) {
 	return newView(model), nil
 }
 
-func New(model *GetBatchedNodesModel) pkg.Job[*GetBatchedNodesModel, map[string]interface{}, map[string]interface{}] {
+func New(model *Model) pkg.Job[*Model, map[string]interface{}, map[string]interface{}] {
 	return Main{model: model}
 }
