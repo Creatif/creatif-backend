@@ -1,18 +1,18 @@
 package getValue
 
 import (
-	"encoding/json"
+	"creatif/pkg/lib/sdk"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"gorm.io/datatypes"
 )
 
 type Model struct {
 	// this can be project name
-	ID string `json:"id"`
+	Name string `json:"name"`
 }
 
-func NewModel(id string) Model {
-	return Model{ID: id}
+func NewModel(name string) Model {
+	return Model{Name: name}
 }
 
 type Node struct {
@@ -25,30 +25,15 @@ func newView(model Node) datatypes.JSON {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"id": a.ID,
+		"name": a.Name,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			// Name cannot be empty, and the length must be between 5 and 20.
-			validation.Key("id", validation.Required),
+			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 		),
 	); err != nil {
-		var e map[string]string
-		b, err := json.Marshal(err)
-		if err != nil {
-			return map[string]string{
-				"unrecoverable": "An internal validation error occurred. This should not happen. Please, submit a bug.",
-			}
-		}
-
-		if err := json.Unmarshal(b, &e); err != nil {
-			return map[string]string{
-				"unrecoverable": "An internal validation error occurred. This should not happen. Please, submit a bug.",
-			}
-		}
-
-		return e
+		return sdk.ErrorToResponseError(err)
 	}
 
 	return nil

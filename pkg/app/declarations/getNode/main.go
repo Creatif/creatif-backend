@@ -6,7 +6,7 @@ import (
 )
 
 type Main struct {
-	model GetNodeModel
+	model Model
 }
 
 func (c Main) Validate() error {
@@ -26,7 +26,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (Node, error) {
-	return queryValue(c.model.ID, c.model.Fields)
+	return queryValue(c.model.Name, c.model.Fields)
 }
 
 func (c Main) Handle() (map[string]interface{}, error) {
@@ -51,6 +51,6 @@ func (c Main) Handle() (map[string]interface{}, error) {
 	return newView(model, c.model.Fields), nil
 }
 
-func New(model GetNodeModel) pkg.Job[GetNodeModel, map[string]interface{}, Node] {
+func New(model Model) pkg.Job[Model, map[string]interface{}, Node] {
 	return Main{model: model}
 }

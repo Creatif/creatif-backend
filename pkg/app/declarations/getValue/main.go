@@ -26,7 +26,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (Node, error) {
-	return queryValue(c.model.ID)
+	return queryValue(c.model.Name)
 }
 
 func (c Main) Handle() (datatypes.JSON, error) {

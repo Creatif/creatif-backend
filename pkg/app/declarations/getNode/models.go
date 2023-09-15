@@ -2,7 +2,6 @@ package getNode
 
 import (
 	"creatif/pkg/lib/sdk"
-	"encoding/json"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -21,21 +20,21 @@ var validFields = []string{
 	"updated_at",
 }
 
-type GetNodeModel struct {
+type Model struct {
 	// this can be project name
-	ID     string `json:"id"`
+	Name   string `json:"name"`
 	Fields []string
 
 	validFields []string
 }
 
-func NewGetNodeModel(id string, fields []string) GetNodeModel {
+func NewModel(name string, fields []string) Model {
 	if len(fields) == 0 {
 		fields = validFields
 	}
 
-	return GetNodeModel{
-		ID:          id,
+	return Model{
+		Name:        name,
 		Fields:      fields,
 		validFields: validFields,
 	}
@@ -88,16 +87,16 @@ func newView(model Node, returnFields []string) map[string]interface{} {
 	return m
 }
 
-func (a *GetNodeModel) Validate() map[string]string {
+func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"id":          a.ID,
+		"name":        a.Name,
 		"fieldsValid": a.Fields,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			// Name cannot be empty, and the length must be between 5 and 20.
-			validation.Key("id", validation.Required),
+			validation.Key("name", validation.Required),
 			validation.Key("fieldsValid", validation.By(func(value interface{}) error {
 				fields := value.([]string)
 				vFields := a.validFields
@@ -112,21 +111,7 @@ func (a *GetNodeModel) Validate() map[string]string {
 			})),
 		),
 	); err != nil {
-		var e map[string]string
-		b, err := json.Marshal(err)
-		if err != nil {
-			return map[string]string{
-				"unrecoverable": "An internal validation error occurred. This should not happen. Please, submit a bug.",
-			}
-		}
-
-		if err := json.Unmarshal(b, &e); err != nil {
-			return map[string]string{
-				"unrecoverable": "An internal validation error occurred. This should not happen. Please, submit a bug.",
-			}
-		}
-
-		return e
+		return sdk.ErrorToResponseError(err)
 	}
 
 	return nil
