@@ -60,6 +60,10 @@ func (a *Model) Validate() map[string]string {
 				return nil
 			})),
 			validation.Key("validNum", validation.By(func(value interface{}) error {
+				if len(a.Entries) == 0 {
+					return errors.New("Empty entries are not permitted. Maps must have values.")
+				}
+
 				if len(a.Entries) > 1000 {
 					return errors.New("Number of map values cannot be larger than 1000.")
 				}

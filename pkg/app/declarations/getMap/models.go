@@ -2,8 +2,14 @@ package getMap
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/sdk"
+	"encoding/json"
+	"errors"
+	"fmt"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
+	"strings"
 	"time"
 )
 
@@ -11,6 +17,7 @@ var validFields = []string{
 	"behaviour",
 	"metadata",
 	"groups",
+	"value",
 	"created_at",
 	"updated_at",
 }
@@ -20,7 +27,6 @@ type Model struct {
 	Fields []string
 
 	validFields []string
-	// TODO: Add project ID prop here
 }
 
 func NewModel(name string, fields []string) Model {
@@ -34,11 +40,6 @@ func NewModel(name string, fields []string) Model {
 type LogicModel struct {
 	nodeMap declarations.Map
 	nodes   []Node
-}
-
-type NamesOnlyView struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
 }
 
 type Node struct {
@@ -112,4 +113,48 @@ func newView(model LogicModel, returnFields []string) View {
 		CreatedAt: model.nodeMap.CreatedAt,
 		UpdatedAt: model.nodeMap.UpdatedAt,
 	}
+}
+
+func (a *Model) Validate() map[string]string {
+	v := map[string]interface{}{
+		"name":        a.Name,
+		"fieldsValid": a.Fields,
+	}
+
+	if err := validation.Validate(v,
+		validation.Map(
+			// Name cannot be empty, and the length must be between 5 and 20.
+			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("fieldsValid", validation.By(func(value interface{}) error {
+				fields := value.([]string)
+				vFields := a.validFields
+
+				for _, f := range fields {
+					if !sdk.Includes(vFields, f) {
+						return errors.New(fmt.Sprintf("%s is not a valid field to return. Valid fields are %s", f, strings.Join(a.validFields, ", ")))
+					}
+				}
+
+				return nil
+			})),
+		),
+	); err != nil {
+		var e map[string]string
+		b, err := json.Marshal(err)
+		if err != nil {
+			return map[string]string{
+				"unrecoverable": "An internal validation error occurred. This should not happen. Please, submit a bug.",
+			}
+		}
+
+		if err := json.Unmarshal(b, &e); err != nil {
+			return map[string]string{
+				"unrecoverable": "An internal validation error occurred. This should not happen. Please, submit a bug.",
+			}
+		}
+
+		return e
+	}
+
+	return nil
 }

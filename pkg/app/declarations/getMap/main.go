@@ -10,6 +10,10 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	if errs := c.model.Validate(); errs != nil {
+		return appErrors.NewValidationError(errs)
+	}
+
 	return nil
 }
 
