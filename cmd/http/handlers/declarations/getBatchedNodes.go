@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func GetBatchedVariablesHandler() func(e echo.Context) error {
+func GetAllStructuresHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		var model []declarations.GetBatchedVariables
 		if err := c.Bind(&model); err != nil {

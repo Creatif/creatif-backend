@@ -7,7 +7,6 @@ import (
 )
 
 type Model struct {
-	// this can be project name
 	Name string `json:"name"`
 }
 

@@ -21,19 +21,19 @@ func app() {
 		AllowMethods:     []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))
 
-	appRoutes(srv.Group("/api/v1/app"))
 	declarationRoutes(srv.Group("/api/v1/declarations"))
 
 	server.StartServer(srv)
 }
 
-func appRoutes(group *echo.Group) {
-}
-
 func declarationRoutes(group *echo.Group) {
 	group.PUT("/variable", declarations.CreateVariableHandler())
+	group.POST("/variable", declarations.UpdateVariableHandler())
+	group.DELETE("/variable/:name", declarations.DeleteVariableHandler())
 	group.PUT("/map", declarations.CreateMapHandler())
-	group.GET("/variable/:id", declarations.GetVariableHandler())
-	group.GET("/map/:id", declarations.GetMapHandler())
-	group.POST("/combined", declarations.GetBatchedVariablesHandler())
+	group.GET("/variable/:name", declarations.GetVariableHandler())
+	group.GET("/variables", declarations.PaginateVariablesHandler())
+	group.GET("/map/:name", declarations.GetMapHandler())
+	group.GET("/variable/value/:name", declarations.GetValueHandler())
+	group.POST("/all-structures", declarations.GetAllStructuresHandler())
 }

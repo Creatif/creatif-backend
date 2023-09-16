@@ -24,8 +24,8 @@ func GetMapHandler() func(e echo.Context) error {
 			newFields = append(newFields, strings.Trim(f, " "))
 		}
 
-		handler := getMap.New(getMap.NewModel(model.ID, newFields))
+		handler := getMap.New(getMap.NewModel(model.Name, newFields))
 
-		return request.SendResponse[getMap.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[getMap.Model](handler, c, http.StatusOK)
 	}
 }

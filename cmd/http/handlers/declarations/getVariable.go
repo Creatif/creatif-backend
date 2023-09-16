@@ -17,7 +17,7 @@ func GetVariableHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeGetVariable(model)
 
-		handler := getVariable.New(getVariable.NewModel(model.ID, model.Fields))
+		handler := getVariable.New(getVariable.NewModel(model.Name, model.Fields))
 
 		return request.SendResponse[getVariable.Model](handler, c, http.StatusCreated)
 	}

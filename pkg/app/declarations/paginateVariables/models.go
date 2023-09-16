@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type PaginationModel struct {
+type Model struct {
 	NextID    string
 	PrevID    string
 	Field     string
@@ -16,8 +16,8 @@ type PaginationModel struct {
 	Limit     int
 }
 
-func NewModel(nextId, prevId, field, orderBy, direction string, limit int, groups []string) PaginationModel {
-	return PaginationModel{
+func NewModel(nextId, prevId, field, orderBy, direction string, limit int, groups []string) Model {
+	return Model{
 		NextID:    nextId,
 		PrevID:    prevId,
 		Field:     field,

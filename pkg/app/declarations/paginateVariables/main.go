@@ -9,7 +9,7 @@ import (
 )
 
 type Main struct {
-	model PaginationModel
+	model Model
 }
 
 func (c Main) Validate() error {
@@ -93,6 +93,6 @@ func (c Main) Handle() (PaginatedView, error) {
 	return newView(model), nil
 }
 
-func New(model PaginationModel) pkg.Job[PaginationModel, PaginatedView, interface{}] {
+func New(model Model) pkg.Job[Model, PaginatedView, interface{}] {
 	return Main{model: model}
 }

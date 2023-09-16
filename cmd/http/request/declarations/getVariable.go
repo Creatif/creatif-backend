@@ -5,13 +5,13 @@ import (
 )
 
 type GetVariable struct {
-	ID     string   `param:"id"`
+	Name   string   `param:"name"`
 	Fields []string `param:"fields"`
 }
 
 func SanitizeGetVariable(model GetVariable) GetVariable {
 	p := bluemonday.StrictPolicy()
-	model.ID = p.Sanitize(model.ID)
+	model.Name = p.Sanitize(model.Name)
 	if len(model.Fields) > 0 {
 		newFields := make([]string, len(model.Fields))
 
