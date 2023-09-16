@@ -11,7 +11,7 @@ var _ = ginkgo.Describe("Declaration node pagination tests", func() {
 	ginkgo.It("should return the first row of results by created_at field desc going forward", func() {
 		limit := 10
 		for i := 0; i < 20; i++ {
-			testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i))
+			testCreateBasicDeclarationTextNode(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
 		handler := New(NewModel("", "", "created_at", "desc", pagination.DIRECTION_FORWARD, limit, []string{}))
@@ -29,7 +29,7 @@ var _ = ginkgo.Describe("Declaration node pagination tests", func() {
 	ginkgo.It("should return the first row of results by created_at field desc going forward and with specifying all the groups and some that do not exist", func() {
 		limit := 10
 		for i := 0; i < 20; i++ {
-			testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i))
+			testCreateBasicDeclarationTextNode(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
 		handler := New(NewModel("", "", "created_at", "desc", pagination.DIRECTION_FORWARD, limit, []string{"one", "two", "three", "six"}))
@@ -47,7 +47,7 @@ var _ = ginkgo.Describe("Declaration node pagination tests", func() {
 	ginkgo.It("should return the first row of results by created_at field asc going forward", func() {
 		limit := 10
 		for i := 0; i < 20; i++ {
-			testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i))
+			testCreateBasicDeclarationTextNode(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
 		handler := New(NewModel("", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit, []string{"one"}))
@@ -65,7 +65,7 @@ var _ = ginkgo.Describe("Declaration node pagination tests", func() {
 	ginkgo.It("nextUrl in pagination info should be an empty string if number of items is less than limit", func() {
 		limit := 10
 		for i := 0; i < 5; i++ {
-			testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i))
+			testCreateBasicDeclarationTextNode(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
 		handler := New(NewModel("", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit, []string{"one"}))
@@ -83,7 +83,7 @@ var _ = ginkgo.Describe("Declaration node pagination tests", func() {
 	ginkgo.It("should give an empty result for a non existent group", func() {
 		limit := 10
 		for i := 0; i < 5; i++ {
-			testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i))
+			testCreateBasicDeclarationTextNode(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
 		handler := New(NewModel("", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit, []string{"six"}))

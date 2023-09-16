@@ -43,6 +43,10 @@ func (c Main) Logic() (declarations.Node, error) {
 			existing.Metadata = c.model.Values.Metadata
 		}
 
+		if f == "value" {
+			existing.Value = c.model.Values.Value
+		}
+
 		if f == "groups" {
 			existing.Groups = c.model.Values.Groups
 		}

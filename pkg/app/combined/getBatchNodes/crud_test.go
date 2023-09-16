@@ -1,7 +1,7 @@
 package getBatchNodes
 
 import (
-	"creatif/pkg/app/assignments/create"
+	create "creatif/pkg/app/declarations/createNode"
 	"creatif/pkg/lib/sdk"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -10,37 +10,13 @@ import (
 
 var _ = ginkgo.Describe("Batch nodes tests", func() {
 	ginkgo.It("should getNode a batch of declaration nodes with full data", func() {
-		textNodes := make([]create.View, 0)
-		booleanNodes := make([]create.View, 0)
-		jsonNodes := make([]create.View, 0)
-
-		for i := 0; i < 10; i++ {
-			textNodes = append(textNodes, testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i), "this is a text node"))
-		}
-
-		for i := 10; i < 20; i++ {
-			booleanNodes = append(booleanNodes, testCreateBasicAssignmentBooleanNode(fmt.Sprintf("name-%d", i), false))
-		}
-
-		for i := 20; i < 30; i++ {
-			jsonNodes = append(jsonNodes, testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i), map[string]interface{}{
-				"one":   "one",
-				"two":   []string{"one", "two"},
-				"three": []int{1, 2, 3, 4},
-				"four":  583,
-			}))
+		declarationsNodes := make([]create.View, 0)
+		for i := 0; i < 30; i++ {
+			declarationsNodes = append(declarationsNodes, testCreateDeclarationNode(fmt.Sprintf("name-%d", i), "modifiable"))
 		}
 
 		names := make([]string, 0)
-		names = append(names, sdk.Map(textNodes, func(idx int, value create.View) string {
-			return value.Name
-		})...)
-
-		names = append(names, sdk.Map(booleanNodes, func(idx int, value create.View) string {
-			return value.Name
-		})...)
-
-		names = append(names, sdk.Map(jsonNodes, func(idx int, value create.View) string {
+		names = append(names, sdk.Map(declarationsNodes, func(idx int, value create.View) string {
 			return value.Name
 		})...)
 
@@ -83,37 +59,13 @@ var _ = ginkgo.Describe("Batch nodes tests", func() {
 	})
 
 	ginkgo.It("should get a batch of maps and variables with full data", func() {
-		textNodes := make([]create.View, 0)
-		booleanNodes := make([]create.View, 0)
-		jsonNodes := make([]create.View, 0)
-
-		for i := 0; i < 10; i++ {
-			textNodes = append(textNodes, testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i), "this is a text node"))
-		}
-
-		for i := 10; i < 20; i++ {
-			booleanNodes = append(booleanNodes, testCreateBasicAssignmentBooleanNode(fmt.Sprintf("name-%d", i), false))
-		}
-
-		for i := 20; i < 30; i++ {
-			jsonNodes = append(jsonNodes, testCreateBasicAssignmentTextNode(fmt.Sprintf("name-%d", i), map[string]interface{}{
-				"one":   "one",
-				"two":   []string{"one", "two"},
-				"three": []int{1, 2, 3, 4},
-				"four":  583,
-			}))
+		declarationsNodes := make([]create.View, 0)
+		for i := 0; i < 30; i++ {
+			declarationsNodes = append(declarationsNodes, testCreateDeclarationNode(fmt.Sprintf("name-%d", i), "modifiable"))
 		}
 
 		names := make([]string, 0)
-		names = append(names, sdk.Map(textNodes, func(idx int, value create.View) string {
-			return value.Name
-		})...)
-
-		names = append(names, sdk.Map(booleanNodes, func(idx int, value create.View) string {
-			return value.Name
-		})...)
-
-		names = append(names, sdk.Map(jsonNodes, func(idx int, value create.View) string {
+		names = append(names, sdk.Map(declarationsNodes, func(idx int, value create.View) string {
 			return value.Name
 		})...)
 

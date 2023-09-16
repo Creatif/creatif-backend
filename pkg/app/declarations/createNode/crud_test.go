@@ -15,7 +15,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewModel(name, "modifiable", []string{"one", "two", "three"}, b))
+		handler := New(NewModel(name, "modifiable", []string{"one", "two", "three"}, b, b))
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
@@ -36,7 +36,7 @@ var _ = ginkgo.Describe("Declaration node tests", func() {
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewModel(name, "modifiable", []string{"one", "two", "three"}, b))
+		handler := New(NewModel(name, "modifiable", []string{"one", "two", "three"}, b, b))
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)

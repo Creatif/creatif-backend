@@ -1,7 +1,6 @@
 package getValue
 
 import (
-	assignmentsCreate "creatif/pkg/app/assignments/create"
 	"creatif/pkg/app/declarations/createNode"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
@@ -67,24 +66,12 @@ var _ = GinkgoAfterSuite(func() {
 
 var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.DECLARATION_NODES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_MAP_VALUE_NODE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_VALUE_NODE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
 
-func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte) createNode.View {
-	handler := createNode.New(createNode.NewModel(name, behaviour, groups, metadata))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
-
-func testCreateBasicDeclarationTextNode(name, behaviour string) createNode.View {
+func testCreateDeclarationNode(name, behaviour string) createNode.View {
 	m := map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -95,23 +82,7 @@ func testCreateBasicDeclarationTextNode(name, behaviour string) createNode.View 
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	return testCreateDeclarationNode(name, behaviour, []string{
-		"one",
-		"two",
-		"three",
-	}, b)
-}
-
-func testCreateBasicDeclarationBooleanNode(name, behaviour string) createNode.View {
-	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{})
-}
-
-func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
-	declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
-
-	b, _ := json.Marshal("this is a text node")
-
-	handler := assignmentsCreate.New(assignmentsCreate.NewCreateNodeModel(declarationNode.Name, b))
+	handler := createNode.New(createNode.NewModel(name, behaviour, []string{"one", "two", "three"}, b, b))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -119,7 +90,6 @@ func testCreateBasicAssignmentTextNode(name string) assignmentsCreate.View {
 
 	return view
 }
-
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }

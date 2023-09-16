@@ -63,6 +63,10 @@ func newView(model Node, returnFields []string) map[string]interface{} {
 			m["groups"] = model.Groups
 		}
 
+		if f == "value" {
+			m["value"] = model.Value
+		}
+
 		if f == "behaviour" {
 			m["behaviour"] = model.Behaviour
 		}

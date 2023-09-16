@@ -1,11 +1,9 @@
 package getBatchNodes
 
 import (
-	assignmentsCreate "creatif/pkg/app/assignments/create"
 	"creatif/pkg/app/declarations/createNode"
 	mapsCreate "creatif/pkg/app/declarations/mapCreate"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -69,39 +67,29 @@ var _ = GinkgoAfterSuite(func() {
 
 var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.DECLARATION_NODES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_NODES_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_MAP_VALUE_NODE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_VALUE_NODE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
 })
 
-func testUniqueName() string {
-	uid, err := sdk.NewULID()
-	gomega.Expect(err).Should(gomega.BeNil())
-	return uid
-}
+func testCreateDeclarationNode(name, behaviour string) createNode.View {
+	m := map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+	}
 
-func testCreateDeclarationNode(name, behaviour string, groups []string, metadata []byte) createNode.View {
-	handler := createNode.New(createNode.NewModel(name, behaviour, groups, metadata))
+	b, err := json.Marshal(m)
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	handler := createNode.New(createNode.NewModel(name, behaviour, []string{"one", "two", "three"}, b, b))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
 	testAssertIDValid(view.ID)
 
 	return view
-}
-
-func testCreateBasicDeclarationTextNode(name, behaviour string) createNode.View {
-	return testCreateDeclarationNode(name, behaviour, []string{
-		"one",
-		"two",
-		"three",
-	}, []byte{})
-}
-
-func testCreateBasicDeclarationBooleanNode(name, behaviour string) createNode.View {
-	return testCreateDeclarationNode(name, behaviour, []string{}, []byte{})
 }
 
 func testCreateMap(name string, nodesNum int) mapsCreate.View {
@@ -162,33 +150,6 @@ func testCreateMap(name string, nodesNum int) mapsCreate.View {
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
 	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(nodesNum))
-
-	return view
-}
-
-func testCreateBasicAssignmentTextNode(name string, value interface{}) assignmentsCreate.View {
-	declarationNode := testCreateBasicDeclarationTextNode(name, "modifiable")
-
-	b, _ := json.Marshal(value)
-
-	handler := assignmentsCreate.New(assignmentsCreate.NewCreateNodeModel(declarationNode.Name, b))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
-
-func testCreateBasicAssignmentBooleanNode(name string, value bool) assignmentsCreate.View {
-	declarationNode := testCreateBasicDeclarationBooleanNode(name, "modifiable")
-
-	b, _ := json.Marshal(value)
-	handler := assignmentsCreate.New(assignmentsCreate.NewCreateNodeModel(declarationNode.Name, b))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
 
 	return view
 }

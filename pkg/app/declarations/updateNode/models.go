@@ -18,6 +18,7 @@ var validUpdateableFields = []string{
 	"metadata",
 	"groups",
 	"behaviour",
+	"value",
 }
 
 type ModelValues struct {
@@ -25,6 +26,7 @@ type ModelValues struct {
 	Metadata  []byte   `json:"metadata"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
+	Value     []byte   `json:"value"`
 }
 
 type Model struct {
@@ -33,7 +35,7 @@ type Model struct {
 	Values ModelValues
 }
 
-func NewModel(fields []string, name, updatingName, behaviour string, groups []string, metadata []byte) Model {
+func NewModel(fields []string, name, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
 	return Model{
 		Fields: fields,
 		Name:   name,
@@ -42,6 +44,7 @@ func NewModel(fields []string, name, updatingName, behaviour string, groups []st
 			Metadata:  metadata,
 			Groups:    groups,
 			Behaviour: behaviour,
+			Value:     value,
 		},
 	}
 }
@@ -109,6 +112,7 @@ type View struct {
 	Groups    []string               `json:"groups"`
 	Behaviour string                 `json:"behaviour"`
 	Metadata  map[string]interface{} `json:"metadata"`
+	Value     []byte                 `json:"value"`
 
 	CreatedAt time.Time `gorm:"<-:createNode" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -121,6 +125,7 @@ func newView(model declarations.Node) View {
 		Groups:    model.Groups,
 		Behaviour: model.Behaviour,
 		Metadata:  sdk.UnmarshalToMap([]byte(model.Metadata)),
+		Value:     model.Value,
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 	}

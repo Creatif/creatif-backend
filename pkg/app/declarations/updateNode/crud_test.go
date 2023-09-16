@@ -3,6 +3,7 @@ package updateNode
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/storage"
+	"encoding/json"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -11,7 +12,11 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 	ginkgo.It("should update the name of the declaration node", func() {
 		view := testCreateBasicDeclarationTextNode("name", "modifiable")
 
-		handler := New(NewModel([]string{"name", "behaviour"}, "name", "newName", "readonly", []string{}, []byte{}))
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		handler := New(NewModel([]string{"name", "behaviour"}, "name", "newName", "readonly", []string{}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -26,12 +31,16 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 
 		gomega.Expect(checkModel.Name).Should(gomega.Equal("newName"))
 		gomega.Expect(checkModel.Behaviour).Should(gomega.Equal("readonly"))
+		gomega.Expect(checkModel.Value).ShouldNot(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should update the groups of the declaration node", func() {
 		view := testCreateBasicDeclarationTextNode("name", "modifiable")
 
-		handler := New(NewModel([]string{"name", "groups"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}))
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel([]string{"name", "groups", "value"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -54,7 +63,10 @@ var _ = ginkgo.Describe("Declaration (UPDATE) node tests", func() {
 	ginkgo.It("should update the behaviour of the declaration node", func() {
 		view := testCreateBasicDeclarationTextNode("name", "modifiable")
 
-		handler := New(NewModel([]string{"name", "behaviour", "groups"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}))
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel([]string{"name", "behaviour", "groups"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)

@@ -30,7 +30,3 @@ type NodeWithoutValue struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
-
-func getQueryWithoutValue() string {
-	return `SELECT n.id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at FROM declarations.nodes AS n`
-}

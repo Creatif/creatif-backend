@@ -1,12 +1,10 @@
 package createNode
 
 import (
-	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
-	"gorm.io/gorm"
 )
 
 type Create struct {
@@ -30,26 +28,10 @@ func (c Create) Authorize() error {
 }
 
 func (c Create) Logic() (declarations.Node, error) {
-	model := declarations.NewNode(c.model.Name, c.model.Behaviour, c.model.Groups, c.model.Metadata)
+	model := declarations.NewNode(c.model.Name, c.model.Behaviour, c.model.Groups, c.model.Metadata, c.model.Value)
 
-	if err := storage.Transaction(func(tx *gorm.DB) error {
-		if res := tx.Create(&model); res.Error != nil {
-			return res.Error
-		}
-
-		assignmentModel := assignments.NewNode(model.Name, model.ID)
-		if res := tx.Create(&assignmentModel); res.Error != nil {
-			return res.Error
-		}
-
-		valueModel := assignments.NewValueNode(assignmentModel.ID, nil)
-		if res := tx.Create(&valueModel); res.Error != nil {
-			return res.Error
-		}
-
-		return nil
-	}); err != nil {
-		return declarations.Node{}, appErrors.NewDatabaseError(err).AddError("Node.Create.Logic", nil)
+	if err := storage.Create((declarations.Node{}).TableName(), &model, false); err != nil {
+		return declarations.Node{}, appErrors.NewDatabaseError(err).AddError("createNode.Logic", nil)
 	}
 
 	return model, nil

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"creatif/cmd/http/handlers/assignments"
 	"creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/server"
 	"github.com/labstack/echo/v4"
@@ -24,7 +23,6 @@ func app() {
 
 	appRoutes(srv.Group("/api/v1/app"))
 	declarationRoutes(srv.Group("/api/v1/declarations"))
-	assignmentRoutes(srv.Group("/api/v1/assignments"))
 
 	server.StartServer(srv)
 }
@@ -38,8 +36,4 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/node/:id", declarations.GetNodeHandler())
 	group.GET("/map/:id", declarations.GetMapHandler())
 	group.POST("/combined", declarations.GetBatchedNodesHandler())
-}
-
-func assignmentRoutes(group *echo.Group) {
-	group.PUT("/node", assignments.AssignNodeHandler())
 }

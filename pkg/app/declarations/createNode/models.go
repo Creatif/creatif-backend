@@ -16,14 +16,16 @@ type Model struct {
 	Metadata  []byte   `json:"metadata"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
+	Value     []byte   `json:"value"`
 }
 
-func NewModel(name, behaviour string, groups []string, metadata []byte) Model {
+func NewModel(name, behaviour string, groups []string, metadata []byte, value []byte) Model {
 	return Model{
 		Name:      name,
 		Behaviour: behaviour,
 		Groups:    groups,
 		Metadata:  metadata,
+		Value:     value,
 	}
 }
 
@@ -61,6 +63,7 @@ type View struct {
 	Groups    []string               `json:"groups"`
 	Behaviour string                 `json:"behaviour"`
 	Metadata  map[string]interface{} `json:"metadata"`
+	Value     []byte                 `json:"value"`
 
 	CreatedAt time.Time `gorm:"<-:createNode" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`

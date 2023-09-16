@@ -1,7 +1,6 @@
 package getBatchNodes
 
 import (
-	"creatif/pkg/app/domain/assignments"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -39,11 +38,8 @@ type QueriesMapNode struct {
 
 func queryNodesValue(nodeIds []string) ([]Node, error) {
 	var nodes []Node
-	if res := storage.Gorm().Raw(fmt.Sprintf(`SELECT n.id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, vn.value FROM declarations.nodes AS n
-INNER JOIN %s AS an ON n.id = an.declaration_node_id
-INNER JOIN %s AS vn ON an.id = vn.assignment_node_id
-WHERE n.id IN (?)
-`, (assignments.Node{}).TableName(), (assignments.ValueNode{}).TableName()), nodeIds).Scan(&nodes); res.Error != nil {
+	if res := storage.Gorm().Raw(`SELECT n.id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, n.value FROM declarations.nodes AS n WHERE n.id IN (?)
+`, nodeIds).Scan(&nodes); res.Error != nil {
 		return nil, res.Error
 	}
 

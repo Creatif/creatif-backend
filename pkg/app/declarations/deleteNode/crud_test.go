@@ -1,10 +1,12 @@
 package deleteNode
 
 import (
-	"creatif/pkg/app/domain/assignments"
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/storage"
+	"errors"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
+	"gorm.io/gorm"
 )
 
 var _ = ginkgo.Describe("Declaration (DELETE) node tests", func() {
@@ -16,7 +18,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) node tests", func() {
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		res := storage.Gorm().Where("declaration_node_id = ?", view.ID).First(&assignments.Node{})
-		gomega.Expect(res.Error).ShouldNot(gomega.BeNil())
+		res := storage.Gorm().Where("id = ?", view.ID).First(&declarations.Node{})
+		gomega.Expect(errors.Is(res.Error, gorm.ErrRecordNotFound)).Should(gomega.BeTrue())
 	})
 })

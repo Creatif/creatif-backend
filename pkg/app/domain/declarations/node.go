@@ -17,6 +17,7 @@ type Node struct {
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
 	Metadata  datatypes.JSON
+	Value     datatypes.JSON
 
 	CreatedAt time.Time `gorm:"<-:createNode;index"`
 	UpdatedAt time.Time
@@ -37,11 +38,12 @@ func (Node) TableName() string {
 	return fmt.Sprintf("%s.%s", "declarations", domain.DECLARATION_NODES_TABLE)
 }
 
-func NewNode(name, behaviour string, groups []string, metadata []byte) Node {
+func NewNode(name, behaviour string, groups []string, metadata, value []byte) Node {
 	return Node{
 		Name:      name,
 		Groups:    groups,
 		Behaviour: behaviour,
 		Metadata:  metadata,
+		Value:     value,
 	}
 }
