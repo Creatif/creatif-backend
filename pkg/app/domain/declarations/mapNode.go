@@ -10,10 +10,10 @@ import (
 	"time"
 )
 
-type MapNode struct {
+type MapVariable struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	Name      string `gorm:"index;uniqueIndex:unique_node"`
+	Name      string `gorm:"index;uniqueIndex:unique_variable"`
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
 	Metadata  datatypes.JSON
@@ -22,16 +22,12 @@ type MapNode struct {
 	MapID string `gorm:"type:text;check:length(id)=26"`
 	Map   Map    `gorm:"foreignKey:MapID"`
 
-	// TODO: change this to be string when projects and exploration are over, project must exist and be UUID
-	/*	ProjectID *string `gorm:"type:uuid;uniqueIndex:unique_node"`
-		Project   domain.Project*/
-
-	CreatedAt time.Time `gorm:"<-:createNode;index"`
+	CreatedAt time.Time `gorm:"<-:createVariable;index"`
 	UpdatedAt time.Time
 }
 
-func NewMapNode(mapId, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) MapNode {
-	return MapNode{
+func NewMapVariable(mapId, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) MapVariable {
+	return MapVariable{
 		MapID:     mapId,
 		Name:      name,
 		Behaviour: behaviour,
@@ -41,7 +37,7 @@ func NewMapNode(mapId, name, behaviour string, metadata datatypes.JSON, groups p
 	}
 }
 
-func (u *MapNode) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *MapVariable) BeforeCreate(tx *gorm.DB) (err error) {
 	id, err := sdk.NewULID()
 	if err != nil {
 		return err
@@ -52,6 +48,6 @@ func (u *MapNode) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (MapNode) TableName() string {
-	return fmt.Sprintf("%s.%s", "declarations", domain.NODE_MAP_NODES_TABLE)
+func (MapVariable) TableName() string {
+	return fmt.Sprintf("%s.%s", "declarations", domain.MAP_VARIABLES)
 }

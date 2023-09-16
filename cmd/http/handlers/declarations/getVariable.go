@@ -3,22 +3,22 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/declarations/getNode"
+	"creatif/pkg/app/declarations/getVariable"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func GetNodeHandler() func(e echo.Context) error {
+func GetVariableHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model declarations.GetNode
+		var model declarations.GetVariable
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = declarations.SanitizeGetNode(model)
+		model = declarations.SanitizeGetVariable(model)
 
-		handler := getNode.New(getNode.NewModel(model.ID, model.Fields))
+		handler := getVariable.New(getVariable.NewModel(model.ID, model.Fields))
 
-		return request.SendResponse[getNode.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[getVariable.Model](handler, c, http.StatusCreated)
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type MapNodeModel struct {
+type MapVariableModel struct {
 	Name      string   `json:"name"`
 	Metadata  []byte   `json:"metadata"`
 	Groups    []string `json:"groups"`
@@ -47,15 +47,15 @@ func (u *CreateMap) UnmarshalJSON(b []byte) error {
 
 	newEntries := make([]Entry, 0)
 	for _, entry := range entries {
-		if entry.Type == "node" {
-			var node MapNodeModel
-			if err := sdk.ConvertByUnmarshaling(entry.Model, node); err != nil {
+		if entry.Type == "variable" {
+			var variable MapVariableModel
+			if err := sdk.ConvertByUnmarshaling(entry.Model, variable); err != nil {
 				return err
 			}
 
 			newEntries = append(newEntries, Entry{
 				Type:  entry.Type,
-				Model: node,
+				Model: variable,
 			})
 		}
 	}
@@ -78,8 +78,8 @@ func SanitizeMapModel(model CreateMap) CreateMap {
 			Model: nil,
 		}
 
-		if entries[i].Type == "node" {
-			m := entries[i].Model.(MapNodeModel)
+		if entries[i].Type == "variable" {
+			m := entries[i].Model.(MapVariableModel)
 			m.Name = p.Sanitize(m.Name)
 			m.Behaviour = p.Sanitize(m.Behaviour)
 

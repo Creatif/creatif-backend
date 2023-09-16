@@ -31,14 +31,14 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
 	}
 
-	var nodes []Node
-	if err := queryNodes(m.ID, c.model.Fields, &nodes); err != nil {
+	var variables []Variable
+	if err := queryVariables(m.ID, c.model.Fields, &variables); err != nil {
 		return LogicModel{}, err
 	}
 
 	return LogicModel{
-		nodeMap: m,
-		nodes:   nodes,
+		variableMap: m,
+		variables:   variables,
 	}, nil
 }
 

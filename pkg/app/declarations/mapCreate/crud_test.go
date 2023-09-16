@@ -7,8 +7,8 @@ import (
 	"github.com/onsi/gomega"
 )
 
-var _ = ginkgo.Describe("Map node tests", func() {
-	ginkgo.It("should createNode a map with only node entries", func() {
+var _ = ginkgo.Describe("Map variable tests", func() {
+	ginkgo.It("should createVariable a map with only variable entries", func() {
 		entries := make([]Entry, 0)
 
 		m := map[string]interface{}{
@@ -40,7 +40,7 @@ var _ = ginkgo.Describe("Map node tests", func() {
 			v, err := json.Marshal(value)
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			nodeModel := NodeModel{
+			variableModel := VariableModel{
 				Name:     fmt.Sprintf("name-%d", i),
 				Metadata: b,
 				Groups: []string{
@@ -53,8 +53,8 @@ var _ = ginkgo.Describe("Map node tests", func() {
 			}
 
 			entries = append(entries, Entry{
-				Type:  "node",
-				Model: nodeModel,
+				Type:  "variable",
+				Model: variableModel,
 			})
 		}
 
@@ -64,6 +64,6 @@ var _ = ginkgo.Describe("Map node tests", func() {
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("mapName"))
-		gomega.Expect(view.Nodes).Should(gomega.HaveLen(100))
+		gomega.Expect(view.Variables).Should(gomega.HaveLen(100))
 	})
 })

@@ -25,7 +25,7 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (Node, error) {
+func (c Main) Logic() (Variable, error) {
 	return queryValue(c.model.Name)
 }
 
@@ -51,6 +51,6 @@ func (c Main) Handle() (datatypes.JSON, error) {
 	return newView(model), nil
 }
 
-func New(model Model) pkg.Job[Model, datatypes.JSON, Node] {
+func New(model Model) pkg.Job[Model, datatypes.JSON, Variable] {
 	return Main{model: model}
 }

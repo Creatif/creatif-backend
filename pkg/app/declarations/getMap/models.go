@@ -38,27 +38,27 @@ func NewModel(name string, fields []string) Model {
 }
 
 type LogicModel struct {
-	nodeMap declarations.Map
-	nodes   []Node
+	variableMap declarations.Map
+	variables   []Variable
 }
 
-type Node struct {
+type Variable struct {
 	ID string `json:"id" gorm:"primarykey"`
 
-	Name      string         `json:"name" gorm:"index;uniqueIndex:unique_node"`
+	Name      string         `json:"name" gorm:"index;uniqueIndex:unique_variable"`
 	Value     datatypes.JSON `json:"value"`
 	Behaviour string         `json:"behaviour"`
 	Groups    pq.StringArray `json:"groups" gorm:"type:text[]"`
 	Metadata  datatypes.JSON `json:"metadata"`
 
-	CreatedAt time.Time `json:"createdAt" gorm:"<-:createNode"`
+	CreatedAt time.Time `json:"createdAt" gorm:"<-:createVariable"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type View struct {
-	ID    string                   `json:"id"`
-	Name  string                   `json:"name"`
-	Nodes []map[string]interface{} `json:"nodes"`
+	ID        string                   `json:"id"`
+	Name      string                   `json:"name"`
+	Variables []map[string]interface{} `json:"variables"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -67,7 +67,7 @@ type View struct {
 func newView(model LogicModel, returnFields []string) View {
 	m := make([]map[string]interface{}, 0)
 
-	for _, n := range model.nodes {
+	for _, n := range model.variables {
 		o := make(map[string]interface{})
 
 		o["id"] = n.ID
@@ -107,11 +107,11 @@ func newView(model LogicModel, returnFields []string) View {
 	}
 
 	return View{
-		ID:        model.nodeMap.ID,
-		Name:      model.nodeMap.Name,
-		Nodes:     m,
-		CreatedAt: model.nodeMap.CreatedAt,
-		UpdatedAt: model.nodeMap.UpdatedAt,
+		ID:        model.variableMap.ID,
+		Name:      model.variableMap.Name,
+		Variables: m,
+		CreatedAt: model.variableMap.CreatedAt,
+		UpdatedAt: model.variableMap.UpdatedAt,
 	}
 }
 

@@ -15,11 +15,11 @@ func NewModel(name string) Model {
 	return Model{Name: name}
 }
 
-type Node struct {
+type Variable struct {
 	Value datatypes.JSON
 }
 
-func newView(model Node) datatypes.JSON {
+func newView(model Variable) datatypes.JSON {
 	return model.Value
 }
 

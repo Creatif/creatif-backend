@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func queryNodes(mapId string, fields []string, model interface{}) error {
+func queryVariables(mapId string, fields []string, model interface{}) error {
 	resolvedFields := strings.Join(sdk.Map(fields, func(idx int, value string) string {
 		return fmt.Sprintf("n.%s", value)
 	}), ",")
@@ -27,7 +27,7 @@ SELECT
 `,
 		delimiter,
 		resolvedFields,
-		(declarations.MapNode{}).TableName(),
+		(declarations.MapVariable{}).TableName(),
 	)
 
 	if res := storage.Gorm().Raw(sql, mapId).Scan(model); res.Error != nil {

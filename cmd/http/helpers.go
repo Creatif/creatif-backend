@@ -38,7 +38,7 @@ func runDb() {
 
 func runLogger() {
 	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createNode logger: %s", err.Error()))
+		log.Fatalln(fmt.Sprintf("Cannot createVariable logger: %s", err.Error()))
 	}
 
 	logger.Info("Health info logger health check... Ignore!")
@@ -52,7 +52,7 @@ func runAssets() {
 		err := os.MkdirAll(assetsDir, os.ModePerm)
 
 		if err != nil {
-			log.Fatalln(fmt.Sprintf("Cannot createNode assets directory: %s", err.Error()))
+			log.Fatalln(fmt.Sprintf("Cannot createVariable assets directory: %s", err.Error()))
 		}
 	}
 }

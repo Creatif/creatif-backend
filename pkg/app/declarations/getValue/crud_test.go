@@ -5,11 +5,11 @@ import (
 	"github.com/onsi/gomega"
 )
 
-var _ = ginkgo.Describe("GET value of declaration node", func() {
-	ginkgo.It("should return a node value", func() {
-		createdNode := testCreateDeclarationNode("node", "modifiable")
+var _ = ginkgo.Describe("GET value of declaration variable", func() {
+	ginkgo.It("should return a variable value", func() {
+		createdVariable := testCreateDeclarationVariable("variable", "modifiable")
 
-		handler := New(NewModel(createdNode.Name))
+		handler := New(NewModel(createdVariable.Name))
 		value, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

@@ -9,23 +9,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type MapNodeValue struct {
+type MapVariableValue struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	MapNodeID string               `gorm:"type:text;check:length(id)=26"`
-	MapNode   declarations.MapNode `gorm:"foreignKey:MapID"`
+	MapVariableID string                   `gorm:"type:text;check:length(id)=26"`
+	MapVariable   declarations.MapVariable `gorm:"foreignKey:MapID"`
 
 	Value datatypes.JSON
 }
 
-func NewMapNodeValue(mapNodeId string, value datatypes.JSON) MapNodeValue {
-	return MapNodeValue{
-		Value:     value,
-		MapNodeID: mapNodeId,
+func NewMapVariableValue(mapVariableId string, value datatypes.JSON) MapVariableValue {
+	return MapVariableValue{
+		Value:         value,
+		MapVariableID: mapVariableId,
 	}
 }
 
-func (u *MapNodeValue) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *MapVariableValue) BeforeCreate(tx *gorm.DB) (err error) {
 	id, err := sdk.NewULID()
 	if err != nil {
 		return err
@@ -36,6 +36,6 @@ func (u *MapNodeValue) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (MapNodeValue) TableName() string {
-	return fmt.Sprintf("%s.%s", "assignments", domain.ASSIGNMENT_MAP_VALUE_NODE)
+func (MapVariableValue) TableName() string {
+	return fmt.Sprintf("%s.%s", "assignments", domain.MAP_VARIABLE_VALUE)
 }

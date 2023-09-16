@@ -4,12 +4,12 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type GetNode struct {
+type GetVariable struct {
 	ID     string   `param:"id"`
 	Fields []string `param:"fields"`
 }
 
-func SanitizeGetNode(model GetNode) GetNode {
+func SanitizeGetVariable(model GetVariable) GetVariable {
 	p := bluemonday.StrictPolicy()
 	model.ID = p.Sanitize(model.ID)
 	if len(model.Fields) > 0 {

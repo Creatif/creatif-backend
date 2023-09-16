@@ -37,13 +37,13 @@ func (c Main) Logic() (LogicResult, error) {
 			return res.Error
 		}
 
-		domainEntries := make([]declarations.MapNode, 0)
+		domainEntries := make([]declarations.MapVariable, 0)
 		entries := c.model.Entries
 		for _, entry := range entries {
-			if entry.Type == "node" {
-				m := entry.Model.(NodeModel)
+			if entry.Type == "variable" {
+				m := entry.Model.(VariableModel)
 
-				domainEntries = append(domainEntries, declarations.NewMapNode(
+				domainEntries = append(domainEntries, declarations.NewMapVariable(
 					newMap.ID,
 					m.Name,
 					m.Behaviour,
@@ -62,7 +62,7 @@ func (c Main) Logic() (LogicResult, error) {
 			if d.ID != "" {
 				names = append(names, map[string]string{
 					"name": d.Name,
-					"type": "node",
+					"type": "variable",
 				})
 			}
 		}
@@ -73,9 +73,9 @@ func (c Main) Logic() (LogicResult, error) {
 	}
 
 	return LogicResult{
-		ID:    newMap.ID,
-		Name:  newMap.Name,
-		Nodes: names,
+		ID:        newMap.ID,
+		Name:      newMap.Name,
+		Variables: names,
 	}, nil
 }
 

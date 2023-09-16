@@ -4,17 +4,17 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type GetBatchedNodes struct {
+type GetBatchedVariables struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
 
-func SanitizeGetBatchedNodes(model []GetBatchedNodes) []GetBatchedNodes {
+func SanitizeGetBatchedVariables(model []GetBatchedVariables) []GetBatchedVariables {
 	p := bluemonday.StrictPolicy()
-	sanitized := make([]GetBatchedNodes, 0)
+	sanitized := make([]GetBatchedVariables, 0)
 
 	for _, n := range model {
-		sanitized = append(sanitized, GetBatchedNodes{
+		sanitized = append(sanitized, GetBatchedVariables{
 			Name: p.Sanitize(n.Name),
 			Type: p.Sanitize(n.Type),
 		})

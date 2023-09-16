@@ -13,7 +13,7 @@ type Map struct {
 
 	Name string `gorm:"uniqueIndex"`
 
-	CreatedAt time.Time `gorm:"<-:createNode"`
+	CreatedAt time.Time `gorm:"<-:createVariable"`
 	UpdatedAt time.Time
 }
 
@@ -35,5 +35,5 @@ func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (Map) TableName() string {
-	return fmt.Sprintf("%s.%s", "declarations", domain.NODE_MAP_TABLE)
+	return fmt.Sprintf("%s.%s", "declarations", domain.VARIABLE_MAP)
 }

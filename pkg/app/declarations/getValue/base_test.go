@@ -1,7 +1,7 @@
 package getValue
 
 import (
-	"creatif/pkg/app/declarations/createNode"
+	"creatif/pkg/app/declarations/createVariable"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -65,13 +65,13 @@ var _ = GinkgoAfterSuite(func() {
 })
 
 var _ = GinkgoAfterHandler(func() {
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.DECLARATION_NODES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_MAP_VALUE_NODE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.MAP_VARIABLE_VALUE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateDeclarationNode(name, behaviour string) createNode.View {
+func testCreateDeclarationVariable(name, behaviour string) createVariable.View {
 	m := map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -82,7 +82,7 @@ func testCreateDeclarationNode(name, behaviour string) createNode.View {
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createNode.New(createNode.NewModel(name, behaviour, []string{"one", "two", "three"}, b, b))
+	handler := createVariable.New(createVariable.NewModel(name, behaviour, []string{"one", "two", "three"}, b, b))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

@@ -5,12 +5,11 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type CreateNode struct {
-	Name       string         `json:"name"`
-	Groups     []string       `json:"groups"`
-	Behaviour  string         `json:"behaviour"`
-	Validation NodeValidation `json:"validation"`
-	Metadata   string         `json:"metadata"`
+type CreateVariable struct {
+	Name      string   `json:"name"`
+	Groups    []string `json:"groups"`
+	Behaviour string   `json:"behaviour"`
+	Metadata  string   `json:"metadata"`
 }
 
 type ValidationLength struct {
@@ -19,15 +18,7 @@ type ValidationLength struct {
 	Exact int `json:"exact"`
 }
 
-type NodeValidation struct {
-	Required    bool             `json:"metadata"`
-	Length      ValidationLength `json:"length"`
-	ExactValue  string           `json:"exactValue"`
-	ExactValues []string         `json:"exactValues"`
-	IsDate      bool             `json:"isDate"`
-}
-
-func SanitizeNode(model CreateNode) CreateNode {
+func SanitizeVariable(model CreateVariable) CreateVariable {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.Behaviour = p.Sanitize(model.Behaviour)
@@ -35,17 +26,6 @@ func SanitizeNode(model CreateNode) CreateNode {
 	model.Groups = sdk.Sanitize(model.Groups, func(k int, v string) string {
 		return p.Sanitize(v)
 	})
-
-	newNodeValidation := NodeValidation{}
-	newNodeValidation.Required = model.Validation.Required
-	newNodeValidation.IsDate = model.Validation.IsDate
-	newNodeValidation.ExactValue = p.Sanitize(model.Validation.ExactValue)
-
-	newNodeValidation.ExactValues = sdk.Sanitize(model.Validation.ExactValues, func(k int, v string) string {
-		return p.Sanitize(v)
-	})
-
-	model.Validation = newNodeValidation
 
 	return model
 }

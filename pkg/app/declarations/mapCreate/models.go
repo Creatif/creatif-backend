@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type NodeModel struct {
+type VariableModel struct {
 	Name      string   `json:"name"`
 	Metadata  []byte   `json:"metadata"`
 	Groups    []string `json:"groups"`
@@ -28,9 +28,9 @@ type Model struct {
 }
 
 type LogicResult struct {
-	ID    string
-	Nodes []map[string]string
-	Name  string
+	ID        string
+	Variables []map[string]string
+	Name      string
 }
 
 func NewModel(name string, entries []Entry) Model {
@@ -42,9 +42,9 @@ func NewModel(name string, entries []Entry) Model {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"uniqueName":     a.Name,
-		"validNum":       a.Entries,
-		"validNodeNames": a.Entries,
+		"uniqueName":         a.Name,
+		"validNum":           a.Entries,
+		"validVariableNames": a.Entries,
 	}
 
 	if err := validation.Validate(v,
@@ -70,17 +70,17 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("validNodeNames", validation.By(func(value interface{}) error {
+			validation.Key("validVariableNames", validation.By(func(value interface{}) error {
 				m := make(map[string]int)
 				for _, entry := range a.Entries {
-					if entry.Type == "node" {
-						o := entry.Model.(NodeModel)
+					if entry.Type == "variable" {
+						o := entry.Model.(VariableModel)
 						m[o.Name] = 0
 					}
 				}
 
 				if len(m) != len(a.Entries) {
-					return errors.New("Some node/map names are not unique. All node/map names must be unique.")
+					return errors.New("Some variable/map names are not unique. All variable/map names must be unique.")
 				}
 				return nil
 			})),
@@ -93,15 +93,15 @@ func (a *Model) Validate() map[string]string {
 }
 
 type View struct {
-	ID    string              `json:"id"`
-	Name  string              `json:"name"`
-	Nodes []map[string]string `json:"nodes"`
+	ID        string              `json:"id"`
+	Name      string              `json:"name"`
+	Variables []map[string]string `json:"variables"`
 }
 
 func newView(model LogicResult) View {
 	return View{
-		ID:    model.ID,
-		Name:  model.Name,
-		Nodes: model.Nodes,
+		ID:        model.ID,
+		Name:      model.Name,
+		Variables: model.Variables,
 	}
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"creatif/pkg/app/declarations/createNode"
+	"creatif/pkg/app/declarations/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -14,10 +14,10 @@ func main() {
 	loadEnv()
 	db()
 
-	createDeclarationNodesWithoutValue(1000)
+	createDeclarationVariablesWithoutValue(1000)
 }
 
-func createDeclarationNodesWithoutValue(num int) {
+func createDeclarationVariablesWithoutValue(num int) {
 	for i := 0; i < num; i++ {
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":   "one",
@@ -26,12 +26,12 @@ func createDeclarationNodesWithoutValue(num int) {
 			"four":  4,
 		})
 
-		handler := createNode.New(createNode.NewCreateNodeModel(
+		handler := createVariable.New(createVariable.NewModel(
 			fmt.Sprintf("name-%d", i),
 			"modifiable",
 			[]string{"one", "two", "three"},
 			b,
-			createNode.NodeValidation{},
+			b,
 		))
 
 		_, err := handler.Handle()

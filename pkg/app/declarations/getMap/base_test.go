@@ -65,13 +65,13 @@ var _ = GinkgoAfterSuite(func() {
 })
 
 var _ = GinkgoAfterHandler(func() {
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.DECLARATION_NODES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.ASSIGNMENT_MAP_VALUE_NODE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.NODE_MAP_NODES_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE assignments.%s CASCADE", domain.MAP_VARIABLE_VALUE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateMap(name string, nodesNum int) mapsCreate.View {
+func testCreateMap(name string, variablesNum int) mapsCreate.View {
 	entries := make([]mapsCreate.Entry, 0)
 
 	m := map[string]interface{}{
@@ -84,7 +84,7 @@ func testCreateMap(name string, nodesNum int) mapsCreate.View {
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	for i := 0; i < nodesNum; i++ {
+	for i := 0; i < variablesNum; i++ {
 		var value interface{}
 		value = "my value"
 		if i%2 == 0 {
@@ -103,7 +103,7 @@ func testCreateMap(name string, nodesNum int) mapsCreate.View {
 		v, err := json.Marshal(value)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		nodeModel := mapsCreate.NodeModel{
+		variableModel := mapsCreate.VariableModel{
 			Name:     fmt.Sprintf("name-%d", i),
 			Metadata: b,
 			Groups: []string{
@@ -116,8 +116,8 @@ func testCreateMap(name string, nodesNum int) mapsCreate.View {
 		}
 
 		entries = append(entries, mapsCreate.Entry{
-			Type:  "node",
-			Model: nodeModel,
+			Type:  "variable",
+			Model: variableModel,
 		})
 	}
 
@@ -128,7 +128,7 @@ func testCreateMap(name string, nodesNum int) mapsCreate.View {
 	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Nodes)).Should(gomega.Equal(nodesNum))
+	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
 	return view
 }
