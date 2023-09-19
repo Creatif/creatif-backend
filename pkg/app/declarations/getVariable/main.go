@@ -1,8 +1,11 @@
 package getVariable
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"errors"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -25,8 +28,17 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (Variable, error) {
-	return queryValue(c.model.Name, c.model.Fields)
+func (c Main) Logic() (declarations.Variable, error) {
+	variable, err := queryValue(c.model.Name, c.model.Fields)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return declarations.Variable{}, appErrors.NewNotFoundError(err)
+		}
+
+		return declarations.Variable{}, appErrors.NewDatabaseError(err)
+	}
+
+	return variable, nil
 }
 
 func (c Main) Handle() (map[string]interface{}, error) {
@@ -51,6 +63,6 @@ func (c Main) Handle() (map[string]interface{}, error) {
 	return newView(model, c.model.Fields), nil
 }
 
-func New(model Model) pkg.Job[Model, map[string]interface{}, Variable] {
+func New(model Model) pkg.Job[Model, map[string]interface{}, declarations.Variable] {
 	return Main{model: model}
 }

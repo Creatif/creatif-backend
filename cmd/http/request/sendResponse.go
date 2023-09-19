@@ -18,7 +18,7 @@ type ErrorResponse[T any] struct {
 }
 
 func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int) error {
-	createdModel, err := handler.Handle()
+	model, err := handler.Handle()
 
 	if err != nil {
 		validationError, ok := err.(appErrors.AppError[map[string]string])
@@ -32,11 +32,15 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 		if ok {
 			if otherError.Type() == appErrors.AUTHENTICATION_ERROR {
 				return context.JSON(http.StatusForbidden, ErrorResponse[string]{
-					Data: "Unauthenticated",
+					Data: "Unauthenticated!",
 				})
 			} else if otherError.Type() == appErrors.AUTHORIZATION_ERROR {
 				return context.JSON(http.StatusUnauthorized, ErrorResponse[string]{
-					Data: "Unauthorized",
+					Data: "Unauthorized!",
+				})
+			} else if otherError.Type() == appErrors.NOT_FOUND_ERROR {
+				return context.JSON(http.StatusNotFound, ErrorResponse[string]{
+					Data: "The record you are querying does not exist.",
 				})
 			}
 
@@ -55,5 +59,5 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 		})
 	}
 
-	return context.JSON(status, createdModel)
+	return context.JSON(status, model)
 }

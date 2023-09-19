@@ -5,7 +5,7 @@ import (
 )
 
 type GetValue struct {
-	Name string `json:"name"`
+	Name string `param:"name"`
 }
 
 func SanitizeGetValue(model GetValue) GetValue {

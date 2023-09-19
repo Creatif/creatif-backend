@@ -12,7 +12,6 @@ import (
 
 type Model struct {
 	Name      string   `json:"name"`
-	Type      string   `json:"type"`
 	Metadata  []byte   `json:"metadata"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
@@ -58,14 +57,14 @@ func (a *Model) Validate() map[string]string {
 }
 
 type View struct {
-	ID        string                 `json:"id"`
-	Name      string                 `json:"name"`
-	Groups    []string               `json:"groups"`
-	Behaviour string                 `json:"behaviour"`
-	Metadata  map[string]interface{} `json:"metadata"`
-	Value     []byte                 `json:"value"`
+	ID        string      `json:"id"`
+	Name      string      `json:"name"`
+	Groups    []string    `json:"groups"`
+	Behaviour string      `json:"behaviour"`
+	Metadata  interface{} `json:"metadata"`
+	Value     interface{} `json:"value"`
 
-	CreatedAt time.Time `gorm:"<-:createVariable" json:"createdAt"`
+	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
@@ -74,8 +73,9 @@ func newView(model declarations.Variable) View {
 		ID:        model.ID,
 		Name:      model.Name,
 		Groups:    model.Groups,
+		Metadata:  model.Metadata,
+		Value:     model.Value,
 		Behaviour: model.Behaviour,
-		Metadata:  sdk.UnmarshalToMap([]byte(model.Metadata)),
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 	}

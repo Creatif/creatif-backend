@@ -16,8 +16,8 @@ type MapVariable struct {
 	Name      string `gorm:"index;uniqueIndex:unique_variable"`
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
-	Metadata  datatypes.JSON
-	Value     datatypes.JSON
+	Metadata  datatypes.JSON `gorm:"type:jsonb"`
+	Value     datatypes.JSON `gorm:"type:jsonb"`
 
 	MapID string `gorm:"type:text;check:length(id)=26"`
 	Map   Map    `gorm:"foreignKey:MapID"`

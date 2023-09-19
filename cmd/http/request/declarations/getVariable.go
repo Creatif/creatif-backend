@@ -6,7 +6,7 @@ import (
 
 type GetVariable struct {
 	Name   string   `param:"name"`
-	Fields []string `param:"fields"`
+	Fields []string `query:"fields"`
 }
 
 func SanitizeGetVariable(model GetVariable) GetVariable {

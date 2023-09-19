@@ -16,10 +16,10 @@ type Variable struct {
 	Name      string `gorm:"index;uniqueIndex:unique_variable"`
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
-	Metadata  datatypes.JSON
-	Value     datatypes.JSON
+	Metadata  datatypes.JSON `gorm:"type:jsonb"`
+	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	CreatedAt time.Time `gorm:"<-:createVariable;index"`
+	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
 }
 

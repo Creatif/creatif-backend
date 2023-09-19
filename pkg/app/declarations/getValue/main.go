@@ -3,7 +3,9 @@ package getValue
 import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"errors"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -26,7 +28,16 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (Variable, error) {
-	return queryValue(c.model.Name)
+	value, err := queryValue(c.model.Name)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return Variable{}, appErrors.NewNotFoundError(err)
+		}
+
+		return Variable{}, appErrors.NewDatabaseError(err)
+	}
+
+	return value, nil
 }
 
 func (c Main) Handle() (datatypes.JSON, error) {

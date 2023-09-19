@@ -1,6 +1,7 @@
 package getVariable
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
 	"errors"
 	"fmt"
@@ -53,7 +54,7 @@ type Variable struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model Variable, returnFields []string) map[string]interface{} {
+func newView(model declarations.Variable, returnFields []string) map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = model.ID
 	m["name"] = model.Name

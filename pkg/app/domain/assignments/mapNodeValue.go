@@ -15,7 +15,7 @@ type MapVariableValue struct {
 	MapVariableID string                   `gorm:"type:text;check:length(id)=26"`
 	MapVariable   declarations.MapVariable `gorm:"foreignKey:MapID"`
 
-	Value datatypes.JSON
+	Value datatypes.JSON `gorm:"type:jsonb"`
 }
 
 func NewMapVariableValue(mapVariableId string, value datatypes.JSON) MapVariableValue {
