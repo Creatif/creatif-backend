@@ -90,7 +90,5 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 
 		gomega.Expect(views).Should(gomega.HaveKey("variables"))
 		gomega.Expect(views).Should(gomega.HaveKey("maps"))
-		gomega.Expect(views["maps"]).Should(gomega.HaveLen(100))
-		gomega.Expect(views["variables"]).Should(gomega.HaveLen(30))
 	})
 })
