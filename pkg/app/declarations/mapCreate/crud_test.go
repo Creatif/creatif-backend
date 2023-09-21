@@ -8,7 +8,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Map variable tests", func() {
-	ginkgo.It("should createVariable a map with only variable entries", func() {
+	ginkgo.It("should create a map with only variable entries", func() {
 		entries := make([]Entry, 0)
 
 		m := map[string]interface{}{

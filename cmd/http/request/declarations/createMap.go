@@ -9,7 +9,8 @@ import (
 
 type MapVariableModel struct {
 	Name      string   `json:"name"`
-	Metadata  []byte   `json:"metadata"`
+	Metadata  string   `json:"metadata"`
+	Value     string   `json:"value"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
 }
@@ -26,13 +27,12 @@ type CreateMap struct {
 
 func (u *CreateMap) UnmarshalJSON(b []byte) error {
 	var v map[string]interface{}
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
 
 	if _, ok := v["name"].(string); !ok {
 		return errors.New("'name' is not a string")
-	}
-
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
 	}
 
 	rawEntries, ok := v["entries"]
@@ -41,7 +41,7 @@ func (u *CreateMap) UnmarshalJSON(b []byte) error {
 	}
 
 	var entries []Entry
-	if err := sdk.ConvertByUnmarshaling(rawEntries, entries); err != nil {
+	if err := sdk.ConvertByUnmarshaling(rawEntries, &entries); err != nil {
 		return err
 	}
 
@@ -49,7 +49,7 @@ func (u *CreateMap) UnmarshalJSON(b []byte) error {
 	for _, entry := range entries {
 		if entry.Type == "variable" {
 			var variable MapVariableModel
-			if err := sdk.ConvertByUnmarshaling(entry.Model, variable); err != nil {
+			if err := sdk.ConvertByUnmarshaling(entry.Model, &variable); err != nil {
 				return err
 			}
 

@@ -18,10 +18,12 @@ func GetMapHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeGetMap(model)
 
-		fields := strings.Split(model.Fields, ",")
 		newFields := make([]string, 0)
-		for _, f := range fields {
-			newFields = append(newFields, strings.Trim(f, " "))
+		if strings.Trim(model.Fields, " ") != "" {
+			fields := strings.Split(strings.Trim(model.Fields, " "), ",")
+			for _, f := range fields {
+				newFields = append(newFields, strings.Trim(f, " "))
+			}
 		}
 
 		handler := getMap.New(getMap.NewModel(model.Name, newFields))

@@ -19,14 +19,14 @@ func CreateMapHandler() func(e echo.Context) error {
 
 		serviceEntries := make([]mapCreate.Entry, 0)
 		for _, entry := range model.Entries {
-
 			m, ok := entry.Model.(declarations.MapVariableModel)
 			if ok {
 				serviceEntries = append(serviceEntries, mapCreate.Entry{
 					Type: entry.Type,
 					Model: mapCreate.VariableModel{
 						Name:      m.Name,
-						Metadata:  m.Metadata,
+						Metadata:  []byte(m.Metadata),
+						Value:     []byte(m.Value),
 						Groups:    m.Groups,
 						Behaviour: m.Behaviour,
 					},

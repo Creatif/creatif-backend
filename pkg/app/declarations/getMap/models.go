@@ -129,9 +129,11 @@ func (a *Model) Validate() map[string]string {
 				fields := value.([]string)
 				vFields := a.validFields
 
-				for _, f := range fields {
-					if !sdk.Includes(vFields, f) {
-						return errors.New(fmt.Sprintf("%s is not a valid field to return. Valid fields are %s", f, strings.Join(a.validFields, ", ")))
+				if len(fields) > 0 {
+					for _, f := range fields {
+						if !sdk.Includes(vFields, f) {
+							return errors.New(fmt.Sprintf("%s is not a valid field to return. Valid fields are %s", f, strings.Join(a.validFields, ", ")))
+						}
 					}
 				}
 

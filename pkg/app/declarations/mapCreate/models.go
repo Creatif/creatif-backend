@@ -2,9 +2,11 @@ package mapCreate
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"gorm.io/gorm"
 )
@@ -15,6 +17,12 @@ type VariableModel struct {
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
 	Value     []byte   `json:"value"`
+}
+
+type View struct {
+	ID        string              `json:"id"`
+	Name      string              `json:"name"`
+	Variables []map[string]string `json:"variables"`
 }
 
 type Entry struct {
@@ -42,13 +50,16 @@ func NewModel(name string, entries []Entry) Model {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
+		"name":               a.Name,
 		"uniqueName":         a.Name,
 		"validNum":           a.Entries,
 		"validVariableNames": a.Entries,
+		"behaviourValid":     a.Entries,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("name", validation.Required, validation.RuneLength(1, 500)),
 			validation.Key("uniqueName", validation.By(func(value interface{}) error {
 				name := value.(string)
 
@@ -84,18 +95,29 @@ func (a *Model) Validate() map[string]string {
 				}
 				return nil
 			})),
+			validation.Key("behaviourValid", validation.Required, validation.By(func(value interface{}) error {
+				m := make(map[string]string)
+				for _, entry := range a.Entries {
+					if entry.Type == "variable" {
+						o := entry.Model.(VariableModel)
+						m[o.Name] = o.Behaviour
+					}
+				}
+
+				for key, v := range m {
+					if v != constants.ReadonlyBehaviour && v != constants.ModifiableBehaviour {
+						return errors.New(fmt.Sprintf("Invalid value for behaviour in variable '%s'. Variable behaviour can be 'modifiable' or 'readonly'", key))
+					}
+				}
+
+				return nil
+			})),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)
 	}
 
 	return nil
-}
-
-type View struct {
-	ID        string              `json:"id"`
-	Name      string              `json:"name"`
-	Variables []map[string]string `json:"variables"`
 }
 
 func newView(model LogicResult) View {
