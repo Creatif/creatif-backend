@@ -1,4 +1,4 @@
-package getBatchData
+package getBatchStructures
 
 import (
 	pkg "creatif/pkg/lib"
@@ -28,7 +28,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (map[string]interface{}, error) {
 	variables := make([]Variable, 0)
 	if len(c.model.variableIds) > 0 {
-		n, err := queryVariableValue(c.model.variableIds)
+		n, err := queryVariables(c.model.variableIds)
 		if err != nil {
 			return nil, err
 		}
@@ -36,20 +36,21 @@ func (c Main) Logic() (map[string]interface{}, error) {
 		variables = append(variables, n...)
 	}
 
-	maps := make([]QueriesMapVariable, 0)
+	queriedMaps := make([]QueriesMapVariable, 0)
 	if len(c.model.mapIds) > 0 {
-		if err := queryMapVariables(c.model.mapIds, &maps); err != nil {
+		if err := queryMaps(c.model.mapIds, &queriedMaps); err != nil {
 			return nil, err
 		}
 	}
 
-	mapVariables := make(map[string][]Variable)
-	for _, mapVariable := range maps {
-		if _, ok := mapVariables[mapVariable.Name]; !ok {
-			mapVariables[mapVariable.Name] = make([]Variable, 0)
+	maps := make(map[string][]Variable)
+	for _, mapVariable := range queriedMaps {
+		mapName := mapVariable.MapName
+		if _, ok := maps[mapName]; !ok {
+			maps[mapName] = make([]Variable, 0)
 		}
 
-		mapVariables[mapVariable.Name] = append(mapVariables[mapVariable.Name], Variable{
+		maps[mapName] = append(maps[mapName], Variable{
 			ID:        mapVariable.ID,
 			Name:      mapVariable.Name,
 			Behaviour: mapVariable.Behaviour,
@@ -63,7 +64,7 @@ func (c Main) Logic() (map[string]interface{}, error) {
 
 	return map[string]interface{}{
 		"variables": variables,
-		"maps":      mapVariables,
+		"maps":      maps,
 	}, nil
 }
 

@@ -64,7 +64,7 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
 				t := value.([]string)
 
-				if len(t) == 0 || len(t) > 4 {
+				if len(t) == 0 || len(t) > 5 {
 					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
 				}
 
@@ -75,16 +75,24 @@ func (a *Model) Validate() map[string]string {
 				return nil
 			})),
 			validation.Key("groups", validation.When(len(a.Values.Groups) != 0, validation.Each(validation.RuneLength(1, 200)))),
-			validation.Key("behaviour", validation.Required, validation.By(func(value interface{}) error {
+			validation.Key("behaviour", validation.By(func(value interface{}) error {
+				if !sdk.Includes(a.Fields, "behaviour") {
+					return nil
+				}
+
 				t := value.(string)
 
 				if t != constants.ReadonlyBehaviour && t != constants.ModifiableBehaviour {
-					return errors.New(fmt.Sprintf("Invalid value for behaviour. Variable type can be 'modifiable' or 'readonly'"))
+					return errors.New(fmt.Sprintf("Invalid value for behaviour. Variable behaviour can be 'modifiable' or 'readonly'"))
 				}
 
 				return nil
 			})),
 			validation.Key("updatingNameExists", validation.When(a.Values.Name != "", validation.Required, validation.RuneLength(1, 200)), validation.By(func(value interface{}) error {
+				if !sdk.Includes(a.Fields, "name") {
+					return nil
+				}
+
 				t := value.(string)
 
 				if t == "" {
@@ -107,12 +115,12 @@ func (a *Model) Validate() map[string]string {
 }
 
 type View struct {
-	ID        string                 `json:"id"`
-	Name      string                 `json:"name"`
-	Groups    []string               `json:"groups"`
-	Behaviour string                 `json:"behaviour"`
-	Metadata  map[string]interface{} `json:"metadata"`
-	Value     []byte                 `json:"value"`
+	ID        string      `json:"id"`
+	Name      string      `json:"name"`
+	Groups    []string    `json:"groups"`
+	Behaviour string      `json:"behaviour"`
+	Metadata  interface{} `json:"metadata"`
+	Value     interface{} `json:"value"`
 
 	CreatedAt time.Time `gorm:"<-:createVariable" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -124,7 +132,7 @@ func newView(model declarations.Variable) View {
 		Name:      model.Name,
 		Groups:    model.Groups,
 		Behaviour: model.Behaviour,
-		Metadata:  sdk.UnmarshalToMap([]byte(model.Metadata)),
+		Metadata:  model.Metadata,
 		Value:     model.Value,
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,

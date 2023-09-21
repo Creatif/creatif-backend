@@ -35,5 +35,5 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/variables", declarations.PaginateVariablesHandler())
 	group.GET("/map/:name", declarations.GetMapHandler())
 	group.GET("/variable/value/:name", declarations.GetValueHandler())
-	group.POST("/all-structures", declarations.GetAllStructuresHandler())
+	group.POST("/structures", declarations.GetBatchedStructuresHandler())
 }

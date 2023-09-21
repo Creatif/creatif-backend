@@ -17,7 +17,15 @@ func UpdateVariableHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeUpdateVariable(model)
 
-		handler := updateVariable.New(updateVariable.NewModel(model.Fields, model.Name, model.Values.Name, model.Values.Behaviour, model.Values.Groups, model.Values.Metadata, model.Values.Value))
+		handler := updateVariable.New(updateVariable.NewModel(
+			model.Fields,
+			model.Name,
+			model.Values.Name,
+			model.Values.Behaviour,
+			model.Values.Groups,
+			[]byte(model.Values.Metadata),
+			[]byte(model.Values.Value)),
+		)
 
 		return request.SendResponse[updateVariable.Model](handler, c, http.StatusOK)
 	}

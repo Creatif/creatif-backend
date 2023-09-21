@@ -1,4 +1,4 @@
-package getBatchData
+package getBatchStructures
 
 import (
 	create "creatif/pkg/app/declarations/createVariable"

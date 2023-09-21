@@ -1,4 +1,4 @@
-package getBatchData
+package getBatchStructures
 
 import (
 	"creatif/pkg/app/declarations/createVariable"
@@ -32,7 +32,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Combined -> getBatchData tests")
+	GinkgoRunSpecs(t, "Combined -> getBatchStructures tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

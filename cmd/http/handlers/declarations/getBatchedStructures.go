@@ -3,12 +3,12 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/combined/getBatchData"
+	"creatif/pkg/app/combined/getBatchStructures"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func GetAllStructuresHandler() func(e echo.Context) error {
+func GetBatchedStructuresHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		var model []declarations.GetBatchedVariables
 		if err := c.Bind(&model); err != nil {
@@ -21,8 +21,8 @@ func GetAllStructuresHandler() func(e echo.Context) error {
 			serviceModel[m.Name] = m.Type
 		}
 
-		handler := getBatchData.New(getBatchData.NewModel(serviceModel))
+		handler := getBatchStructures.New(getBatchStructures.NewModel(serviceModel))
 
-		return request.SendResponse[*getBatchData.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[*getBatchStructures.Model](handler, c, http.StatusCreated)
 	}
 }

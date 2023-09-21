@@ -7,10 +7,10 @@ import (
 
 type UpdateVariableValues struct {
 	Name      string   `json:"name"`
-	Metadata  []byte   `json:"metadata"`
+	Metadata  string   `json:"metadata"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
-	Value     []byte   `json:"value"`
+	Value     string   `json:"value"`
 }
 
 type UpdateVariable struct {
@@ -29,12 +29,12 @@ func SanitizeUpdateVariable(model UpdateVariable) UpdateVariable {
 
 	values := UpdateVariableValues{
 		Name:     p.Sanitize(model.Values.Name),
-		Metadata: []byte(p.Sanitize(string(model.Values.Metadata))),
+		Metadata: model.Values.Metadata,
 		Groups: sdk.Map(model.Values.Groups, func(idx int, value string) string {
 			return p.Sanitize(value)
 		}),
 		Behaviour: p.Sanitize(model.Values.Behaviour),
-		Value:     []byte(p.Sanitize(string(model.Values.Metadata))),
+		Value:     model.Values.Value,
 	}
 
 	model.Fields = newFields

@@ -1,4 +1,4 @@
-package getBatchData
+package getBatchStructures
 
 import (
 	"creatif/pkg/app/domain/declarations"
@@ -25,7 +25,7 @@ type Variable struct {
 type QueriesMapVariable struct {
 	ID string `gorm:"primarykey"`
 
-	MapName   string
+	MapName   string `gorm:"->" json:"mapName"`
 	Name      string `gorm:"index;uniqueIndex:unique_variable"`
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
@@ -36,7 +36,7 @@ type QueriesMapVariable struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func queryVariableValue(variableIds []string) ([]Variable, error) {
+func queryVariables(variableIds []string) ([]Variable, error) {
 	var variables []Variable
 	if res := storage.Gorm().Raw(`SELECT n.id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, n.value FROM declarations.variables AS n WHERE n.id IN (?)
 `, variableIds).Scan(&variables); res.Error != nil {
@@ -46,12 +46,12 @@ func queryVariableValue(variableIds []string) ([]Variable, error) {
 	return variables, nil
 }
 
-func queryMapVariables(mapIds []string, model interface{}) error {
+func queryMaps(mapIds []string, model interface{}) error {
 	sql := fmt.Sprintf(`
 SELECT 
     n.id,
     n.name,
-    m.name AS mapName,
+    m.name AS map_name,
     n.groups,
     n.metadata,
     n.value,

@@ -1,4 +1,4 @@
-package getBatchData
+package getBatchStructures
 
 import (
 	"creatif/pkg/app/domain/declarations"
