@@ -18,7 +18,7 @@ type View struct {
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
 	Metadata  interface{} `json:"metadata"`
-	Value     interface{} `json:"value,omitempty"`
+	Value     interface{} `json:"value"`
 
 	CreatedAt time.Time `gorm:"<-:createVariable" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -40,7 +40,6 @@ type ViewPaginationInfo struct {
 type PaginatedView struct {
 	Items          []View             `json:"items"`
 	PaginationInfo ViewPaginationInfo `json:"paginationInfo"`
-	Parameters     ViewParameters     `json:"parameters"`
 }
 
 func newView(model LogicModel) PaginatedView {
@@ -57,17 +56,19 @@ func newView(model LogicModel) PaginatedView {
 		}
 	})
 
-	return PaginatedView{
+	p := PaginatedView{
 		Items: views,
 		PaginationInfo: ViewPaginationInfo{
 			Next: model.paginationInfo.Next,
 			Prev: model.paginationInfo.Prev,
-		},
-		Parameters: ViewParameters{
-			Field:   model.paginationInfo.Parameters.Field,
-			OrderBy: model.paginationInfo.Parameters.OrderBy,
-			Groups:  model.paginationInfo.Parameters.Groups,
-			Limit:   model.paginationInfo.Parameters.Limit,
+			Parameters: ViewParameters{
+				Field:   model.paginationInfo.Parameters.Field,
+				OrderBy: model.paginationInfo.Parameters.OrderBy,
+				Groups:  model.paginationInfo.Parameters.Groups,
+				Limit:   model.paginationInfo.Parameters.Limit,
+			},
 		},
 	}
+
+	return p
 }

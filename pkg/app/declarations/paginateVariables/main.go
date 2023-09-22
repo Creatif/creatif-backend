@@ -60,7 +60,7 @@ func (c Main) Logic() (LogicModel, error) {
 		}
 
 		paginationInfo = info
-	} else if len(variables) > 0 {
+	} else if len(variables) == c.model.Limit {
 		info, err := p.PaginationInfo(variables[len(variables)-1].ID, variables[0].ID, c.model.Field, c.model.OrderBy, c.model.Groups, c.model.Limit)
 		if err != nil {
 			return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.declarationsVariable", nil)
