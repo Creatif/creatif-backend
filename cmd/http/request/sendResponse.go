@@ -40,7 +40,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 				})
 			} else if otherError.Type() == appErrors.NOT_FOUND_ERROR {
 				return context.JSON(http.StatusNotFound, ErrorResponse[string]{
-					Data: "The record you are querying does not exist.",
+					Data: "The resource does not exist.",
 				})
 			}
 

@@ -1,16 +1,22 @@
 package paginateVariables
 
 import (
+	"creatif/pkg/app/declarations/paginateVariables/pagination"
 	"creatif/pkg/lib/sdk"
-	"creatif/pkg/lib/sdk/pagination"
-	"time"
+	"errors"
+	"fmt"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"strings"
 )
 
 type Model struct {
-	NextID    string
-	PrevID    string
-	Field     string
-	OrderBy   string
+	NextID string
+	PrevID string
+	// field for ORDER_BY clause
+	Field string
+	// DESC or ASC
+	OrderBy string
+	// forward or backwards
 	Direction string
 	Groups    []string
 	Limit     int
@@ -28,87 +34,51 @@ func NewModel(nextId, prevId, field, orderBy, direction string, limit int, group
 	}
 }
 
-type LogicModelWithoutValue struct {
-	variables      []VariableWithoutValue
-	paginationInfo pagination.PaginationInfo
-}
-
-type LogicModelWithValue struct {
-	variables      []VariableWithValue
-	paginationInfo pagination.PaginationInfo
-}
-
-type View struct {
-	ID        string                 `json:"id"`
-	Name      string                 `json:"name"`
-	Type      string                 `json:"type"`
-	Groups    []string               `json:"groups"`
-	Behaviour string                 `json:"behaviour"`
-	Metadata  map[string]interface{} `json:"metadata"`
-	Value     interface{}            `json:"value,omitempty"`
-
-	CreatedAt time.Time `gorm:"<-:createVariable" json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
-type ViewPaginationInfo struct {
-	Next    string `json:"next"`
-	Prev    string `json:"prev"`
-	NextURL string `json:"nextURL"`
-	PrevURL string `json:"prevURL"`
-}
-
-type PaginatedView struct {
-	Items          []View             `json:"items"`
-	PaginationInfo ViewPaginationInfo `json:"paginationInfo"`
-}
-
-func newView(model interface{}) PaginatedView {
-	if m, ok := model.(LogicModelWithoutValue); ok {
-		views := sdk.Map(m.variables, func(idx int, value VariableWithoutValue) View {
-			return View{
-				ID:        value.ID,
-				Name:      value.Name,
-				Groups:    value.Groups,
-				Behaviour: value.Behaviour,
-				Metadata:  sdk.UnmarshalToMap([]byte(value.Metadata)),
-				CreatedAt: value.CreatedAt,
-				UpdatedAt: value.UpdatedAt,
-			}
-		})
-
-		return PaginatedView{
-			Items: views,
-			PaginationInfo: ViewPaginationInfo{
-				Next:    m.paginationInfo.Next,
-				Prev:    m.paginationInfo.Prev,
-				NextURL: m.paginationInfo.NextURL,
-				PrevURL: m.paginationInfo.PrevURL,
-			},
-		}
+func (a *Model) Validate() map[string]string {
+	v := map[string]interface{}{
+		"field":     a.Field,
+		"orderBy":   a.OrderBy,
+		"direction": a.Direction,
+		"limit":     a.Limit,
 	}
 
-	m := model.(LogicModelWithValue)
-	views := sdk.Map(m.variables, func(idx int, value VariableWithValue) View {
-		return View{
-			ID:        value.ID,
-			Name:      value.Name,
-			Groups:    value.Groups,
-			Value:     value.Value,
-			Behaviour: value.Behaviour,
-			Metadata:  sdk.UnmarshalToMap([]byte(value.Metadata)),
-			CreatedAt: value.CreatedAt,
-			UpdatedAt: value.UpdatedAt,
-		}
-	})
+	if err := validation.Validate(v,
+		validation.Map(
+			validation.Key("field", validation.Required, validation.RuneLength(1, 50)),
+			validation.Key("orderBy", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+				orderBy := strings.ToUpper(t)
 
-	return PaginatedView{
-		Items: views,
-		PaginationInfo: ViewPaginationInfo{
-			Next:    m.paginationInfo.Next,
-			Prev:    m.paginationInfo.Prev,
-			NextURL: m.paginationInfo.NextURL,
-			PrevURL: m.paginationInfo.PrevURL,
-		},
+				if orderBy != pagination.DESC && orderBy != pagination.ASC {
+					return errors.New(fmt.Sprintf("orderBy field can be either '%s' or '%s'", pagination.DESC, pagination.ASC))
+				}
+
+				a.OrderBy = orderBy
+
+				return nil
+			})),
+			validation.Key("direction", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if t != pagination.DIRECTION_FORWARD && t != pagination.DIRECTION_BACKWARDS {
+					return errors.New(fmt.Sprintf("direction field can be either '%s' or '%s'", pagination.DIRECTION_FORWARD, pagination.DIRECTION_BACKWARDS))
+				}
+
+				return nil
+			})),
+			validation.Key("limit", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(int)
+
+				if t <= 0 {
+					return errors.New("Limit must be greater than 0 (zero)")
+				}
+
+				return nil
+			})),
+		),
+	); err != nil {
+		return sdk.ErrorToResponseError(err)
 	}
+
+	return nil
 }

@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", "desc", pagination.DIRECTION_FORWARD, limit, []string{}))
+		handler := New(NewModel("", "", "created_at", pagination.DESC, pagination.DIRECTION_FORWARD, limit, []string{}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -32,7 +32,7 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", "desc", pagination.DIRECTION_FORWARD, limit, []string{"one", "two", "three", "six"}))
+		handler := New(NewModel("", "", "created_at", pagination.DESC, pagination.DIRECTION_FORWARD, limit, []string{"one", "two", "three", "six"}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -50,7 +50,7 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit, []string{"one"}))
+		handler := New(NewModel("", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"one"}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -68,7 +68,7 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit, []string{"one"}))
+		handler := New(NewModel("", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"one"}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -86,7 +86,7 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", "asc", pagination.DIRECTION_FORWARD, limit, []string{"six"}))
+		handler := New(NewModel("", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"six"}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

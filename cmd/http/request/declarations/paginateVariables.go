@@ -27,11 +27,13 @@ func SanitizePaginateVariables(model PaginateVariables) PaginateVariables {
 	model.Direction = p.Sanitize(model.Direction)
 	model.Groups = p.Sanitize(model.Groups)
 
-	newGroups := sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {
-		return p.Sanitize(strings.TrimSpace(value))
-	})
+	if model.Groups != "" {
+		newGroups := sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {
+			return p.Sanitize(strings.TrimSpace(value))
+		})
 
-	model.SanitizedGroups = newGroups
+		model.SanitizedGroups = newGroups
+	}
 
 	return model
 }

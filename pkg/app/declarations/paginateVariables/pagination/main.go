@@ -85,7 +85,7 @@ func (p Pagination) Paginate(model interface{}) error {
 	return nil
 }
 
-func (p Pagination) PaginationInfo(nextId, prevId string) (PaginationInfo, error) {
+func (p Pagination) PaginationInfo(nextId, prevId, field, orderBy string, groups []string, limit int) (PaginationInfo, error) {
 	var next, prev string
 	if nextId != "" {
 		next = fmt.Sprintf("?nextId=%s&prevId=%s&field=%s&orderBy=%s&direction=%s&limit=%d", nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_FORWARD, p.limit)
@@ -98,5 +98,11 @@ func (p Pagination) PaginationInfo(nextId, prevId string) (PaginationInfo, error
 	return PaginationInfo{
 		Next: next,
 		Prev: prev,
+		Parameters: Parameters{
+			Field:   field,
+			OrderBy: orderBy,
+			Groups:  groups,
+			Limit:   limit,
+		},
 	}, nil
 }

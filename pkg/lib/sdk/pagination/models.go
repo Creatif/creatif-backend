@@ -4,18 +4,19 @@ type initialModel struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 }
 
-type PaginationInfo struct {
-	Next    string
-	Prev    string
-	NextURL string
-	PrevURL string
+type Parameters struct {
+	NextID    string
+	PrevID    string
+	Field     string
+	OrderBy   string
+	Direction string
+	Groups    []string
+	Limit     int
 }
 
-func newPaginationInfo(nextCursor, prevCursor, nextURL, prevURL string) PaginationInfo {
-	return PaginationInfo{
-		Next:    nextCursor,
-		Prev:    prevCursor,
-		NextURL: nextURL,
-		PrevURL: prevURL,
-	}
+type PaginationInfo struct {
+	Next           string
+	Prev           string
+	NextParameters Parameters
+	PrevParameters Parameters
 }
