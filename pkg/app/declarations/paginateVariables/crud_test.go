@@ -1,7 +1,7 @@
 package paginateVariables
 
 import (
-	"creatif/pkg/lib/sdk/pagination"
+	"creatif/pkg/app/declarations/paginateVariables/pagination"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"

@@ -38,7 +38,7 @@ func (c Main) Logic() (LogicModel, error) {
 		c.model.Direction,
 		c.model.Limit,
 	)
-	
+
 	var variables []Variable
 	err := p.Paginate(&variables)
 	if err != nil {
