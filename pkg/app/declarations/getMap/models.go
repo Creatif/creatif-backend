@@ -51,7 +51,7 @@ type Variable struct {
 	Groups    pq.StringArray `json:"groups" gorm:"type:text[]"`
 	Metadata  datatypes.JSON `json:"metadata"`
 
-	CreatedAt time.Time `json:"createdAt" gorm:"<-:createVariable"`
+	CreatedAt time.Time `json:"createdAt" gorm:"<-:createProject"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 

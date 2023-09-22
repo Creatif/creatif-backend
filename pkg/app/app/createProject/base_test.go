@@ -1,10 +1,8 @@
-package updateVariable
+package createProject
 
 import (
-	"creatif/pkg/app/declarations/createVariable"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -31,7 +29,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
+	GinkgoRunSpecs(t, "Project -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -71,30 +69,6 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateDeclarationVariable(name, behaviour string, groups []string, metadata []byte) createVariable.View {
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	handler := createVariable.New(createVariable.NewModel(name, behaviour, groups, metadata, b))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
-
-func testCreateBasicDeclarationTextVariable(name, behaviour string) createVariable.View {
-	return testCreateDeclarationVariable(name, behaviour, []string{}, []byte{})
-}
-
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }
@@ -103,4 +77,16 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateProject(name string) string {
+	handler := New(NewModel(name))
+
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(model.ID)
+
+	gomega.Expect(model.Name).Should(gomega.Equal(name))
+
+	return model.ID
 }

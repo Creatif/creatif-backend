@@ -8,7 +8,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Declaration variable tests", func() {
-	ginkgo.It("should createVariable a text declaration variable", func() {
+	ginkgo.It("should createProject a text declaration variable", func() {
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
@@ -29,7 +29,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(view.UpdatedAt).ShouldNot(gomega.BeNil())
 	})
 
-	ginkgo.It("should createVariable a boolean declaration variable", func() {
+	ginkgo.It("should createProject a boolean declaration variable", func() {
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,

@@ -65,9 +65,9 @@ func (c Create) Logic() (declarations.Variable, error) {
 	}}).Create(&model)
 
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
-		return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("createVariable.Logic", nil)
+		return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("createProject.Logic", nil)
 	} else if res.Error != nil {
-		return declarations.Variable{}, appErrors.NewDatabaseError(res.Error).AddError("createVariable.Logic", nil)
+		return declarations.Variable{}, appErrors.NewDatabaseError(res.Error).AddError("createProject.Logic", nil)
 	}
 
 	return model, nil

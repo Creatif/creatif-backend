@@ -22,7 +22,7 @@ type MapVariable struct {
 	MapID string `gorm:"type:text;check:length(id)=26"`
 	Map   Map    `gorm:"foreignKey:MapID"`
 
-	CreatedAt time.Time `gorm:"<-:createVariable;index"`
+	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
 }
 

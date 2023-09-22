@@ -1,4 +1,4 @@
-package declarations
+package app
 
 import (
 	"creatif/pkg/app/domain"
@@ -8,22 +8,22 @@ import (
 	"time"
 )
 
-type Map struct {
+type Project struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	Name string `gorm:"uniqueIndex"`
+	Name string `gorm:"index"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }
 
-func NewMap(name string) Map {
-	return Map{
+func NewProject(name string) Project {
+	return Project{
 		Name: name,
 	}
 }
 
-func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *Project) BeforeCreate(tx *gorm.DB) (err error) {
 	id, err := sdk.NewULID()
 	if err != nil {
 		return err
@@ -34,6 +34,6 @@ func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (Map) TableName() string {
-	return fmt.Sprintf("%s.%s", "declarations", domain.VARIABLE_MAP)
+func (Project) TableName() string {
+	return fmt.Sprintf("%s.%s", "app", domain.PROJECT_TABLE)
 }
