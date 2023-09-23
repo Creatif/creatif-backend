@@ -10,7 +10,8 @@ import (
 )
 
 type Variable struct {
-	ID string `gorm:"primarykey"`
+	ID        string `gorm:"primarykey"`
+	ProjectID string
 
 	Name      string `gorm:"index;uniqueIndex:unique_variable"`
 	Behaviour string
@@ -23,7 +24,8 @@ type Variable struct {
 }
 
 type QueriesMapVariable struct {
-	ID string `gorm:"primarykey"`
+	ID        string `gorm:"primarykey"`
+	ProjectID string
 
 	MapName   string `gorm:"->" json:"mapName"`
 	Name      string `gorm:"index;uniqueIndex:unique_variable"`
@@ -38,7 +40,7 @@ type QueriesMapVariable struct {
 
 func queryVariables(variableIds []string) ([]Variable, error) {
 	var variables []Variable
-	if res := storage.Gorm().Raw(`SELECT n.id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, n.value FROM declarations.variables AS n WHERE n.id IN (?)
+	if res := storage.Gorm().Raw(`SELECT n.id, n.project_id, n.name, n.behaviour, n.metadata, n.groups, n.created_at, n.updated_at, n.value FROM declarations.variables AS n WHERE n.id IN (?)
 `, variableIds).Scan(&variables); res.Error != nil {
 		return nil, res.Error
 	}
@@ -51,6 +53,7 @@ func queryMaps(mapIds []string, model interface{}) error {
 SELECT 
     n.id,
     n.name,
+    m.project_id,
     m.name AS map_name,
     n.groups,
     n.metadata,

@@ -105,7 +105,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string) createVari
 	return view
 }
 
-func testCreateMap(name string, variablesNum int) mapsCreate.View {
+func testCreateMap(projectId, name string, variablesNum int) mapsCreate.View {
 	entries := make([]mapsCreate.Entry, 0)
 
 	m := map[string]interface{}{
@@ -155,7 +155,7 @@ func testCreateMap(name string, variablesNum int) mapsCreate.View {
 		})
 	}
 
-	handler := mapsCreate.New(mapsCreate.NewModel(name, entries))
+	handler := mapsCreate.New(mapsCreate.NewModel(projectId, name, entries))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

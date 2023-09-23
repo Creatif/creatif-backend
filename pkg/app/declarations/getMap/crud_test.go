@@ -7,9 +7,10 @@ import (
 
 var _ = ginkgo.Describe("GET map tests", func() {
 	ginkgo.It("should getVariable names only (default) representation of map of variables", func() {
-		view := testCreateMap("mapName", 100)
+		projectId := testCreateProject("project")
+		view := testCreateMap(projectId, "mapName", 100)
 
-		handler := New(NewModel(view.Name, []string{}))
+		handler := New(NewModel(projectId, view.Name, []string{}))
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
@@ -18,9 +19,10 @@ var _ = ginkgo.Describe("GET map tests", func() {
 	})
 
 	ginkgo.It("should get specific fields from a map variable", func() {
-		view := testCreateMap("mapName", 100)
+		projectId := testCreateProject("project")
+		view := testCreateMap(projectId, "mapName", 100)
 
-		handler := New(NewModel(view.Name, []string{"groups", "value"}))
+		handler := New(NewModel(projectId, view.Name, []string{"groups", "value"}))
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)

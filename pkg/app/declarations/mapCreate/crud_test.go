@@ -9,6 +9,7 @@ import (
 
 var _ = ginkgo.Describe("Map variable tests", func() {
 	ginkgo.It("should create a map with only variable entries", func() {
+		projectId := testCreateProject("project")
 		entries := make([]Entry, 0)
 
 		m := map[string]interface{}{
@@ -58,7 +59,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel("mapName", entries))
+		handler := New(NewModel(projectId, "mapName", entries))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)

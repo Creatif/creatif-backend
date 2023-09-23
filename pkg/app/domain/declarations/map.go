@@ -13,13 +13,16 @@ type Map struct {
 
 	Name string `gorm:"uniqueIndex"`
 
+	ProjectID string `gorm:"index;type:text;check:length(id)=26"`
+
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }
 
-func NewMap(name string) Map {
+func NewMap(projectId, name string) Map {
 	return Map{
-		Name: name,
+		Name:      name,
+		ProjectID: projectId,
 	}
 }
 

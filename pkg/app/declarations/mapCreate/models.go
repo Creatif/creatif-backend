@@ -31,8 +31,9 @@ type Entry struct {
 }
 
 type Model struct {
-	Entries []Entry `json:"entries"`
-	Name    string  `json:"name"`
+	Entries   []Entry `json:"entries"`
+	Name      string  `json:"name"`
+	ProjectID string  `json:"projectID"`
 }
 
 type LogicResult struct {
@@ -41,10 +42,11 @@ type LogicResult struct {
 	Name      string
 }
 
-func NewModel(name string, entries []Entry) Model {
+func NewModel(projectId, name string, entries []Entry) Model {
 	return Model{
-		Name:    name,
-		Entries: entries,
+		Name:      name,
+		ProjectID: projectId,
+		Entries:   entries,
 	}
 }
 

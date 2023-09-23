@@ -26,7 +26,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "variable"
 		}
 
-		handler := New(NewModel(model))
+		handler := New(NewModel(projectId, model))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -39,9 +39,10 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 	})
 
 	ginkgo.It("should get a batch of maps with full data", func() {
+		projectId := testCreateProject("project")
 		maps := make([]string, 0)
 		for i := 0; i < 100; i++ {
-			view := testCreateMap(fmt.Sprintf("name-%d", i), 100)
+			view := testCreateMap(projectId, fmt.Sprintf("name-%d", i), 100)
 			maps = append(maps, view.Name)
 		}
 
@@ -50,7 +51,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "map"
 		}
 
-		handler := New(NewModel(model))
+		handler := New(NewModel(projectId, model))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -73,7 +74,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 
 		maps := make([]string, 0)
 		for i := 0; i < 100; i++ {
-			view := testCreateMap(fmt.Sprintf("name-%d", i), 100)
+			view := testCreateMap(projectId, fmt.Sprintf("name-%d", i), 100)
 			maps = append(maps, view.Name)
 		}
 
@@ -86,7 +87,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "variable"
 		}
 
-		handler := New(NewModel(model))
+		handler := New(NewModel(projectId, model))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

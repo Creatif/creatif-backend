@@ -26,7 +26,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
-	m, err := queryMap(c.model.Name)
+	m, err := queryMap(c.model.ProjectID, c.model.Name)
 	if err != nil {
 		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
 	}

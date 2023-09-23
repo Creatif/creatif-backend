@@ -23,15 +23,17 @@ var validFields = []string{
 }
 
 type Model struct {
-	Name   string
-	Fields []string
+	Name      string
+	Fields    []string
+	ProjectID string
 
 	validFields []string
 }
 
-func NewModel(name string, fields []string) Model {
+func NewModel(projectId, name string, fields []string) Model {
 	return Model{
 		Name:        name,
+		ProjectID:   projectId,
 		Fields:      fields,
 		validFields: validFields,
 	}
@@ -58,6 +60,7 @@ type Variable struct {
 type View struct {
 	ID        string                   `json:"id"`
 	Name      string                   `json:"name"`
+	ProjectID string                   `json:"projectID"`
 	Variables []map[string]interface{} `json:"variables"`
 
 	CreatedAt time.Time `json:"createdAt"`
@@ -108,6 +111,7 @@ func newView(model LogicModel, returnFields []string) View {
 
 	return View{
 		ID:        model.variableMap.ID,
+		ProjectID: model.variableMap.ProjectID,
 		Name:      model.variableMap.Name,
 		Variables: m,
 		CreatedAt: model.variableMap.CreatedAt,

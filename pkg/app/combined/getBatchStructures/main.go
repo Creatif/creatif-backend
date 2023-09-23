@@ -1,8 +1,10 @@
 package getBatchStructures
 
 import (
+	"creatif/pkg/app/domain/app"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/storage"
 )
 
 type Main struct {
@@ -18,6 +20,12 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
+	// user check by project id should be gotten here, with authentication cookie
+	var project app.Project
+	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
+		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	}
+
 	return nil
 }
 
@@ -52,6 +60,7 @@ func (c Main) Logic() (map[string]interface{}, error) {
 
 		maps[mapName] = append(maps[mapName], Variable{
 			ID:        mapVariable.ID,
+			ProjectID: mapVariable.ProjectID,
 			Name:      mapVariable.Name,
 			Behaviour: mapVariable.Behaviour,
 			Groups:    mapVariable.Groups,

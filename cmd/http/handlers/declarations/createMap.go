@@ -34,7 +34,7 @@ func CreateMapHandler() func(e echo.Context) error {
 			}
 		}
 
-		handler := mapCreate.New(mapCreate.NewModel(model.Name, serviceEntries))
+		handler := mapCreate.New(mapCreate.NewModel(model.ProjectID, model.Name, serviceEntries))
 
 		return request.SendResponse[mapCreate.Model](handler, c, http.StatusCreated)
 	}

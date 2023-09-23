@@ -19,12 +19,13 @@ type variable struct {
 
 type Model struct {
 	Variables []variable
+	ProjectID string
 
 	mapIds      []string
 	variableIds []string
 }
 
-func NewModel(variables map[string]string) *Model {
+func NewModel(projectId string, variables map[string]string) *Model {
 	models := make([]variable, len(variables))
 	count := 0
 	for name, t := range variables {
@@ -37,6 +38,7 @@ func NewModel(variables map[string]string) *Model {
 
 	return &Model{
 		Variables: models,
+		ProjectID: projectId,
 	}
 }
 
@@ -158,12 +160,12 @@ func (a *Model) Validate() map[string]string {
 				})
 
 				var foundVariables []declarations.Variable
-				if res := storage.Gorm().Table((declarations.Variable{}).TableName()).Select("ID").Where("name IN (?)", variablesNames).Find(&foundVariables); res.Error != nil {
+				if res := storage.Gorm().Table((declarations.Variable{}).TableName()).Select("ID").Where("project_id = ? AND name IN (?)", a.ProjectID, variablesNames).Find(&foundVariables); res.Error != nil {
 					return errors.New("One of the variables or map names given is invalid or does not exist.")
 				}
 
 				var maps []declarations.Map
-				if res := storage.Gorm().Table((declarations.Map{}).TableName()).Select("ID").Where("name IN (?)", mapNames).Find(&maps); res.Error != nil {
+				if res := storage.Gorm().Table((declarations.Map{}).TableName()).Select("ID").Where("project_id = ? AND name IN (?)", a.ProjectID, mapNames).Find(&maps); res.Error != nil {
 					return errors.New("One of the variables or map names given is invalid or does not exist.")
 				}
 

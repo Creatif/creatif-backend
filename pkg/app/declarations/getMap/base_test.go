@@ -1,6 +1,7 @@
 package getMap
 
 import (
+	"creatif/pkg/app/app/createProject"
 	mapsCreate "creatif/pkg/app/declarations/mapCreate"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
@@ -71,7 +72,7 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateMap(name string, variablesNum int) mapsCreate.View {
+func testCreateMap(projectId, name string, variablesNum int) mapsCreate.View {
 	entries := make([]mapsCreate.Entry, 0)
 
 	m := map[string]interface{}{
@@ -121,7 +122,7 @@ func testCreateMap(name string, variablesNum int) mapsCreate.View {
 		})
 	}
 
-	handler := mapsCreate.New(mapsCreate.NewModel(name, entries))
+	handler := mapsCreate.New(mapsCreate.NewModel(projectId, name, entries))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -141,4 +142,16 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateProject(name string) string {
+	handler := createProject.New(createProject.NewModel(name))
+
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(model.ID)
+
+	gomega.Expect(model.Name).Should(gomega.Equal(name))
+
+	return model.ID
 }

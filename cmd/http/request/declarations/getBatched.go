@@ -4,22 +4,29 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type GetBatchedVariables struct {
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	ProjectID string `param:"projectID"`
+type GetBatchedStructures struct {
+	ProjectID  string              `param:"projectID"`
+	Structures []BatchedStructures `json:"structures"`
 }
 
-func SanitizeGetBatchedVariables(model []GetBatchedVariables) []GetBatchedVariables {
-	p := bluemonday.StrictPolicy()
-	sanitized := make([]GetBatchedVariables, 0)
+type BatchedStructures struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
 
-	for _, n := range model {
-		sanitized = append(sanitized, GetBatchedVariables{
+func SanitizeGetBatchedVariables(model GetBatchedStructures) GetBatchedStructures {
+	p := bluemonday.StrictPolicy()
+	model.ProjectID = p.Sanitize(model.ProjectID)
+
+	sanitized := make([]BatchedStructures, 0)
+	for _, n := range model.Structures {
+		sanitized = append(sanitized, BatchedStructures{
 			Name: p.Sanitize(n.Name),
 			Type: p.Sanitize(n.Type),
 		})
 	}
 
-	return sanitized
+	model.Structures = sanitized
+
+	return model
 }

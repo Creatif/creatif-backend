@@ -26,7 +26,7 @@ func GetMapHandler() func(e echo.Context) error {
 			}
 		}
 
-		handler := getMap.New(getMap.NewModel(model.Name, newFields))
+		handler := getMap.New(getMap.NewModel(model.ProjectID, model.Name, newFields))
 
 		return request.SendResponse[getMap.Model](handler, c, http.StatusOK)
 	}

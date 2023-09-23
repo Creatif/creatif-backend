@@ -37,10 +37,10 @@ SELECT
 	return nil
 }
 
-func queryMap(mapName string) (declarations.Map, error) {
+func queryMap(projectId, mapName string) (declarations.Map, error) {
 	var m declarations.Map
-	if err := storage.GetBy((declarations.Map{}).TableName(), "name", mapName, &m); err != nil {
-		return declarations.Map{}, err
+	if res := storage.Gorm().Where("name = ? AND project_id = ?", mapName, projectId).First(&m); res.Error != nil {
+		return declarations.Map{}, res.Error
 	}
 
 	return m, nil

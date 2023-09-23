@@ -2,7 +2,6 @@ package declarations
 
 import (
 	"creatif/pkg/app/domain"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/lib/sdk"
 	"fmt"
 	"github.com/lib/pq"
@@ -20,8 +19,7 @@ type Variable struct {
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	ProjectID string `gorm:"type:text CHECK(length(id)=26)"`
-	Project   app.Project
+	ProjectID string `gorm:"index;type:text;check:length(id)=26"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
