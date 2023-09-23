@@ -13,6 +13,7 @@ type GetMap struct {
 func SanitizeGetMap(model GetMap) GetMap {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
+	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Fields = p.Sanitize(model.Fields)
 
 	return model

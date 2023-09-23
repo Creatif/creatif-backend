@@ -1,6 +1,7 @@
 package main
 
 import (
+	appHandlers "creatif/cmd/http/handlers/app"
 	"creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/server"
 	"github.com/labstack/echo/v4"
@@ -22,18 +23,23 @@ func app() {
 	}))
 
 	declarationRoutes(srv.Group("/api/v1/declarations"))
+	appRoutes(srv.Group("/api/v1/app"))
 
 	server.StartServer(srv)
 }
 
+func appRoutes(group *echo.Group) {
+	group.PUT("/project", appHandlers.CreateProjectHandler())
+}
+
 func declarationRoutes(group *echo.Group) {
 	group.PUT("/variable", declarations.CreateVariableHandler())
-	group.POST("/variable", declarations.UpdateVariableHandler())
-	group.DELETE("/variable/:name", declarations.DeleteVariableHandler())
-	group.PUT("/map", declarations.CreateMapHandler())
-	group.GET("/variable/:name", declarations.GetVariableHandler())
-	group.GET("/variables", declarations.PaginateVariablesHandler())
-	group.GET("/map/:name", declarations.GetMapHandler())
-	group.GET("/variable/value/:name", declarations.GetValueHandler())
-	group.POST("/structures", declarations.GetBatchedStructuresHandler())
+	group.POST("/variable/:projectID", declarations.UpdateVariableHandler())
+	group.DELETE("/variable/:projectID/:name", declarations.DeleteVariableHandler())
+	group.PUT("/map/:projectID", declarations.CreateMapHandler())
+	group.GET("/variable/:projectID/:name", declarations.GetVariableHandler())
+	group.GET("/variables/:projectID", declarations.PaginateVariablesHandler())
+	group.GET("/map/:projectID/:name", declarations.GetMapHandler())
+	group.GET("/variable/value/:projectID/:name", declarations.GetValueHandler())
+	group.POST("/structures/:projectID", declarations.GetBatchedStructuresHandler())
 }

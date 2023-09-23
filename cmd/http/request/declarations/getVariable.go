@@ -13,6 +13,8 @@ type GetVariable struct {
 func SanitizeGetVariable(model GetVariable) GetVariable {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
+	model.ProjectID = p.Sanitize(model.ProjectID)
+
 	if len(model.Fields) > 0 {
 		newFields := make([]string, len(model.Fields))
 

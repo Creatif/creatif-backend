@@ -17,7 +17,6 @@ services:
       - .:/var/log:${LOG_DIRECTORY}
     depends_on:
       - db
-      - cache
   db:
     container_name: "db"
     ports:
@@ -27,13 +26,6 @@ services:
     environment:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_USER: ${DATABASE_USER}
-  cache:
-    container_name: "redis"
-    image: redis:6.2-alpine
-    restart: no
-    ports:
-      - '6379:6379'
-    command: redis-server --loglevel warning --requirepass ${REDIS_PASSWORD}
 volumes:
   app:
 

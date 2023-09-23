@@ -23,6 +23,7 @@ type UpdateVariable struct {
 func SanitizeUpdateVariable(model UpdateVariable) UpdateVariable {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
+	model.ProjectID = p.Sanitize(model.ProjectID)
 
 	newFields := sdk.Map(model.Fields, func(idx int, value string) string {
 		return p.Sanitize(value)

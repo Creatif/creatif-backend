@@ -22,6 +22,7 @@ type PaginateVariables struct {
 func SanitizePaginateVariables(model PaginateVariables) PaginateVariables {
 	p := bluemonday.StrictPolicy()
 	model.NextID = p.Sanitize(model.NextID)
+	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.PrevID = p.Sanitize(model.PrevID)
 	model.Field = p.Sanitize(model.Field)
 	model.OrderBy = p.Sanitize(model.OrderBy)

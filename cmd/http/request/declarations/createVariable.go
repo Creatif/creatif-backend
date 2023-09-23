@@ -11,13 +11,14 @@ type CreateVariable struct {
 	Behaviour string   `json:"behaviour"`
 	Metadata  string   `json:"metadata"`
 	Value     string   `json:"value"`
-	ProjectID string   `param:"projectID"`
+	ProjectID string   `json:"projectID"`
 }
 
 func SanitizeVariable(model CreateVariable) CreateVariable {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.Behaviour = p.Sanitize(model.Behaviour)
+	model.ProjectID = p.Sanitize(model.ProjectID)
 
 	model.Groups = sdk.Sanitize(model.Groups, func(k int, v string) string {
 		return p.Sanitize(v)

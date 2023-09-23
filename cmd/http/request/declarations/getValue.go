@@ -12,6 +12,7 @@ type GetValue struct {
 func SanitizeGetValue(model GetValue) GetValue {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
+	model.ProjectID = p.Sanitize(model.ProjectID)
 
 	return model
 }

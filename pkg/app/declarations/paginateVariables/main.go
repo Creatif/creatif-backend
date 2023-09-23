@@ -25,7 +25,7 @@ func (c Main) Authenticate() error {
 	// user check by project id should be gotten here, with authentication cookie
 	var project app.Project
 	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+		return appErrors.NewAuthenticationError(err).AddError("paginateVariables.Authenticate", nil)
 	}
 
 	return nil

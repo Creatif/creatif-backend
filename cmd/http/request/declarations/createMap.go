@@ -70,6 +70,7 @@ func (u *CreateMap) UnmarshalJSON(b []byte) error {
 func SanitizeMapModel(model CreateMap) CreateMap {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
+	model.ProjectID = p.Sanitize(model.ProjectID)
 
 	entries := model.Entries
 	newEntries := make([]Entry, len(entries))

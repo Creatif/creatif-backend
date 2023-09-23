@@ -12,6 +12,7 @@ type DeleteVariable struct {
 func SanitizeDeleteVariable(model DeleteVariable) DeleteVariable {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
+	model.ProjectID = p.Sanitize(model.ProjectID)
 
 	return model
 }

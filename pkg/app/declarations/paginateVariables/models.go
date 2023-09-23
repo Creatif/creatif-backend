@@ -20,7 +20,7 @@ type Model struct {
 	Direction string
 	Groups    []string
 	Limit     int
-	ProjectID string `json:"projectID"`
+	ProjectID string
 }
 
 func NewModel(projectId, nextId, prevId, field, orderBy, direction string, limit int, groups []string) Model {
