@@ -6,6 +6,8 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
+	"errors"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -31,9 +33,15 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
-	if res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Delete(&declarations.Variable{}); res.Error != nil {
+	res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Delete(&declarations.Variable{})
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteVariable.Logic", nil)
+	}
+
+	if res.Error != nil {
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteVariable.Logic", nil)
 	}
+
 	return nil, nil
 }
 

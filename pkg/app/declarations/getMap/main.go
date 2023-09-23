@@ -3,6 +3,8 @@ package getMap
 import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"errors"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -27,8 +29,12 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (LogicModel, error) {
 	m, err := queryMap(c.model.ProjectID, c.model.Name)
-	if err != nil {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
+	}
+
+	if err != nil {
+		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("getMap.Logic", nil)
 	}
 
 	var variables []Variable
