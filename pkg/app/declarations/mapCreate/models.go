@@ -65,9 +65,19 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("uniqueName", validation.By(func(value interface{}) error {
 				name := value.(string)
 
-				var m declarations.Map
-				if err := storage.GetBy((&declarations.Map{}).TableName(), "name", name, &m); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-					return errors.New("Map with this name already exists")
+				var model declarations.Map
+				res := storage.Gorm().Where("name = ? AND project_id = ?", name, a.ProjectID).Select("ID").First(&model)
+
+				if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+					return nil
+				}
+
+				if res.Error != nil {
+					return errors.New(fmt.Sprintf("Record with name '%s' already exists", name))
+				}
+
+				if model.ID != "" {
+					return errors.New(fmt.Sprintf("Record with name '%s' already exists", name))
 				}
 
 				return nil
