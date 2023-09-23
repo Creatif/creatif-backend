@@ -59,6 +59,9 @@ func runMigrations() {
 		closeConnection()
 		log.Fatalln(err)
 	}
+	/*
+		storage2.Gorm().Exec(fmt.Sprintf("ALTER TABLE %s ADD CONSTRAINT unique_variable_per_project UNIQUE (name, project_id)", domain.VARIABLES_TABLE))
+		storage2.Gorm().Exec(fmt.Sprintf("CREATE UNIQUE INDEX idx_unique_variable_name ON %s (name) WHERE project_id IS NOT NULL", domain.VARIABLES_TABLE))*/
 }
 
 func loadEnv() {

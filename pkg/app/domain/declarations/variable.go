@@ -13,13 +13,13 @@ import (
 type Variable struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	Name      string `gorm:"index;uniqueIndex:unique_variable"`
+	Name      string `gorm:"uniqueIndex:unique_variable"`
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	ProjectID string `gorm:"index;type:text;check:length(id)=26"`
+	ProjectID string `gorm:"uniqueIndex:unique_variable;type:text;check:length(id)=26;not null;default: null"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time

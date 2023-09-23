@@ -11,9 +11,9 @@ import (
 type Map struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	Name string `gorm:"uniqueIndex"`
+	Name string `gorm:"uniqueIndex:unique_map_name"`
 
-	ProjectID string `gorm:"index;type:text;check:length(id)=26"`
+	ProjectID string `gorm:"uniqueIndex:unique_map_name;type:text;check:length(id)=26;not null;default: null"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
