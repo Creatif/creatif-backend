@@ -5,7 +5,8 @@ import (
 )
 
 type GetValue struct {
-	Name string `param:"name"`
+	Name      string `param:"name"`
+	ProjectID string `param:"projectID"`
 }
 
 func SanitizeGetValue(model GetValue) GetValue {

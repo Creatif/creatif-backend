@@ -7,9 +7,10 @@ import (
 
 var _ = ginkgo.Describe("GET value of declaration variable", func() {
 	ginkgo.It("should return a variable value", func() {
-		createdVariable := testCreateDeclarationVariable("variable", "modifiable")
+		projectId := testCreateProject("project")
+		createdVariable := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(createdVariable.Name))
+		handler := New(NewModel(projectId, createdVariable.Name))
 		value, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

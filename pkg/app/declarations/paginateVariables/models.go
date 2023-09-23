@@ -20,10 +20,12 @@ type Model struct {
 	Direction string
 	Groups    []string
 	Limit     int
+	ProjectID string `json:"projectID"`
 }
 
-func NewModel(nextId, prevId, field, orderBy, direction string, limit int, groups []string) Model {
+func NewModel(projectId, nextId, prevId, field, orderBy, direction string, limit int, groups []string) Model {
 	return Model{
+		ProjectID: projectId,
 		NextID:    nextId,
 		PrevID:    prevId,
 		Field:     field,

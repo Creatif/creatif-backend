@@ -13,6 +13,7 @@ type LogicModel struct {
 
 type View struct {
 	ID        string      `json:"id"`
+	ProjectID string      `json:"projectID"`
 	Name      string      `json:"name"`
 	Type      string      `json:"type"`
 	Groups    []string    `json:"groups"`
@@ -46,6 +47,7 @@ func newView(model LogicModel) PaginatedView {
 	views := sdk.Map(model.variables, func(idx int, value Variable) View {
 		return View{
 			ID:        value.ID,
+			ProjectID: value.ProjectID,
 			Name:      value.Name,
 			Groups:    value.Groups,
 			Value:     value.Value,

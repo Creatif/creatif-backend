@@ -1,6 +1,7 @@
 package deleteVariable
 
 import (
+	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -16,6 +17,12 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
+	// user check by project id should be gotten here, with authentication cookie
+	var project app.Project
+	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
+		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	}
+
 	return nil
 }
 
@@ -24,7 +31,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
-	if res := storage.Gorm().Where("name = ?", c.model.Name).Delete(&declarations.Variable{}); res.Error != nil {
+	if res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Delete(&declarations.Variable{}); res.Error != nil {
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteVariable.Logic", nil)
 	}
 	return nil, nil

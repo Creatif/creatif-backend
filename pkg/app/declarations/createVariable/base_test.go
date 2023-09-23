@@ -1,6 +1,7 @@
 package createVariable
 
 import (
+	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -77,4 +78,16 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateProject(name string) string {
+	handler := createProject.New(createProject.NewModel(name))
+
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(model.ID)
+
+	gomega.Expect(model.Name).Should(gomega.Equal(name))
+
+	return model.ID
 }

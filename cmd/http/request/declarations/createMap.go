@@ -21,8 +21,9 @@ type Entry struct {
 }
 
 type CreateMap struct {
-	Entries []Entry `json:"entries"`
-	Name    string  `json:"name"`
+	Entries   []Entry `json:"entries"`
+	Name      string  `json:"name"`
+	ProjectID string  `param:"projectID"`
 }
 
 func (u *CreateMap) UnmarshalJSON(b []byte) error {

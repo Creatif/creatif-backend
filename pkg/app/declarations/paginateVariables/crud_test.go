@@ -9,12 +9,13 @@ import (
 
 var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 	ginkgo.It("should return the first row of results by created_at field desc going forward", func() {
+		projectId := testCreateProject("project")
 		limit := 10
 		for i := 0; i < 20; i++ {
-			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
+			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", pagination.DESC, pagination.DIRECTION_FORWARD, limit, []string{}))
+		handler := New(NewModel(projectId, "", "", "created_at", pagination.DESC, pagination.DIRECTION_FORWARD, limit, []string{}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -27,12 +28,13 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 	})
 
 	ginkgo.It("should return the first row of results by created_at field desc going forward and with specifying all the groups and some that do not exist", func() {
+		projectId := testCreateProject("project")
 		limit := 10
 		for i := 0; i < 20; i++ {
-			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
+			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", pagination.DESC, pagination.DIRECTION_FORWARD, limit, []string{"one", "two", "three", "six"}))
+		handler := New(NewModel(projectId, "", "", "created_at", pagination.DESC, pagination.DIRECTION_FORWARD, limit, []string{"one", "two", "three", "six"}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -45,12 +47,13 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 	})
 
 	ginkgo.It("should return the first row of results by created_at field asc going forward", func() {
+		projectId := testCreateProject("project")
 		limit := 10
 		for i := 0; i < 20; i++ {
-			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
+			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"one"}))
+		handler := New(NewModel(projectId, "", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"one"}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -63,12 +66,13 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 	})
 
 	ginkgo.It("nextUrl in paginateVariables info should be an empty string if number of items is less than limit", func() {
+		projectId := testCreateProject("project")
 		limit := 10
 		for i := 0; i < 5; i++ {
-			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
+			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"one"}))
+		handler := New(NewModel(projectId, "", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"one"}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -81,12 +85,13 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 	})
 
 	ginkgo.It("should give an empty result for a non existent group", func() {
+		projectId := testCreateProject("project")
 		limit := 10
 		for i := 0; i < 5; i++ {
-			testCreateBasicDeclarationTextVariable(fmt.Sprintf("name-%d", i), "modifiable")
+			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("name-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel("", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"six"}))
+		handler := New(NewModel(projectId, "", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"six"}))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

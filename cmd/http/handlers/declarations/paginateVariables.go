@@ -19,7 +19,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 		model = declarations.SanitizePaginateVariables(model)
 		model.OrderBy = strings.ToUpper(model.OrderBy)
 
-		handler := paginateVariables.New(paginateVariables.NewModel(model.NextID, model.PrevID, model.Field, model.OrderBy, model.Direction, model.Limit, model.SanitizedGroups))
+		handler := paginateVariables.New(paginateVariables.NewModel(model.ProjectID, model.NextID, model.PrevID, model.Field, model.OrderBy, model.Direction, model.Limit, model.SanitizedGroups))
 
 		return request.SendResponse[paginateVariables.Model](handler, c, http.StatusOK)
 	}

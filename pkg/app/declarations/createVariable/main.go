@@ -1,6 +1,7 @@
 package createVariable
 
 import (
+	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -11,11 +12,11 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type Create struct {
+type Main struct {
 	model Model
 }
 
-func (c Create) Validate() error {
+func (c Main) Validate() error {
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
@@ -23,15 +24,21 @@ func (c Create) Validate() error {
 	return nil
 }
 
-func (c Create) Authenticate() error {
+func (c Main) Authenticate() error {
+	// user check by project id should be gotten here, with authentication cookie
+	var project app.Project
+	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
+		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	}
+
 	return nil
 }
 
-func (c Create) Authorize() error {
+func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Create) Logic() (declarations.Variable, error) {
+func (c Main) Logic() (declarations.Variable, error) {
 	var metadata []byte
 	var value []byte
 	if len(c.model.Metadata) > 0 {
@@ -52,7 +59,7 @@ func (c Create) Logic() (declarations.Variable, error) {
 		value = m
 	}
 
-	model := declarations.NewVariable(c.model.Name, c.model.Behaviour, c.model.Groups, metadata, value)
+	model := declarations.NewVariable(c.model.ProjectID, c.model.Name, c.model.Behaviour, c.model.Groups, metadata, value)
 	res := storage.Gorm().Model(&model).Clauses(clause.Returning{Columns: []clause.Column{
 		{Name: "id"},
 		{Name: "name"},
@@ -73,7 +80,7 @@ func (c Create) Logic() (declarations.Variable, error) {
 	return model, nil
 }
 
-func (c Create) Handle() (View, error) {
+func (c Main) Handle() (View, error) {
 	if err := c.Validate(); err != nil {
 		return View{}, err
 	}
@@ -96,5 +103,5 @@ func (c Create) Handle() (View, error) {
 }
 
 func New(model Model) pkg.Job[Model, View, declarations.Variable] {
-	return Create{model: model}
+	return Main{model: model}
 }

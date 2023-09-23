@@ -10,19 +10,21 @@ import (
 
 var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	ginkgo.It("should update the name of the declaration variable", func() {
-		view := testCreateBasicDeclarationTextVariable("name", "modifiable")
+		projectId := testCreateProject("project")
+		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel([]string{"name", "behaviour"}, "name", "newName", "readonly", []string{}, []byte{}, v))
+		handler := New(NewModel(projectId, []string{"name", "behaviour"}, "name", "newName", "readonly", []string{}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(updated.ID)
 
 		gomega.Expect(view.ID).Should(gomega.Equal(updated.ID))
+		gomega.Expect(view.ProjectID).Should(gomega.Equal(projectId))
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
 
 		var checkModel declarations.Variable
@@ -35,18 +37,20 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	})
 
 	ginkgo.It("should update the groups of the declaration variable", func() {
-		view := testCreateBasicDeclarationTextVariable("name", "modifiable")
+		projectId := testCreateProject("project")
+		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel([]string{"name", "groups", "value"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
+		handler := New(NewModel(projectId, []string{"name", "groups", "value"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(updated.ID)
 
 		gomega.Expect(view.ID).Should(gomega.Equal(updated.ID))
+		gomega.Expect(view.ProjectID).Should(gomega.Equal(projectId))
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
 		gomega.Expect(updated.Groups).Should(gomega.HaveLen(3))
 		gomega.Expect(updated.Groups[0]).Should(gomega.Equal("first"))
@@ -61,18 +65,20 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	})
 
 	ginkgo.It("should update the behaviour of the declaration variable", func() {
-		view := testCreateBasicDeclarationTextVariable("name", "modifiable")
+		projectId := testCreateProject("project")
+		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel([]string{"name", "behaviour", "groups"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
+		handler := New(NewModel(projectId, []string{"name", "behaviour", "groups"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(updated.ID)
 
 		gomega.Expect(view.ID).Should(gomega.Equal(updated.ID))
+		gomega.Expect(view.ProjectID).Should(gomega.Equal(projectId))
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
 		gomega.Expect(updated.Groups).Should(gomega.HaveLen(3))
 		gomega.Expect(updated.Groups[0]).Should(gomega.Equal("first"))

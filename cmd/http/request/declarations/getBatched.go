@@ -5,8 +5,9 @@ import (
 )
 
 type GetBatchedVariables struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+	ProjectID string `param:"projectID"`
 }
 
 func SanitizeGetBatchedVariables(model []GetBatchedVariables) []GetBatchedVariables {

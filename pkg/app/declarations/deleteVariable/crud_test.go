@@ -11,9 +11,10 @@ import (
 
 var _ = ginkgo.Describe("Declaration (DELETE) variable tests", func() {
 	ginkgo.It("should delete a declaration variable and all assignment variables", func() {
-		view := testCreateBasicDeclarationTextVariable("variable", "modifiable")
+		projectId := testCreateProject("project")
+		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(view.Name))
+		handler := New(NewModel(projectId, view.Name))
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

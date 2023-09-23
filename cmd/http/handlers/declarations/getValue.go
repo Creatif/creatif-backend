@@ -17,7 +17,7 @@ func GetValueHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeGetValue(model)
 
-		handler := getValue.New(getValue.NewModel(model.Name))
+		handler := getValue.New(getValue.NewModel(model.ProjectID, model.Name))
 
 		return request.SendResponse[getValue.Model](handler, c, http.StatusOK)
 	}

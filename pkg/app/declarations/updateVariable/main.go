@@ -1,6 +1,7 @@
 package updateVariable
 
 import (
+	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -21,6 +22,12 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
+	// user check by project id should be gotten here, with authentication cookie
+	var project app.Project
+	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
+		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	}
+
 	return nil
 }
 
@@ -30,6 +37,7 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (declarations.Variable, error) {
 	var existing declarations.Variable
+	storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).First(&existing)
 	if err := storage.GetBy((declarations.Variable{}).TableName(), "name", c.model.Name, &existing, "id"); err != nil {
 		return declarations.Variable{}, appErrors.NewNotFoundError(err).AddError("updateVariable.Logic", nil)
 	}
@@ -59,6 +67,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 	var updated declarations.Variable
 	if res := storage.Gorm().Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
 		{Name: "id"},
+		{Name: "project_id"},
 		{Name: "name"},
 		{Name: "behaviour"},
 		{Name: "metadata"},

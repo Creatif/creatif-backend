@@ -5,10 +5,10 @@ import (
 	"fmt"
 )
 
-func getInitialID(table, orderBy string) (string, error) {
-	sql := fmt.Sprintf("SELECT id FROM %s ORDER BY id %s LIMIT 1", table, orderBy)
+func getInitialID(projectId, table, orderBy string) (string, error) {
+	sql := fmt.Sprintf("SELECT id FROM %s WHERE project_id = ? ORDER BY id %s LIMIT 1", table, orderBy)
 	var model initialModel
-	if res := storage.Gorm().Raw(sql).Scan(&model); res.Error != nil {
+	if res := storage.Gorm().Raw(sql, projectId).Scan(&model); res.Error != nil {
 		return "", res.Error
 	}
 

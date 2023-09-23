@@ -33,6 +33,7 @@ func NewOrderByRule(field, orderBy, groupField string, groups []string) orderByR
 }
 
 type Pagination struct {
+	projectId string
 	table     string
 	sql       string
 	nextId    string
@@ -42,8 +43,9 @@ type Pagination struct {
 	direction string
 }
 
-func NewPagination(table, sql string, rules orderByRule, nextId, prevId, direction string, limit int) *Pagination {
+func NewPagination(projectId, table, sql string, rules orderByRule, nextId, prevId, direction string, limit int) *Pagination {
 	return &Pagination{
+		projectId: projectId,
 		table:     table,
 		sql:       sql,
 		rule:      rules,
@@ -57,7 +59,7 @@ func NewPagination(table, sql string, rules orderByRule, nextId, prevId, directi
 func (p Pagination) Paginate(model interface{}) error {
 	isFirstPage := p.nextId == "" && p.prevId == ""
 	if isFirstPage {
-		id, err := getInitialID(p.table, p.rule.orderBy)
+		id, err := getInitialID(p.projectId, p.table, p.rule.orderBy)
 		if err != nil {
 			return err
 		}
@@ -65,11 +67,11 @@ func (p Pagination) Paginate(model interface{}) error {
 		operator := getInitialOperator(DIRECTION_FORWARD, p.rule.orderBy)
 		if len(p.rule.groups) > 0 {
 			groups := strings.Join(p.rule.groups, ",")
-			if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' AND '{%s}'::text[] && %s ORDER BY %s %s LIMIT %d", p.sql, operator, id, groups, p.rule.groupField, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
+			if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE project_id = '%s' AND id %s '%s' AND '{%s}'::text[] && %s ORDER BY %s %s LIMIT %d", p.sql, p.projectId, operator, id, groups, p.rule.groupField, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
 				return res.Error
 			}
 		} else {
-			if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, operator, id, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
+			if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE project_id = '%s' AND id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, p.projectId, operator, id, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
 				return res.Error
 			}
 		}
@@ -77,7 +79,7 @@ func (p Pagination) Paginate(model interface{}) error {
 		return nil
 	} else {
 		operator := getOperator(p.direction, p.rule.orderBy)
-		if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, operator, p.nextId, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
+		if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE project_id = '%s' AND id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, p.projectId, operator, p.nextId, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
 			return res.Error
 		}
 	}

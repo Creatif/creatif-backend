@@ -5,8 +5,9 @@ import (
 )
 
 type GetMap struct {
-	Name   string `param:"name"`
-	Fields string `query:"fields"`
+	Name      string `param:"name"`
+	Fields    string `query:"fields"`
+	ProjectID string `param:"projectID"`
 }
 
 func SanitizeGetMap(model GetMap) GetMap {

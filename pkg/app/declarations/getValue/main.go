@@ -1,8 +1,10 @@
 package getValue
 
 import (
+	"creatif/pkg/app/domain/app"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/storage"
 	"errors"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -20,6 +22,12 @@ func (c Main) Validate() error {
 	return nil
 }
 func (c Main) Authenticate() error {
+	// user check by project id should be gotten here, with authentication cookie
+	var project app.Project
+	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
+		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	}
+
 	return nil
 }
 
@@ -28,7 +36,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (Variable, error) {
-	value, err := queryValue(c.model.Name)
+	value, err := queryValue(c.model.ProjectID, c.model.Name)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return Variable{}, appErrors.NewNotFoundError(err)

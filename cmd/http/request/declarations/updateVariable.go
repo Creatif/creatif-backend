@@ -14,9 +14,10 @@ type UpdateVariableValues struct {
 }
 
 type UpdateVariable struct {
-	Fields []string             `json:"fields"`
-	Name   string               `json:"name"`
-	Values UpdateVariableValues `json:"values"`
+	Fields    []string             `json:"fields"`
+	Name      string               `json:"name"`
+	Values    UpdateVariableValues `json:"values"`
+	ProjectID string               `param:"projectID"`
 }
 
 func SanitizeUpdateVariable(model UpdateVariable) UpdateVariable {

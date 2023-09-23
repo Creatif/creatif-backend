@@ -10,9 +10,10 @@ import (
 
 var _ = ginkgo.Describe("Batch variables tests", func() {
 	ginkgo.It("should getVariable a batch of declaration variables with full data", func() {
+		projectId := testCreateProject("project")
 		declarationsVariables := make([]create.View, 0)
 		for i := 0; i < 30; i++ {
-			declarationsVariables = append(declarationsVariables, testCreateDeclarationVariable(fmt.Sprintf("name-%d", i), "modifiable"))
+			declarationsVariables = append(declarationsVariables, testCreateDeclarationVariable(projectId, fmt.Sprintf("name-%d", i), "modifiable"))
 		}
 
 		names := make([]string, 0)
@@ -59,9 +60,10 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 	})
 
 	ginkgo.It("should get a batch of maps and variables with full data", func() {
+		projectId := testCreateProject("project")
 		declarationsVariables := make([]create.View, 0)
 		for i := 0; i < 30; i++ {
-			declarationsVariables = append(declarationsVariables, testCreateDeclarationVariable(fmt.Sprintf("name-%d", i), "modifiable"))
+			declarationsVariables = append(declarationsVariables, testCreateDeclarationVariable(projectId, fmt.Sprintf("name-%d", i), "modifiable"))
 		}
 
 		names := make([]string, 0)

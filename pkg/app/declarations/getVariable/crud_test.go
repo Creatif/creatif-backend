@@ -7,10 +7,11 @@ import (
 
 var _ = ginkgo.Describe("Declaration variable tests", func() {
 	ginkgo.It("should return a text variable with value", func() {
+		projectId := testCreateProject("project")
 		name := "variable"
-		createdVariable := testCreateBasicDeclarationTextVariable(name, "modifiable")
+		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 
-		handler := New(NewModel(createdVariable.Name, []string{}))
+		handler := New(NewModel(projectId, createdVariable.Name, []string{}))
 		variable, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 
@@ -21,8 +22,10 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(variable).Should(gomega.HaveKey("groups"))
 		gomega.Expect(variable).Should(gomega.HaveKey("createdAt"))
 		gomega.Expect(variable).Should(gomega.HaveKey("updatedAt"))
+		gomega.Expect(variable).Should(gomega.HaveKey("projectID"))
 
 		gomega.Expect(variable["id"]).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(variable["projectID"]).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(variable["name"]).Should(gomega.Equal(name))
 
 		gomega.Expect(variable["value"]).ShouldNot(gomega.BeEmpty())

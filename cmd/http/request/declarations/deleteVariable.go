@@ -5,7 +5,8 @@ import (
 )
 
 type DeleteVariable struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
+	ProjectID string `param:"projectID"`
 }
 
 func SanitizeDeleteVariable(model DeleteVariable) DeleteVariable {

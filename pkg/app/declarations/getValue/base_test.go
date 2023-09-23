@@ -1,6 +1,7 @@
 package getValue
 
 import (
+	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/declarations/createVariable"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
@@ -71,7 +72,7 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateDeclarationVariable(name, behaviour string) createVariable.View {
+func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable.View {
 	m := map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -82,7 +83,7 @@ func testCreateDeclarationVariable(name, behaviour string) createVariable.View {
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable.New(createVariable.NewModel(name, behaviour, []string{"one", "two", "three"}, b, b))
+	handler := createVariable.New(createVariable.NewModel(projectId, name, behaviour, []string{"one", "two", "three"}, b, b))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -98,4 +99,16 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateProject(name string) string {
+	handler := createProject.New(createProject.NewModel(name))
+
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(model.ID)
+
+	gomega.Expect(model.Name).Should(gomega.Equal(name))
+
+	return model.ID
 }

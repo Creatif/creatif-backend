@@ -17,7 +17,7 @@ func CreateVariableHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeVariable(model)
 
-		handler := create.New(create.NewModel(model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
+		handler := create.New(create.NewModel(model.ProjectID, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
 
 		return request.SendResponse[create.Model](handler, c, http.StatusCreated)
 	}

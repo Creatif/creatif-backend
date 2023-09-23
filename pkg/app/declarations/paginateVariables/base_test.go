@@ -1,6 +1,7 @@
 package paginateVariables
 
 import (
+	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/declarations/createVariable"
 	"creatif/pkg/app/domain"
 	storage2 "creatif/pkg/lib/storage"
@@ -71,7 +72,7 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateDeclarationVariable(name, behaviour string, groups []string, metadata []byte) createVariable.View {
+func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable.View {
 	m := map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -82,7 +83,7 @@ func testCreateDeclarationVariable(name, behaviour string, groups []string, meta
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable.New(createVariable.NewModel(name, behaviour, groups, metadata, b))
+	handler := createVariable.New(createVariable.NewModel(projectId, name, behaviour, groups, metadata, b))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -91,8 +92,8 @@ func testCreateDeclarationVariable(name, behaviour string, groups []string, meta
 	return view
 }
 
-func testCreateBasicDeclarationTextVariable(name, behaviour string) createVariable.View {
-	return testCreateDeclarationVariable(name, behaviour, []string{
+func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable.View {
+	return testCreateDeclarationVariable(projectId, name, behaviour, []string{
 		"one",
 		"two",
 		"three",
@@ -107,4 +108,16 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateProject(name string) string {
+	handler := createProject.New(createProject.NewModel(name))
+
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(model.ID)
+
+	gomega.Expect(model.Name).Should(gomega.Equal(name))
+
+	return model.ID
 }

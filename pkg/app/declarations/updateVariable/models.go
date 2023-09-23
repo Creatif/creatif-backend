@@ -30,15 +30,17 @@ type ModelValues struct {
 }
 
 type Model struct {
-	Fields []string
-	Name   string
-	Values ModelValues
+	Fields    []string
+	Name      string
+	Values    ModelValues
+	ProjectID string `json:"projectID"`
 }
 
-func NewModel(fields []string, name, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
+func NewModel(projectId string, fields []string, name, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
 	return Model{
-		Fields: fields,
-		Name:   name,
+		Fields:    fields,
+		ProjectID: projectId,
+		Name:      name,
 		Values: ModelValues{
 			Name:      updatingName,
 			Metadata:  metadata,

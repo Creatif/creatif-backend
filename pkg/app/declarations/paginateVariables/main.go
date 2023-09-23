@@ -2,9 +2,11 @@ package paginateVariables
 
 import (
 	"creatif/pkg/app/declarations/paginateVariables/pagination"
+	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/storage"
 	"fmt"
 )
 
@@ -20,6 +22,12 @@ func (c Main) Validate() error {
 	return nil
 }
 func (c Main) Authenticate() error {
+	// user check by project id should be gotten here, with authentication cookie
+	var project app.Project
+	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
+		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	}
+
 	return nil
 }
 
@@ -30,6 +38,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (LogicModel, error) {
 	tableName := (declarations.Variable{}).TableName()
 	p := pagination.NewPagination(
+		c.model.ProjectID,
 		tableName,
 		fmt.Sprintf("SELECT id, name, behaviour, groups FROM %s", tableName),
 		pagination.NewOrderByRule(c.model.Field, c.model.OrderBy, "groups", c.model.Groups),

@@ -23,13 +23,14 @@ var validFields = []string{
 
 type Model struct {
 	// this can be project name
-	Name   string `json:"name"`
-	Fields []string
+	Name      string `json:"name"`
+	Fields    []string
+	ProjectID string `json:"projectID"`
 
 	validFields []string
 }
 
-func NewModel(name string, fields []string) Model {
+func NewModel(projectId, name string, fields []string) Model {
 	if len(fields) == 0 {
 		fields = validFields
 	}
@@ -38,6 +39,7 @@ func NewModel(name string, fields []string) Model {
 		Name:        name,
 		Fields:      fields,
 		validFields: validFields,
+		ProjectID:   projectId,
 	}
 }
 
@@ -58,6 +60,7 @@ func newView(model declarations.Variable, returnFields []string) map[string]inte
 	m := make(map[string]interface{})
 	m["id"] = model.ID
 	m["name"] = model.Name
+	m["projectID"] = model.ProjectID
 
 	for _, f := range returnFields {
 		if f == "groups" {

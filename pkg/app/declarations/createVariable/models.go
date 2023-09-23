@@ -11,16 +11,18 @@ import (
 )
 
 type Model struct {
-	Name      string   `json:"name"`
-	Metadata  []byte   `json:"metadata"`
-	Groups    []string `json:"groups"`
-	Behaviour string   `json:"behaviour"`
-	Value     []byte   `json:"value"`
+	Name      string
+	Metadata  []byte
+	Groups    []string
+	Behaviour string
+	Value     []byte
+	ProjectID string
 }
 
-func NewModel(name, behaviour string, groups []string, metadata []byte, value []byte) Model {
+func NewModel(projectId, name, behaviour string, groups []string, metadata []byte, value []byte) Model {
 	return Model{
 		Name:      name,
+		ProjectID: projectId,
 		Behaviour: behaviour,
 		Groups:    groups,
 		Metadata:  metadata,
@@ -28,7 +30,7 @@ func NewModel(name, behaviour string, groups []string, metadata []byte, value []
 	}
 }
 
-func (a *Model) Validate() map[string]string {
+func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":      a.Name,
 		"groups":    a.Groups,
@@ -58,6 +60,7 @@ func (a *Model) Validate() map[string]string {
 
 type View struct {
 	ID        string      `json:"id"`
+	ProjectID string      `json:"projectID"`
 	Name      string      `json:"name"`
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
@@ -71,6 +74,7 @@ type View struct {
 func newView(model declarations.Variable) View {
 	return View{
 		ID:        model.ID,
+		ProjectID: model.ProjectID,
 		Name:      model.Name,
 		Groups:    model.Groups,
 		Metadata:  model.Metadata,

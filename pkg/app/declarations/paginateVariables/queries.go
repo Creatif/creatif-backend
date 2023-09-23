@@ -14,6 +14,7 @@ type Variable struct {
 	Groups    pq.StringArray `gorm:"type:text[]"` // if groups is set, group should be invalidated
 	Metadata  datatypes.JSON
 	Value     datatypes.JSON
+	ProjectID string
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`

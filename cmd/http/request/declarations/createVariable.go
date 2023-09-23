@@ -11,6 +11,7 @@ type CreateVariable struct {
 	Behaviour string   `json:"behaviour"`
 	Metadata  string   `json:"metadata"`
 	Value     string   `json:"value"`
+	ProjectID string   `param:"projectID"`
 }
 
 func SanitizeVariable(model CreateVariable) CreateVariable {

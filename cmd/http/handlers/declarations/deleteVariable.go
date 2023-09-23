@@ -17,7 +17,7 @@ func DeleteVariableHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeDeleteVariable(model)
 
-		handler := delete.New(delete.NewModel(model.Name))
+		handler := delete.New(delete.NewModel(model.ProjectID, model.Name))
 
 		return request.SendResponse[delete.Model](handler, c, http.StatusCreated)
 	}

@@ -14,6 +14,7 @@ type PaginateVariables struct {
 	Direction string `query:"direction"`
 	Groups    string `query:"groups"`
 	Limit     int    `query:"limit"`
+	ProjectID string `param:"projectID"`
 
 	SanitizedGroups []string
 }

@@ -8,14 +8,15 @@ import (
 )
 
 var _ = ginkgo.Describe("Declaration variable tests", func() {
-	ginkgo.It("should createProject a text declaration variable", func() {
+	ginkgo.It("should create a text declaration variable", func() {
+		projectId := testCreateProject("project")
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewModel(name, "modifiable", []string{"one", "two", "three"}, b, b))
+		handler := New(NewModel(projectId, name, "modifiable", []string{"one", "two", "three"}, b, b))
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
@@ -27,16 +28,18 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(view.Groups).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.CreatedAt).ShouldNot(gomega.BeNil())
 		gomega.Expect(view.UpdatedAt).ShouldNot(gomega.BeNil())
+		gomega.Expect(view.ProjectID).ShouldNot(gomega.BeEmpty())
 	})
 
-	ginkgo.It("should createProject a boolean declaration variable", func() {
+	ginkgo.It("should create a boolean declaration variable", func() {
+		projectId := testCreateProject("project")
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewModel(name, "modifiable", []string{"one", "two", "three"}, b, b))
+		handler := New(NewModel(projectId, name, "modifiable", []string{"one", "two", "three"}, b, b))
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
@@ -48,5 +51,6 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(view.Groups).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.CreatedAt).ShouldNot(gomega.BeNil())
 		gomega.Expect(view.UpdatedAt).ShouldNot(gomega.BeNil())
+		gomega.Expect(view.ProjectID).ShouldNot(gomega.BeEmpty())
 	})
 })
