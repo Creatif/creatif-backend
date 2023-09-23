@@ -61,7 +61,7 @@ func (a *Model) Validate() map[string]string {
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.Required, validation.RuneLength(1, 500)),
+			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("uniqueName", validation.By(func(value interface{}) error {
 				name := value.(string)
 
