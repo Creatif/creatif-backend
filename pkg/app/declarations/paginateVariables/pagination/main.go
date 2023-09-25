@@ -97,10 +97,16 @@ func (p Pagination) PaginationInfo(nextId, prevId, field, orderBy string, groups
 		prev = fmt.Sprintf("?nextId=%s&prevId=%s&field=%s&orderBy=%s&direction=%s&limit=%d", nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_BACKWARDS, p.limit)
 	}
 
+	if len(groups) == 0 {
+		groups = make([]string, 0)
+	}
+
 	return PaginationInfo{
 		Next: next,
 		Prev: prev,
 		Parameters: Parameters{
+			NextID:  nextId,
+			PrevID:  prevId,
 			Field:   field,
 			OrderBy: orderBy,
 			Groups:  groups,

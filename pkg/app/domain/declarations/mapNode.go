@@ -13,13 +13,13 @@ import (
 type MapVariable struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	Name      string `gorm:"index;uniqueIndex:unique_variable"`
+	Name      string `gorm:"uniqueIndex:unique_map_variable"`
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	MapID string `gorm:"type:text;check:length(id)=26"`
+	MapID string `gorm:"uniqueIndex:unique_map_variable;type:text;check:length(id)=26"`
 	Map   Map    `gorm:"foreignKey:MapID"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`

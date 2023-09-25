@@ -30,6 +30,8 @@ type ViewParameters struct {
 	OrderBy string   `json:"orderBy"`
 	Groups  []string `json:"groups"`
 	Limit   int      `json:"limit"`
+	NextID  string   `json:"nextId"`
+	PrevID  string   `json:"prevId"`
 }
 
 type ViewPaginationInfo struct {
@@ -64,6 +66,8 @@ func newView(model LogicModel) PaginatedView {
 			Next: model.paginationInfo.Next,
 			Prev: model.paginationInfo.Prev,
 			Parameters: ViewParameters{
+				NextID:  model.paginationInfo.Parameters.NextID,
+				PrevID:  model.paginationInfo.Parameters.PrevID,
 				Field:   model.paginationInfo.Parameters.Field,
 				OrderBy: model.paginationInfo.Parameters.OrderBy,
 				Groups:  model.paginationInfo.Parameters.Groups,

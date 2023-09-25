@@ -6,6 +6,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 )
@@ -51,31 +52,20 @@ func (c Main) Logic() (LogicModel, error) {
 	var variables []Variable
 	err := p.Paginate(&variables)
 	if err != nil {
-		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.declarationsVariable", nil)
+		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.Logic", nil)
 	}
 
-	var paginationInfo pagination.PaginationInfo
-	if len(variables) == 0 {
-		info, err := p.PaginationInfo("", "", c.model.Field, c.model.OrderBy, c.model.Groups, c.model.Limit)
-		if err != nil {
-			return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.declarationsVariable", nil)
-		}
+	nextId, prevId, err := pagination.ResolveCursor(c.model.Direction, c.model.NextID, c.model.PrevID, sdk.Map(variables, func(idx int, value Variable) string {
+		return value.ID
+	}), c.model.Limit)
 
-		paginationInfo = info
-	} else if len(variables) < c.model.Limit {
-		info, err := p.PaginationInfo("", variables[0].ID, c.model.Field, c.model.OrderBy, c.model.Groups, c.model.Limit)
-		if err != nil {
-			return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.declarationsVariable", nil)
-		}
+	if err != nil {
+		return LogicModel{}, appErrors.NewApplicationError(err).AddError("paginateVariables.Logic", nil)
+	}
 
-		paginationInfo = info
-	} else if len(variables) == c.model.Limit {
-		info, err := p.PaginationInfo(variables[len(variables)-1].ID, variables[0].ID, c.model.Field, c.model.OrderBy, c.model.Groups, c.model.Limit)
-		if err != nil {
-			return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.declarationsVariable", nil)
-		}
-
-		paginationInfo = info
+	paginationInfo, err := p.PaginationInfo(nextId, prevId, c.model.Field, c.model.OrderBy, c.model.Groups, c.model.Limit)
+	if err != nil {
+		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.Logic", nil)
 	}
 
 	return LogicModel{

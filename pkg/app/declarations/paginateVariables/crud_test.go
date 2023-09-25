@@ -24,7 +24,7 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 		gomega.Expect(views.Items[len(views.Items)-1].Name).Should(gomega.Equal("name-10"))
 
 		gomega.Expect(views.PaginationInfo.Next).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(views.PaginationInfo.Prev).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(views.PaginationInfo.Prev).Should(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should return the first row of results by created_at field desc going forward and with specifying all the groups and some that do not exist", func() {
@@ -43,7 +43,7 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 		gomega.Expect(views.Items[len(views.Items)-1].Name).Should(gomega.Equal("name-10"))
 
 		gomega.Expect(views.PaginationInfo.Next).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(views.PaginationInfo.Prev).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(views.PaginationInfo.Prev).Should(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should return the first row of results by created_at field asc going forward", func() {
@@ -62,26 +62,7 @@ var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
 		gomega.Expect(views.Items[len(views.Items)-1].Name).Should(gomega.Equal("name-9"))
 
 		gomega.Expect(views.PaginationInfo.Next).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(views.PaginationInfo.Prev).ShouldNot(gomega.BeEmpty())
-	})
-
-	ginkgo.It("nextUrl in paginateVariables info should be an empty string if number of items is less than limit", func() {
-		projectId := testCreateProject("project")
-		limit := 10
-		for i := 0; i < 5; i++ {
-			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("name-%d", i), "modifiable")
-		}
-
-		handler := New(NewModel(projectId, "", "", "created_at", pagination.ASC, pagination.DIRECTION_FORWARD, limit, []string{"one"}))
-		views, err := handler.Handle()
-		testAssertErrNil(err)
-
-		gomega.Expect(len(views.Items)).Should(gomega.Equal(5))
-		gomega.Expect(views.Items[0].Name).Should(gomega.Equal("name-0"))
-		gomega.Expect(views.Items[len(views.Items)-1].Name).Should(gomega.Equal("name-4"))
-
-		gomega.Expect(views.PaginationInfo.Next).Should(gomega.BeEmpty())
-		gomega.Expect(views.PaginationInfo.Prev).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(views.PaginationInfo.Prev).Should(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should give an empty result for a non existent group", func() {

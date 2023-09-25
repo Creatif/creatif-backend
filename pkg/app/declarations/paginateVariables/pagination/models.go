@@ -5,6 +5,8 @@ type initialModel struct {
 }
 
 type Parameters struct {
+	NextID  string
+	PrevID  string
 	Field   string
 	OrderBy string
 	Groups  []string
