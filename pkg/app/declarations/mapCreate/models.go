@@ -52,6 +52,7 @@ func NewModel(projectId, name string, entries []Entry) Model {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
+		"groups":             nil,
 		"name":               a.Name,
 		"uniqueName":         a.Name,
 		"validNum":           a.Entries,
@@ -119,6 +120,25 @@ func (a *Model) Validate() map[string]string {
 				for key, v := range m {
 					if v != constants.ReadonlyBehaviour && v != constants.ModifiableBehaviour {
 						return errors.New(fmt.Sprintf("Invalid value for behaviour in variable '%s'. Variable behaviour can be 'modifiable' or 'readonly'", key))
+					}
+				}
+
+				return nil
+			})),
+			validation.Key("groups", validation.By(func(value interface{}) error {
+				for _, entry := range a.Entries {
+					if entry.Type == "variable" {
+						o := entry.Model.(VariableModel)
+
+						if len(o.Groups) > 20 {
+							return errors.New(fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", o.Name))
+						}
+
+						for _, g := range o.Groups {
+							if len(g) > 200 {
+								return errors.New(fmt.Sprintf("Invalid group length for '%s'. Maximum number of characters per groups is 200.", g))
+							}
+						}
 					}
 				}
 
