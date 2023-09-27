@@ -32,6 +32,7 @@ func (c Main) Authenticate() error {
 }
 
 func (c Main) Authorize() error {
+
 	return nil
 }
 
