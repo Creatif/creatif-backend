@@ -1,4 +1,4 @@
-package deleteVariable
+package addToMap
 
 import (
 	"creatif/pkg/app/app/createProject"

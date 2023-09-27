@@ -1,4 +1,4 @@
-package deleteVariable
+package removeMapEntry
 
 import (
 	"creatif/pkg/app/app/createProject"

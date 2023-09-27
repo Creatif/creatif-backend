@@ -1,4 +1,4 @@
-package deleteVariable
+package removeMapEntry
 
 type Model struct {
 	Name      string `json:"name"`
