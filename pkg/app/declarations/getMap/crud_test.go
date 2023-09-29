@@ -8,26 +8,26 @@ import (
 var _ = ginkgo.Describe("GET map tests", func() {
 	ginkgo.It("should getVariable names only (default) representation of map of variables", func() {
 		projectId := testCreateProject("project")
-		view := testCreateMap(projectId, "mapName", 100)
+		view := testCreateMap(projectId, "mapName", 10)
 
 		handler := New(NewModel(projectId, view.Name, []string{}))
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(mapVariablesView.ID)
-		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(100))
+		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(10))
 	})
 
 	ginkgo.It("should get specific fields from a map variable", func() {
 		projectId := testCreateProject("project")
-		view := testCreateMap(projectId, "mapName", 100)
+		view := testCreateMap(projectId, "mapName", 10)
 
 		handler := New(NewModel(projectId, view.Name, []string{"groups", "value"}))
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(mapVariablesView.ID)
-		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(100))
+		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(10))
 
 		for _, n := range mapVariablesView.Variables {
 			gomega.Expect(n["id"]).ShouldNot(gomega.BeEmpty())

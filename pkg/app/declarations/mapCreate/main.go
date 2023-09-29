@@ -45,20 +45,20 @@ func (c Main) Logic() (LogicResult, error) {
 			return res.Error
 		}
 
-		domainEntries := make([]declarations.MapVariable, 0)
+		domainEntries := make([]declarations.MapVariable, len(c.model.Entries))
 		entries := c.model.Entries
-		for _, entry := range entries {
+		for i, entry := range entries {
 			if entry.Type == "variable" {
 				m := entry.Model.(VariableModel)
 
-				domainEntries = append(domainEntries, declarations.NewMapVariable(
+				domainEntries[i] = declarations.NewMapVariable(
 					newMap.ID,
 					m.Name,
 					m.Behaviour,
 					m.Metadata,
 					m.Groups,
 					m.Value,
-				))
+				)
 			}
 		}
 

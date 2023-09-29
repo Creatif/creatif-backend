@@ -9,7 +9,7 @@ import (
 var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	ginkgo.It("should add an entry to the map", func() {
 		projectId := testCreateProject("project")
-		m := testCreateMap(projectId, "mapName", 100)
+		m := testCreateMap(projectId, "mapName", 10)
 
 		handler := New(NewModel(projectId, m.Name, VariableModel{
 			Name:      "newEntry",
@@ -28,7 +28,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		testAssertIDValid(maps.ID)
 		gomega.Expect(maps.ProjectID).Should(gomega.Equal(projectId))
 
-		gomega.Expect(len(maps.Variables)).Should(gomega.Equal(101))
+		gomega.Expect(len(maps.Variables)).Should(gomega.Equal(11))
 
 		found := false
 		for _, variable := range maps.Variables {

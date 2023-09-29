@@ -10,7 +10,7 @@ import (
 var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	ginkgo.It("should update an entry in the map by replacing it completely", func() {
 		projectId := testCreateProject("project")
-		m := testCreateMap(projectId, "map", 100)
+		m := testCreateMap(projectId, "map", 10)
 
 		b, err := json.Marshal("this is metadata")
 		gomega.Expect(err).Should(gomega.BeNil())

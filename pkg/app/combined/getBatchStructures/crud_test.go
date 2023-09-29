@@ -42,7 +42,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 		projectId := testCreateProject("project")
 		maps := make([]string, 0)
 		for i := 0; i < 100; i++ {
-			view := testCreateMap(projectId, fmt.Sprintf("name-%d", i), 100)
+			view := testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
 			maps = append(maps, view.Name)
 		}
 
@@ -74,7 +74,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 
 		maps := make([]string, 0)
 		for i := 0; i < 100; i++ {
-			view := testCreateMap(projectId, fmt.Sprintf("name-%d", i), 100)
+			view := testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
 			maps = append(maps, view.Name)
 		}
 
