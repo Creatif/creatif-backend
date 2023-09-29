@@ -21,6 +21,7 @@ type VariableModel struct {
 
 type View struct {
 	ID        string              `json:"id"`
+	ProjectID string              `json:"projectID"`
 	Name      string              `json:"name"`
 	Variables []map[string]string `json:"variables"`
 }
@@ -38,6 +39,7 @@ type Model struct {
 
 type LogicResult struct {
 	ID        string
+	ProjectID string
 	Variables []map[string]string
 	Name      string
 }
@@ -155,6 +157,7 @@ func (a *Model) Validate() map[string]string {
 func newView(model LogicResult) View {
 	return View{
 		ID:        model.ID,
+		ProjectID: model.ProjectID,
 		Name:      model.Name,
 		Variables: model.Variables,
 	}

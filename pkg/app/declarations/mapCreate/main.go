@@ -82,6 +82,7 @@ func (c Main) Logic() (LogicResult, error) {
 
 	return LogicResult{
 		ID:        newMap.ID,
+		ProjectID: newMap.ProjectID,
 		Name:      newMap.Name,
 		Variables: names,
 	}, nil

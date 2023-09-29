@@ -71,6 +71,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 		{Name: "name"},
 		{Name: "behaviour"},
 		{Name: "metadata"},
+		{Name: "value"},
 		{Name: "groups"},
 		{Name: "created_at"},
 		{Name: "updated_at"},

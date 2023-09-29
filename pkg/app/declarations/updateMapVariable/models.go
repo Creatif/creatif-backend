@@ -1,11 +1,13 @@
-package addToMap
+package updateMapVariable
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"time"
 )
 
 type VariableModel struct {
@@ -28,6 +30,11 @@ func NewModel(projectId, name string, entry VariableModel) Model {
 		ProjectID: projectId,
 		Entry:     entry,
 	}
+}
+
+type LogicResult struct {
+	Map   declarations.Map
+	Entry declarations.MapVariable
 }
 
 func (a *Model) Validate() map[string]string {
@@ -65,4 +72,49 @@ func (a *Model) Validate() map[string]string {
 	}
 
 	return nil
+}
+
+type ViewEntry struct {
+	ID        string      `json:"id"`
+	Name      string      `json:"name"`
+	Metadata  interface{} `json:"metadata"`
+	Groups    []string    `json:"groups"`
+	Behaviour string      `json:"behaviour"`
+	Value     interface{} `json:"value"`
+	CreatedAt time.Time   `json:"createdAt"`
+	UpdatedAt time.Time   `json:"updatedAt"`
+}
+
+type View struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	ProjectID string `json:"projectID"`
+
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Entry ViewEntry `json:"entry"`
+}
+
+func newView(logicResult LogicResult) View {
+	m := logicResult.Map
+	variable := logicResult.Entry
+
+	return View{
+		ID:        m.ID,
+		Name:      m.Name,
+		ProjectID: m.ProjectID,
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
+		Entry: ViewEntry{
+			ID:        variable.ID,
+			Name:      variable.Name,
+			Metadata:  variable.Metadata,
+			Groups:    variable.Groups,
+			Behaviour: variable.Behaviour,
+			Value:     variable.Value,
+			CreatedAt: variable.CreatedAt,
+			UpdatedAt: variable.UpdatedAt,
+		},
+	}
 }
