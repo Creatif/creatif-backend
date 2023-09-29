@@ -35,13 +35,16 @@ func appRoutes(group *echo.Group) {
 func declarationRoutes(group *echo.Group) {
 	group.PUT("/variable", declarations.CreateVariableHandler())
 	group.POST("/variable/:projectID", declarations.UpdateVariableHandler())
-	group.POST("/variable/:projectID", declarations.AddToMapHandler())
 	group.DELETE("/variable/:projectID/:name", declarations.DeleteVariableHandler())
-	group.DELETE("/map/entry/:projectID/:name/:entryName", declarations.DeleteMapEntry())
-	group.PUT("/map/:projectID", declarations.CreateMapHandler())
 	group.GET("/variable/:projectID/:name", declarations.GetVariableHandler())
 	group.GET("/variables/:projectID", declarations.PaginateVariablesHandler())
-	group.GET("/map/:projectID/:name", declarations.GetMapHandler())
 	group.GET("/variable/value/:projectID/:name", declarations.GetValueHandler())
+
+	group.POST("/map/add/:projectID", declarations.AddToMapHandler())
+	group.POST("/map/update/:projectID", declarations.UpdateMapVariableHandler())
+	group.DELETE("/map/entry/:projectID/:name/:entryName", declarations.DeleteMapEntry())
+	group.PUT("/map/:projectID", declarations.CreateMapHandler())
+	group.GET("/map/:projectID/:name", declarations.GetMapHandler())
+
 	group.POST("/structures/:projectID", declarations.GetBatchedStructuresHandler())
 }
