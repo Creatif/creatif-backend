@@ -2,6 +2,7 @@ package pagination
 
 import (
 	"creatif/pkg/lib/storage"
+	"errors"
 	"fmt"
 )
 
@@ -15,26 +16,20 @@ func getInitialID(projectId, table, orderBy string) (string, error) {
 	return model.ID, nil
 }
 
-func getInitialOperator(direction, orderByDirection string) string {
-	if direction == DIRECTION_FORWARD && orderByDirection == DESC {
-		return "<="
-	} else if direction == DIRECTION_FORWARD && orderByDirection == ASC {
-		return ">="
-	} else if direction == DIRECTION_BACKWARDS && orderByDirection == DESC {
-		return ""
+func getOperator(direction, orderBy string, isFirst bool) (string, error) {
+	if direction == DIRECTION_FORWARD && isFirst && orderBy == DESC {
+		return "<=", nil
+	} else if direction == DIRECTION_FORWARD && !isFirst && orderBy == DESC {
+		return "<", nil
+	} else if direction == DIRECTION_FORWARD && isFirst && orderBy == ASC {
+		return ">=", nil
+	} else if direction == DIRECTION_FORWARD && !isFirst && orderBy == ASC {
+		return ">", nil
+	} else if direction == DIRECTION_BACKWARDS && isFirst && orderBy == ASC {
+		return ">=", nil
+	} else if direction == DIRECTION_BACKWARDS && !isFirst && orderBy == ASC {
+		return ">", nil
 	}
 
-	return ""
-}
-
-func getOperator(direction, orderBy string) string {
-	if direction == DIRECTION_FORWARD && orderBy == DESC {
-		return "<"
-	} else if direction == DIRECTION_FORWARD && orderBy == ASC {
-		return ">"
-	} else if direction == DIRECTION_BACKWARDS && orderBy == DESC {
-		return ""
-	}
-
-	return ""
+	return "", errors.New("Operator could not be determined")
 }

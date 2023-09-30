@@ -10,8 +10,7 @@ import (
 )
 
 type Model struct {
-	NextID string
-	PrevID string
+	PaginationID string
 	// field for ORDER_BY clause
 	Field string
 	// DESC or ASC
@@ -23,29 +22,30 @@ type Model struct {
 	ProjectID string
 }
 
-func NewModel(projectId, nextId, prevId, field, orderBy, direction string, limit int, groups []string) Model {
+func NewModel(projectId, paginationId, field, orderBy, direction string, limit int, groups []string) Model {
 	return Model{
-		ProjectID: projectId,
-		NextID:    nextId,
-		PrevID:    prevId,
-		Field:     field,
-		OrderBy:   orderBy,
-		Direction: direction,
-		Limit:     limit,
-		Groups:    groups,
+		ProjectID:    projectId,
+		PaginationID: paginationId,
+		Field:        field,
+		OrderBy:      orderBy,
+		Direction:    direction,
+		Limit:        limit,
+		Groups:       groups,
 	}
 }
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"field":     a.Field,
-		"orderBy":   a.OrderBy,
-		"direction": a.Direction,
-		"limit":     a.Limit,
+		"paginationId": a.PaginationID,
+		"field":        a.Field,
+		"orderBy":      a.OrderBy,
+		"direction":    a.Direction,
+		"limit":        a.Limit,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("paginationId", validation.When(a.PaginationID != "", validation.Required, validation.RuneLength(26, 26))),
 			validation.Key("field", validation.Required, validation.RuneLength(1, 50)),
 			validation.Key("orderBy", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)

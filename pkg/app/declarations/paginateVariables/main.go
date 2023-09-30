@@ -43,8 +43,7 @@ func (c Main) Logic() (LogicModel, error) {
 		tableName,
 		fmt.Sprintf("SELECT id, name, behaviour, groups FROM %s", tableName),
 		pagination.NewOrderByRule(c.model.Field, c.model.OrderBy, "groups", c.model.Groups),
-		c.model.NextID,
-		c.model.PrevID,
+		c.model.PaginationID,
 		c.model.Direction,
 		c.model.Limit,
 	)
@@ -55,7 +54,7 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.Logic", nil)
 	}
 
-	nextId, prevId, err := pagination.ResolveCursor(c.model.Direction, c.model.NextID, c.model.PrevID, sdk.Map(variables, func(idx int, value Variable) string {
+	paginationId, err := pagination.ResolveCursor(c.model.PaginationID, c.model.Direction, c.model.OrderBy, sdk.Map(variables, func(idx int, value Variable) string {
 		return value.ID
 	}), c.model.Limit)
 
@@ -63,7 +62,7 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewApplicationError(err).AddError("paginateVariables.Logic", nil)
 	}
 
-	paginationInfo, err := p.PaginationInfo(nextId, prevId, c.model.Field, c.model.OrderBy, c.model.Groups, c.model.Limit)
+	paginationInfo, err := p.PaginationInfo(c.model.PaginationID, paginationId, c.model.Field, c.model.OrderBy, c.model.Groups, c.model.Limit)
 	if err != nil {
 		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("paginateVariables.Logic", nil)
 	}

@@ -121,3 +121,20 @@ func testCreateProject(name string) string {
 
 	return model.ID
 }
+
+func testAdvanceCursor(projectId, direction, orderBy string, limit, advanceTimes int) string {
+	handler := New(NewModel(projectId, "", "created_at", orderBy, direction, limit, []string{}))
+	views, err := handler.Handle()
+	testAssertErrNil(err)
+
+	nextPaginationId := views.PaginationInfo.Parameters.PaginationID
+	for i := 1; i < advanceTimes; i++ {
+		handler := New(NewModel(projectId, nextPaginationId, "created_at", orderBy, direction, limit, []string{}))
+		views, err := handler.Handle()
+		testAssertErrNil(err)
+
+		nextPaginationId = views.PaginationInfo.Parameters.PaginationID
+	}
+
+	return nextPaginationId
+}

@@ -5,12 +5,11 @@ type initialModel struct {
 }
 
 type Parameters struct {
-	NextID  string
-	PrevID  string
-	Field   string
-	OrderBy string
-	Groups  []string
-	Limit   int
+	PaginationID string
+	Field        string
+	OrderBy      string
+	Groups       []string
+	Limit        int
 }
 
 type PaginationInfo struct {

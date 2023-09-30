@@ -33,53 +33,61 @@ func NewOrderByRule(field, orderBy, groupField string, groups []string) orderByR
 }
 
 type Pagination struct {
-	projectId string
-	table     string
-	sql       string
-	nextId    string
-	prevId    string
-	limit     int
-	rule      orderByRule
-	direction string
+	projectId    string
+	table        string
+	sql          string
+	paginationId string
+	limit        int
+	rule         orderByRule
+	direction    string
 }
 
-func NewPagination(projectId, table, sql string, rules orderByRule, nextId, prevId, direction string, limit int) *Pagination {
+func NewPagination(projectId, table, sql string, rules orderByRule, paginationId, direction string, limit int) *Pagination {
 	return &Pagination{
-		projectId: projectId,
-		table:     table,
-		sql:       sql,
-		rule:      rules,
-		nextId:    nextId,
-		prevId:    prevId,
-		direction: direction,
-		limit:     limit,
+		projectId:    projectId,
+		table:        table,
+		sql:          sql,
+		rule:         rules,
+		paginationId: paginationId,
+		direction:    direction,
+		limit:        limit,
 	}
 }
 
 func (p Pagination) Paginate(model interface{}) error {
-	isFirstPage := p.nextId == "" && p.prevId == ""
+	isFirstPage := p.paginationId == ""
 	if isFirstPage {
 		id, err := getInitialID(p.projectId, p.table, p.rule.orderBy)
 		if err != nil {
 			return err
 		}
 
-		operator := getInitialOperator(DIRECTION_FORWARD, p.rule.orderBy)
+		operator, err := getOperator(DIRECTION_FORWARD, p.rule.orderBy, true)
+		if err != nil {
+			return err
+		}
+
 		if len(p.rule.groups) > 0 {
 			groups := strings.Join(p.rule.groups, ",")
 			if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE project_id = '%s' AND id %s '%s' AND '{%s}'::text[] && %s ORDER BY %s %s LIMIT %d", p.sql, p.projectId, operator, id, groups, p.rule.groupField, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
 				return res.Error
 			}
 		} else {
-			if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE project_id = '%s' AND id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, p.projectId, operator, id, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
+			sql := fmt.Sprintf("%s WHERE project_id = '%s' AND id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, p.projectId, operator, id, p.rule.field, p.rule.orderBy, p.limit)
+			if res := storage.Gorm().Raw(sql).Scan(model); res.Error != nil {
 				return res.Error
 			}
 		}
 
 		return nil
 	} else {
-		operator := getOperator(p.direction, p.rule.orderBy)
-		if res := storage.Gorm().Raw(fmt.Sprintf("%s WHERE project_id = '%s' AND id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, p.projectId, operator, p.nextId, p.rule.field, p.rule.orderBy, p.limit)).Scan(model); res.Error != nil {
+		operator, err := getOperator(p.direction, p.rule.orderBy, false)
+		if err != nil {
+			return err
+		}
+
+		sql := fmt.Sprintf("%s WHERE project_id = '%s' AND id %s '%s' ORDER BY %s %s LIMIT %d", p.sql, p.projectId, operator, p.paginationId, p.rule.field, p.rule.orderBy, p.limit)
+		if res := storage.Gorm().Raw(sql).Scan(model); res.Error != nil {
 			return res.Error
 		}
 	}
@@ -87,14 +95,14 @@ func (p Pagination) Paginate(model interface{}) error {
 	return nil
 }
 
-func (p Pagination) PaginationInfo(nextId, prevId, field, orderBy string, groups []string, limit int) (PaginationInfo, error) {
+func (p Pagination) PaginationInfo(prevPaginationId, paginationId, field, orderBy string, groups []string, limit int) (PaginationInfo, error) {
 	var next, prev string
-	if nextId != "" {
-		next = fmt.Sprintf("?nextId=%s&prevId=%s&field=%s&orderBy=%s&direction=%s&limit=%d", nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_FORWARD, p.limit)
+	if paginationId != "" {
+		next = fmt.Sprintf("?paginationId=%s&field=%s&orderBy=%s&direction=%s&limit=%d", paginationId, p.rule.field, p.rule.orderBy, DIRECTION_FORWARD, p.limit)
 	}
 
-	if prevId != "" {
-		prev = fmt.Sprintf("?nextId=%s&prevId=%s&field=%s&orderBy=%s&direction=%s&limit=%d", nextId, prevId, p.rule.field, p.rule.orderBy, DIRECTION_BACKWARDS, p.limit)
+	if prevPaginationId != "" {
+		next = fmt.Sprintf("?paginationId=%s&field=%s&orderBy=%s&direction=%s&limit=%d", paginationId, p.rule.field, p.rule.orderBy, DIRECTION_BACKWARDS, p.limit)
 	}
 
 	if len(groups) == 0 {
@@ -105,12 +113,11 @@ func (p Pagination) PaginationInfo(nextId, prevId, field, orderBy string, groups
 		Next: next,
 		Prev: prev,
 		Parameters: Parameters{
-			NextID:  nextId,
-			PrevID:  prevId,
-			Field:   field,
-			OrderBy: orderBy,
-			Groups:  groups,
-			Limit:   limit,
+			PaginationID: paginationId,
+			Field:        field,
+			OrderBy:      orderBy,
+			Groups:       groups,
+			Limit:        limit,
 		},
 	}, nil
 }
