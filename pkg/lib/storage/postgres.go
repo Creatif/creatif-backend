@@ -22,6 +22,10 @@ func Connect(dsn string) error {
 		return err
 	}
 
+	if err := initShortId(); err != nil {
+		return err
+	}
+
 	gormHandle = db
 
 	return nil

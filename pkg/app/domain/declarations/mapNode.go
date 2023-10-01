@@ -3,6 +3,7 @@ package declarations
 import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/sdk"
+	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
@@ -11,7 +12,8 @@ import (
 )
 
 type MapVariable struct {
-	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
 
 	Name      string `gorm:"uniqueIndex:unique_map_variable"`
 	Behaviour string
@@ -44,6 +46,11 @@ func (u *MapVariable) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 
 	u.ID = id
+	shortId, err := storage.ShortId.Generate()
+	if err != nil {
+		return err
+	}
+	u.ShortID = shortId
 
 	return nil
 }
