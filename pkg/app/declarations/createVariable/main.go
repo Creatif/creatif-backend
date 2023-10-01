@@ -73,7 +73,9 @@ func (c Main) Logic() (declarations.Variable, error) {
 
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
 		return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("createProject.Logic", nil)
-	} else if res.Error != nil {
+	}
+
+	if res.Error != nil {
 		return declarations.Variable{}, appErrors.NewDatabaseError(res.Error).AddError("createProject.Logic", nil)
 	}
 

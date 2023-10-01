@@ -7,7 +7,7 @@ import (
 )
 
 type PaginateVariables struct {
-	PaginationID string `query:"paginationID"`
+	PaginationID string `query:"paginationId"`
 	Field        string `query:"field"`
 	OrderBy      string `query:"orderBy"`
 	Direction    string `query:"direction"`

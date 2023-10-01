@@ -1,10 +1,10 @@
 package sdk
 
 func Map[T any, F any](values []T, fn func(idx int, value T) F) []F {
-	t := make([]F, 0)
+	t := make([]F, len(values))
 
 	for i, item := range values {
-		t = append(t, fn(i, item))
+		t[i] = fn(i, item)
 	}
 
 	return t

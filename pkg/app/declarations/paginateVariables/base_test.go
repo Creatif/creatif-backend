@@ -66,10 +66,10 @@ var _ = GinkgoAfterSuite(func() {
 })
 
 var _ = GinkgoAfterHandler(func() {
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
+	gomega.Expect(storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE)).Error).Should(gomega.BeNil())
+	gomega.Expect(storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE)).Error).Should(gomega.BeNil())
+	gomega.Expect(storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES)).Error).Should(gomega.BeNil())
+	gomega.Expect(storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP)).Error).Should(gomega.BeNil())
 })
 
 func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable.View {
@@ -122,19 +122,10 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testAdvanceCursor(projectId, direction, orderBy string, limit, advanceTimes int) string {
-	handler := New(NewModel(projectId, "", "created_at", orderBy, direction, limit, []string{}))
+func testAdvanceCursor(paginationId, projectId, direction, orderBy string, limit int) string {
+	handler := New(NewModel(projectId, paginationId, "created_at", orderBy, direction, limit, []string{}))
 	views, err := handler.Handle()
 	testAssertErrNil(err)
 
-	nextPaginationId := views.PaginationInfo.Parameters.PaginationID
-	for i := 1; i < advanceTimes; i++ {
-		handler := New(NewModel(projectId, nextPaginationId, "created_at", orderBy, direction, limit, []string{}))
-		views, err := handler.Handle()
-		testAssertErrNil(err)
-
-		nextPaginationId = views.PaginationInfo.Parameters.PaginationID
-	}
-
-	return nextPaginationId
+	return views.PaginationInfo.Parameters.PaginationID
 }

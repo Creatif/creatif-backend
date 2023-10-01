@@ -7,7 +7,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-var _ = ginkgo.Describe("Declaration variable paginateVariables tests", func() {
+var _ = ginkgo.Describe("First page variable paginateVariables tests", func() {
 	ginkgo.It("should return the first row of results by created_at field desc going forward", func() {
 		projectId := testCreateProject("project")
 		limit := 10
