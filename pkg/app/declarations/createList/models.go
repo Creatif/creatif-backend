@@ -35,7 +35,8 @@ func NewModel(projectId, name string, variables []Variable) Model {
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"name": a.Name,
+		"name":        a.Name,
+		"variableLen": len(a.Variables),
 	}
 
 	if err := validation.Validate(v,
@@ -56,6 +57,15 @@ func (a Model) Validate() map[string]string {
 
 				if variable.ID != "" {
 					return errors.New(fmt.Sprintf("Record with name '%s' already exists", name))
+				}
+
+				return nil
+			})),
+			validation.Key("variableLen", validation.By(func(value interface{}) error {
+				l := value.(int)
+
+				if l > 1000 {
+					return errors.New("The number of variables when creating a list cannot be higher than 1000.")
 				}
 
 				return nil
