@@ -15,6 +15,7 @@ type postgresDb struct {
 func Connect(dsn string) error {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		SkipDefaultTransaction: true,
+		PrepareStmt:            true,
 		Logger:                 logger.Default.LogMode(logger.Silent),
 	})
 

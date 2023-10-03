@@ -14,9 +14,9 @@ import (
 type ListVariable struct {
 	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
-	Index   int64  `gorm:"type:bigint"`
+	Index   int64  `gorm:"type:bigserial;autoIncrement:true;uniqueIndex:unique_list_variable"`
 
-	Name      string `gorm:"uniqueIndex:unique_list_variable"`
+	Name      string
 	Behaviour string
 	Groups    pq.StringArray `gorm:"type:text[]"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
