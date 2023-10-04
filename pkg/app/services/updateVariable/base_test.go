@@ -1,10 +1,9 @@
-package addToMap
+package updateVariable
 
 import (
 	"creatif/pkg/app/app/createProject"
-	"creatif/pkg/app/declarations/createVariable"
-	mapsCreate "creatif/pkg/app/declarations/mapCreate"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -73,12 +72,16 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateDetailedVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable.View {
-	b, _ := json.Marshal(map[string]interface{}{
-		"one":  1,
-		"two":  "three",
-		"four": "six",
-	})
+func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable.View {
+	m := map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+	}
+
+	b, err := json.Marshal(m)
+	gomega.Expect(err).Should(gomega.BeNil())
 
 	handler := createVariable.New(createVariable.NewModel(projectId, name, behaviour, groups, metadata, b))
 
@@ -89,8 +92,8 @@ func testCreateDetailedVariable(projectId, name, behaviour string, groups []stri
 	return view
 }
 
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable.View {
-	return testCreateDetailedVariable(projectId, name, behaviour, []string{}, []byte{})
+func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable.View {
+	return testCreateDeclarationVariable(projectId, name, behaviour, []string{}, []byte{})
 }
 
 func testAssertErrNil(err error) {
@@ -113,66 +116,4 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
-}
-
-func testCreateMap(projectId, name string, variablesNum int) mapsCreate.View {
-	entries := make([]mapsCreate.Entry, 0)
-
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	for i := 0; i < variablesNum; i++ {
-		var value interface{}
-		value = "my value"
-		if i%2 == 0 {
-			value = true
-		}
-
-		if i%3 == 0 {
-			value = map[string]interface{}{
-				"one":   "one",
-				"two":   []string{"one", "two", "three"},
-				"three": []int{1, 2, 3},
-				"four":  453,
-			}
-		}
-
-		v, err := json.Marshal(value)
-		gomega.Expect(err).Should(gomega.BeNil())
-
-		variableModel := mapsCreate.VariableModel{
-			Name:     fmt.Sprintf("name-%d", i),
-			Metadata: b,
-			Groups: []string{
-				"one",
-				"two",
-				"three",
-			},
-			Value:     v,
-			Behaviour: "modifiable",
-		}
-
-		entries = append(entries, mapsCreate.Entry{
-			Type:  "variable",
-			Model: variableModel,
-		})
-	}
-
-	handler := mapsCreate.New(mapsCreate.NewModel(projectId, name, entries))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
-
-	return view
 }

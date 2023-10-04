@@ -1,9 +1,9 @@
-package updateVariable
+package getMap
 
 import (
 	"creatif/pkg/app/app/createProject"
-	"creatif/pkg/app/declarations/createVariable"
 	"creatif/pkg/app/domain"
+	mapsCreate "creatif/pkg/app/services/mapCreate"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -32,7 +32,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
+	GinkgoRunSpecs(t, "Declaration -> GET map tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -72,7 +72,9 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable.View {
+func testCreateMap(projectId, name string, variablesNum int) mapsCreate.View {
+	entries := make([]mapsCreate.Entry, 0)
+
 	m := map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -83,17 +85,53 @@ func testCreateDeclarationVariable(projectId, name, behaviour string, groups []s
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable.New(createVariable.NewModel(projectId, name, behaviour, groups, metadata, b))
+	for i := 0; i < variablesNum; i++ {
+		var value interface{}
+		value = "my value"
+		if i%2 == 0 {
+			value = true
+		}
+
+		if i%3 == 0 {
+			value = map[string]interface{}{
+				"one":   "one",
+				"two":   []string{"one", "two", "three"},
+				"three": []int{1, 2, 3},
+				"four":  453,
+			}
+		}
+
+		v, err := json.Marshal(value)
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		variableModel := mapsCreate.VariableModel{
+			Name:     fmt.Sprintf("name-%d", i),
+			Metadata: b,
+			Groups: []string{
+				"one",
+				"two",
+				"three",
+			},
+			Value:     v,
+			Behaviour: "modifiable",
+		}
+
+		entries = append(entries, mapsCreate.Entry{
+			Type:  "variable",
+			Model: variableModel,
+		})
+	}
+
+	handler := mapsCreate.New(mapsCreate.NewModel(projectId, name, entries))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
 	testAssertIDValid(view.ID)
 
-	return view
-}
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
+	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
-func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable.View {
-	return testCreateDeclarationVariable(projectId, name, behaviour, []string{}, []byte{})
+	return view
 }
 
 func testAssertErrNil(err error) {

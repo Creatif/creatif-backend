@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	delete "creatif/pkg/app/declarations/deleteVariable"
+	delete "creatif/pkg/app/services/deleteVariable"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )

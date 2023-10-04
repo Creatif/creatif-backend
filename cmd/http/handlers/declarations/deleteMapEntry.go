@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	delete "creatif/pkg/app/declarations/removeMapEntry"
+	delete "creatif/pkg/app/services/removeMapEntry"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )

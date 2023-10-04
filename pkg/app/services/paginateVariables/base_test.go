@@ -1,9 +1,9 @@
-package deleteVariable
+package paginateVariables
 
 import (
 	"creatif/pkg/app/app/createProject"
-	"creatif/pkg/app/declarations/createVariable"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -32,7 +32,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
+	GinkgoRunSpecs(t, "Variable paginateVariables -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -66,18 +66,22 @@ var _ = GinkgoAfterSuite(func() {
 })
 
 var _ = GinkgoAfterHandler(func() {
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
+	gomega.Expect(storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE)).Error).Should(gomega.BeNil())
+	gomega.Expect(storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE)).Error).Should(gomega.BeNil())
+	gomega.Expect(storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES)).Error).Should(gomega.BeNil())
+	gomega.Expect(storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP)).Error).Should(gomega.BeNil())
 })
 
-func testCreateDetailedVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable.View {
-	b, _ := json.Marshal(map[string]interface{}{
-		"one":  1,
-		"two":  "three",
-		"four": "six",
-	})
+func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable.View {
+	m := map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+	}
+
+	b, err := json.Marshal(m)
+	gomega.Expect(err).Should(gomega.BeNil())
 
 	handler := createVariable.New(createVariable.NewModel(projectId, name, behaviour, groups, metadata, b))
 
@@ -88,8 +92,12 @@ func testCreateDetailedVariable(projectId, name, behaviour string, groups []stri
 	return view
 }
 
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable.View {
-	return testCreateDetailedVariable(projectId, name, behaviour, []string{}, []byte{})
+func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable.View {
+	return testCreateDeclarationVariable(projectId, name, behaviour, []string{
+		"one",
+		"two",
+		"three",
+	}, []byte{})
 }
 
 func testAssertErrNil(err error) {
@@ -112,4 +120,12 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
+}
+
+func testAdvanceCursor(paginationId, projectId, direction, orderBy string, limit int) string {
+	handler := New(NewModel(projectId, paginationId, "created_at", orderBy, direction, limit, []string{}))
+	views, err := handler.Handle()
+	testAssertErrNil(err)
+
+	return views.PaginationInfo.Parameters.PaginationID
 }

@@ -1,7 +1,7 @@
 package paginateVariables
 
 import (
-	"creatif/pkg/app/declarations/paginateVariables/pagination"
+	"creatif/pkg/app/services/paginateVariables/pagination"
 	"creatif/pkg/lib/sdk"
 	"errors"
 	"fmt"

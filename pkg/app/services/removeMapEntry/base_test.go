@@ -1,10 +1,10 @@
-package updateMapVariable
+package removeMapEntry
 
 import (
 	"creatif/pkg/app/app/createProject"
-	"creatif/pkg/app/declarations/createVariable"
-	mapsCreate "creatif/pkg/app/declarations/mapCreate"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/createVariable"
+	mapsCreate "creatif/pkg/app/services/mapCreate"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"

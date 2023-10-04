@@ -1,9 +1,9 @@
-package getValue
+package getVariable
 
 import (
 	"creatif/pkg/app/app/createProject"
-	"creatif/pkg/app/declarations/createVariable"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -72,7 +72,7 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable.View {
+func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable.View {
 	m := map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -83,7 +83,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string) createVari
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable.New(createVariable.NewModel(projectId, name, behaviour, []string{"one", "two", "three"}, b, b))
+	handler := createVariable.New(createVariable.NewModel(projectId, name, behaviour, groups, metadata, b))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -91,6 +91,25 @@ func testCreateDeclarationVariable(projectId, name, behaviour string) createVari
 
 	return view
 }
+
+func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable.View {
+	m := map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+	}
+
+	b, err := json.Marshal(m)
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return testCreateDeclarationVariable(projectId, name, behaviour, []string{
+		"one",
+		"two",
+		"three",
+	}, b)
+}
+
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }

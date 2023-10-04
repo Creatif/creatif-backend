@@ -1,11 +1,11 @@
-package getMap
+package appendToList
 
 import (
 	"creatif/pkg/app/app/createProject"
-	mapsCreate "creatif/pkg/app/declarations/mapCreate"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/createList"
 	storage2 "creatif/pkg/lib/storage"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -32,7 +32,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration -> GET map tests")
+	GinkgoRunSpecs(t, "Declaration Lists -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -70,69 +70,10 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_VARIABLES_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("ALTER SEQUENCE declarations.list_variables_index_seq RESTART WITH 1"))
 })
-
-func testCreateMap(projectId, name string, variablesNum int) mapsCreate.View {
-	entries := make([]mapsCreate.Entry, 0)
-
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	for i := 0; i < variablesNum; i++ {
-		var value interface{}
-		value = "my value"
-		if i%2 == 0 {
-			value = true
-		}
-
-		if i%3 == 0 {
-			value = map[string]interface{}{
-				"one":   "one",
-				"two":   []string{"one", "two", "three"},
-				"three": []int{1, 2, 3},
-				"four":  453,
-			}
-		}
-
-		v, err := json.Marshal(value)
-		gomega.Expect(err).Should(gomega.BeNil())
-
-		variableModel := mapsCreate.VariableModel{
-			Name:     fmt.Sprintf("name-%d", i),
-			Metadata: b,
-			Groups: []string{
-				"one",
-				"two",
-				"three",
-			},
-			Value:     v,
-			Behaviour: "modifiable",
-		}
-
-		entries = append(entries, mapsCreate.Entry{
-			Type:  "variable",
-			Model: variableModel,
-		})
-	}
-
-	handler := mapsCreate.New(mapsCreate.NewModel(projectId, name, entries))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
-
-	return view
-}
 
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -154,4 +95,35 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
+}
+
+func testCreateList(projectId, name string, varNum int) string {
+	variables := make([]createList.Variable, 5)
+	for i := 0; i < varNum; i++ {
+		variables[i] = createList.Variable{
+			Name:      fmt.Sprintf("one-%d", i),
+			Metadata:  nil,
+			Groups:    nil,
+			Behaviour: "readonly",
+			Value:     nil,
+		}
+	}
+
+	handler := createList.New(createList.NewModel(projectId, name, variables))
+
+	list, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal("list"))
+
+	var savedVariables []declarations.ListVariable
+	storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
+
+	gomega.Expect(len(savedVariables)).Should(gomega.Equal(varNum))
+	for i := 1; i <= varNum; i++ {
+		gomega.Expect(savedVariables[i-1].Index).Should(gomega.Equal(int64(i)))
+	}
+
+	return list.Name
 }

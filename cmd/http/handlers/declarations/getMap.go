@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/declarations/getMap"
+	"creatif/pkg/app/services/getMap"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"

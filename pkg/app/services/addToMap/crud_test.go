@@ -1,7 +1,7 @@
 package addToMap
 
 import (
-	"creatif/pkg/app/declarations/getMap"
+	"creatif/pkg/app/services/getMap"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

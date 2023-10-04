@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	update "creatif/pkg/app/declarations/updateVariable"
+	update "creatif/pkg/app/services/updateVariable"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )

@@ -1,9 +1,9 @@
 package paginateVariables
 
 import (
-	"creatif/pkg/app/declarations/paginateVariables/pagination"
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/paginateVariables/pagination"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/sdk"
