@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/services/paginateVariables"
+	paginateVariables2 "creatif/pkg/app/services/variables/paginateVariables"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
@@ -19,8 +19,8 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 		model = declarations.SanitizePaginateVariables(model)
 		model.OrderBy = strings.ToUpper(model.OrderBy)
 
-		handler := paginateVariables.New(paginateVariables.NewModel(model.ProjectID, model.PaginationID, model.Field, model.OrderBy, model.Direction, model.Limit, model.SanitizedGroups))
+		handler := paginateVariables2.New(paginateVariables2.NewModel(model.ProjectID, model.PaginationID, model.Field, model.OrderBy, model.Direction, model.Limit, model.SanitizedGroups))
 
-		return request.SendResponse[paginateVariables.Model](handler, c, http.StatusOK)
+		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK)
 	}
 }

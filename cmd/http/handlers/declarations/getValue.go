@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/services/getValue"
+	getValue2 "creatif/pkg/app/services/variables/getValue"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,8 +17,8 @@ func GetValueHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeGetValue(model)
 
-		handler := getValue.New(getValue.NewModel(model.ProjectID, model.Name))
+		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.Name))
 
-		return request.SendResponse[getValue.Model](handler, c, http.StatusOK)
+		return request.SendResponse[getValue2.Model](handler, c, http.StatusOK)
 	}
 }

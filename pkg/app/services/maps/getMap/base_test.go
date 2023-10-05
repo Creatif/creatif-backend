@@ -1,10 +1,9 @@
-package getBatchStructures
+package getMap
 
 import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/maps/mapCreate"
-	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -18,7 +17,7 @@ import (
 )
 
 func loadEnv() {
-	err := godotenv.Load("../../../../.env")
+	err := godotenv.Load("../../../../../.env")
 
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +32,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Combined -> getBatchStructures tests")
+	GinkgoRunSpecs(t, "Declaration -> GET map tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -72,38 +71,6 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
-
-func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name))
-
-	model, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(model.ID)
-
-	gomega.Expect(model.Name).Should(gomega.Equal(name))
-
-	return model.ID
-}
-
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable2.View {
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	handler := createVariable2.New(createVariable2.NewModel(projectId, name, behaviour, []string{"one", "two", "three"}, b, b))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
 
 func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	entries := make([]mapCreate.Entry, 0)
@@ -175,4 +142,16 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateProject(name string) string {
+	handler := createProject.New(createProject.NewModel(name))
+
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(model.ID)
+
+	gomega.Expect(model.Name).Should(gomega.Equal(name))
+
+	return model.ID
 }

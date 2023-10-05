@@ -1,9 +1,8 @@
-package getBatchStructures
+package updateVariable
 
 import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/app/services/maps/mapCreate"
 	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -18,7 +17,7 @@ import (
 )
 
 func loadEnv() {
-	err := godotenv.Load("../../../../.env")
+	err := godotenv.Load("../../../../../.env")
 
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +32,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Combined -> getBatchStructures tests")
+	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -73,19 +72,7 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
-func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name))
-
-	model, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(model.ID)
-
-	gomega.Expect(model.Name).Should(gomega.Equal(name))
-
-	return model.ID
-}
-
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable2.View {
+func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
 	m := map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -96,7 +83,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string) createVari
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, name, behaviour, []string{"one", "two", "three"}, b, b))
+	handler := createVariable2.New(createVariable2.NewModel(projectId, name, behaviour, groups, metadata, b))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -105,66 +92,8 @@ func testCreateDeclarationVariable(projectId, name, behaviour string) createVari
 	return view
 }
 
-func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
-	entries := make([]mapCreate.Entry, 0)
-
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	for i := 0; i < variablesNum; i++ {
-		var value interface{}
-		value = "my value"
-		if i%2 == 0 {
-			value = true
-		}
-
-		if i%3 == 0 {
-			value = map[string]interface{}{
-				"one":   "one",
-				"two":   []string{"one", "two", "three"},
-				"three": []int{1, 2, 3},
-				"four":  453,
-			}
-		}
-
-		v, err := json.Marshal(value)
-		gomega.Expect(err).Should(gomega.BeNil())
-
-		variableModel := mapCreate.VariableModel{
-			Name:     fmt.Sprintf("name-%d", i),
-			Metadata: b,
-			Groups: []string{
-				"one",
-				"two",
-				"three",
-			},
-			Value:     v,
-			Behaviour: "modifiable",
-		}
-
-		entries = append(entries, mapCreate.Entry{
-			Type:  "variable",
-			Model: variableModel,
-		})
-	}
-
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
-
-	return view
+func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable2.View {
+	return testCreateDeclarationVariable(projectId, name, behaviour, []string{}, []byte{})
 }
 
 func testAssertErrNil(err error) {
@@ -175,4 +104,16 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateProject(name string) string {
+	handler := createProject.New(createProject.NewModel(name))
+
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(model.ID)
+
+	gomega.Expect(model.Name).Should(gomega.Equal(name))
+
+	return model.ID
 }

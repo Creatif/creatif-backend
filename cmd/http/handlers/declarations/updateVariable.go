@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	update "creatif/pkg/app/services/updateVariable"
+	"creatif/pkg/app/services/variables/updateVariable"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,7 +17,7 @@ func UpdateVariableHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeUpdateVariable(model)
 
-		handler := update.New(update.NewModel(
+		handler := updateVariable.New(updateVariable.NewModel(
 			model.ProjectID,
 			model.Fields,
 			model.Name,
@@ -28,6 +28,6 @@ func UpdateVariableHandler() func(e echo.Context) error {
 			[]byte(model.Values.Value)),
 		)
 
-		return request.SendResponse[update.Model](handler, c, http.StatusOK)
+		return request.SendResponse[updateVariable.Model](handler, c, http.StatusOK)
 	}
 }

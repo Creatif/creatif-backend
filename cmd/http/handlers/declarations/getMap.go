@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/services/getMap"
+	getMap2 "creatif/pkg/app/services/maps/getMap"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
@@ -26,8 +26,8 @@ func GetMapHandler() func(e echo.Context) error {
 			}
 		}
 
-		handler := getMap.New(getMap.NewModel(model.ProjectID, model.Name, newFields))
+		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Name, newFields))
 
-		return request.SendResponse[getMap.Model](handler, c, http.StatusOK)
+		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK)
 	}
 }

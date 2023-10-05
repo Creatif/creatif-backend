@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/services/updateMapVariable"
+	updateMapVariable2 "creatif/pkg/app/services/maps/updateMapVariable"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -16,7 +16,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeUpdateMapVariable(model)
-		handler := updateMapVariable.New(updateMapVariable.NewModel(model.ProjectID, model.Name, updateMapVariable.VariableModel{
+		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Name, updateMapVariable2.VariableModel{
 			Name:      model.Entry.Name,
 			Metadata:  []byte(model.Entry.Metadata),
 			Groups:    model.Entry.Groups,
@@ -24,6 +24,6 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Value:     []byte(model.Entry.Value),
 		}))
 
-		return request.SendResponse[updateMapVariable.Model](handler, c, http.StatusOK)
+		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK)
 	}
 }

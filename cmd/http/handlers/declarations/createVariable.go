@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	create "creatif/pkg/app/services/createVariable"
+	"creatif/pkg/app/services/variables/createVariable"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,8 +17,8 @@ func CreateVariableHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeVariable(model)
 
-		handler := create.New(create.NewModel(model.ProjectID, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
+		handler := createVariable.New(createVariable.NewModel(model.ProjectID, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
 
-		return request.SendResponse[create.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[createVariable.Model](handler, c, http.StatusCreated)
 	}
 }

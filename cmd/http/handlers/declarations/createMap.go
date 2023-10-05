@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/services/mapCreate"
+	mapCreate2 "creatif/pkg/app/services/maps/mapCreate"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,13 +17,13 @@ func CreateMapHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeMapModel(model)
 
-		serviceEntries := make([]mapCreate.Entry, 0)
+		serviceEntries := make([]mapCreate2.Entry, 0)
 		for _, entry := range model.Entries {
 			m, ok := entry.Model.(declarations.MapVariableModel)
 			if ok {
-				serviceEntries = append(serviceEntries, mapCreate.Entry{
+				serviceEntries = append(serviceEntries, mapCreate2.Entry{
 					Type: entry.Type,
-					Model: mapCreate.VariableModel{
+					Model: mapCreate2.VariableModel{
 						Name:      m.Name,
 						Metadata:  []byte(m.Metadata),
 						Value:     []byte(m.Value),
@@ -34,8 +34,8 @@ func CreateMapHandler() func(e echo.Context) error {
 			}
 		}
 
-		handler := mapCreate.New(mapCreate.NewModel(model.ProjectID, model.Name, serviceEntries))
+		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Name, serviceEntries))
 
-		return request.SendResponse[mapCreate.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[mapCreate2.Model](handler, c, http.StatusCreated)
 	}
 }

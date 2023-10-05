@@ -1,4 +1,4 @@
-package getBatchStructures
+package removeMapEntry
 
 import (
 	"creatif/pkg/app/app/createProject"
@@ -18,7 +18,7 @@ import (
 )
 
 func loadEnv() {
-	err := godotenv.Load("../../../../.env")
+	err := godotenv.Load("../../../../../.env")
 
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +33,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Combined -> getBatchStructures tests")
+	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -73,6 +73,36 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 })
 
+func testCreateDetailedVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
+	b, _ := json.Marshal(map[string]interface{}{
+		"one":  1,
+		"two":  "three",
+		"four": "six",
+	})
+
+	handler := createVariable2.New(createVariable2.NewModel(projectId, name, behaviour, groups, metadata, b))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	return view
+}
+
+func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable2.View {
+	return testCreateDetailedVariable(projectId, name, behaviour, []string{}, []byte{})
+}
+
+func testAssertErrNil(err error) {
+	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testAssertIDValid(id string) {
+	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
+	_, err := ulid.Parse(id)
+	gomega.Expect(err).Should(gomega.BeNil())
+}
+
 func testCreateProject(name string) string {
 	handler := createProject.New(createProject.NewModel(name))
 
@@ -83,26 +113,6 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
-}
-
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable2.View {
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	handler := createVariable2.New(createVariable2.NewModel(projectId, name, behaviour, []string{"one", "two", "three"}, b, b))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
 }
 
 func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
@@ -165,14 +175,4 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
 	return view
-}
-
-func testAssertErrNil(err error) {
-	gomega.Expect(err).Should(gomega.BeNil())
-}
-
-func testAssertIDValid(id string) {
-	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
-	_, err := ulid.Parse(id)
-	gomega.Expect(err).Should(gomega.BeNil())
 }

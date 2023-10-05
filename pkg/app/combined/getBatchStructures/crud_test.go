@@ -1,7 +1,7 @@
 package getBatchStructures
 
 import (
-	create "creatif/pkg/app/services/createVariable"
+	create "creatif/pkg/app/services/variables/createVariable"
 	"creatif/pkg/lib/sdk"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"

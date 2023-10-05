@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	delete "creatif/pkg/app/services/removeMapEntry"
+	"creatif/pkg/app/services/maps/removeMapEntry"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,8 +17,8 @@ func DeleteMapEntry() func(e echo.Context) error {
 
 		model = declarations.SanitizeDeleteMapEntry(model)
 
-		handler := delete.New(delete.NewModel(model.ProjectID, model.Name, model.EntryName))
+		handler := removeMapEntry.New(removeMapEntry.NewModel(model.ProjectID, model.Name, model.EntryName))
 
-		return request.SendResponse[delete.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[removeMapEntry.Model](handler, c, http.StatusCreated)
 	}
 }

@@ -3,7 +3,7 @@ package declarations
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
-	"creatif/pkg/app/services/addToMap"
+	addToMap2 "creatif/pkg/app/services/maps/addToMap"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -16,7 +16,7 @@ func AddToMapHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeAddToMap(model)
-		handler := addToMap.New(addToMap.NewModel(model.ProjectID, model.Name, addToMap.VariableModel{
+		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Name, addToMap2.VariableModel{
 			Name:      model.Entry.Name,
 			Metadata:  []byte(model.Entry.Metadata),
 			Groups:    model.Entry.Groups,
@@ -24,6 +24,6 @@ func AddToMapHandler() func(e echo.Context) error {
 			Value:     []byte(model.Entry.Value),
 		}))
 
-		return request.SendResponse[addToMap.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated)
 	}
 }
