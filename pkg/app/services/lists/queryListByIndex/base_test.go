@@ -1,8 +1,10 @@
-package getVariable
+package queryListByIndex
 
 import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/domain/declarations"
+	createList2 "creatif/pkg/app/services/lists/createList"
 	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -70,6 +72,9 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_VARIABLES_TABLE))
+	storage2.Gorm().Exec(fmt.Sprintf("ALTER SEQUENCE declarations.list_variables_index_seq RESTART WITH 1"))
 })
 
 func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
@@ -130,4 +135,35 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
+}
+
+func testCreateList(projectId, name string, varNum int) string {
+	variables := make([]createList2.Variable, varNum)
+	for i := 0; i < varNum; i++ {
+		variables[i] = createList2.Variable{
+			Name:      fmt.Sprintf("one-%d", i),
+			Metadata:  nil,
+			Groups:    nil,
+			Behaviour: "readonly",
+			Value:     nil,
+		}
+	}
+
+	handler := createList2.New(createList2.NewModel(projectId, name, variables))
+
+	list, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
+
+	var savedVariables []declarations.ListVariable
+	storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
+
+	gomega.Expect(len(savedVariables)).Should(gomega.Equal(varNum))
+	for i := 1; i <= varNum; i++ {
+		gomega.Expect(savedVariables[i-1].Index).Should(gomega.Equal(int64(i)))
+	}
+
+	return list.Name
 }

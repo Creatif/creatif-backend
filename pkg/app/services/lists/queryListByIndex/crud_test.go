@@ -1,33 +1,47 @@
-package getVariable
+package queryListByIndex
 
 import (
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
 
-var _ = ginkgo.Describe("Declaration variable tests", func() {
-	ginkgo.It("should return a text variable with value", func() {
+var _ = ginkgo.Describe("Declaration list variable tests", func() {
+	ginkgo.It("should query a list variable by index 0 (zero)", func() {
 		projectId := testCreateProject("project")
-		name := "variable"
-		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
+		listName := testCreateList(projectId, "name", 6)
 
-		handler := New(NewModel(projectId, createdVariable.Name, []string{}))
-		variable, err := handler.Handle()
-		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel(projectId, listName, 0))
+		view, err := handler.Handle()
+		testAssertErrNil(err)
+		testAssertIDValid(view.ID)
 
-		gomega.Expect(variable).Should(gomega.HaveKey("id"))
-		gomega.Expect(variable).Should(gomega.HaveKey("name"))
-		gomega.Expect(variable).Should(gomega.HaveKey("behaviour"))
-		gomega.Expect(variable).Should(gomega.HaveKey("metadata"))
-		gomega.Expect(variable).Should(gomega.HaveKey("groups"))
-		gomega.Expect(variable).Should(gomega.HaveKey("createdAt"))
-		gomega.Expect(variable).Should(gomega.HaveKey("updatedAt"))
-		gomega.Expect(variable).Should(gomega.HaveKey("projectID"))
+		gomega.Expect(view.Name).Should(gomega.Equal("one-0"))
+		gomega.Expect(view.Index).Should(gomega.Equal(int64(1)))
+	})
 
-		gomega.Expect(variable["id"]).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(variable["projectID"]).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(variable["name"]).Should(gomega.Equal(name))
+	ginkgo.It("should query a list variable by index 3 (zero) - middle", func() {
+		projectId := testCreateProject("project")
+		listName := testCreateList(projectId, "name", 6)
 
-		gomega.Expect(variable["value"]).ShouldNot(gomega.BeEmpty())
+		handler := New(NewModel(projectId, listName, 3))
+		view, err := handler.Handle()
+		testAssertErrNil(err)
+		testAssertIDValid(view.ID)
+
+		gomega.Expect(view.Name).Should(gomega.Equal("one-3"))
+		gomega.Expect(view.Index).Should(gomega.Equal(int64(4)))
+	})
+
+	ginkgo.It("should query a list variable by index 5 (five) - last element", func() {
+		projectId := testCreateProject("project")
+		listName := testCreateList(projectId, "name", 6)
+
+		handler := New(NewModel(projectId, listName, 5))
+		view, err := handler.Handle()
+		testAssertErrNil(err)
+		testAssertIDValid(view.ID)
+
+		gomega.Expect(view.Name).Should(gomega.Equal("one-5"))
+		gomega.Expect(view.Index).Should(gomega.Equal(int64(6)))
 	})
 })

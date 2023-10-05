@@ -98,7 +98,7 @@ func testCreateProject(name string) string {
 }
 
 func testCreateList(projectId, name string, varNum int) string {
-	variables := make([]createList2.Variable, 5)
+	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
 		variables[i] = createList2.Variable{
 			Name:      fmt.Sprintf("one-%d", i),
@@ -115,7 +115,7 @@ func testCreateList(projectId, name string, varNum int) string {
 	testAssertErrNil(err)
 	testAssertIDValid(list.ID)
 
-	gomega.Expect(list.Name).Should(gomega.Equal("list"))
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
 	var savedVariables []declarations.ListVariable
 	storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)

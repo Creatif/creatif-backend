@@ -1,4 +1,4 @@
-package getVariable
+package queryListByIndex
 
 import (
 	"creatif/pkg/app/domain/app"
@@ -7,6 +7,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -36,41 +37,60 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (declarations.Variable, error) {
-	variable, err := queryValue(c.model.ProjectID, c.model.Name, c.model.Fields)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return declarations.Variable{}, appErrors.NewNotFoundError(err)
+func (c Main) Logic() (declarations.ListVariable, error) {
+	offset := c.model.Index
+
+	var list declarations.List
+	res := storage.Gorm().Where("project_id = ? AND name = ?", c.model.ProjectID, c.model.Name).Select("ID").First(&list)
+	if res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByIndex.Logic", nil)
 		}
 
-		return declarations.Variable{}, appErrors.NewDatabaseError(err)
+		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryListByIndex.Logic", nil)
+	}
+
+	var variable declarations.ListVariable
+	res = storage.Gorm().
+		Raw(fmt.Sprintf(`
+			SELECT *
+			FROM %s WHERE list_id = ?
+			OFFSET ? LIMIT 1`, (declarations.ListVariable{}).TableName()), list.ID, offset).
+		Scan(&variable)
+
+	if res.Error != nil {
+		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryListByIndex.Logic", nil)
+	}
+
+	if res.RowsAffected == 0 {
+		return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByIndex.Logic", nil)
 	}
 
 	return variable, nil
 }
 
-func (c Main) Handle() (map[string]interface{}, error) {
+func (c Main) Handle() (View, error) {
 	if err := c.Validate(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return nil, err
+		return View{}, err
 	}
 
-	return newView(model, c.model.Fields), nil
+	return newView(model), nil
 }
 
-func New(model Model) pkg.Job[Model, map[string]interface{}, declarations.Variable] {
+func New(model Model) pkg.Job[Model, View, declarations.ListVariable] {
 	return Main{model: model}
 }

@@ -1,4 +1,4 @@
-package getVariable
+package queryListByIndex
 
 import (
 	"creatif/pkg/app/domain/declarations"
