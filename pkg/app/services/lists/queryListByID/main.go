@@ -6,8 +6,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
-	"errors"
-	"gorm.io/gorm"
+	"fmt"
 )
 
 type Main struct {
@@ -37,24 +36,21 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.ListVariable, error) {
-	var list declarations.List
-	res := storage.Gorm().Where("project_id = ? AND name = ?", c.model.ProjectID, c.model.Name).Select("ID").First(&list)
-	if res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByIndex.Logic", nil)
-		}
+	var variable declarations.ListVariable
+	res := storage.Gorm().
+		Raw(fmt.Sprintf(`
+			SELECT lv.id, lv.name, lv.index, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at
+			FROM %s AS lv INNER JOIN %s AS l
+			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND lv.id = ?`,
+			(declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.Name, c.model.ID).
+		Scan(&variable)
 
+	if res.Error != nil {
 		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryListByIndex.Logic", nil)
 	}
 
-	var variable declarations.ListVariable
-	res = storage.Gorm().Where("list_id = ? AND id = ?", list.ID, c.model.ID).First(&variable)
-	if res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByIndex.Logic", nil)
-		}
-
-		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryListByIndex.Logic", nil)
+	if res.RowsAffected == 0 {
+		return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByIndex.Logic", nil)
 	}
 
 	return variable, nil
