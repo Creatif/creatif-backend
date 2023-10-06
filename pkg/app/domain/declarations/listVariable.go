@@ -14,7 +14,7 @@ import (
 type ListVariable struct {
 	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
-	Index   int64  `gorm:"type:bigserial;autoIncrement:true;uniqueIndex:unique_list_variable"`
+	Index   string `gorm:"type:text;uniqueIndex:unique_list_variable"`
 
 	Name      string
 	Behaviour string
@@ -52,6 +52,12 @@ func (u *ListVariable) BeforeCreate(tx *gorm.DB) (err error) {
 		return err
 	}
 	u.ShortID = shortId
+
+	idx, err := sdk.NewULID()
+	if err != nil {
+		return err
+	}
+	u.Index = idx
 
 	return nil
 }

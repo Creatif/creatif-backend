@@ -17,6 +17,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		gomega.Expect(view.ID).Should(gomega.Equal(variableIds[3]))
 		gomega.Expect(view.Name).Should(gomega.Equal("one-3"))
-		gomega.Expect(view.Index).Should(gomega.Equal(int64(4)))
+		gomega.Expect(view.Index).ShouldNot(gomega.BeEmpty())
 	})
 })

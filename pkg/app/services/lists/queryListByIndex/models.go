@@ -25,7 +25,7 @@ func NewModel(projectId, name string, index int64) Model {
 
 type View struct {
 	ID        string         `json:"id"`
-	Index     int64          `json:"index"`
+	Index     string         `json:"index"`
 	ShortID   string         `json:"shortId"`
 	Name      string         `json:"name"`
 	Behaviour string         `json:"behaviour"`

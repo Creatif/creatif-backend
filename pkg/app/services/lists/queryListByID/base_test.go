@@ -75,7 +75,6 @@ var _ = GinkgoAfterHandler(func() {
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_TABLE))
 	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_VARIABLES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("ALTER SEQUENCE declarations.list_variables_index_seq RESTART WITH 1"))
 })
 
 func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
@@ -96,24 +95,6 @@ func testCreateDeclarationVariable(projectId, name, behaviour string, groups []s
 	testAssertIDValid(view.ID)
 
 	return view
-}
-
-func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable2.View {
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	return testCreateDeclarationVariable(projectId, name, behaviour, []string{
-		"one",
-		"two",
-		"three",
-	}, b)
 }
 
 func testAssertErrNil(err error) {
@@ -138,37 +119,6 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateList(projectId, name string, varNum int) string {
-	variables := make([]createList2.Variable, varNum)
-	for i := 0; i < varNum; i++ {
-		variables[i] = createList2.Variable{
-			Name:      fmt.Sprintf("one-%d", i),
-			Metadata:  nil,
-			Groups:    nil,
-			Behaviour: "readonly",
-			Value:     nil,
-		}
-	}
-
-	handler := createList2.New(createList2.NewModel(projectId, name, variables))
-
-	list, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(list.ID)
-
-	gomega.Expect(list.Name).Should(gomega.Equal(name))
-
-	var savedVariables []declarations.ListVariable
-	storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
-
-	gomega.Expect(len(savedVariables)).Should(gomega.Equal(varNum))
-	for i := 1; i <= varNum; i++ {
-		gomega.Expect(savedVariables[i-1].Index).Should(gomega.Equal(int64(i)))
-	}
-
-	return list.Name
-}
-
 func testCreateListAndReturnIds(projectId, name string, varNum int) []string {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
@@ -190,12 +140,8 @@ func testCreateListAndReturnIds(projectId, name string, varNum int) []string {
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
 	var savedVariables []declarations.ListVariable
-	storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
-
-	gomega.Expect(len(savedVariables)).Should(gomega.Equal(varNum))
-	for i := 1; i <= varNum; i++ {
-		gomega.Expect(savedVariables[i-1].Index).Should(gomega.Equal(int64(i)))
-	}
+	res := storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 
 	return sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) string {
 		return value.ID

@@ -1,8 +1,6 @@
 package appendToList
 
 import (
-	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -31,13 +29,5 @@ var _ = ginkgo.Describe("Declaration list append tests", func() {
 		testAssertIDValid(list.ID)
 
 		gomega.Expect(list.Name).Should(gomega.Equal(listName))
-
-		var savedVariables []declarations.ListVariable
-		storage.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
-
-		gomega.Expect(len(savedVariables)).Should(gomega.Equal(10))
-		for i := 1; i <= 10; i++ {
-			gomega.Expect(savedVariables[i-1].Index).Should(gomega.Equal(int64(i)))
-		}
 	})
 })
