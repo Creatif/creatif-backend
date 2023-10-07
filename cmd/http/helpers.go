@@ -65,3 +65,17 @@ func setupServer() *echo.Echo {
 
 	return srv
 }
+
+func releaseAllLocks() {
+	var stat []int64
+	res := storage2.Gorm().Raw(`SELECT DISTINCT pid FROM pg_locks l, pg_stat_all_tables t WHERE l.relation = t.relid AND t.relname = 'list_variables'`).Scan(&stat)
+	if res.Error != nil {
+		log.Fatalln(res.Error)
+	}
+
+	for s, _ := range stat {
+		if res := storage2.Gorm().Exec("SELECT pg_cancel_backend(?)", s); res.Error != nil {
+			log.Fatalln(res.Error)
+		}
+	}
+}

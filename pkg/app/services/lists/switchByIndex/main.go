@@ -2,11 +2,9 @@ package switchByIndex
 
 import (
 	"creatif/pkg/app/domain/app"
-	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
-	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -36,33 +34,14 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicResult, error) {
-	var to, from declarations.ListVariable
-	if err := storage.Transaction(func(tx *gorm.DB) error {
-		source, err := queryVariableByIndex(c.model.ProjectID, c.model.Name, c.model.Source)
-		if err != nil {
-			return err
-		}
-		destination, err := queryVariableByIndex(c.model.ProjectID, c.model.Name, c.model.Destination)
-		if err != nil {
-			return err
-		}
-
-		newToVariable, newFromVariable, err := handleUpdate(source, destination)
-		if err != nil {
-			return err
-		}
-
-		to = newToVariable
-		from = newFromVariable
-
-		return nil
-	}); err != nil {
+	source, destination, err := tryUpdates(c.model.ProjectID, c.model.Name, c.model.Source, c.model.Destination, 0, 10)
+	if err != nil {
 		return LogicResult{}, appErrors.NewDatabaseError(err)
 	}
 
 	return LogicResult{
-		To:   to,
-		From: from,
+		To:   source,
+		From: destination,
 	}, nil
 }
 

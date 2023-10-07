@@ -46,11 +46,11 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		Scan(&variable)
 
 	if res.Error != nil {
-		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryListByIndex.Logic", nil)
+		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryListByID.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
-		return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByIndex.Logic", nil)
+		return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByID.Logic", nil)
 	}
 
 	return variable, nil

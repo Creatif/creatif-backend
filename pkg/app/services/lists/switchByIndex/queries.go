@@ -3,18 +3,31 @@ package switchByIndex
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/storage"
+	"errors"
 	"fmt"
 	"gorm.io/gorm"
+	"time"
 )
 
-func queryVariableByIndex(projectId, name string, offset int64) (declarations.ListVariable, error) {
+func queryList(tx *gorm.DB, projectId, name string) (declarations.List, error) {
+	var list declarations.List
+	if res := tx.Table((declarations.List{}).TableName()).Where("project_id = ? AND name = ?", projectId, name).Select("ID").First(&list); res.Error != nil {
+		return declarations.List{}, res.Error
+	}
+
+	return list, nil
+}
+
+func queryVariableByIndex(g *gorm.DB, listId string, offset int64, acquireLock bool) (declarations.ListVariable, error) {
 	var variable declarations.ListVariable
-	res := storage.Gorm().
+	lock := ""
+	if acquireLock {
+		lock = fmt.Sprintf("FOR UPDATE")
+	}
+	res := g.
 		Raw(fmt.Sprintf(`
 			SELECT lv.id, lv.index
-			FROM %s AS lv INNER JOIN %s AS l
-			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id
-			OFFSET ? LIMIT 1`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), projectId, name, offset).
+			FROM %s AS lv WHERE lv.list_id = ? OFFSET ? LIMIT 1 %s`, (declarations.ListVariable{}).TableName(), lock), listId, offset).
 		Scan(&variable)
 
 	if res.Error != nil {
@@ -28,8 +41,8 @@ func queryVariableByIndex(projectId, name string, offset int64) (declarations.Li
 	return variable, nil
 }
 
-func handleUpdate(source declarations.ListVariable, destination declarations.ListVariable) (declarations.ListVariable, declarations.ListVariable, error) {
-	res := storage.Gorm().Exec(fmt.Sprintf(`UPDATE %s SET index = NULL WHERE id = ?`, (declarations.ListVariable{}).TableName()), source.ID)
+func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination declarations.ListVariable) (declarations.ListVariable, declarations.ListVariable, error) {
+	res := g.Exec(fmt.Sprintf(`UPDATE %s SET index = NULL WHERE id = ?`, (declarations.ListVariable{}).TableName()), source.ID)
 	if res.Error != nil {
 		return declarations.ListVariable{}, declarations.ListVariable{}, res.Error
 	}
@@ -39,7 +52,7 @@ func handleUpdate(source declarations.ListVariable, destination declarations.Lis
 	}
 
 	var toVariable declarations.ListVariable
-	res = storage.Gorm().Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? RETURNING id, name, index, short_id`, (declarations.ListVariable{}).TableName()), source.Index, destination.ID).Scan(&toVariable)
+	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? RETURNING id, name, index, short_id`, (declarations.ListVariable{}).TableName()), source.Index, destination.ID).Scan(&toVariable)
 	if res.Error != nil {
 		return declarations.ListVariable{}, declarations.ListVariable{}, res.Error
 	}
@@ -49,7 +62,7 @@ func handleUpdate(source declarations.ListVariable, destination declarations.Lis
 	}
 
 	var fromVariable declarations.ListVariable
-	res = storage.Gorm().Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? RETURNING id, name, index, short_id`, (declarations.ListVariable{}).TableName()), destination.Index, source.ID).Scan(&fromVariable)
+	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? RETURNING id, name, index, short_id`, (declarations.ListVariable{}).TableName()), destination.Index, source.ID).Scan(&fromVariable)
 	if res.Error != nil {
 		return declarations.ListVariable{}, declarations.ListVariable{}, res.Error
 	}
@@ -59,4 +72,43 @@ func handleUpdate(source declarations.ListVariable, destination declarations.Lis
 	}
 
 	return toVariable, fromVariable, nil
+}
+
+func tryUpdates(projectId, name string, s, d int64, currentUpdate, maxUpdates int) (declarations.ListVariable, declarations.ListVariable, error) {
+	var to, from declarations.ListVariable
+	if err := storage.Gorm().Transaction(func(tx *gorm.DB) error {
+		list, err := queryList(tx, projectId, name)
+		if err != nil {
+			return err
+		}
+
+		source, err := queryVariableByIndex(tx, list.ID, s, false)
+		if err != nil {
+			return err
+		}
+		destination, err := queryVariableByIndex(tx, list.ID, d, false)
+		if err != nil {
+			return err
+		}
+
+		newToVariable, newFromVariable, err := handleUpdate(tx, source, destination)
+		if err != nil {
+			return err
+		}
+
+		to = newToVariable
+		from = newFromVariable
+
+		return nil
+	}); err != nil {
+		time.Sleep(time.Millisecond * 10)
+		if currentUpdate < maxUpdates {
+			return tryUpdates(projectId, name, s, d, currentUpdate+1, maxUpdates)
+		}
+	}
+
+	if to.ID == "" || from.ID == "" {
+		return declarations.ListVariable{}, declarations.ListVariable{}, errors.New("Failed switching indexes after retrying.")
+	}
+	return to, from, nil
 }

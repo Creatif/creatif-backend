@@ -13,6 +13,7 @@ func app() {
 	runLogger()
 	runAssets()
 	runDb()
+	releaseAllLocks()
 
 	srv := setupServer()
 	srv.Use(middleware.CORSWithConfig(middleware.CORSConfig{

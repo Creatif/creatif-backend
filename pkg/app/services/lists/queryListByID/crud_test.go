@@ -10,13 +10,15 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		projectId := testCreateProject("project")
 		variableIds := testCreateListAndReturnIds(projectId, "name", 6)
 
-		handler := New(NewModel(projectId, "name", variableIds[3]))
+		selectedVariable := variableIds[3]
+
+		handler := New(NewModel(projectId, "name", selectedVariable["id"]))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
-		gomega.Expect(view.ID).Should(gomega.Equal(variableIds[3]))
-		gomega.Expect(view.Name).Should(gomega.Equal("one-3"))
+		gomega.Expect(view.ID).Should(gomega.Equal(variableIds[3]["id"]))
+		gomega.Expect(view.Name).Should(gomega.Equal(selectedVariable["name"]))
 		gomega.Expect(view.Index).ShouldNot(gomega.BeEmpty())
 	})
 })
