@@ -53,11 +53,13 @@ func (u *ListVariable) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	u.ShortID = shortId
 
-	idx, err := sdk.NewULID()
-	if err != nil {
-		return err
+	if u.Index == "" {
+		idx, err := sdk.NewULID()
+		if err != nil {
+			return err
+		}
+		u.Index = idx
 	}
-	u.Index = idx
 
 	return nil
 }
