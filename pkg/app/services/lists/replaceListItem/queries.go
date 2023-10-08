@@ -15,7 +15,7 @@ type ListWithItem struct {
 
 func queryListAndItem(projectId, listName, itemName string) (ListWithItem, error) {
 	sql := fmt.Sprintf(`
-		SELECT lv.id as item_id, lv.index as item_index, l.id as list_id FROM %s INNER JOIN %s ON lv.list_id = l.id AND l.project_id = ? AND l.name = ? AND lv.name = ?
+		SELECT lv.id as item_id, lv.index as item_index, l.id as list_id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.project_id = ? AND l.name = ? AND lv.name = ?
 `, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
 
 	var variable ListWithItem

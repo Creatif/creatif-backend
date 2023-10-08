@@ -3,6 +3,9 @@ package replaceListItem
 import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/domain/declarations"
+	createList2 "creatif/pkg/app/services/lists/createList"
+	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -98,4 +101,38 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
+}
+
+func testCreateListAndReturnVariables(projectId, name string, varNum int) []map[string]string {
+	variables := make([]createList2.Variable, varNum)
+	for i := 0; i < varNum; i++ {
+		variables[i] = createList2.Variable{
+			Name:      fmt.Sprintf("one-%d", i),
+			Metadata:  nil,
+			Groups:    nil,
+			Behaviour: "readonly",
+			Value:     nil,
+		}
+	}
+
+	handler := createList2.New(createList2.NewModel(projectId, name, variables))
+
+	list, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
+
+	var savedVariables []declarations.ListVariable
+	res := storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+
+	return sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) map[string]string {
+		return map[string]string{
+			"id":     value.ID,
+			"name":   value.Name,
+			"index":  value.Index,
+			"listId": list.ID,
+		}
+	})
 }

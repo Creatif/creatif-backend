@@ -22,12 +22,12 @@ type Model struct {
 	Variable  Variable
 }
 
-func NewModel(projectId, name, itemName string, variables Variable) Model {
+func NewModel(projectId, name, itemName string, variable Variable) Model {
 	return Model{
 		Name:      name,
 		ItemName:  itemName,
 		ProjectID: projectId,
-		Variable:  variables,
+		Variable:  variable,
 	}
 }
 
@@ -62,5 +62,15 @@ type View struct {
 }
 
 func newView(model declarations.ListVariable) View {
-	return View{}
+	return View{
+		ID:        model.ID,
+		Index:     model.Index,
+		Name:      model.Name,
+		Metadata:  model.Metadata,
+		Groups:    model.Groups,
+		Behaviour: model.Behaviour,
+		Value:     model.Value,
+		CreatedAt: model.CreatedAt,
+		UpdatedAt: model.UpdatedAt,
+	}
 }

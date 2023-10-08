@@ -38,6 +38,10 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.ListVariable, error) {
+	if c.model.Variable.Groups == nil {
+		c.model.Variable.Groups = []string{}
+	}
+
 	listAndItem, err := queryListAndItem(c.model.ProjectID, c.model.Name, c.model.ItemName)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -52,7 +56,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 			return res.Error
 		}
 
-		res := storage.Gorm().Model(&listItem).Clauses(clause.Returning{Columns: []clause.Column{
+		res := tx.Model(&listItem).Clauses(clause.Returning{Columns: []clause.Column{
 			{Name: "id"},
 			{Name: "name"},
 			{Name: "behaviour"},

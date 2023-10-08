@@ -37,6 +37,12 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (declarations.List, error) {
 	list := declarations.NewList(c.model.ProjectID, c.model.Name)
+	for _, v := range c.model.Variables {
+		if v.Groups == nil {
+			v.Groups = []string{}
+		}
+	}
+
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&list); res.Error != nil {
 			return res.Error

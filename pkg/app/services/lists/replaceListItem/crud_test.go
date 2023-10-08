@@ -1,31 +1,37 @@
 package replaceListItem
 
 import (
-	"fmt"
+	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
+	"gorm.io/gorm"
 )
 
-var _ = ginkgo.Describe("Declaration list create tests", func() {
-	ginkgo.It("should create a list", func() {
+var _ = ginkgo.Describe("Declaration list replace tests", func() {
+	ginkgo.It("should replace a list item", func() {
 		projectId := testCreateProject("project")
-		variables := make([]Variable, 5)
-		for i := 0; i < 5; i++ {
-			variables[i] = Variable{
-				Name:      fmt.Sprintf("one-%d", i),
-				Metadata:  nil,
-				Groups:    nil,
-				Behaviour: "readonly",
-				Value:     nil,
-			}
-		}
+		variables := testCreateListAndReturnVariables(projectId, "list", 10)
 
-		handler := New(NewModel(projectId, "list", variables))
+		item := variables[4]
+		handler := New(NewModel(projectId, "list", item["name"], Variable{
+			Name:      "newName",
+			Metadata:  nil,
+			Groups:    nil,
+			Behaviour: "readonly",
+			Value:     nil,
+		}))
 
-		list, err := handler.Handle()
+		view, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(list.ID)
+		testAssertIDValid(view.ID)
 
-		gomega.Expect(list.Name).Should(gomega.Equal("list"))
+		gomega.Expect(view.Name).Should(gomega.Equal("newName"))
+		gomega.Expect(item["index"]).Should(gomega.Equal(view.Index))
+
+		var listVariable declarations.ListVariable
+		res := storage.Gorm().Where("list_id = ? AND id = ?", item["listId"], item["id"]).First(&listVariable)
+		gomega.Expect(res.Error).ShouldNot(gomega.BeNil())
+		gomega.Expect(res.Error).Should(gomega.MatchError(gorm.ErrRecordNotFound))
 	})
 })
