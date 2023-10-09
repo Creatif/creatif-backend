@@ -1,11 +1,9 @@
-package switchByIndex
+package updateList
 
 import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/app/domain/declarations"
 	createList2 "creatif/pkg/app/services/lists/createList"
-	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -33,7 +31,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
+	GinkgoRunSpecs(t, "Declaration Lists -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -103,7 +101,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateListAndReturnIndexes(projectId, name string, varNum int) []string {
+func testCreateList(projectId, name string, varNum int) string {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
 		variables[i] = createList2.Variable{
@@ -123,11 +121,5 @@ func testCreateListAndReturnIndexes(projectId, name string, varNum int) []string
 
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
-	var savedVariables []declarations.ListVariable
-	res := storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
-	gomega.Expect(res.Error).Should(gomega.BeNil())
-
-	return sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) string {
-		return value.Index
-	})
+	return list.Name
 }
