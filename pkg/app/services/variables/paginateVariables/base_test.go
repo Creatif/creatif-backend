@@ -129,11 +129,3 @@ func testCreateProject(name string) string {
 
 	return model.ID
 }
-
-func testAdvanceCursor(paginationId, projectId, direction, orderBy string, limit int) string {
-	handler := New(NewModel(projectId, paginationId, "created_at", orderBy, direction, limit, []string{}))
-	views, err := handler.Handle()
-	testAssertErrNil(err)
-
-	return views.PaginationInfo.Parameters.PaginationID
-}

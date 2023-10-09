@@ -7,25 +7,27 @@ import (
 )
 
 type PaginateVariables struct {
-	PaginationID string `query:"paginationId"`
-	Field        string `query:"field"`
-	OrderBy      string `query:"orderBy"`
-	Direction    string `query:"direction"`
-	Groups       string `query:"groups"`
-	Limit        int    `query:"limit"`
-	ProjectID    string `param:"projectID"`
+	ProjectID      string `json:"projectID"`
+	Limit          int    `query:"limit"`
+	Page           int    `query:"page"`
+	Filters        string `query:"filters"`
+	Groups         string `query:"groups"`
+	Search         string `query:"search"`
+	OrderBy        string `query:"orderBy"`
+	OrderDirection string `query:"orderDirection"`
+	In             string `query:"in"`
 
 	SanitizedGroups []string
 }
 
 func SanitizePaginateVariables(model PaginateVariables) PaginateVariables {
 	p := bluemonday.StrictPolicy()
-	model.PaginationID = p.Sanitize(model.PaginationID)
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Field = p.Sanitize(model.Field)
 	model.OrderBy = p.Sanitize(model.OrderBy)
-	model.Direction = p.Sanitize(model.Direction)
-	model.Groups = p.Sanitize(model.Groups)
+	model.Search = p.Sanitize(model.Search)
+	model.OrderDirection = p.Sanitize(model.OrderDirection)
+	model.In = p.Sanitize(model.In)
+	model.OrderBy = p.Sanitize(model.OrderBy)
 
 	if model.Groups != "" {
 		newGroups := sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {
