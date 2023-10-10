@@ -1,4 +1,4 @@
-package updateListItemByID
+package updateListItemByIndex
 
 import (
 	"creatif/pkg/app/domain/declarations"
@@ -16,7 +16,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 		var singleItem declarations.ListVariable
 		res := storage.Gorm().Raw(
-			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
+			fmt.Sprintf("SELECT lv.index AS index FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
 			"name",
 			projectId,
 		).Scan(&singleItem)
@@ -26,7 +26,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, []string{"name", "behaviour"}, "name", singleItem.ID, "newName", "readonly", []string{}, []byte{}, v))
+		handler := New(NewModel(projectId, []string{"name", "behaviour"}, "name", singleItem.Index, "newName", "readonly", []string{}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -42,13 +42,13 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(checkModel.Behaviour).Should(gomega.Equal("readonly"))
 	})
 
-	ginkgo.It("should update the groups of the declaration variable", func() {
+	ginkgo.It("should update the groups of a list item variable", func() {
 		projectId := testCreateProject("project")
 		testCreateList(projectId, "name", 100)
 
 		var singleItem declarations.ListVariable
 		res := storage.Gorm().Raw(
-			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
+			fmt.Sprintf("SELECT lv.index AS index FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
 			"name",
 			projectId,
 		).Scan(&singleItem)
@@ -57,7 +57,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, []string{"name", "groups", "value"}, "name", singleItem.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
+		handler := New(NewModel(projectId, []string{"name", "groups", "value"}, "name", singleItem.Index, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -76,14 +76,14 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(checkModel.Groups[0]).Should(gomega.Equal("first"))
 	})
 
-	ginkgo.It("should update the behaviour of the declaration variable", func() {
+	ginkgo.It("should update the behaviour of a list item variable", func() {
 		projectId := testCreateProject("project")
-		listName := testCreateList(projectId, "name", 100)
+		testCreateList(projectId, "name", 100)
 
 		var singleItem declarations.ListVariable
 		res := storage.Gorm().Raw(
-			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
-			listName,
+			fmt.Sprintf("SELECT lv.index AS index FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
+			"name",
 			projectId,
 		).Scan(&singleItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
@@ -91,7 +91,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, []string{"name", "behaviour", "groups"}, "name", singleItem.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
+		handler := New(NewModel(projectId, []string{"name", "behaviour", "groups"}, "name", singleItem.Index, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
