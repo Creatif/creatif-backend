@@ -13,9 +13,9 @@ type List struct {
 	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 	ShortID string `gorm:"uniqueIndex:unique_list;type:text"`
 
-	Name string `gorm:"uniqueIndex:unique_list_name"`
-
-	ProjectID string `gorm:"uniqueIndex:unique_list_name;type:text;check:length(id)=26;not null;default: null"`
+	Name          string         `gorm:"uniqueIndex:unique_list_name"`
+	ProjectID     string         `gorm:"uniqueIndex:unique_list_name;type:text;check:length(id)=26"`
+	ListVariables []ListVariable `gorm:"foreignKey:ListID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
