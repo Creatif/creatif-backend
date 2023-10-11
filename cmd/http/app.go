@@ -35,7 +35,7 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
-	group.GET("/supported-languages", appHandlers.GetSupportedLanguageHandler())
+	group.GET("/supported-languages", declarations.GetSupportedLanguageHandler())
 	group.PUT("/variable", declarations.CreateVariableHandler())
 	group.POST("/variable/:projectID", declarations.UpdateVariableHandler())
 	group.DELETE("/variable/:projectID/:name", declarations.DeleteVariableHandler())

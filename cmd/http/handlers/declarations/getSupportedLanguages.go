@@ -1,4 +1,4 @@
-package app
+package declarations
 
 import (
 	app2 "creatif/pkg/app/domain/declarations"
