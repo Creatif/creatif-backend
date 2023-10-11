@@ -96,6 +96,10 @@ func loadLanguages() error {
 		}
 	}
 
+	if exists.ID != "" {
+		return nil
+	}
+
 	readFile, err := os.Open("/app/assets/languages.csv")
 	if err != nil {
 		return err

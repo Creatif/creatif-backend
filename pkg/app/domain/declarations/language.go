@@ -12,7 +12,7 @@ type Language struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
 	Name  string
-	Alpha string
+	Alpha string `gorm:"unique"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time

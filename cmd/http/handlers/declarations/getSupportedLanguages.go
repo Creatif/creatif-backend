@@ -13,11 +13,13 @@ type languageView struct {
 
 func processStoredLanguages() []languageView {
 	loadedLanguages := make([]languageView, len(languages.StoredLanguages))
+	i := 0
 	for key, lang := range languages.StoredLanguages {
-		loadedLanguages = append(loadedLanguages, languageView{
+		loadedLanguages[i] = languageView{
 			Name:  lang["name"],
 			Alpha: key,
-		})
+		}
+		i++
 	}
 
 	return loadedLanguages
