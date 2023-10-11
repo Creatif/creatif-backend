@@ -1,5 +1,4 @@
 var
-assets
 .env
 .env.test
 service_account.json
