@@ -1,13 +1,18 @@
 package main
 
 import (
+	"bufio"
+	app2 "creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
+	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -77,5 +82,37 @@ func releaseAllLocks() {
 		if res := storage2.Gorm().Exec("SELECT pg_cancel_backend(?)", s); res.Error != nil {
 			log.Fatalln(res.Error)
 		}
+	}
+}
+
+func loadLanguages() {
+	var exists app2.Language
+	if res := storage2.Gorm().First(&exists); res.Error != nil {
+		if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			log.Fatalln(res.Error)
+		}
+	}
+
+	readFile, err := os.Open("/app/assets/languages.csv")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fileScanner := bufio.NewScanner(readFile)
+	fileScanner.Split(bufio.ScanLines)
+
+	languages := make([]app2.Language, 0)
+	fileScanner.Scan()
+	for fileScanner.Scan() {
+		values := strings.Split(fileScanner.Text(), ",")
+		languages = append(languages, app2.NewLanguage(values[3], values[0], values[1], values[2]))
+	}
+
+	if err := readFile.Close(); err != nil {
+		log.Fatalln(err)
+	}
+
+	if res := storage2.Gorm().Create(&languages); res.Error != nil {
+		log.Fatalln(res.Error)
 	}
 }

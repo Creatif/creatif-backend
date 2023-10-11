@@ -14,6 +14,7 @@ func app() {
 	runAssets()
 	runDb()
 	releaseAllLocks()
+	loadLanguages()
 
 	srv := setupServer()
 	srv.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -34,6 +35,7 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
+	group.GET("/supported-languages", appHandlers.GetSupportedLanguageHandler())
 	group.PUT("/variable", declarations.CreateVariableHandler())
 	group.POST("/variable/:projectID", declarations.UpdateVariableHandler())
 	group.DELETE("/variable/:projectID/:name", declarations.DeleteVariableHandler())
