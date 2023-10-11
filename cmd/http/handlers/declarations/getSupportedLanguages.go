@@ -4,16 +4,13 @@ import (
 	app2 "creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
 type languageView struct {
-	Name    string `json:"name"`
-	Alpha3b string `json:"alpha3b"`
-	Alpha3t string `json:"alpha3t"`
-	Alpha2  string `json:"alpha2"`
+	Name  string `json:"name"`
+	Alpha string `json:"alpha"`
 }
 
 var loadedLanguages []languageView
@@ -21,8 +18,6 @@ var loadedLanguages []languageView
 func GetSupportedLanguageHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		if len(loadedLanguages) > 0 {
-			fmt.Println(len(loadedLanguages))
-			fmt.Println("Already loaded")
 			return c.JSON(http.StatusOK, loadedLanguages)
 		}
 
@@ -36,13 +31,10 @@ func GetSupportedLanguageHandler() func(e echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, "Internal server error")
 		}
 
-		fmt.Println("Not loaded")
 		loadedLanguages = sdk.Map(languages, func(idx int, value app2.Language) languageView {
 			return languageView{
-				Name:    value.Name,
-				Alpha3b: value.Alpha3b,
-				Alpha3t: value.Alpha3t,
-				Alpha2:  value.Alpha2,
+				Name:  value.Name,
+				Alpha: value.Alpha,
 			}
 		})
 

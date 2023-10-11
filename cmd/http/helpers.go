@@ -105,7 +105,7 @@ func loadLanguages() {
 	fileScanner.Scan()
 	for fileScanner.Scan() {
 		values := strings.Split(fileScanner.Text(), ",")
-		languages = append(languages, app2.NewLanguage(values[3], values[0], values[1], values[2]))
+		languages = append(languages, app2.NewLanguage(values[3], values[0]))
 	}
 
 	if err := readFile.Close(); err != nil {

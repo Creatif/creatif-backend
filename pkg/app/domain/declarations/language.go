@@ -11,21 +11,17 @@ import (
 type Language struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
-	Name    string
-	Alpha3b string
-	Alpha3t string
-	Alpha2  string
+	Name  string
+	Alpha string
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }
 
-func NewLanguage(name, alpha3b, alpha3t, alpha2 string) Language {
+func NewLanguage(name, alpha string) Language {
 	return Language{
-		Name:    name,
-		Alpha3b: alpha3b,
-		Alpha3t: alpha3t,
-		Alpha2:  alpha2,
+		Name:  name,
+		Alpha: alpha,
 	}
 }
 
