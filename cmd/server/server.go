@@ -41,9 +41,11 @@ func StartServer(srv *echo.Echo) {
 func appShutdown() {
 	sqlDB, err := storage.SQLDB()
 	if err != nil {
-		log.Fatalln("Unable to disconnect from the database: ", err)
+		fmt.Println("Unable to disconnect from the database: ", err)
 	}
 
 	// Close
-	sqlDB.Close()
+	if err := sqlDB.Close(); err != nil {
+		fmt.Println("Unable to disconnect from the database", err)
+	}
 }

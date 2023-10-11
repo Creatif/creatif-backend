@@ -4,8 +4,10 @@ import (
 	appHandlers "creatif/cmd/http/handlers/app"
 	"creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/server"
+	"creatif/pkg/lib/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"log"
 )
 
 func app() {
@@ -13,8 +15,27 @@ func app() {
 	runLogger()
 	runAssets()
 	runDb()
-	releaseAllLocks()
-	loadLanguages()
+	if err := releaseAllLocks(); err != nil {
+		sqlDB, err := storage.SQLDB()
+		if err != nil {
+			log.Fatalln("Unable to get storage.SQLDB()", err)
+		}
+
+		if err := sqlDB.Close(); err != nil {
+			log.Fatalln("Unable to disconnect from the database", err)
+		}
+	}
+	
+	if err := loadLanguages(); err != nil {
+		sqlDB, err := storage.SQLDB()
+		if err != nil {
+			log.Fatalln("Unable to get storage.SQLDB()", err)
+		}
+
+		if err := sqlDB.Close(); err != nil {
+			log.Fatalln("Unable to disconnect from the database", err)
+		}
+	}
 
 	srv := setupServer()
 	srv.Use(middleware.CORSWithConfig(middleware.CORSConfig{

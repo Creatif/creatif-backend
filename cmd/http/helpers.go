@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	app2 "creatif/pkg/app/domain/declarations"
+	languages2 "creatif/pkg/app/services/languages"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"errors"
@@ -71,31 +72,33 @@ func setupServer() *echo.Echo {
 	return srv
 }
 
-func releaseAllLocks() {
+func releaseAllLocks() error {
 	var stat []int64
 	res := storage2.Gorm().Raw(`SELECT DISTINCT pid FROM pg_locks l, pg_stat_all_tables t WHERE l.relation = t.relid AND t.relname = 'list_variables'`).Scan(&stat)
 	if res.Error != nil {
-		log.Fatalln(res.Error)
+		return res.Error
 	}
 
 	for s, _ := range stat {
 		if res := storage2.Gorm().Exec("SELECT pg_cancel_backend(?)", s); res.Error != nil {
-			log.Fatalln(res.Error)
+			return res.Error
 		}
 	}
+
+	return nil
 }
 
-func loadLanguages() {
+func loadLanguages() error {
 	var exists app2.Language
 	if res := storage2.Gorm().First(&exists); res.Error != nil {
 		if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			log.Fatalln(res.Error)
+			return res.Error
 		}
 	}
 
 	readFile, err := os.Open("/app/assets/languages.csv")
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	fileScanner := bufio.NewScanner(readFile)
@@ -109,10 +112,16 @@ func loadLanguages() {
 	}
 
 	if err := readFile.Close(); err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	if res := storage2.Gorm().Create(&languages); res.Error != nil {
-		log.Fatalln(res.Error)
+		return res.Error
 	}
+
+	if err := languages2.Store(); err != nil {
+		return err
+	}
+
+	return nil
 }
