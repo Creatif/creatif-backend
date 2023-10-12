@@ -15,6 +15,7 @@ type LogicModel struct {
 type View struct {
 	ID        string      `json:"id"`
 	ProjectID string      `json:"projectID"`
+	Locale    string      `json:"locale"`
 	Name      string      `json:"name"`
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
@@ -25,11 +26,12 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(models []declarations.Variable) []View {
+func newView(models []declarations.Variable, locale string) []View {
 	return sdk.Map(models, func(idx int, value declarations.Variable) View {
 		return View{
 			ID:        value.ID,
 			ProjectID: value.ProjectID,
+			Locale:    locale,
 			Name:      value.Name,
 			Groups:    value.Groups,
 			Value:     value.Value,

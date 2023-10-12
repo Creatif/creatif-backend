@@ -8,6 +8,7 @@ import (
 
 type PaginateVariables struct {
 	ProjectID      string `json:"projectID"`
+	Locale         string `json:"locale"`
 	Limit          int    `query:"limit"`
 	Page           int    `query:"page"`
 	Filters        string `query:"filters"`
@@ -28,6 +29,7 @@ func SanitizePaginateVariables(model PaginateVariables) PaginateVariables {
 	model.OrderDirection = p.Sanitize(model.OrderDirection)
 	model.In = p.Sanitize(model.In)
 	model.OrderBy = p.Sanitize(model.OrderBy)
+	model.Locale = p.Sanitize(model.Locale)
 
 	if model.Groups != "" {
 		newGroups := sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {

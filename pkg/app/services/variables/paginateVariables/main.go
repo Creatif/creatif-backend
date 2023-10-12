@@ -3,6 +3,7 @@ package paginateVariables
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/queryBuilder"
@@ -38,8 +39,14 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return sdk.LogicView[declarations.Variable]{}, appErrors.NewApplicationError(err).AddError("Variables.Paginate.Logic", nil)
+	}
+
 	qb := queryBuilder.NewQueryBuilder(fmt.Sprintf("%s as v", (declarations.Variable{}).TableName()), c.model.OrderBy, c.model.OrderDirection, c.model.Limit, c.model.Page)
-	qb = qb.Fields("v.id", "v.groups", "v.name", "v.behaviour", "v.metadata", "v.value", "v.created_at", "v.updated_at")
+	qb = qb.Fields("v.id", "v.groups", "v.name", "v.behaviour", "v.metadata", "v.value", "v.created_at", "v.updated_at").
+		AddWhere("v.locale_id = ?", localeID)
 	if len(c.model.Groups) != 0 {
 		qb.AddWhere(fmt.Sprintf("'{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "groups"))
 	}
@@ -47,7 +54,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 	var items []declarations.Variable
 	var count int64
 	if err := qb.Run(&items, &count, qb.Build()); err != nil {
-		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(err).AddError("Words.Paginate.Logic", nil)
+		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(err).AddError("Variables.Paginate.Logic", nil)
 	}
 
 	return sdk.LogicView[declarations.Variable]{
@@ -78,7 +85,7 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 	return sdk.PaginationView[View]{
 		Total: model.Total,
 		Page:  c.model.Page,
-		Data:  newView(model.Data),
+		Data:  newView(model.Data, c.model.Locale),
 	}, nil
 }
 

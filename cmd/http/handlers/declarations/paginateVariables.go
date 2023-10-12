@@ -19,9 +19,13 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizePaginateVariables(model)
 		model.OrderBy = strings.ToUpper(model.OrderBy)
+		if model.Locale == "" {
+			model.Locale = "eng"
+		}
 
 		handler := paginateVariables2.New(paginateVariables2.NewModel(
 			model.ProjectID,
+			model.Locale,
 			model.OrderBy,
 			model.OrderDirection,
 			model.Limit,
