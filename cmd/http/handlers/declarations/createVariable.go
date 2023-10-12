@@ -16,8 +16,11 @@ func CreateVariableHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeVariable(model)
+		if model.Language == "" {
+			model.Language = "eng"
+		}
 
-		handler := createVariable.New(createVariable.NewModel(model.ProjectID, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
+		handler := createVariable.New(createVariable.NewModel(model.ProjectID, model.Language, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
 
 		return request.SendResponse[createVariable.Model](handler, c, http.StatusCreated)
 	}

@@ -12,6 +12,7 @@ type CreateVariable struct {
 	Metadata  string   `json:"metadata"`
 	Value     string   `json:"value"`
 	ProjectID string   `json:"projectID"`
+	Language  string   `json:"language"`
 }
 
 func SanitizeVariable(model CreateVariable) CreateVariable {
@@ -19,6 +20,7 @@ func SanitizeVariable(model CreateVariable) CreateVariable {
 	model.Name = p.Sanitize(model.Name)
 	model.Behaviour = p.Sanitize(model.Behaviour)
 	model.ProjectID = p.Sanitize(model.ProjectID)
+	model.Language = p.Sanitize(model.Language)
 
 	model.Groups = sdk.Sanitize(model.Groups, func(k int, v string) string {
 		return p.Sanitize(v)

@@ -59,7 +59,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 		value = m
 	}
 
-	model := declarations.NewVariable(c.model.ProjectID, c.model.Name, c.model.Behaviour, c.model.Groups, metadata, value)
+	model := declarations.NewVariable(c.model.ProjectID, c.model.LocaleID, c.model.Name, c.model.Behaviour, c.model.Groups, metadata, value)
 	res := storage.Gorm().Model(&model).Clauses(clause.Returning{Columns: []clause.Column{
 		{Name: "id"},
 		{Name: "name"},
@@ -101,7 +101,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model), nil
+	return newView(model, c.model.LocaleAlpha), nil
 }
 
 func New(model Model) pkg.Job[Model, View, declarations.Variable] {

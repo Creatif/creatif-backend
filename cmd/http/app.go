@@ -25,8 +25,8 @@ func app() {
 			log.Fatalln("Unable to disconnect from the database", err)
 		}
 	}
-	
-	if err := loadLanguages(); err != nil {
+
+	if err := loadLocales(); err != nil {
 		sqlDB, err := storage.SQLDB()
 		if err != nil {
 			log.Fatalln("Unable to get storage.SQLDB()", err)
@@ -56,7 +56,7 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
-	group.GET("/supported-languages", declarations.GetSupportedLanguageHandler())
+	group.GET("/supported-locales", declarations.GetSupportedLanguageHandler())
 	group.PUT("/variable", declarations.CreateVariableHandler())
 	group.POST("/variable/:projectID", declarations.UpdateVariableHandler())
 	group.DELETE("/variable/:projectID/:name", declarations.DeleteVariableHandler())

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type Language struct {
+type Locale struct {
 	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
 
 	Name  string
@@ -18,14 +18,14 @@ type Language struct {
 	UpdatedAt time.Time
 }
 
-func NewLanguage(name, alpha string) Language {
-	return Language{
+func NewLocale(name, alpha string) Locale {
+	return Locale{
 		Name:  name,
 		Alpha: alpha,
 	}
 }
 
-func (u *Language) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *Locale) BeforeCreate(tx *gorm.DB) (err error) {
 	id, err := sdk.NewULID()
 	if err != nil {
 		return err
@@ -36,6 +36,6 @@ func (u *Language) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (Language) TableName() string {
-	return fmt.Sprintf("%s.%s", "app", domain.LANGUAGE_TABLE)
+func (Locale) TableName() string {
+	return fmt.Sprintf("%s.%s", "declarations", domain.LOCALE_TABLE)
 }

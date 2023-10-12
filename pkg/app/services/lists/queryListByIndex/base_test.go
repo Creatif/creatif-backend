@@ -4,9 +4,7 @@ import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
 	createList2 "creatif/pkg/app/services/lists/createList"
-	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	storage2 "creatif/pkg/lib/storage"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -80,26 +78,6 @@ var _ = GinkgoAfterHandler(func() {
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_VARIABLES_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
-
-func testCreateDeclarationVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	handler := createVariable2.New(createVariable2.NewModel(projectId, name, behaviour, groups, metadata, b))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
 
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())

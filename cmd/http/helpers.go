@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	app2 "creatif/pkg/app/domain/declarations"
-	languages2 "creatif/pkg/app/services/languages"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"errors"
@@ -88,8 +88,8 @@ func releaseAllLocks() error {
 	return nil
 }
 
-func loadLanguages() error {
-	var exists app2.Language
+func loadLocales() error {
+	var exists app2.Locale
 	if res := storage2.Gorm().First(&exists); res.Error != nil {
 		if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return res.Error
@@ -100,7 +100,7 @@ func loadLanguages() error {
 		return nil
 	}
 
-	readFile, err := os.Open("/app/assets/languages.csv")
+	readFile, err := os.Open("/app/assets/locales.csv")
 	if err != nil {
 		return err
 	}
@@ -108,22 +108,22 @@ func loadLanguages() error {
 	fileScanner := bufio.NewScanner(readFile)
 	fileScanner.Split(bufio.ScanLines)
 
-	languages := make([]app2.Language, 0)
+	l := make([]app2.Locale, 0)
 	fileScanner.Scan()
 	for fileScanner.Scan() {
 		values := strings.Split(fileScanner.Text(), ",")
-		languages = append(languages, app2.NewLanguage(values[3], values[0]))
+		l = append(l, app2.NewLocale(values[3], values[0]))
 	}
 
 	if err := readFile.Close(); err != nil {
 		return err
 	}
 
-	if res := storage2.Gorm().Create(&languages); res.Error != nil {
+	if res := storage2.Gorm().Create(&l); res.Error != nil {
 		return res.Error
 	}
 
-	if err := languages2.Store(); err != nil {
+	if err := locales.Store(); err != nil {
 		return err
 	}
 

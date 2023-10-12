@@ -21,7 +21,8 @@ type Variable struct {
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	ProjectID string `gorm:"uniqueIndex:unique_variable_per_project;type:text;check:length(id)=26;not null;default: null"`
+	ProjectID string `gorm:"uniqueIndex:unique_variable_per_project;type:text;check:length(id)=26;not null"`
+	LocaleID  string `gorm:"uniqueIndex:unique_variable_per_project;type:text;check:length(id)=26;not null"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
@@ -47,9 +48,10 @@ func (Variable) TableName() string {
 	return fmt.Sprintf("%s.%s", "declarations", domain.VARIABLES_TABLE)
 }
 
-func NewVariable(projectId, name, behaviour string, groups []string, metadata, value []byte) Variable {
+func NewVariable(projectId, localeID, name, behaviour string, groups []string, metadata, value []byte) Variable {
 	return Variable{
 		Name:      name,
+		LocaleID:  localeID,
 		ProjectID: projectId,
 		Groups:    groups,
 		Behaviour: behaviour,

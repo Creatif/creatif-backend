@@ -3,6 +3,7 @@ package updateVariable
 import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/locales"
 	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -52,6 +53,8 @@ var _ = ginkgo.BeforeSuite(func() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	gomega.Expect(locales.Store()).Should(gomega.BeNil())
 })
 
 var _ = GinkgoAfterSuite(func() {
@@ -91,7 +94,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string, groups []s
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, name, behaviour, groups, metadata, b))
+	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

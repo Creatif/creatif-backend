@@ -2,7 +2,7 @@ package domain
 
 const (
 	PROJECT_TABLE        = "projects"
-	LANGUAGE_TABLE       = "languages"
+	LOCALE_TABLE         = "locales"
 	VARIABLES_TABLE      = "variables"
 	MAP_VARIABLES        = "map_variables"
 	VARIABLE_MAP         = "maps"

@@ -1,36 +1,37 @@
 package declarations
 
 import (
-	"creatif/pkg/app/services/languages"
+	"creatif/pkg/app/services/locales"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-type languageView struct {
+type localeView struct {
 	Name  string `json:"name"`
 	Alpha string `json:"alpha"`
 }
 
-func processStoredLanguages() []languageView {
-	loadedLanguages := make([]languageView, len(languages.StoredLanguages))
+func processStoredLocales(l map[string]map[string]string) []localeView {
+	loadedLocales := make([]localeView, len(l))
 	i := 0
-	for key, lang := range languages.StoredLanguages {
-		loadedLanguages[i] = languageView{
+	for key, lang := range l {
+		loadedLocales[i] = localeView{
 			Name:  lang["name"],
 			Alpha: key,
 		}
 		i++
 	}
 
-	return loadedLanguages
+	return loadedLocales
 }
 
 func GetSupportedLanguageHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		if len(languages.StoredLanguages) > 0 {
-			return c.JSON(http.StatusOK, processStoredLanguages())
+		l := locales.Locales()
+		if len(l) > 0 {
+			return c.JSON(http.StatusOK, processStoredLocales(l))
 		}
 
-		return c.JSON(http.StatusOK, processStoredLanguages())
+		return c.JSON(http.StatusOK, processStoredLocales(l))
 	}
 }

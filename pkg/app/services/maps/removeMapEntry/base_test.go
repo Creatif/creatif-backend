@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/maps/mapCreate"
-	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -80,26 +79,6 @@ var _ = GinkgoAfterHandler(func() {
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_VARIABLES_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
-
-func testCreateDetailedVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
-	b, _ := json.Marshal(map[string]interface{}{
-		"one":  1,
-		"two":  "three",
-		"four": "six",
-	})
-
-	handler := createVariable2.New(createVariable2.NewModel(projectId, name, behaviour, groups, metadata, b))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
-
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable2.View {
-	return testCreateDetailedVariable(projectId, name, behaviour, []string{}, []byte{})
-}
 
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())

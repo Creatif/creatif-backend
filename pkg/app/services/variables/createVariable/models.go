@@ -2,6 +2,7 @@ package createVariable
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
@@ -13,22 +14,26 @@ import (
 )
 
 type Model struct {
-	Name      string
-	Metadata  []byte
-	Groups    []string
-	Behaviour string
-	Value     []byte
-	ProjectID string
+	Name        string
+	Metadata    []byte
+	Groups      []string
+	Behaviour   string
+	Value       []byte
+	ProjectID   string
+	LocaleAlpha string
+
+	LocaleID string
 }
 
-func NewModel(projectId, name, behaviour string, groups []string, metadata []byte, value []byte) Model {
+func NewModel(projectId, localeAlpha, name, behaviour string, groups []string, metadata []byte, value []byte) Model {
 	return Model{
-		Name:      name,
-		ProjectID: projectId,
-		Behaviour: behaviour,
-		Groups:    groups,
-		Metadata:  metadata,
-		Value:     value,
+		Name:        name,
+		LocaleAlpha: localeAlpha,
+		ProjectID:   projectId,
+		Behaviour:   behaviour,
+		Groups:      groups,
+		Metadata:    metadata,
+		Value:       value,
 	}
 }
 
@@ -37,6 +42,7 @@ func (a Model) Validate() map[string]string {
 		"name":      a.Name,
 		"groups":    a.Groups,
 		"behaviour": a.Behaviour,
+		"locale":    a.LocaleAlpha,
 	}
 
 	if err := validation.Validate(v,
@@ -78,6 +84,22 @@ func (a Model) Validate() map[string]string {
 
 				return nil
 			})),
+			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if !locales.ExistsByAlpha(t) {
+					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
+				}
+
+				id, err := locales.GetIDWithAlpha(t)
+				if err != nil {
+					return err
+				}
+
+				a.LocaleID = id
+
+				return nil
+			})),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)
@@ -89,6 +111,7 @@ func (a Model) Validate() map[string]string {
 type View struct {
 	ID        string      `json:"id"`
 	ProjectID string      `json:"projectID"`
+	Locale    string      `json:"locale"`
 	Name      string      `json:"name"`
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
@@ -99,10 +122,11 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.Variable) View {
+func newView(model declarations.Variable, langAlpha string) View {
 	return View{
 		ID:        model.ID,
 		ProjectID: model.ProjectID,
+		Locale:    langAlpha,
 		Name:      model.Name,
 		Groups:    model.Groups,
 		Metadata:  model.Metadata,
