@@ -16,9 +16,13 @@ func UpdateVariableHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeUpdateVariable(model)
+		if model.Locale == "" {
+			model.Locale = "eng"
+		}
 
 		handler := updateVariable.New(updateVariable.NewModel(
 			model.ProjectID,
+			model.Locale,
 			model.Fields,
 			model.Name,
 			model.Values.Name,

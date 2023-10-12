@@ -16,6 +16,7 @@ type UpdateVariableValues struct {
 type UpdateVariable struct {
 	Fields    []string             `json:"fields"`
 	Name      string               `json:"name"`
+	Locale    string               `json:"locale"`
 	Values    UpdateVariableValues `json:"values"`
 	ProjectID string               `param:"projectID"`
 }
@@ -24,6 +25,7 @@ func SanitizeUpdateVariable(model UpdateVariable) UpdateVariable {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
+	model.Locale = p.Sanitize(model.Locale)
 
 	newFields := sdk.Map(model.Fields, func(idx int, value string) string {
 		return p.Sanitize(value)

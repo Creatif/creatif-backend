@@ -3,6 +3,7 @@ package updateVariable
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -38,8 +39,13 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.Variable, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return declarations.Variable{}, appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
+	}
+
 	var existing declarations.Variable
-	if res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("updateVariable.Logic", nil)
 		}
@@ -106,7 +112,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model), nil
+	return newView(model, c.model.Locale), nil
 }
 
 func New(model Model) pkg.Job[Model, View, declarations.Variable] {

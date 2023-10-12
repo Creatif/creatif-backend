@@ -2,6 +2,7 @@ package updateVariable
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
@@ -22,25 +23,27 @@ var validUpdateableFields = []string{
 }
 
 type ModelValues struct {
-	Name      string   `json:"name"`
-	Metadata  []byte   `json:"metadata"`
-	Groups    []string `json:"groups"`
-	Behaviour string   `json:"behaviour"`
-	Value     []byte   `json:"value"`
+	Name      string
+	Metadata  []byte
+	Groups    []string
+	Behaviour string
+	Value     []byte
 }
 
 type Model struct {
 	Fields    []string
 	Name      string
 	Values    ModelValues
-	ProjectID string `json:"projectID"`
+	ProjectID string
+	Locale    string
 }
 
-func NewModel(projectId string, fields []string, name, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
+func NewModel(projectId, locale string, fields []string, name, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
 	return Model{
 		Fields:    fields,
 		ProjectID: projectId,
 		Name:      name,
+		Locale:    locale,
 		Values: ModelValues{
 			Name:      updatingName,
 			Metadata:  metadata,
@@ -53,6 +56,8 @@ func NewModel(projectId string, fields []string, name, updatingName, behaviour s
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
+		"projectID":          a.ProjectID,
+		"locale":             a.Locale,
 		"fieldsValid":        a.Fields,
 		"name":               a.Values.Name,
 		"groups":             a.Values.Groups,
@@ -63,6 +68,16 @@ func (a *Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if !locales.ExistsByAlpha(t) {
+					return errors.New(fmt.Sprintf("Locale '%s' does not exist.", t))
+				}
+
+				return nil
+			})),
 			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
 				t := value.([]string)
 
@@ -129,16 +144,18 @@ type View struct {
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
 	Metadata  interface{} `json:"metadata"`
+	Locale    string      `json:"locale"`
 	Value     interface{} `json:"value"`
 
 	CreatedAt time.Time `gorm:"<-:createProject" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.Variable) View {
+func newView(model declarations.Variable, locale string) View {
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
+		Locale:    locale,
 		Groups:    model.Groups,
 		Behaviour: model.Behaviour,
 		Metadata:  model.Metadata,
