@@ -26,6 +26,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("modifiable"))
 		gomega.Expect(view.Metadata).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.Groups).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(view.Locale).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.CreatedAt).ShouldNot(gomega.BeNil())
 		gomega.Expect(view.UpdatedAt).ShouldNot(gomega.BeNil())
 		gomega.Expect(view.ProjectID).ShouldNot(gomega.BeEmpty())
@@ -49,6 +50,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("modifiable"))
 		gomega.Expect(view.Metadata).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.Groups).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(view.Locale).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.CreatedAt).ShouldNot(gomega.BeNil())
 		gomega.Expect(view.UpdatedAt).ShouldNot(gomega.BeNil())
 		gomega.Expect(view.ProjectID).ShouldNot(gomega.BeEmpty())
@@ -73,6 +75,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(view.Metadata).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.Groups).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.CreatedAt).ShouldNot(gomega.BeNil())
+		gomega.Expect(view.Locale).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.UpdatedAt).ShouldNot(gomega.BeNil())
 		gomega.Expect(view.ProjectID).ShouldNot(gomega.BeEmpty())
 

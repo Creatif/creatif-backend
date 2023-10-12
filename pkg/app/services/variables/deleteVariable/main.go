@@ -3,6 +3,7 @@ package deleteVariable
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -33,7 +34,12 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
-	res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Delete(&declarations.Variable{})
+	localeID, err := locales.GetIDWithAlpha(c.model.LocaleAlpha)
+	if err != nil {
+		return declarations.Variable{}, appErrors.NewNotFoundError(err)
+	}
+
+	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Delete(&declarations.Variable{})
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteVariable.Logic", nil)
 	}

@@ -74,7 +74,7 @@ func (c Main) Handle() (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	return newView(model, c.model.Fields), nil
+	return newView(model, c.model.Fields, c.model.LocaleAlpha), nil
 }
 
 func New(model Model) pkg.Job[Model, map[string]interface{}, declarations.Variable] {

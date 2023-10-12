@@ -14,12 +14,13 @@ var _ = ginkgo.Describe("Declaration (DELETE) variable tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(projectId, view.Name))
+		handler := New(NewModel(projectId, view.Name, "eng"))
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
 		res := storage.Gorm().Where("id = ?", view.ID).First(&declarations.Variable{})
+		gomega.Expect(res.Error).ShouldNot(gomega.BeNil())
 		gomega.Expect(errors.Is(res.Error, gorm.ErrRecordNotFound)).Should(gomega.BeTrue())
 	})
 })

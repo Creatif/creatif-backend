@@ -41,10 +41,12 @@ func (a Model) Validate() map[string]string {
 		"groups":    a.Groups,
 		"behaviour": a.Behaviour,
 		"locale":    a.LocaleAlpha,
+		"projectID": a.ProjectID,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200), validation.By(func(value interface{}) error {
 				name := value.(string)
 

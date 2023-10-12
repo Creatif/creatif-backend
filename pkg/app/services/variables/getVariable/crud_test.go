@@ -23,6 +23,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(variable).Should(gomega.HaveKey("createdAt"))
 		gomega.Expect(variable).Should(gomega.HaveKey("updatedAt"))
 		gomega.Expect(variable).Should(gomega.HaveKey("projectID"))
+		gomega.Expect(variable).Should(gomega.HaveKey("locale"))
 
 		gomega.Expect(variable["id"]).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(variable["projectID"]).ShouldNot(gomega.BeEmpty())

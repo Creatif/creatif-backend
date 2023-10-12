@@ -43,11 +43,12 @@ func NewModel(projectId, name, localeAlpha string, fields []string) Model {
 	}
 }
 
-func newView(model declarations.Variable, returnFields []string) map[string]interface{} {
+func newView(model declarations.Variable, returnFields []string, localeAlpha string) map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = model.ID
 	m["name"] = model.Name
 	m["projectID"] = model.ProjectID
+	m["locale"] = localeAlpha
 
 	for _, f := range returnFields {
 		if f == "groups" {
@@ -87,12 +88,14 @@ func (a *Model) Validate() map[string]string {
 		"name":        a.Name,
 		"fieldsValid": a.Fields,
 		"locale":      a.LocaleAlpha,
+		"projectID":   a.ProjectID,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			// Name cannot be empty, and the length must be between 5 and 20.
 			validation.Key("name", validation.Required),
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)
 
