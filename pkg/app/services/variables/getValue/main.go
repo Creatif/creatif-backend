@@ -2,6 +2,7 @@ package getValue
 
 import (
 	"creatif/pkg/app/domain/app"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -36,7 +37,12 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (Variable, error) {
-	value, err := queryValue(c.model.ProjectID, c.model.Name)
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return Variable{}, appErrors.NewApplicationError(err)
+	}
+
+	value, err := queryValue(c.model.ProjectID, c.model.Name, localeID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return Variable{}, appErrors.NewNotFoundError(err)

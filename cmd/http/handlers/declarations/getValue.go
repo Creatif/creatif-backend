@@ -16,8 +16,11 @@ func GetValueHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeGetValue(model)
+		if model.Locale == "" {
+			model.Locale = "eng"
+		}
 
-		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.Name))
+		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.Name, model.Locale))
 
 		return request.SendResponse[getValue2.Model](handler, c, http.StatusOK)
 	}
