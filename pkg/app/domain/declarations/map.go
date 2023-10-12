@@ -15,7 +15,8 @@ type Map struct {
 
 	Name string `gorm:"uniqueIndex:unique_map_name"`
 
-	ProjectID string `gorm:"uniqueIndex:unique_map_name;type:text;check:length(id)=26;not null;default: null"`
+	ProjectID    string        `gorm:"uniqueIndex:unique_map_name;type:text;check:length(id)=26;not null;default: null"`
+	MapVariables []MapVariable `gorm:"foreignKey:MapID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
