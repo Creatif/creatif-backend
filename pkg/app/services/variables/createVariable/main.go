@@ -3,6 +3,7 @@ package createVariable
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/sdk"
@@ -59,7 +60,12 @@ func (c Main) Logic() (declarations.Variable, error) {
 		value = m
 	}
 
-	model := declarations.NewVariable(c.model.ProjectID, c.model.LocaleID, c.model.Name, c.model.Behaviour, c.model.Groups, metadata, value)
+	localeID, err := locales.GetIDWithAlpha(c.model.LocaleAlpha)
+	if err != nil {
+		return declarations.Variable{}, appErrors.NewApplicationError(err)
+	}
+
+	model := declarations.NewVariable(c.model.ProjectID, localeID, c.model.Name, c.model.Behaviour, c.model.Groups, metadata, value)
 	res := storage.Gorm().Model(&model).Clauses(clause.Returning{Columns: []clause.Column{
 		{Name: "id"},
 		{Name: "name"},

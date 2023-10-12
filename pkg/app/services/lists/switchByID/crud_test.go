@@ -16,8 +16,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		source := idsAndIndexes[0]
 		destination := idsAndIndexes[5]
 
-		//fmt.Println(source, destination)
-
 		handler := New(NewModel(projectId, "list", source["id"], destination["id"]))
 		view, err := handler.Handle()
 		testAssertErrNil(err)

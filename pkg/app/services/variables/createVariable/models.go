@@ -21,8 +21,6 @@ type Model struct {
 	Value       []byte
 	ProjectID   string
 	LocaleAlpha string
-
-	LocaleID string
 }
 
 func NewModel(projectId, localeAlpha, name, behaviour string, groups []string, metadata []byte, value []byte) Model {
@@ -90,13 +88,6 @@ func (a Model) Validate() map[string]string {
 				if !locales.ExistsByAlpha(t) {
 					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
 				}
-
-				id, err := locales.GetIDWithAlpha(t)
-				if err != nil {
-					return err
-				}
-
-				a.LocaleID = id
 
 				return nil
 			})),

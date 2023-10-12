@@ -65,7 +65,6 @@ func (c Main) Logic() (LogicResult, error) {
 		c.model.Entry.Name,
 		m.ID,
 	).Scan(&model); res.Error != nil || res.RowsAffected == 0 {
-		fmt.Println(res.Error, res.RowsAffected)
 		return LogicResult{}, appErrors.NewNotFoundError(errors.New("Could not update map")).AddError("updateMapVariable.Logic", nil)
 	}
 

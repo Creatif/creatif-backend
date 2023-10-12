@@ -11,7 +11,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		name := "variable"
 		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 
-		handler := New(NewModel(projectId, createdVariable.Name, []string{}))
+		handler := New(NewModel(projectId, createdVariable.Name, "eng", []string{}))
 		variable, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

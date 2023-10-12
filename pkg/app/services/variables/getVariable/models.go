@@ -2,14 +2,12 @@ package getVariable
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/lib/pq"
-	"gorm.io/datatypes"
 	"strings"
-	"time"
 )
 
 var validFields = []string{
@@ -23,37 +21,26 @@ var validFields = []string{
 
 type Model struct {
 	// this can be project name
-	Name      string `json:"name"`
-	Fields    []string
-	ProjectID string `json:"projectID"`
+	Name        string `json:"name"`
+	Fields      []string
+	ProjectID   string `json:"projectID"`
+	LocaleAlpha string `json:"localeAlpha"`
 
 	validFields []string
 }
 
-func NewModel(projectId, name string, fields []string) Model {
+func NewModel(projectId, name, localeAlpha string, fields []string) Model {
 	if len(fields) == 0 {
 		fields = validFields
 	}
 
 	return Model{
 		Name:        name,
+		LocaleAlpha: localeAlpha,
 		Fields:      fields,
 		validFields: validFields,
 		ProjectID:   projectId,
 	}
-}
-
-type Variable struct {
-	ID string `gorm:"primarykey"`
-
-	Name      string         `gorm:"index;uniqueIndex:unique_variable"`
-	Behaviour string         // readonly,modifiable
-	Groups    pq.StringArray `gorm:"type:text[]"` // if groups is set, group should be invalidated
-	Metadata  datatypes.JSON
-	Value     datatypes.JSON
-
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func newView(model declarations.Variable, returnFields []string) map[string]interface{} {
@@ -99,12 +86,22 @@ func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":        a.Name,
 		"fieldsValid": a.Fields,
+		"locale":      a.LocaleAlpha,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			// Name cannot be empty, and the length must be between 5 and 20.
 			validation.Key("name", validation.Required),
+			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if !locales.ExistsByAlpha(t) {
+					return errors.New(fmt.Sprintf("Locale '%s' does not exist.", t))
+				}
+
+				return nil
+			})),
 			validation.Key("fieldsValid", validation.By(func(value interface{}) error {
 				fields := value.([]string)
 				vFields := a.validFields
