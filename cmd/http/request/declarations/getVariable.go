@@ -8,12 +8,14 @@ type GetVariable struct {
 	Name      string   `param:"name"`
 	Fields    []string `query:"fields"`
 	ProjectID string   `param:"projectID"`
+	Locale    string   `param:"locale"`
 }
 
 func SanitizeGetVariable(model GetVariable) GetVariable {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
+	model.Locale = p.Sanitize(model.Locale)
 
 	if len(model.Fields) > 0 {
 		newFields := make([]string, len(model.Fields))

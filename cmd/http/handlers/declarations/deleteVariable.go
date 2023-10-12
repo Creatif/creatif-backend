@@ -16,8 +16,11 @@ func DeleteVariableHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeDeleteVariable(model)
+		if model.Locale == "" {
+			model.Locale = "eng"
+		}
 
-		handler := deleteVariable.New(deleteVariable.NewModel(model.ProjectID, model.Name))
+		handler := deleteVariable.New(deleteVariable.NewModel(model.ProjectID, model.Name, model.Locale))
 
 		return request.SendResponse[deleteVariable.Model](handler, c, http.StatusCreated)
 	}
