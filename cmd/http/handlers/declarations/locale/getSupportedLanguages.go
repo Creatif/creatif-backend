@@ -1,4 +1,4 @@
-package declarations
+package locale
 
 import (
 	"creatif/pkg/app/services/locales"

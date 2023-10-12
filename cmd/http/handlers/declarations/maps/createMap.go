@@ -1,4 +1,4 @@
-package declarations
+package maps
 
 import (
 	"creatif/cmd/http/request"

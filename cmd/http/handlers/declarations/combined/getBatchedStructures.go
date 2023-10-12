@@ -1,4 +1,4 @@
-package declarations
+package combined
 
 import (
 	"creatif/cmd/http/request"

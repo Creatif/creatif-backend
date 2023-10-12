@@ -2,7 +2,10 @@ package main
 
 import (
 	appHandlers "creatif/cmd/http/handlers/app"
-	"creatif/cmd/http/handlers/declarations"
+	"creatif/cmd/http/handlers/declarations/combined"
+	"creatif/cmd/http/handlers/declarations/locale"
+	"creatif/cmd/http/handlers/declarations/maps"
+	"creatif/cmd/http/handlers/declarations/variables"
 	"creatif/cmd/server"
 	"creatif/pkg/lib/storage"
 	"github.com/labstack/echo/v4"
@@ -56,19 +59,19 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
-	group.GET("/supported-locales", declarations.GetSupportedLanguageHandler())
-	group.PUT("/variable", declarations.CreateVariableHandler())
-	group.POST("/variable/:projectID", declarations.UpdateVariableHandler())
-	group.DELETE("/variable/:projectID/:name", declarations.DeleteVariableHandler())
-	group.GET("/variable/:projectID/:name", declarations.GetVariableHandler())
-	group.GET("/variables/:projectID", declarations.PaginateVariablesHandler())
-	group.GET("/variable/value/:projectID/:name", declarations.GetValueHandler())
+	group.GET("/supported-locales", locale.GetSupportedLanguageHandler())
+	group.PUT("/variable", variables.CreateVariableHandler())
+	group.POST("/variable/:projectID", variables.UpdateVariableHandler())
+	group.DELETE("/variable/:projectID/:name", variables.DeleteVariableHandler())
+	group.GET("/variable/:projectID/:name", variables.GetVariableHandler())
+	group.GET("/variables/:projectID", variables.PaginateVariablesHandler())
+	group.GET("/variable/value/:projectID/:name", variables.GetValueHandler())
 
-	group.POST("/map/add/:projectID", declarations.AddToMapHandler())
-	group.POST("/map/update/:projectID", declarations.UpdateMapVariableHandler())
-	group.DELETE("/map/entry/:projectID/:name/:entryName", declarations.DeleteMapEntry())
-	group.PUT("/map/:projectID", declarations.CreateMapHandler())
-	group.GET("/map/:projectID/:name", declarations.GetMapHandler())
+	group.POST("/map/add/:projectID", maps.AddToMapHandler())
+	group.POST("/map/update/:projectID", maps.UpdateMapVariableHandler())
+	group.DELETE("/map/entry/:projectID/:name/:entryName", maps.DeleteMapEntry())
+	group.PUT("/map/:projectID", maps.CreateMapHandler())
+	group.GET("/map/:projectID/:name", maps.GetMapHandler())
 
-	group.POST("/structures/:projectID", declarations.GetBatchedStructuresHandler())
+	group.POST("/structures/:projectID", combined.GetBatchedStructuresHandler())
 }
