@@ -11,7 +11,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, m.Name, VariableModel{
+		handler := New(NewModel(projectId, "eng", m.Name, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,
