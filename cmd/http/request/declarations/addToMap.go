@@ -8,12 +8,14 @@ import (
 type AddToMap struct {
 	Name      string           `json:"name"`
 	ProjectID string           `param:"projectID"`
+	Locale    string           `json:"locale"`
 	Entry     MapVariableModel `json:"entry"`
 }
 
 func SanitizeAddToMap(model AddToMap) AddToMap {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
+	model.Locale = p.Sanitize(model.Locale)
 	model.Name = p.Sanitize(model.Name)
 
 	variable := model.Entry

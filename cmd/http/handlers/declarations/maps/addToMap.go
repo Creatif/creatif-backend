@@ -16,7 +16,11 @@ func AddToMapHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeAddToMap(model)
-		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Name, addToMap2.VariableModel{
+		if model.Locale == "" {
+			model.Locale = "eng"
+		}
+
+		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Locale, model.Name, addToMap2.VariableModel{
 			Name:      model.Entry.Name,
 			Metadata:  []byte(model.Entry.Metadata),
 			Groups:    model.Entry.Groups,

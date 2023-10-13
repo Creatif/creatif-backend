@@ -9,12 +9,14 @@ type UpdateMapVariable struct {
 	Name      string           `json:"name"`
 	ProjectID string           `param:"projectID"`
 	Entry     MapVariableModel `json:"entry"`
+	Locale    string           `json:"locale"`
 }
 
 func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Name = p.Sanitize(model.Name)
+	model.Locale = p.Sanitize(model.Locale)
 
 	variable := model.Entry
 	variable.Name = p.Sanitize(variable.Name)

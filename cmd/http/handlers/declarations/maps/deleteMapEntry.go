@@ -16,8 +16,11 @@ func DeleteMapEntry() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeDeleteMapEntry(model)
+		if model.Locale == "" {
+			model.Locale = "eng"
+		}
 
-		handler := removeMapEntry.New(removeMapEntry.NewModel(model.ProjectID, model.Name, model.EntryName))
+		handler := removeMapEntry.New(removeMapEntry.NewModel(model.ProjectID, model.Locale, model.Name, model.EntryName))
 
 		return request.SendResponse[removeMapEntry.Model](handler, c, http.StatusCreated)
 	}

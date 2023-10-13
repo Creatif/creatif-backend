@@ -17,6 +17,9 @@ func GetMapHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeGetMap(model)
+		if model.Locale == "" {
+			model.Locale = "eng"
+		}
 
 		newFields := make([]string, 0)
 		if strings.Trim(model.Fields, " ") != "" {
@@ -26,7 +29,7 @@ func GetMapHandler() func(e echo.Context) error {
 			}
 		}
 
-		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Name, newFields))
+		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Locale, model.Name, newFields))
 
 		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK)
 	}
