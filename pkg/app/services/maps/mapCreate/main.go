@@ -3,6 +3,7 @@ package mapCreate
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -37,8 +38,12 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicResult, error) {
-	newMap := declarations.NewMap(c.model.ProjectID, c.model.Name)
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return LogicResult{}, appErrors.NewApplicationError(err).AddError("mapCreate.Logic", nil)
+	}
 
+	newMap := declarations.NewMap(c.model.ProjectID, localeID, c.model.Name)
 	names := make([]map[string]string, 0)
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&newMap); res.Error != nil {
@@ -53,6 +58,7 @@ func (c Main) Logic() (LogicResult, error) {
 
 				domainEntries[i] = declarations.NewMapVariable(
 					newMap.ID,
+					localeID,
 					m.Name,
 					m.Behaviour,
 					m.Metadata,
@@ -82,6 +88,7 @@ func (c Main) Logic() (LogicResult, error) {
 
 	return LogicResult{
 		ID:        newMap.ID,
+		Locale:    c.model.Locale,
 		ProjectID: newMap.ProjectID,
 		Name:      newMap.Name,
 		Variables: names,

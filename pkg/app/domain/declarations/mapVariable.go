@@ -21,16 +21,18 @@ type MapVariable struct {
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	MapID string `gorm:"uniqueIndex:unique_map_variable;type:text;check:length(id)=26"`
-	Map   Map    `gorm:"foreignKey:MapID"`
+	MapID    string `gorm:"uniqueIndex:unique_map_variable;type:text;check:length(id)=26"`
+	LocaleID string `gorm:"uniqueIndex:unique_map_variable;type:text;check:length(id)=26;not null"`
+	Map      Map    `gorm:"foreignKey:MapID"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
 }
 
-func NewMapVariable(mapId, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) MapVariable {
+func NewMapVariable(mapId, localeID, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) MapVariable {
 	return MapVariable{
 		MapID:     mapId,
+		LocaleID:  localeID,
 		Name:      name,
 		Behaviour: behaviour,
 		Metadata:  metadata,

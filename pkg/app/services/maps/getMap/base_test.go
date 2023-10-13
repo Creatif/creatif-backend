@@ -3,6 +3,7 @@ package getMap
 import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/mapCreate"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -52,6 +53,8 @@ var _ = ginkgo.BeforeSuite(func() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	gomega.Expect(locales.Store()).Should(gomega.BeNil())
 })
 
 var _ = GinkgoAfterSuite(func() {
@@ -130,7 +133,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 		})
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries))
+	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

@@ -38,7 +38,7 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (interface{}, error) {
 	var m declarations.Map
-	if res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Select("ID").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Select("ID", "locale_id").First(&m); res.Error != nil {
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
 
@@ -46,7 +46,7 @@ func (c Main) Logic() (interface{}, error) {
 		c.model.Entry.Groups = []string{}
 	}
 
-	mapNode := declarations.NewMapVariable(m.ID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
+	mapNode := declarations.NewMapVariable(m.ID, m.LocaleID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
 	if res := storage.Gorm().Create(&mapNode); res.Error != nil {
 		return nil, appErrors.NewApplicationError(errors.New(fmt.Sprintf("Entry with name '%s' already exists", c.model.Entry.Name))).AddError("addToMap.Logic", nil)
 	}

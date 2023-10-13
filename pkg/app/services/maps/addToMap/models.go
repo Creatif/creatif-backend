@@ -34,12 +34,14 @@ func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"groups":    a.Entry.Groups,
 		"name":      a.Name,
+		"projectID": a.ProjectID,
 		"behaviour": a.Entry.Behaviour,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("behaviour", validation.Required, validation.By(func(value interface{}) error {
 				v := value.(string)
 				if v != constants.ReadonlyBehaviour && v != constants.ModifiableBehaviour {

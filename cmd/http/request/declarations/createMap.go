@@ -24,6 +24,7 @@ type CreateMap struct {
 	Entries   []Entry `json:"entries"`
 	Name      string  `json:"name"`
 	ProjectID string  `param:"projectID"`
+	Locale    string  `param:"locale"`
 }
 
 func (u *CreateMap) UnmarshalJSON(b []byte) error {
@@ -71,6 +72,7 @@ func SanitizeMapModel(model CreateMap) CreateMap {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
+	model.Locale = p.Sanitize(model.Locale)
 
 	entries := model.Entries
 	newEntries := make([]Entry, len(entries))

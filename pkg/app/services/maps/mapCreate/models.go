@@ -2,6 +2,7 @@ package mapCreate
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
@@ -22,6 +23,7 @@ type VariableModel struct {
 type View struct {
 	ID        string              `json:"id"`
 	ProjectID string              `json:"projectID"`
+	Locale    string              `json:"locale"`
 	Name      string              `json:"name"`
 	Variables []map[string]string `json:"variables"`
 }
@@ -35,25 +37,30 @@ type Model struct {
 	Entries   []Entry `json:"entries"`
 	Name      string  `json:"name"`
 	ProjectID string  `json:"projectID"`
+	Locale    string  `json:"locale"`
 }
 
 type LogicResult struct {
 	ID        string
+	Locale    string
 	ProjectID string
 	Variables []map[string]string
 	Name      string
 }
 
-func NewModel(projectId, name string, entries []Entry) Model {
+func NewModel(projectId, locale, name string, entries []Entry) Model {
 	return Model{
 		Name:      name,
 		ProjectID: projectId,
+		Locale:    locale,
 		Entries:   entries,
 	}
 }
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
+		"projectID":          a.ProjectID,
+		"locale":             a.Locale,
 		"groups":             nil,
 		"name":               a.Name,
 		"uniqueName":         a.Name,
@@ -65,6 +72,16 @@ func (a *Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if !locales.ExistsByAlpha(t) {
+					return errors.New(fmt.Sprintf("Locale '%s' does not exist.", t))
+				}
+
+				return nil
+			})),
 			validation.Key("uniqueName", validation.By(func(value interface{}) error {
 				name := value.(string)
 
@@ -157,6 +174,7 @@ func (a *Model) Validate() map[string]string {
 func newView(model LogicResult) View {
 	return View{
 		ID:        model.ID,
+		Locale:    model.Locale,
 		ProjectID: model.ProjectID,
 		Name:      model.Name,
 		Variables: model.Variables,

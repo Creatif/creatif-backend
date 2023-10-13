@@ -59,15 +59,16 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "mapName", entries))
+		handler := New(NewModel(projectId, "eng", "mapName", entries))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("mapName"))
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
+		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "otherMapName", entries))
+		handler = New(NewModel(projectId, "eng", "otherMapName", entries))
 		view, err = handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -127,15 +128,16 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "mapName", entries))
+		handler := New(NewModel(projectId, "eng", "mapName", entries))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("mapName"))
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
+		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "mapName", entries))
+		handler = New(NewModel(projectId, "eng", "mapName", entries))
 		_, err = handler.Logic()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})
@@ -191,15 +193,16 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "mapName", entries))
+		handler := New(NewModel(projectId, "eng", "mapName", entries))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("mapName"))
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
+		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "mapName", entries))
+		handler = New(NewModel(projectId, "eng", "mapName", entries))
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})

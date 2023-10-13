@@ -16,6 +16,9 @@ func CreateMapHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeMapModel(model)
+		if model.Locale == "" {
+			model.Locale = "eng"
+		}
 
 		serviceEntries := make([]mapCreate2.Entry, 0)
 		for _, entry := range model.Entries {
@@ -34,7 +37,7 @@ func CreateMapHandler() func(e echo.Context) error {
 			}
 		}
 
-		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Name, serviceEntries))
+		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Locale, model.Name, serviceEntries))
 
 		return request.SendResponse[mapCreate2.Model](handler, c, http.StatusCreated)
 	}

@@ -15,17 +15,19 @@ type Map struct {
 
 	Name string `gorm:"uniqueIndex:unique_map_name"`
 
-	ProjectID    string        `gorm:"uniqueIndex:unique_map_name;type:text;check:length(id)=26;not null;default: null"`
+	ProjectID    string        `gorm:"uniqueIndex:unique_map_name;type:text;check:length(id)=26;not null"`
+	LocaleID     string        `gorm:"uniqueIndex:unique_map_name;type:text;check:length(id)=26;not null"`
 	MapVariables []MapVariable `gorm:"foreignKey:MapID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }
 
-func NewMap(projectId, name string) Map {
+func NewMap(projectId, localeID, name string) Map {
 	return Map{
 		Name:      name,
 		ProjectID: projectId,
+		LocaleID:  localeID,
 	}
 }
 
