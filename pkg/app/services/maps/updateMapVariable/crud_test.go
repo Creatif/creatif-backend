@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, m.Name, VariableModel{
+		handler := New(NewModel(projectId, "eng", m.Name, VariableModel{
 			Name:      "name-0",
 			Metadata:  b,
 			Groups:    []string{"updated1", "updated2", "updated3"},

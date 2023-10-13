@@ -2,6 +2,7 @@ package updateMapVariable
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
@@ -11,30 +12,33 @@ import (
 )
 
 type VariableModel struct {
-	Name      string   `json:"name"`
-	Metadata  []byte   `json:"metadata"`
-	Groups    []string `json:"groups"`
-	Behaviour string   `json:"behaviour"`
-	Value     []byte   `json:"value"`
+	Name      string
+	Metadata  []byte
+	Groups    []string
+	Behaviour string
+	Value     []byte
 }
 
 type Model struct {
-	Entry     VariableModel `json:"entry"`
-	Name      string        `json:"name"`
-	ProjectID string        `query:"projectID"`
+	Entry     VariableModel
+	Name      string
+	ProjectID string
+	Locale    string
 }
 
-func NewModel(projectId, name string, entry VariableModel) Model {
+func NewModel(projectId, locale, name string, entry VariableModel) Model {
 	return Model{
 		Name:      name,
+		Locale:    locale,
 		ProjectID: projectId,
 		Entry:     entry,
 	}
 }
 
 type LogicResult struct {
-	Map   declarations.Map
-	Entry declarations.MapVariable
+	Map    declarations.Map
+	Entry  declarations.MapVariable
+	Locale string
 }
 
 func (a *Model) Validate() map[string]string {
@@ -42,11 +46,14 @@ func (a *Model) Validate() map[string]string {
 		"groups":    a.Entry.Groups,
 		"name":      a.Name,
 		"behaviour": a.Entry.Behaviour,
+		"projectID": a.ProjectID,
+		"locale":    a.Locale,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("behaviour", validation.Required, validation.By(func(value interface{}) error {
 				v := value.(string)
 				if v != constants.ReadonlyBehaviour && v != constants.ModifiableBehaviour {
@@ -62,6 +69,15 @@ func (a *Model) Validate() map[string]string {
 					}
 
 					return nil
+				}
+
+				return nil
+			})),
+			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if !locales.ExistsByAlpha(t) {
+					return errors.New(fmt.Sprintf("Locale '%s' does not exist.", t))
 				}
 
 				return nil
@@ -89,6 +105,7 @@ type View struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	ProjectID string `json:"projectID"`
+	Locale    string `json:"locale"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -103,6 +120,7 @@ func newView(logicResult LogicResult) View {
 	return View{
 		ID:        m.ID,
 		Name:      m.Name,
+		Locale:    logicResult.Locale,
 		ProjectID: m.ProjectID,
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,

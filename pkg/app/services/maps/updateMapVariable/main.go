@@ -3,6 +3,7 @@ package updateMapVariable
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -39,8 +40,13 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicResult, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return LogicResult{}, appErrors.NewApplicationError(err).AddError("updateMapVariable.Logic", nil)
+	}
+
 	var m declarations.Map
-	if res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).First(&m); res.Error != nil {
+	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).First(&m); res.Error != nil {
 		return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
 	}
 
@@ -57,20 +63,22 @@ func (c Main) Logic() (LogicResult, error) {
 
 	var model declarations.MapVariable
 	if res := storage.Gorm().Raw(fmt.Sprintf(
-		"UPDATE %s SET behaviour = ?, metadata = ?, groups = ?, value = ? WHERE name = ? AND map_id = ? RETURNING %s", (declarations.MapVariable{}).TableName(), strings.Join(returningFields, ",")),
+		"UPDATE %s SET behaviour = ?, metadata = ?, groups = ?, value = ? WHERE name = ? AND map_id = ? AND locale_id = ? RETURNING %s", (declarations.MapVariable{}).TableName(), strings.Join(returningFields, ",")),
 		c.model.Entry.Behaviour,
 		c.model.Entry.Metadata,
 		pqGroups,
 		c.model.Entry.Value,
 		c.model.Entry.Name,
 		m.ID,
+		localeID,
 	).Scan(&model); res.Error != nil || res.RowsAffected == 0 {
 		return LogicResult{}, appErrors.NewNotFoundError(errors.New("Could not update map")).AddError("updateMapVariable.Logic", nil)
 	}
 
 	return LogicResult{
-		Map:   m,
-		Entry: model,
+		Map:    m,
+		Locale: c.model.Locale,
+		Entry:  model,
 	}, nil
 }
 
