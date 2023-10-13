@@ -3,6 +3,7 @@ package removeMapEntry
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -33,12 +34,16 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return nil, appErrors.NewApplicationError(err).AddError("removeMapEntry.Logic", nil)
+	}
 	var m declarations.Map
-	if res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Select("ID").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&m); res.Error != nil {
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapEntry.Logic", nil)
 	}
 
-	res := storage.Gorm().Where("map_id = ? AND name = ?", m.ID, c.model.EntryName).Delete(&declarations.MapVariable{})
+	res := storage.Gorm().Where("map_id = ? AND name = ? AND locale_id = ?", m.ID, c.model.EntryName, localeID).Delete(&declarations.MapVariable{})
 	if res.Error != nil {
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapEntry.Logic", nil)
 	}
