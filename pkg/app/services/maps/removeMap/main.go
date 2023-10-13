@@ -3,6 +3,7 @@ package removeMap
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -16,6 +17,10 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	if errs := c.model.Validate(); errs != nil {
+		return appErrors.NewValidationError(errs)
+	}
+
 	return nil
 }
 
@@ -34,7 +39,11 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
-	res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Delete(&declarations.Map{})
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return nil, appErrors.NewApplicationError(err).AddError("removeMap.Logic", nil)
+	}
+	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Delete(&declarations.Map{})
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMap.Logic", nil)

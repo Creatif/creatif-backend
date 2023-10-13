@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) a map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "mapName"))
+		handler := New(NewModel(projectId, "eng", "mapName"))
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
