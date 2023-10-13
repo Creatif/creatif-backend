@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name, []string{}))
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", m.Name, []string{}))
 		maps, err := getMapHandler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(maps.ID)

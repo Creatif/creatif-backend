@@ -1,6 +1,7 @@
 package getMap
 
 import (
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"errors"
@@ -28,7 +29,12 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
-	m, err := queryMap(c.model.ProjectID, c.model.Name)
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return LogicModel{}, appErrors.NewApplicationError(err).AddError("getMap.Logic", nil)
+	}
+
+	m, err := queryMap(c.model.ProjectID, c.model.Name, localeID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
 	}
@@ -38,7 +44,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var variables []Variable
-	if err := queryVariables(m.ID, c.model.Fields, &variables); err != nil {
+	if err := queryVariables(m.ID, localeID, c.model.Fields, &variables); err != nil {
 		return LogicModel{}, err
 	}
 
@@ -67,7 +73,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Fields), nil
+	return newView(model, c.model.Fields, c.model.Locale), nil
 }
 
 func New(model Model) pkg.Job[Model, View, LogicModel] {
