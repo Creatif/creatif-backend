@@ -2,19 +2,19 @@ package lists
 
 import "github.com/microcosm-cc/bluemonday"
 
-type DeleteListItemByID struct {
+type DeleteListItemByIndex struct {
 	Name      string `param:"name"`
-	ItemID    string `param:"itemID"`
+	ItemIndex string `param:"itemIndex"`
 	ProjectID string `param:"projectID"`
 	Locale    string `param:"locale"`
 }
 
-func SanitizeDeleteListItemByID(model DeleteListItemByID) DeleteListItemByID {
+func SanitizeDeleteListItemByIndex(model DeleteListItemByIndex) DeleteListItemByIndex {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
-	model.ItemID = p.Sanitize(model.ItemID)
+	model.ItemIndex = p.Sanitize(model.ItemIndex)
 
 	return model
 }

@@ -63,7 +63,8 @@ func declarationRoutes(group *echo.Group) {
 	group.PUT("/lists/:projectID", lists.CreateListHandler())
 	group.PUT("/lists/append/:projectID", lists.AppendToListHandler())
 	group.DELETE("/lists/:projectID/:name/:locale", lists.DeleteListHandler())
-	group.DELETE("/lists/item/:projectID/:name/:itemID/:locale", lists.DeleteListHandler())
+	group.DELETE("/lists/id/:projectID/:name/:itemID/:locale", lists.DeleteListItemByIDHandler())
+	group.DELETE("/lists/index/:projectID/:name/:itemIndex/:locale", lists.DeleteListItemByIndexHandler())
 
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 	group.PUT("/variable", variables.CreateVariableHandler())
