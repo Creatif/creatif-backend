@@ -61,6 +61,7 @@ func appRoutes(group *echo.Group) {
 
 func declarationRoutes(group *echo.Group) {
 	group.PUT("/lists/:projectID", lists.CreateListHandler())
+	group.PUT("/lists/append/:projectID", lists.AppendToListHandler())
 
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 	group.PUT("/variable", variables.CreateVariableHandler())
