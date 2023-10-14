@@ -22,8 +22,9 @@ type ListVariable struct {
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	ListID string `gorm:"uniqueIndex:unique_list_variable;type:text;check:length(id)=26"`
-	List   List   `gorm:"foreignKey:ListID"`
+	LocaleID string `gorm:"uniqueIndex:unique_list_variable;type:text;check:length(id)=26;not null"`
+	ListID   string `gorm:"uniqueIndex:unique_list_variable;type:text;check:length(id)=26"`
+	List     List   `gorm:"foreignKey:ListID"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time

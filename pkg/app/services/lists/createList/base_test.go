@@ -3,6 +3,7 @@ package createList
 import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/locales"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -50,6 +51,8 @@ var _ = ginkgo.BeforeSuite(func() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	gomega.Expect(locales.Store()).Should(gomega.BeNil())
 })
 
 var _ = GinkgoAfterSuite(func() {

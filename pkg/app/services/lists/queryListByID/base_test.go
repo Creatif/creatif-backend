@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/domain/declarations"
 	createList2 "creatif/pkg/app/services/lists/createList"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -53,6 +54,8 @@ var _ = ginkgo.BeforeSuite(func() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	gomega.Expect(locales.Store()).Should(gomega.BeNil())
 })
 
 var _ = GinkgoAfterSuite(func() {
