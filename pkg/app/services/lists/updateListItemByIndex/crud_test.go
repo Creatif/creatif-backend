@@ -26,13 +26,14 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, []string{"name", "behaviour"}, "name", singleItem.Index, "newName", "readonly", []string{}, []byte{}, v))
+		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour"}, "name", singleItem.Index, "newName", "readonly", []string{}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(updated.ID)
 
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
+		gomega.Expect(updated.Locale).Should(gomega.Equal("eng"))
 
 		var checkModel declarations.ListVariable
 		res = storage.Gorm().Table(checkModel.TableName()).Where("id = ?", updated.ID).First(&checkModel)
@@ -57,7 +58,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, []string{"name", "groups", "value"}, "name", singleItem.Index, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
+		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, "name", singleItem.Index, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -66,6 +67,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
 		gomega.Expect(updated.Groups).Should(gomega.HaveLen(3))
 		gomega.Expect(updated.Groups[0]).Should(gomega.Equal("first"))
+		gomega.Expect(updated.Locale).Should(gomega.Equal("eng"))
 
 		var checkModel declarations.ListVariable
 		res = storage.Gorm().Table(checkModel.TableName()).Where("id = ?", updated.ID).First(&checkModel)
@@ -91,7 +93,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, []string{"name", "behaviour", "groups"}, "name", singleItem.Index, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
+		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour", "groups"}, "name", singleItem.Index, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -101,6 +103,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(updated.Groups).Should(gomega.HaveLen(3))
 		gomega.Expect(updated.Groups[0]).Should(gomega.Equal("first"))
 		gomega.Expect(updated.Behaviour).Should(gomega.Equal("readonly"))
+		gomega.Expect(updated.Locale).Should(gomega.Equal("eng"))
 
 		var checkModel declarations.ListVariable
 		res = storage.Gorm().Table(checkModel.TableName()).Where("id = ?", updated.ID).First(&checkModel)

@@ -3,6 +3,7 @@ package queryListByID
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -36,13 +37,17 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.ListVariable, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("queryListByID.Logic", nil)
+	}
 	var variable declarations.ListVariable
 	res := storage.Gorm().
 		Raw(fmt.Sprintf(`
 			SELECT lv.id, lv.name, lv.index, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at
 			FROM %s AS lv INNER JOIN %s AS l
-			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND lv.id = ?`,
-			(declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.Name, c.model.ID).
+			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND lv.id = ? AND l.locale_id = ?`,
+			(declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.Name, c.model.ID, localeID).
 		Scan(&variable)
 
 	if res.Error != nil {
@@ -75,7 +80,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model), nil
+	return newView(model, c.model.Locale), nil
 }
 
 func New(model Model) pkg.Job[Model, View, declarations.ListVariable] {

@@ -7,8 +7,8 @@ import (
 )
 
 type PaginateVariables struct {
-	ProjectID      string `json:"projectID"`
-	Locale         string `json:"locale"`
+	ProjectID      string `param:"projectID"`
+	Locale         string `param:"locale"`
 	Limit          int    `query:"limit"`
 	Page           int    `query:"page"`
 	Filters        string `query:"filters"`

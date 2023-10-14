@@ -10,12 +10,13 @@ var _ = ginkgo.Describe("Declaration list create tests", func() {
 		projectId := testCreateProject("project")
 		listName := testCreateList(projectId, "list", 1)
 
-		handler := New(NewModel(projectId, []string{"name"}, listName, "newNameList"))
+		handler := New(NewModel(projectId, "eng", []string{"name"}, listName, "newNameList"))
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("newNameList"))
+		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 	})
 })

@@ -1,6 +1,7 @@
 package variables
 
 import (
+	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
 	"creatif/pkg/app/services/variables/createVariable"
@@ -16,11 +17,11 @@ func CreateVariableHandler() func(e echo.Context) error {
 		}
 
 		model = declarations.SanitizeVariable(model)
-		if model.Language == "" {
-			model.Language = "eng"
+		if model.Locale == "" {
+			model.Locale = declarations2.DefaultLocale
 		}
 
-		handler := createVariable.New(createVariable.NewModel(model.ProjectID, model.Language, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
+		handler := createVariable.New(createVariable.NewModel(model.ProjectID, model.Locale, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
 
 		return request.SendResponse[createVariable.Model](handler, c, http.StatusCreated)
 	}

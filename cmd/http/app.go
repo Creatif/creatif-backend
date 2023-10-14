@@ -59,19 +59,20 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
-	group.GET("/supported-locales", locale.GetSupportedLanguageHandler())
+	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 	group.PUT("/variable", variables.CreateVariableHandler())
 	group.POST("/variable/:projectID", variables.UpdateVariableHandler())
-	group.DELETE("/variable/:projectID/:name", variables.DeleteVariableHandler())
-	group.GET("/variable/:projectID/:name", variables.GetVariableHandler())
-	group.GET("/variables/:projectID", variables.PaginateVariablesHandler())
-	group.GET("/variable/value/:projectID/:name", variables.GetValueHandler())
+	group.DELETE("/variable/:projectID", variables.DeleteVariableHandler())
+	group.GET("/variable/:projectID/:name/:locale", variables.GetVariableHandler())
+	group.GET("/variables/:projectID/:locale", variables.PaginateVariablesHandler())
+	group.GET("/variable/value/:projectID/:name/:locale", variables.GetValueHandler())
 
-	group.POST("/map/add/:projectID", maps.AddToMapHandler())
-	group.POST("/map/update/:projectID", maps.UpdateMapVariableHandler())
-	group.DELETE("/map/entry/:projectID/:name/:entryName", maps.DeleteMapEntry())
-	group.PUT("/map/:projectID", maps.CreateMapHandler())
-	group.GET("/map/:projectID/:name", maps.GetMapHandler())
+	group.POST("/map/add/:projectID/:locale", maps.AddToMapHandler())
+	group.POST("/map/update/:projectID/:locale", maps.UpdateMapVariableHandler())
+	group.DELETE("/map/entry/:projectID/:name/:entryName/:locale", maps.DeleteMapEntry())
+	group.DELETE("/map/:projectID/:name/:locale", maps.DeleteMap())
+	group.PUT("/map/:projectID/:locale", maps.CreateMapHandler())
+	group.GET("/map/:projectID/:name/:locale", maps.GetMapHandler())
 
-	group.POST("/structures/:projectID", combined.GetBatchedStructuresHandler())
+	group.POST("/structures/:projectID/:locale", combined.GetBatchedStructuresHandler())
 }

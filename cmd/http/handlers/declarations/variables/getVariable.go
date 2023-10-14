@@ -1,6 +1,7 @@
 package variables
 
 import (
+	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
 	getVariable2 "creatif/pkg/app/services/variables/getVariable"
@@ -17,7 +18,7 @@ func GetVariableHandler() func(e echo.Context) error {
 
 		model = declarations.SanitizeGetVariable(model)
 		if model.Locale == "" {
-			model.Locale = "eng"
+			model.Locale = declarations2.DefaultLocale
 		}
 
 		handler := getVariable2.New(getVariable2.NewModel(model.ProjectID, model.Name, model.Locale, model.Fields))

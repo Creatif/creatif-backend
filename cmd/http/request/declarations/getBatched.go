@@ -6,6 +6,7 @@ import (
 
 type GetBatchedStructures struct {
 	ProjectID  string              `param:"projectID"`
+	Locale     string              `param:"locale"`
 	Structures []BatchedStructures `json:"structures"`
 }
 
@@ -17,6 +18,7 @@ type BatchedStructures struct {
 func SanitizeGetBatchedVariables(model GetBatchedStructures) GetBatchedStructures {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
+	model.Locale = p.Sanitize(model.Locale)
 
 	sanitized := make([]BatchedStructures, 0)
 	for _, n := range model.Structures {

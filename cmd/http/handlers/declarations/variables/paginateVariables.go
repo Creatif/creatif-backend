@@ -1,6 +1,7 @@
 package variables
 
 import (
+	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations"
 	paginateVariables2 "creatif/pkg/app/services/variables/paginateVariables"
@@ -20,7 +21,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 		model = declarations.SanitizePaginateVariables(model)
 		model.OrderBy = strings.ToUpper(model.OrderBy)
 		if model.Locale == "" {
-			model.Locale = "eng"
+			model.Locale = declarations2.DefaultLocale
 		}
 
 		handler := paginateVariables2.New(paginateVariables2.NewModel(

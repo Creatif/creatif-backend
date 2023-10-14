@@ -6,10 +6,10 @@ import (
 )
 
 type AddToMap struct {
-	Name      string           `json:"name"`
+	Locale    string           `param:"locale"`
 	ProjectID string           `param:"projectID"`
-	Locale    string           `json:"locale"`
 	Entry     MapVariableModel `json:"entry"`
+	Name      string           `json:"name"`
 }
 
 func SanitizeAddToMap(model AddToMap) AddToMap {

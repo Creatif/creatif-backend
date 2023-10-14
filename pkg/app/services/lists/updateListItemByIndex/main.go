@@ -3,6 +3,7 @@ package updateListItemByIndex
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -38,8 +39,12 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.ListVariable, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("updateListItemByIndex.Logic", nil)
+	}
 	var list declarations.List
-	if res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.ListName, c.model.ProjectID).Select("id").First(&list); res.Error != nil {
+	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.ListName, c.model.ProjectID, localeID).Select("id").First(&list); res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByIndex.Logic", nil)
 		}
@@ -48,7 +53,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 	}
 
 	var existing declarations.ListVariable
-	if res := storage.Gorm().Where("index = ? AND list_id = ?", c.model.ItemIndex, list.ID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where("index = ? AND list_id = ? AND locale_id = ?", c.model.ItemIndex, list.ID, localeID).First(&existing); res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByIndex.Logic", nil)
 		}
@@ -114,7 +119,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model), nil
+	return newView(model, c.model.Locale), nil
 }
 
 func New(model Model) pkg.Job[Model, View, declarations.ListVariable] {

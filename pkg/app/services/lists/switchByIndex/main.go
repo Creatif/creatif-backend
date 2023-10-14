@@ -2,6 +2,7 @@ package switchByIndex
 
 import (
 	"creatif/pkg/app/domain/app"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -34,14 +35,20 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicResult, error) {
-	source, destination, err := tryUpdates(c.model.ProjectID, c.model.Name, c.model.Source, c.model.Destination, 0, 10)
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return LogicResult{}, appErrors.NewApplicationError(err)
+	}
+
+	source, destination, err := tryUpdates(c.model.ProjectID, localeID, c.model.Name, c.model.Source, c.model.Destination, 0, 10)
 	if err != nil {
 		return LogicResult{}, appErrors.NewDatabaseError(err)
 	}
 
 	return LogicResult{
-		To:   source,
-		From: destination,
+		To:     source,
+		From:   destination,
+		Locale: c.model.Locale,
 	}, nil
 }
 

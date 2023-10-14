@@ -25,7 +25,7 @@ func processStoredLocales(l map[string]map[string]string) []localeView {
 	return loadedLocales
 }
 
-func GetSupportedLanguageHandler() func(e echo.Context) error {
+func GetSupportedLocalesHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		l := locales.Locales()
 		if len(l) > 0 {

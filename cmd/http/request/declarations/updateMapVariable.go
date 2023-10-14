@@ -6,10 +6,10 @@ import (
 )
 
 type UpdateMapVariable struct {
-	Name      string           `json:"name"`
 	ProjectID string           `param:"projectID"`
+	Locale    string           `param:"locale"`
+	Name      string           `json:"name"`
 	Entry     MapVariableModel `json:"entry"`
-	Locale    string           `json:"locale"`
 }
 
 func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {

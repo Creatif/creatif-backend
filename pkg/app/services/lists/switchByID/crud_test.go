@@ -16,12 +16,14 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		source := idsAndIndexes[0]
 		destination := idsAndIndexes[5]
 
-		handler := New(NewModel(projectId, "list", source["id"], destination["id"]))
+		handler := New(NewModel(projectId, "eng", "list", source["id"], destination["id"]))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 
 		gomega.Expect(view.Source.Index).Should(gomega.Equal(destination["index"]))
 		gomega.Expect(view.Destination.Index).Should(gomega.Equal(source["index"]))
+		gomega.Expect(view.Destination.Locale).Should(gomega.Equal("eng"))
+		gomega.Expect(view.Source.Locale).Should(gomega.Equal("eng"))
 	})
 
 	ginkgo.It("should switch two equal list variables indexes concurrently", func() {
@@ -38,12 +40,14 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "list", source["id"], destination["id"]))
+				handler := New(NewModel(projectId, "eng", "list", source["id"], destination["id"]))
 				view, err := handler.Handle()
 				testAssertErrNil(err)
 
 				gomega.Expect(view.Source.Index).ShouldNot(gomega.BeEmpty())
 				gomega.Expect(view.Destination.Index).ShouldNot(gomega.BeEmpty())
+				gomega.Expect(view.Destination.Locale).Should(gomega.Equal("eng"))
+				gomega.Expect(view.Source.Locale).Should(gomega.Equal("eng"))
 			}()
 		}
 		wg.Wait()
@@ -80,12 +84,14 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "list", ids[sourceIdx]["id"], ids[destinationIdx]["id"]))
+				handler := New(NewModel(projectId, "eng", "list", ids[sourceIdx]["id"], ids[destinationIdx]["id"]))
 				view, err := handler.Handle()
 				testAssertErrNil(err)
 
 				gomega.Expect(view.Source.Index).ShouldNot(gomega.BeEmpty())
 				gomega.Expect(view.Destination.Index).ShouldNot(gomega.BeEmpty())
+				gomega.Expect(view.Destination.Locale).Should(gomega.Equal("eng"))
+				gomega.Expect(view.Source.Locale).Should(gomega.Equal("eng"))
 			}()
 		}
 		wg.Wait()
