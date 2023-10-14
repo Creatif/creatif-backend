@@ -60,12 +60,13 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
-	group.PUT("/lists/:projectID", lists.CreateListHandler())
-	group.PUT("/lists/append/:projectID", lists.AppendToListHandler())
-	group.DELETE("/lists/:projectID/:name/:locale", lists.DeleteListHandler())
-	group.DELETE("/lists/id/:projectID/:name/:itemID/:locale", lists.DeleteListItemByIDHandler())
-	group.DELETE("/lists/index/:projectID/:name/:itemIndex/:locale", lists.DeleteListItemByIndexHandler())
-	group.DELETE("/lists/range/:projectID/:name/:locale", lists.DeleteRangeByIDHandler())
+	group.PUT("/list/:projectID", lists.CreateListHandler())
+	group.PUT("/list/append/:projectID", lists.AppendToListHandler())
+	group.DELETE("/list/:projectID/:name/:locale", lists.DeleteListHandler())
+	group.DELETE("/list/id/:projectID/:name/:itemID/:locale", lists.DeleteListItemByIDHandler())
+	group.DELETE("/list/index/:projectID/:name/:itemIndex/:locale", lists.DeleteListItemByIndexHandler())
+	group.DELETE("/list/range/:projectID/:name/:locale", lists.DeleteRangeByIDHandler())
+	group.GET("/lists/:projectID/:name/:listName", lists.PaginateListItemsHandler())
 
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 	group.PUT("/variable", variables.CreateVariableHandler())
