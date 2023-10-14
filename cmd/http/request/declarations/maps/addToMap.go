@@ -1,22 +1,22 @@
-package declarations
+package maps
 
 import (
 	"creatif/pkg/lib/sdk"
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type UpdateMapVariable struct {
-	ProjectID string           `param:"projectID"`
+type AddToMap struct {
 	Locale    string           `param:"locale"`
-	Name      string           `json:"name"`
+	ProjectID string           `param:"projectID"`
 	Entry     MapVariableModel `json:"entry"`
+	Name      string           `json:"name"`
 }
 
-func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
+func SanitizeAddToMap(model AddToMap) AddToMap {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Name = p.Sanitize(model.Name)
 	model.Locale = p.Sanitize(model.Locale)
+	model.Name = p.Sanitize(model.Name)
 
 	variable := model.Entry
 	variable.Name = p.Sanitize(variable.Name)

@@ -1,21 +1,21 @@
-package declarations
+package maps
 
 import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type DeleteMapEntry struct {
+type GetMap struct {
 	Name      string `param:"name"`
-	EntryName string `param:"entryName"`
+	Fields    string `query:"fields"`
 	ProjectID string `param:"projectID"`
 	Locale    string `param:"locale"`
 }
 
-func SanitizeDeleteMapEntry(model DeleteMapEntry) DeleteMapEntry {
+func SanitizeGetMap(model GetMap) GetMap {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.EntryName = p.Sanitize(model.EntryName)
+	model.Fields = p.Sanitize(model.Fields)
 	model.Locale = p.Sanitize(model.Locale)
 
 	return model

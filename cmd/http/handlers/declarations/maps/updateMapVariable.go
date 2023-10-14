@@ -2,7 +2,7 @@ package maps
 
 import (
 	"creatif/cmd/http/request"
-	"creatif/cmd/http/request/declarations"
+	"creatif/cmd/http/request/declarations/maps"
 	updateMapVariable2 "creatif/pkg/app/services/maps/updateMapVariable"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -10,12 +10,12 @@ import (
 
 func UpdateMapVariableHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model declarations.UpdateMapVariable
+		var model maps.UpdateMapVariable
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = declarations.SanitizeUpdateMapVariable(model)
+		model = maps.SanitizeUpdateMapVariable(model)
 		if model.Locale == "" {
 			model.Locale = "eng"
 		}

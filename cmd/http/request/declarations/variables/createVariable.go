@@ -1,4 +1,4 @@
-package declarations
+package variables
 
 import (
 	"creatif/pkg/lib/sdk"

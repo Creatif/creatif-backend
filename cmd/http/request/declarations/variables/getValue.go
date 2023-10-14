@@ -1,21 +1,19 @@
-package declarations
+package variables
 
 import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type GetMap struct {
+type GetValue struct {
 	Name      string `param:"name"`
-	Fields    string `query:"fields"`
 	ProjectID string `param:"projectID"`
 	Locale    string `param:"locale"`
 }
 
-func SanitizeGetMap(model GetMap) GetMap {
+func SanitizeGetValue(model GetValue) GetValue {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Fields = p.Sanitize(model.Fields)
 	model.Locale = p.Sanitize(model.Locale)
 
 	return model

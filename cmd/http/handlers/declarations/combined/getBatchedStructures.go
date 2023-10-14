@@ -2,7 +2,7 @@ package combined
 
 import (
 	"creatif/cmd/http/request"
-	"creatif/cmd/http/request/declarations"
+	"creatif/cmd/http/request/declarations/combined"
 	"creatif/pkg/app/combined/getBatchStructures"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -10,12 +10,12 @@ import (
 
 func GetBatchedStructuresHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model declarations.GetBatchedStructures
+		var model combined.GetBatchedStructures
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = declarations.SanitizeGetBatchedVariables(model)
+		model = combined.SanitizeGetBatchedVariables(model)
 		serviceModel := make(map[string]string)
 		for _, m := range model.Structures {
 			serviceModel[m.Name] = m.Type

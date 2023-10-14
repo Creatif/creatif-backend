@@ -2,7 +2,7 @@ package maps
 
 import (
 	"creatif/cmd/http/request"
-	"creatif/cmd/http/request/declarations"
+	"creatif/cmd/http/request/declarations/maps"
 	addToMap2 "creatif/pkg/app/services/maps/addToMap"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -10,12 +10,12 @@ import (
 
 func AddToMapHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model declarations.AddToMap
+		var model maps.AddToMap
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = declarations.SanitizeAddToMap(model)
+		model = maps.SanitizeAddToMap(model)
 		if model.Locale == "" {
 			model.Locale = "eng"
 		}

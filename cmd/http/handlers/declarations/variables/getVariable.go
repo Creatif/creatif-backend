@@ -3,7 +3,7 @@ package variables
 import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
-	"creatif/cmd/http/request/declarations"
+	"creatif/cmd/http/request/declarations/variables"
 	getVariable2 "creatif/pkg/app/services/variables/getVariable"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -11,12 +11,12 @@ import (
 
 func GetVariableHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model declarations.GetVariable
+		var model variables.GetVariable
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = declarations.SanitizeGetVariable(model)
+		model = variables.SanitizeGetVariable(model)
 		if model.Locale == "" {
 			model.Locale = declarations2.DefaultLocale
 		}

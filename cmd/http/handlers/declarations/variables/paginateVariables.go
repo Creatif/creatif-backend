@@ -3,7 +3,7 @@ package variables
 import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
-	"creatif/cmd/http/request/declarations"
+	"creatif/cmd/http/request/declarations/variables"
 	paginateVariables2 "creatif/pkg/app/services/variables/paginateVariables"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
@@ -13,12 +13,12 @@ import (
 
 func PaginateVariablesHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model declarations.PaginateVariables
+		var model variables.PaginateVariables
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = declarations.SanitizePaginateVariables(model)
+		model = variables.SanitizePaginateVariables(model)
 		model.OrderBy = strings.ToUpper(model.OrderBy)
 		if model.Locale == "" {
 			model.Locale = declarations2.DefaultLocale

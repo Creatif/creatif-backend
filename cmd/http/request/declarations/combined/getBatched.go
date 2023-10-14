@@ -1,4 +1,4 @@
-package declarations
+package combined
 
 import (
 	"github.com/microcosm-cc/bluemonday"
