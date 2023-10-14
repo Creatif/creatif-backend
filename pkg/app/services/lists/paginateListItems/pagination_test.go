@@ -10,7 +10,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, listName, "created_at", "desc", 10, 1, []string{"one"}, nil))
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 1, []string{"one"}, nil))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, listName, "created_at", "desc", 10, 50, []string{"one"}, nil))
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 50, []string{"one"}, nil))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -34,7 +34,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, listName, "created_at", "desc", 10, 1, []string{"not_exists"}, nil))
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 1, []string{"not_exists"}, nil))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

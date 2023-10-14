@@ -7,8 +7,10 @@ import (
 )
 
 var storedLocales = make(map[string]map[string]string)
+var idToAlpha = make(map[string]string)
 
 var LocaleByAlphaNotExists = errors.New("Locale does not exist")
+var IDByAlphaNotExists = errors.New("ID by alpha does not exist")
 
 func Store() error {
 	if len(storedLocales) > 0 {
@@ -25,6 +27,8 @@ func Store() error {
 			"id":   l.ID,
 			"name": l.Name,
 		}
+
+		idToAlpha[l.ID] = l.Alpha
 	}
 
 	return nil
@@ -47,4 +51,13 @@ func GetIDWithAlpha(alpha string) (string, error) {
 
 	val, _ := storedLocales[alpha]
 	return val["id"], nil
+}
+
+func GetAlphaWithID(id string) (string, error) {
+	val, ok := idToAlpha[id]
+	if !ok {
+		return "", IDByAlphaNotExists
+	}
+
+	return val, nil
 }

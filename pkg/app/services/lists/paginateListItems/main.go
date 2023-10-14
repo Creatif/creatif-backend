@@ -3,6 +3,7 @@ package paginateListItems
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/sdk"
@@ -37,6 +38,11 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewApplicationError(err).AddError("ListItems.Paginate.Logic", nil)
+	}
+
 	if c.model.OrderBy == "" {
 		c.model.OrderBy = "created_at"
 	}
@@ -55,6 +61,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	lv.id, 
     	lv.index, 
     	lv.short_id, 
+    	lv.locale_id,
     	lv.name, 
     	lv.behaviour, 
     	lv.metadata, 
@@ -63,7 +70,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	lv.updated_at 
 			FROM %s AS lv
 			INNER JOIN %s AS l
-		ON l.project_id = ? AND l.name = ? AND l.id = lv.list_id
+		ON l.project_id = ? AND l.name = ? AND l.id = lv.list_id AND l.locale_id = ?
 		%s
 		ORDER BY lv.%s %s
 		OFFSET ? LIMIT ?`,
@@ -75,7 +82,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	)
 
 	var items []declarations.ListVariable
-	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.ListName, offset, c.model.Limit).Scan(&items)
+	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.ListName, localeID, offset, c.model.Limit).Scan(&items)
 	if res.Error != nil {
 		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
 	}
@@ -124,10 +131,15 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 		return sdk.PaginationView[View]{}, err
 	}
 
+	items, err := newView(model.Data)
+	if err != nil {
+		return sdk.PaginationView[View]{}, appErrors.NewApplicationError(err).AddError("ListItems.Paginate.Handle", nil)
+	}
+
 	return sdk.PaginationView[View]{
 		Total: model.Total,
 		Page:  c.model.Page,
-		Data:  newView(model.Data),
+		Data:  items,
 	}, nil
 }
 
