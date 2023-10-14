@@ -12,7 +12,7 @@ var _ = ginkgo.Describe("Declaration list delete tests", func() {
 		projectId := testCreateProject("project")
 		listName, listId := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, listName))
+		handler := New(NewModel(projectId, "eng", listName))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
