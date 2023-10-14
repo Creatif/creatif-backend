@@ -16,6 +16,7 @@ type Project struct {
 
 	Variables []declarations.Variable `gorm:"foreignKey:ProjectID;references:ID"`
 	Maps      []declarations.Map      `gorm:"foreignKey:ProjectID;references:ID"`
+	Lists     []declarations.List     `gorm:"foreignKey:ProjectID;references:ID"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
