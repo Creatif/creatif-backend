@@ -16,7 +16,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		res := storage.Gorm().Where("list_id = ?", listId).Select("index").First(&listItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, listName, listItem.Index))
+		handler := New(NewModel(projectId, "eng", listName, listItem.Index))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

@@ -3,6 +3,7 @@ package deleteListItemByIndex
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -37,8 +38,13 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (*struct{}, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return nil, appErrors.NewApplicationError(err).AddError("deleteListItemByIndex.Logic", nil)
+	}
+
 	var list declarations.List
-	res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Select("ID").First(&list)
+	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&list)
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteListItemByIndex.Logic", nil)
@@ -48,7 +54,7 @@ func (c Main) Logic() (*struct{}, error) {
 	}
 
 	var variable declarations.ListVariable
-	res = storage.Gorm().Where("index = ? AND list_id = ?", c.model.ItemIndex, list.ID).Delete(&variable)
+	res = storage.Gorm().Where("index = ? AND list_id = ? AND locale_id = ?", c.model.ItemIndex, list.ID, localeID).Delete(&variable)
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteListItemByIndex.Logic", nil)
