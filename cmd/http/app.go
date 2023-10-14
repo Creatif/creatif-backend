@@ -69,6 +69,7 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/lists/:projectID/:name/:listName", lists.PaginateListItemsHandler())
 	group.GET("/lists/query-id/:id/:projectID/:name/:locale", lists.QueryListByIDHandler())
 	group.GET("/lists/query-index/:index/:projectID/:name/:locale", lists.QueryListByIDHandler())
+	group.POST("/lists/:name/:itemName/:projectID/:locale", lists.ReplaceListItemHandler())
 
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 	group.PUT("/variable", variables.CreateVariableHandler())
