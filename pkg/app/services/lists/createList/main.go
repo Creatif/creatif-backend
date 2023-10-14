@@ -3,6 +3,7 @@ package createList
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -36,7 +37,12 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.List, error) {
-	list := declarations.NewList(c.model.ProjectID, c.model.Name)
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return declarations.List{}, appErrors.NewApplicationError(err).AddError("createList.Logic", nil)
+	}
+
+	list := declarations.NewList(c.model.ProjectID, c.model.Name, localeID)
 	for _, v := range c.model.Variables {
 		if v.Groups == nil {
 			v.Groups = []string{}
@@ -51,7 +57,7 @@ func (c Main) Logic() (declarations.List, error) {
 		listVariables := make([]declarations.ListVariable, len(c.model.Variables))
 		for i := 0; i < len(c.model.Variables); i++ {
 			v := c.model.Variables[i]
-			listVariables[i] = declarations.NewListVariable(list.ID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
+			listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
 		}
 
 		if res := tx.Create(&listVariables); res.Error != nil {

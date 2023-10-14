@@ -30,9 +30,10 @@ type ListVariable struct {
 	UpdatedAt time.Time
 }
 
-func NewListVariable(listId, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) ListVariable {
+func NewListVariable(listId, localeID, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) ListVariable {
 	return ListVariable{
 		ListID:    listId,
+		LocaleID:  localeID,
 		Name:      name,
 		Behaviour: behaviour,
 		Metadata:  metadata,

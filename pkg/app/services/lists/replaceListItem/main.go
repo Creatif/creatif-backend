@@ -3,6 +3,7 @@ package replaceListItem
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -38,6 +39,11 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.ListVariable, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("replaceListItem.Logic", nil)
+	}
+
 	if c.model.Variable.Groups == nil {
 		c.model.Variable.Groups = []string{}
 	}
@@ -49,7 +55,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		}
 	}
 
-	listItem := declarations.NewListVariable(listAndItem.ListID, c.model.Variable.Name, c.model.Variable.Behaviour, c.model.Variable.Metadata, c.model.Variable.Groups, c.model.Variable.Value)
+	listItem := declarations.NewListVariable(listAndItem.ListID, localeID, c.model.Variable.Name, c.model.Variable.Behaviour, c.model.Variable.Metadata, c.model.Variable.Groups, c.model.Variable.Value)
 	listItem.Index = listAndItem.ItemIndex
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Where("list_id = ? AND id = ?", listAndItem.ListID, listAndItem.ItemID).Delete(&declarations.ListVariable{}); res.Error != nil {

@@ -20,7 +20,7 @@ var _ = ginkgo.Describe("Declaration list create tests", func() {
 			}
 		}
 
-		handler := New(NewModel(projectId, "list", variables))
+		handler := New(NewModel(projectId, "eng", "list", variables))
 
 		list, err := handler.Handle()
 		testAssertErrNil(err)

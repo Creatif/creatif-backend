@@ -22,9 +22,10 @@ type List struct {
 	UpdatedAt time.Time
 }
 
-func NewList(projectId, name string) List {
+func NewList(projectId, name, localeID string) List {
 	return List{
 		Name:      name,
+		LocaleID:  localeID,
 		ProjectID: projectId,
 	}
 }

@@ -3,6 +3,7 @@ package appendToList
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -35,6 +36,11 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.List, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return declarations.List{}, appErrors.NewApplicationError(err).AddError("appendToList.Logic", nil)
+	}
+
 	var list declarations.List
 	if err := storage.GetBy((declarations.List{}).TableName(), "name", c.model.Name, &list, "id"); err != nil {
 		return declarations.List{}, appErrors.NewNotFoundError(err).AddError("appendToList.Logic", nil)
@@ -43,7 +49,7 @@ func (c Main) Logic() (declarations.List, error) {
 	listVariables := make([]declarations.ListVariable, len(c.model.Variables))
 	for i := 0; i < len(c.model.Variables); i++ {
 		v := c.model.Variables[i]
-		listVariables[i] = declarations.NewListVariable(list.ID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
+		listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
 	}
 
 	if res := storage.Gorm().Create(&listVariables); res.Error != nil {

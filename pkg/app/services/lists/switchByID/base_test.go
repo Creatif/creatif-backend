@@ -118,7 +118,7 @@ func testCreateList(projectId, name string, varNum int) string {
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables))
+	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables))
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)
@@ -141,7 +141,7 @@ func testCreateListAndReturnIdsAndIndexes(projectId, name string, varNum int) []
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables))
+	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables))
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

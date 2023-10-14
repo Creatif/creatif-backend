@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Declaration list replace tests", func() {
 		variables := testCreateListAndReturnVariables(projectId, "list", 10)
 
 		item := variables[4]
-		handler := New(NewModel(projectId, "list", item["name"], Variable{
+		handler := New(NewModel(projectId, "eng", "list", item["name"], Variable{
 			Name:      "newName",
 			Metadata:  nil,
 			Groups:    nil,

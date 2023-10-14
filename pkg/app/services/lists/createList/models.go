@@ -2,6 +2,7 @@ package createList
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
@@ -22,12 +23,14 @@ type Variable struct {
 type Model struct {
 	Name      string
 	ProjectID string
+	Locale    string
 	Variables []Variable
 }
 
-func NewModel(projectId, name string, variables []Variable) Model {
+func NewModel(projectId, locale, name string, variables []Variable) Model {
 	return Model{
 		Name:      name,
+		Locale:    locale,
 		ProjectID: projectId,
 		Variables: variables,
 	}
@@ -36,11 +39,14 @@ func NewModel(projectId, name string, variables []Variable) Model {
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":        a.Name,
+		"projectID":   a.ProjectID,
+		"locale":      a.Locale,
 		"variableLen": len(a.Variables),
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200), validation.By(func(value interface{}) error {
 				name := value.(string)
 
@@ -66,6 +72,15 @@ func (a Model) Validate() map[string]string {
 
 				if l > 1000 {
 					return errors.New("The number of variables when creating a list cannot be higher than 1000.")
+				}
+
+				return nil
+			})),
+			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if !locales.ExistsByAlpha(t) {
+					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
 				}
 
 				return nil
