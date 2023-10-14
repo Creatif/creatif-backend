@@ -27,5 +27,6 @@ var _ = ginkgo.Describe("Declaration list create tests", func() {
 		testAssertIDValid(list.ID)
 
 		gomega.Expect(list.Name).Should(gomega.Equal("list"))
+		gomega.Expect(list.Locale).Should(gomega.Equal("eng"))
 	})
 })
