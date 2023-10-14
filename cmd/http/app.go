@@ -3,6 +3,7 @@ package main
 import (
 	appHandlers "creatif/cmd/http/handlers/app"
 	"creatif/cmd/http/handlers/declarations/combined"
+	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
 	"creatif/cmd/http/handlers/declarations/variables"
@@ -59,6 +60,8 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
+	group.PUT("/lists/:projectID", lists.CreateListHandler())
+
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 	group.PUT("/variable", variables.CreateVariableHandler())
 	group.POST("/variable/:projectID", variables.UpdateVariableHandler())
