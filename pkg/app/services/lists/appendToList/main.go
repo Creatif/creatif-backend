@@ -78,7 +78,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model), nil
+	return newView(model, c.model.Locale), nil
 }
 
 func New(model Model) pkg.Job[Model, View, declarations.List] {

@@ -74,14 +74,16 @@ type View struct {
 	ID        string `json:"id"`
 	ProjectID string `json:"projectID"`
 	Name      string `json:"name"`
+	Locale    string `json:"locale"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.List) View {
+func newView(model declarations.List, locale string) View {
 	return View{
 		ID:        model.ID,
+		Locale:    locale,
 		ProjectID: model.ProjectID,
 		Name:      model.Name,
 
