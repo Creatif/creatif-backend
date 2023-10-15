@@ -19,7 +19,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 		}
 
 		model = variables.SanitizePaginateVariables(model)
-		model.OrderBy = strings.ToUpper(model.OrderBy)
+		model.OrderDirection = strings.ToUpper(model.OrderDirection)
 		if model.Locale == "" {
 			model.Locale = declarations2.DefaultLocale
 		}

@@ -45,8 +45,10 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 	}
 
 	qb := queryBuilder.NewQueryBuilder(fmt.Sprintf("%s as v", (declarations.Variable{}).TableName()), c.model.OrderBy, c.model.OrderDirection, c.model.Limit, c.model.Page)
-	qb = qb.Fields("v.id", "v.groups", "v.name", "v.behaviour", "v.metadata", "v.value", "v.created_at", "v.updated_at").
-		AddWhere("v.locale_id = ?", localeID)
+	qb = qb.Fields("v.id", "v.short_id", "v.groups", "v.name", "v.behaviour", "v.metadata", "v.value", "v.created_at", "v.updated_at").
+		AddWhere("v.locale_id = ?", localeID).
+		AddWhere("v.project_id = ?", c.model.ProjectID)
+
 	if len(c.model.Groups) != 0 {
 		qb.AddWhere(fmt.Sprintf("'{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "groups"))
 	}

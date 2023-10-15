@@ -34,7 +34,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.LocaleAlpha)
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
 		return declarations.Variable{}, appErrors.NewNotFoundError(err)
 	}

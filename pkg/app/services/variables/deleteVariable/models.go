@@ -9,23 +9,23 @@ import (
 )
 
 type Model struct {
-	Name        string
-	ProjectID   string
-	LocaleAlpha string
+	Name      string
+	ProjectID string
+	Locale    string
 }
 
-func NewModel(projectId, name, localeAlpha string) Model {
+func NewModel(projectId, name, locale string) Model {
 	return Model{
-		Name:        name,
-		LocaleAlpha: localeAlpha,
-		ProjectID:   projectId,
+		Name:      name,
+		Locale:    locale,
+		ProjectID: projectId,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":      a.Name,
-		"locale":    a.LocaleAlpha,
+		"locale":    a.Locale,
 		"projectID": a.ProjectID,
 	}
 

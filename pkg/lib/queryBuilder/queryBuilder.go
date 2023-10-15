@@ -198,10 +198,19 @@ func runCount(count *int64, q *queryBuilder) appErrors.AppError[struct{}] {
 		}
 	}
 
-	if res := storage.Gorm().
+	g := storage.Gorm().
 		Table(q.table).
-		Scopes(scopes...).
-		Count(count); res.Error != nil {
+		Scopes(scopes...)
+
+	if len(q.where) != 0 {
+		for _, whereList := range q.where {
+			for key, value := range whereList {
+				g.Where(key, value...)
+			}
+		}
+	}
+
+	if res := g.Count(count); res.Error != nil {
 		return appErrors.NewDatabaseError(res.Error)
 	}
 
