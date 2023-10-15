@@ -14,24 +14,24 @@ import (
 )
 
 type Model struct {
-	Name        string
-	Metadata    []byte
-	Groups      []string
-	Behaviour   string
-	Value       []byte
-	ProjectID   string
-	LocaleAlpha string
+	Name      string
+	Metadata  []byte
+	Groups    []string
+	Behaviour string
+	Value     []byte
+	ProjectID string
+	Locale    string
 }
 
-func NewModel(projectId, localeAlpha, name, behaviour string, groups []string, metadata []byte, value []byte) Model {
+func NewModel(projectId, locale, name, behaviour string, groups []string, metadata []byte, value []byte) Model {
 	return Model{
-		Name:        name,
-		LocaleAlpha: localeAlpha,
-		ProjectID:   projectId,
-		Behaviour:   behaviour,
-		Groups:      groups,
-		Metadata:    metadata,
-		Value:       value,
+		Name:      name,
+		Locale:    locale,
+		ProjectID: projectId,
+		Behaviour: behaviour,
+		Groups:    groups,
+		Metadata:  metadata,
+		Value:     value,
 	}
 }
 
@@ -40,7 +40,7 @@ func (a Model) Validate() map[string]string {
 		"name":      a.Name,
 		"groups":    a.Groups,
 		"behaviour": a.Behaviour,
-		"locale":    a.LocaleAlpha,
+		"locale":    a.Locale,
 		"projectID": a.ProjectID,
 	}
 
@@ -115,11 +115,11 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.Variable, langAlpha string) View {
+func newView(model declarations.Variable, locale string) View {
 	return View{
 		ID:        model.ID,
 		ProjectID: model.ProjectID,
-		Locale:    langAlpha,
+		Locale:    locale,
 		Name:      model.Name,
 		Groups:    model.Groups,
 		Metadata:  model.Metadata,

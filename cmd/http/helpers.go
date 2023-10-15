@@ -97,6 +97,10 @@ func loadLocales() error {
 	}
 
 	if exists.ID != "" {
+		if err := locales.Store(); err != nil {
+			return err
+		}
+
 		return nil
 	}
 

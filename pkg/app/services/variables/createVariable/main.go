@@ -40,6 +40,11 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.Variable, error) {
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return declarations.Variable{}, appErrors.NewApplicationError(err)
+	}
+
 	var metadata []byte
 	var value []byte
 	if len(c.model.Metadata) > 0 {
@@ -58,11 +63,6 @@ func (c Main) Logic() (declarations.Variable, error) {
 		}
 
 		value = m
-	}
-
-	localeID, err := locales.GetIDWithAlpha(c.model.LocaleAlpha)
-	if err != nil {
-		return declarations.Variable{}, appErrors.NewApplicationError(err)
 	}
 
 	model := declarations.NewVariable(c.model.ProjectID, localeID, c.model.Name, c.model.Behaviour, c.model.Groups, metadata, value)
@@ -107,7 +107,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.LocaleAlpha), nil
+	return newView(model, c.model.Locale), nil
 }
 
 func New(model Model) pkg.Job[Model, View, declarations.Variable] {

@@ -60,6 +60,8 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
+	group.POST("/structures/:projectID/:locale", combined.GetBatchedStructuresHandler())
+
 	group.PUT("/list/:projectID", lists.CreateListHandler())
 	group.PUT("/list/append/:projectID", lists.AppendToListHandler())
 	group.DELETE("/list/:projectID/:name/:locale", lists.DeleteListHandler())
@@ -77,14 +79,6 @@ func declarationRoutes(group *echo.Group) {
 	group.POST("/list/update-item-by-id/:projectID/:locale/:listName/:itemID", lists.UpdateListItemByIDHandler())
 	group.POST("/list/update-item-by-index/:projectID/:locale/:listName/:index", lists.UpdateListItemByIndexHandler())
 
-	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
-	group.PUT("/variable", variables.CreateVariableHandler())
-	group.POST("/variable/:projectID", variables.UpdateVariableHandler())
-	group.DELETE("/variable/:projectID", variables.DeleteVariableHandler())
-	group.GET("/variable/:projectID/:name/:locale", variables.GetVariableHandler())
-	group.GET("/variables/:projectID/:locale", variables.PaginateVariablesHandler())
-	group.GET("/variable/value/:projectID/:name/:locale", variables.GetValueHandler())
-
 	group.POST("/map/add/:projectID/:locale", maps.AddToMapHandler())
 	group.POST("/map/update/:projectID/:locale", maps.UpdateMapVariableHandler())
 	group.DELETE("/map/entry/:projectID/:name/:entryName/:locale", maps.DeleteMapEntry())
@@ -92,5 +86,12 @@ func declarationRoutes(group *echo.Group) {
 	group.PUT("/map/:projectID/:locale", maps.CreateMapHandler())
 	group.GET("/map/:projectID/:name/:locale", maps.GetMapHandler())
 
-	group.POST("/structures/:projectID/:locale", combined.GetBatchedStructuresHandler())
+	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
+
+	group.PUT("/variable", variables.CreateVariableHandler())
+	group.POST("/variable/:projectID", variables.UpdateVariableHandler())
+	group.DELETE("/variable/:projectID", variables.DeleteVariableHandler())
+	group.GET("/variable/:projectID/:name/:locale", variables.GetVariableHandler())
+	group.GET("/variables/:projectID/:locale", variables.PaginateVariablesHandler())
+	group.GET("/variable/value/:projectID/:name/:locale", variables.GetValueHandler())
 }
