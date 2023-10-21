@@ -44,7 +44,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	}
 
 	if c.model.OrderBy == "" {
-		c.model.OrderBy = "created_at"
+		c.model.OrderBy = "index"
 	}
 
 	if c.model.OrderDirection == "" {
@@ -63,6 +63,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	lv.short_id, 
     	lv.locale_id,
     	lv.name, 
+    	lv.groups,
     	lv.behaviour, 
     	lv.metadata, 
     	lv.value, 

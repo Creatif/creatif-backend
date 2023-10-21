@@ -35,11 +35,13 @@ type LogicResult struct {
 }
 
 type ViewSourceDestination struct {
-	ID      string `json:"id"`
-	Index   string `json:"index"`
-	ShortID string `json:"shortId"`
-	Locale  string `json:"locale"`
-	Name    string `json:"name"`
+	ID        string   `json:"id"`
+	Index     string   `json:"index"`
+	ShortID   string   `json:"shortId"`
+	Locale    string   `json:"locale"`
+	Name      string   `json:"name"`
+	Groups    []string `json:"groups"`
+	Behaviour string   `json:"behaviour"`
 }
 
 type View struct {
@@ -50,18 +52,22 @@ type View struct {
 func newView(model LogicResult) View {
 	return View{
 		Source: ViewSourceDestination{
-			ID:      model.From.ID,
-			Locale:  model.Locale,
-			Index:   model.From.Index,
-			ShortID: model.From.ShortID,
-			Name:    model.From.Name,
+			ID:        model.From.ID,
+			Locale:    model.Locale,
+			Index:     model.From.Index,
+			ShortID:   model.From.ShortID,
+			Name:      model.From.Name,
+			Behaviour: model.From.Behaviour,
+			Groups:    model.From.Groups,
 		},
 		Destination: ViewSourceDestination{
-			ID:      model.To.ID,
-			Index:   model.To.Index,
-			Locale:  model.Locale,
-			ShortID: model.To.ShortID,
-			Name:    model.To.ShortID,
+			ID:        model.To.ID,
+			Index:     model.To.Index,
+			Locale:    model.Locale,
+			ShortID:   model.To.ShortID,
+			Name:      model.To.Name,
+			Behaviour: model.To.Behaviour,
+			Groups:    model.To.Groups,
 		},
 	}
 }

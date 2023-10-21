@@ -67,15 +67,15 @@ func (a Model) Validate() map[string]string {
 }
 
 type View struct {
-	ID        string
-	Index     string
-	Name      string
-	Metadata  []byte
-	Groups    []string
-	Behaviour string
-	Value     []byte
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        string      `json:"id"`
+	Index     string      `json:"index"`
+	Name      string      `json:"name"`
+	Metadata  interface{} `json:"metadata"`
+	Groups    []string    `json:"groups"`
+	Behaviour string      `json:"behaviour"`
+	Value     interface{} `json:"value"`
+	CreatedAt time.Time   `json:"createdAt"`
+	UpdatedAt time.Time   `json:"UpdatedAt"`
 }
 
 func newView(model declarations.ListVariable) View {

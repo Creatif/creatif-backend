@@ -23,7 +23,7 @@ type View struct {
 	Metadata  interface{} `json:"metadata"`
 	Value     interface{} `json:"value"`
 
-	CreatedAt time.Time `gorm:"<-:createProject" json:"createdAt"`
+	CreatedAt time.Time `gorm:"<-:create" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 

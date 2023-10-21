@@ -52,7 +52,7 @@ func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination decl
 	}
 
 	var toVariable declarations.ListVariable
-	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? AND locale_id = ? RETURNING id, name, index, short_id`, (declarations.ListVariable{}).TableName()), source.Index, destination.ID, localeID).Scan(&toVariable)
+	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? AND locale_id = ? RETURNING id, name, index, short_id, behaviour, groups`, (declarations.ListVariable{}).TableName()), source.Index, destination.ID, localeID).Scan(&toVariable)
 	if res.Error != nil {
 		return declarations.ListVariable{}, declarations.ListVariable{}, res.Error
 	}
@@ -62,7 +62,7 @@ func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination decl
 	}
 
 	var fromVariable declarations.ListVariable
-	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? AND locale_id = ? RETURNING id, name, index, short_id`, (declarations.ListVariable{}).TableName()), destination.Index, source.ID, localeID).Scan(&fromVariable)
+	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? AND locale_id = ? RETURNING id, name, index, short_id, behaviour, groups`, (declarations.ListVariable{}).TableName()), destination.Index, source.ID, localeID).Scan(&fromVariable)
 	if res.Error != nil {
 		return declarations.ListVariable{}, declarations.ListVariable{}, res.Error
 	}

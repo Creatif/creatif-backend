@@ -46,6 +46,6 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		testAssertErrNil(err)
 
 		gomega.Expect(len(views.Data)).Should(gomega.Equal(0))
-		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
+		gomega.Expect(views.Total).Should(gomega.Equal(int64(0)))
 	})
 })

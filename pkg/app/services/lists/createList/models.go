@@ -69,7 +69,7 @@ func (a Model) Validate() map[string]string {
 			})),
 			validation.Key("variableLen", validation.By(func(value interface{}) error {
 				l := value.(int)
-
+				
 				if l > 1000 {
 					return errors.New("The number of variables when creating a list cannot be higher than 1000.")
 				}

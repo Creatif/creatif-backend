@@ -3,9 +3,9 @@ package lists
 import "github.com/microcosm-cc/bluemonday"
 
 type DeleteList struct {
-	Name      string
-	ProjectID string
-	Locale    string
+	Name      string `param:"name"`
+	ProjectID string `param:"projectID"`
+	Locale    string `param:"locale"`
 }
 
 func SanitizeDeleteList(model DeleteList) DeleteList {

@@ -19,11 +19,11 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 		}
 
 		model = lists.SanitizePaginateListItems(model)
-		model.OrderBy = strings.ToUpper(model.OrderBy)
+		model.OrderDirection = strings.ToUpper(model.OrderDirection)
 		if model.Locale == "" {
 			model.Locale = declarations2.DefaultLocale
 		}
-
+		
 		handler := paginateListItems.New(paginateListItems.NewModel(
 			model.ProjectID,
 			model.Locale,

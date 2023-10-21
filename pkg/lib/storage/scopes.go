@@ -27,7 +27,7 @@ func WithLimit(limit int) func(db *gorm.DB) *gorm.DB {
 	}
 }
 
-func OrderBy(field string, direction string) func(db *gorm.DB) *gorm.DB {
+func OrderBy(field, direction string) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Order(fmt.Sprintf("%s %s", field, direction))
 	}

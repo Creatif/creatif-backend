@@ -15,9 +15,9 @@ type ReplaceListVariable struct {
 
 type ReplaceListItem struct {
 	Name      string              `param:"name"`
-	ItemName  string              `param:"name"`
-	ProjectID string              `param:"name"`
-	Locale    string              `param:"name"`
+	ItemName  string              `param:"itemName"`
+	ProjectID string              `param:"projectID"`
+	Locale    string              `param:"locale"`
 	Variable  ReplaceListVariable `json:"variable"`
 }
 
@@ -29,7 +29,7 @@ func SanitizeReplaceListItem(model ReplaceListItem) ReplaceListItem {
 	model.Locale = p.Sanitize(model.Locale)
 
 	model.Variable = ReplaceListVariable{
-		Name:     p.Sanitize(model.Name),
+		Name:     p.Sanitize(model.Variable.Name),
 		Metadata: model.Variable.Metadata,
 		Groups: sdk.Map(model.Variable.Groups, func(idx int, value string) string {
 			return p.Sanitize(value)

@@ -5,8 +5,8 @@ import (
 	"github.com/onsi/gomega"
 )
 
-var _ = ginkgo.Describe("Variable pagination tests", func() {
-	ginkgo.It("should paginate through variables", func() {
+var _ = ginkgo.Describe("List items pagination tests", func() {
+	ginkgo.It("should paginate through list variables", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
 	})
 
-	ginkgo.It("should get an empty result from the end of the variables listing", func() {
+	ginkgo.It("should get an empty result from the end of the list variables listing", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 

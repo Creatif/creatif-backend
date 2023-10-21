@@ -47,7 +47,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 	var variable declarations.ListVariable
 	res := storage.Gorm().
 		Raw(fmt.Sprintf(`
-			SELECT lv.id, lv.name, lv.index, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at
+			SELECT lv.id, lv.name, lv.index, lv.short_id, lv.behaviour, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at
 			FROM %s AS lv INNER JOIN %s AS l
 			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND l.locale_id = ?
 			OFFSET ? LIMIT 1`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.Name, localeID, offset).

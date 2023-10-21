@@ -9,14 +9,14 @@ import (
 type PaginateListItems struct {
 	ProjectID      string `param:"projectID"`
 	Locale         string `param:"locale"`
-	ListName       string `param:"listName"`
+	ListName       string `param:"name"`
 	Limit          int    `query:"limit"`
 	Page           int    `query:"page"`
 	Filters        string `query:"filters"`
 	Groups         string `query:"groups"`
 	Search         string `query:"search"`
 	OrderBy        string `query:"orderBy"`
-	OrderDirection string `query:"orderDirection"`
+	OrderDirection string `query:"direction"`
 	In             string `query:"in"`
 
 	SanitizedGroups []string
