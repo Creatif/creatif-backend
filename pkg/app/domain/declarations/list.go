@@ -2,7 +2,6 @@ package declarations
 
 import (
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
@@ -10,12 +9,12 @@ import (
 )
 
 type List struct {
-	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
 	ShortID string `gorm:"uniqueIndex:unique_list;type:text"`
 
 	Name          string         `gorm:"uniqueIndex:unique_list_name"`
-	ProjectID     string         `gorm:"uniqueIndex:unique_list_name;type:text;check:length(id)=26"`
-	LocaleID      string         `gorm:"uniqueIndex:unique_list_name;type:text;check:length(id)=26;not null"`
+	ProjectID     string         `gorm:"uniqueIndex:unique_list_name;type:text"`
+	LocaleID      string         `gorm:"uniqueIndex:unique_list_name;type:text"`
 	ListVariables []ListVariable `gorm:"foreignKey:ListID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
@@ -31,12 +30,6 @@ func NewList(projectId, name, localeID string) List {
 }
 
 func (u *List) BeforeCreate(tx *gorm.DB) (err error) {
-	id, err := sdk.NewULID()
-	if err != nil {
-		return err
-	}
-
-	u.ID = id
 	shortId, err := storage.ShortId.Generate()
 	if err != nil {
 		return err

@@ -2,7 +2,6 @@ package declarations
 
 import (
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/lib/pq"
@@ -12,7 +11,7 @@ import (
 )
 
 type Variable struct {
-	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
 	ShortID string `gorm:"uniqueIndex:unique_short_id;type:text"`
 
 	Name      string `gorm:"uniqueIndex:unique_variable_per_project"`
@@ -21,20 +20,14 @@ type Variable struct {
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	ProjectID string `gorm:"uniqueIndex:unique_variable_per_project;type:text;check:length(id)=26;not null"`
-	LocaleID  string `gorm:"uniqueIndex:unique_variable_per_project;type:text;check:length(id)=26;not null"`
+	ProjectID string `gorm:"uniqueIndex:unique_variable_per_project;type:text"`
+	LocaleID  string `gorm:"uniqueIndex:unique_variable_per_project;type:text"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
 	UpdatedAt time.Time
 }
 
 func (u *Variable) BeforeCreate(tx *gorm.DB) (err error) {
-	id, err := sdk.NewULID()
-	if err != nil {
-		return err
-	}
-
-	u.ID = id
 	shortId, err := storage.ShortId.Generate()
 	if err != nil {
 		return err

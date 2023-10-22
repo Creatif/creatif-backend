@@ -126,9 +126,5 @@ func createSchemas() *sql.DB {
 		log.Fatalln(err)
 	}
 
-	if _, err := sqlDb.Exec("DROP SCHEMA IF EXISTS public"); err != nil {
-		log.Fatalln(err)
-	}
-
 	return sqlDb
 }

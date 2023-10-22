@@ -3,14 +3,13 @@ package app
 import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/lib/sdk"
 	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
 
 type Project struct {
-	ID string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
 
 	Name string `gorm:"index"`
 
@@ -29,13 +28,6 @@ func NewProject(name string) Project {
 }
 
 func (u *Project) BeforeCreate(tx *gorm.DB) (err error) {
-	id, err := sdk.NewULID()
-	if err != nil {
-		return err
-	}
-
-	u.ID = id
-
 	return nil
 }
 

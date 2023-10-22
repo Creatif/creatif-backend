@@ -2,7 +2,6 @@ package declarations
 
 import (
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/lib/pq"
@@ -12,7 +11,7 @@ import (
 )
 
 type MapVariable struct {
-	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
 	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
 
 	Name      string `gorm:"uniqueIndex:unique_map_variable"`
@@ -21,8 +20,8 @@ type MapVariable struct {
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	MapID    string `gorm:"uniqueIndex:unique_map_variable;type:text;check:length(id)=26"`
-	LocaleID string `gorm:"uniqueIndex:unique_map_variable;type:text;check:length(id)=26;not null"`
+	MapID    string `gorm:"uniqueIndex:unique_map_variable;type:text"`
+	LocaleID string `gorm:"uniqueIndex:unique_map_variable;type:text"`
 	Map      Map    `gorm:"foreignKey:MapID"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
@@ -42,12 +41,6 @@ func NewMapVariable(mapId, localeID, name, behaviour string, metadata datatypes.
 }
 
 func (u *MapVariable) BeforeCreate(tx *gorm.DB) (err error) {
-	id, err := sdk.NewULID()
-	if err != nil {
-		return err
-	}
-
-	u.ID = id
 	shortId, err := storage.ShortId.Generate()
 	if err != nil {
 		return err

@@ -12,7 +12,7 @@ import (
 )
 
 type ListVariable struct {
-	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
 	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
 	Index   string `gorm:"type:text;uniqueIndex:unique_list_variable"`
 
@@ -22,8 +22,8 @@ type ListVariable struct {
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	LocaleID string `gorm:"uniqueIndex:unique_list_variable;type:text;check:length(id)=26;not null"`
-	ListID   string `gorm:"uniqueIndex:unique_list_variable;type:text;check:length(id)=26"`
+	LocaleID string `gorm:"uniqueIndex:unique_list_variable;type:text"`
+	ListID   string `gorm:"uniqueIndex:unique_list_variable;type:text"`
 	List     List   `gorm:"foreignKey:ListID"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
@@ -43,12 +43,6 @@ func NewListVariable(listId, localeID, name, behaviour string, metadata datatype
 }
 
 func (u *ListVariable) BeforeCreate(tx *gorm.DB) (err error) {
-	id, err := sdk.NewULID()
-	if err != nil {
-		return err
-	}
-
-	u.ID = id
 	shortId, err := storage.ShortId.Generate()
 	if err != nil {
 		return err

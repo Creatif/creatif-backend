@@ -2,7 +2,6 @@ package declarations
 
 import (
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
@@ -10,13 +9,13 @@ import (
 )
 
 type Map struct {
-	ID      string `gorm:"primarykey;type:text CHECK(length(id)=26)"`
+	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
 	ShortID string `gorm:"uniqueIndex:unique_map;type:text"`
 
 	Name string `gorm:"uniqueIndex:unique_map_name"`
 
-	ProjectID    string        `gorm:"uniqueIndex:unique_map_name;type:text;check:length(id)=26;not null"`
-	LocaleID     string        `gorm:"uniqueIndex:unique_map_name;type:text;check:length(id)=26;not null"`
+	ProjectID    string        `gorm:"uniqueIndex:unique_map_name;type:text"`
+	LocaleID     string        `gorm:"uniqueIndex:unique_map_name;type:text"`
 	MapVariables []MapVariable `gorm:"foreignKey:MapID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
@@ -32,12 +31,6 @@ func NewMap(projectId, localeID, name string) Map {
 }
 
 func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
-	id, err := sdk.NewULID()
-	if err != nil {
-		return err
-	}
-
-	u.ID = id
 	shortId, err := storage.ShortId.Generate()
 	if err != nil {
 		return err
