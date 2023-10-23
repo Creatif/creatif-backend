@@ -15,7 +15,7 @@ type PaginateVariables struct {
 	Groups         string `query:"groups"`
 	Search         string `query:"search"`
 	OrderBy        string `query:"orderBy"`
-	OrderDirection string `query:"orderDirection"`
+	OrderDirection string `query:"direction"`
 	In             string `query:"in"`
 
 	SanitizedGroups []string

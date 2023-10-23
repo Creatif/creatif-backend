@@ -44,12 +44,14 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	}
 
 	if c.model.OrderBy == "" {
-		c.model.OrderBy = "index"
+		c.model.OrderBy = "created_at"
 	}
 
 	if c.model.OrderDirection == "" {
 		c.model.OrderDirection = "ASC"
 	}
+
+	c.model.OrderDirection = strings.ToUpper(c.model.OrderDirection)
 
 	var groupsWhereClause string
 	if len(c.model.Groups) != 0 {

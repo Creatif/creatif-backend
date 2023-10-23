@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strings"
 )
 
 func PaginateVariablesHandler() func(e echo.Context) error {
@@ -19,7 +18,6 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 		}
 
 		model = variables.SanitizePaginateVariables(model)
-		model.OrderDirection = strings.ToUpper(model.OrderDirection)
 		if model.Locale == "" {
 			model.Locale = declarations2.DefaultLocale
 		}

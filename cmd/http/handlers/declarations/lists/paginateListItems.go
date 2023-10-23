@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strings"
 )
 
 func PaginateListItemsHandler() func(e echo.Context) error {
@@ -19,11 +18,10 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 		}
 
 		model = lists.SanitizePaginateListItems(model)
-		model.OrderDirection = strings.ToUpper(model.OrderDirection)
 		if model.Locale == "" {
 			model.Locale = declarations2.DefaultLocale
 		}
-		
+
 		handler := paginateListItems.New(paginateListItems.NewModel(
 			model.ProjectID,
 			model.Locale,
