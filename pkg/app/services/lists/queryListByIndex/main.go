@@ -43,13 +43,13 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 	}
 
 	offset := c.model.Index
-
 	var variable declarations.ListVariable
 	res := storage.Gorm().
 		Raw(fmt.Sprintf(`
 			SELECT lv.id, lv.name, lv.index, lv.short_id, lv.behaviour, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at
 			FROM %s AS lv INNER JOIN %s AS l
 			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND l.locale_id = ?
+			ORDER BY lv.index ASC
 			OFFSET ? LIMIT 1`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.Name, localeID, offset).
 		Scan(&variable)
 
@@ -60,6 +60,8 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 	if res.RowsAffected == 0 {
 		return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByIndex.Logic", nil)
 	}
+
+	fmt.Println(variable.ID, variable.Name)
 
 	return variable, nil
 }

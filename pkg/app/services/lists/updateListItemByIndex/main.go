@@ -50,6 +50,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 			SELECT lv.id
 			FROM %s AS lv INNER JOIN %s AS l
 			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND l.locale_id = ?
+			ORDER BY lv.index ASC
 			OFFSET ? LIMIT 1`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.ListName, localeID, offset).
 		Scan(&existing); res.Error != nil || res.RowsAffected == 0 {
 		if res.RowsAffected == 0 {
@@ -58,6 +59,8 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 
 		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByIndex.Logic", nil)
 	}
+
+	fmt.Println(existing.ID)
 
 	for _, f := range c.model.Fields {
 		if f == "name" {

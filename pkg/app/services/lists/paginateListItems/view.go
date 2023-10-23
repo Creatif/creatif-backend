@@ -14,7 +14,6 @@ type LogicModel struct {
 
 type View struct {
 	ID        string      `json:"id"`
-	Index     string      `json:"index"`
 	ShortID   string      `json:"shortId"`
 	Locale    string      `json:"locale"`
 	Name      string      `json:"name"`
@@ -38,7 +37,6 @@ func newView(models []declarations.ListVariable) ([]View, error) {
 		views[i] = View{
 			ID:        value.ID,
 			Name:      value.Name,
-			Index:     value.Index,
 			Locale:    locale,
 			ShortID:   value.ShortID,
 			Groups:    value.Groups,

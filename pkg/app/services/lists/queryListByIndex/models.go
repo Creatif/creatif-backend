@@ -29,7 +29,6 @@ func NewModel(projectId, locale, name string, index int64) Model {
 
 type View struct {
 	ID        string         `json:"id"`
-	Index     string         `json:"index"`
 	Locale    string         `json:"locale"`
 	ShortID   string         `json:"shortId"`
 	Name      string         `json:"name"`
@@ -45,7 +44,6 @@ type View struct {
 func newView(model declarations.ListVariable, locale string) View {
 	return View{
 		ID:        model.ID,
-		Index:     model.Index,
 		Locale:    locale,
 		ShortID:   model.ShortID,
 		Name:      model.Name,

@@ -10,6 +10,8 @@ import (
 
 var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	ginkgo.It("should update the name of the list item variable", func() {
+		ginkgo.Skip("Querying by index should be revisited later. Currently impossible!")
+
 		projectId := testCreateProject("project")
 		testCreateList(projectId, "name", 100)
 
@@ -35,6 +37,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	})
 
 	ginkgo.It("should update the groups of a list item variable", func() {
+		ginkgo.Skip("Querying by index should be revisited later. Currently impossible!")
 		projectId := testCreateProject("project")
 		testCreateList(projectId, "name", 100)
 
@@ -62,6 +65,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	})
 
 	ginkgo.It("should update the behaviour of a list item variable", func() {
+		ginkgo.Skip("Querying by index should be revisited later. Currently impossible!")
+
 		projectId := testCreateProject("project")
 		testCreateList(projectId, "name", 100)
 

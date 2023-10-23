@@ -5,12 +5,13 @@ import (
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
+	"time"
 )
 
 type ListWithItem struct {
 	ListID    string
 	ItemID    string
-	ItemIndex string
+	ItemIndex time.Time
 }
 
 func queryListAndItem(projectId, listName, itemName string) (ListWithItem, error) {

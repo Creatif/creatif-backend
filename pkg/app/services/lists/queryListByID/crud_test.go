@@ -19,7 +19,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		gomega.Expect(view.ID).Should(gomega.Equal(variableIds[3]["id"]))
 		gomega.Expect(view.Name).Should(gomega.Equal(selectedVariable["name"]))
-		gomega.Expect(view.Index).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 	})
 })

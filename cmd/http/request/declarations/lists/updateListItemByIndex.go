@@ -15,7 +15,7 @@ type UpdateListItemByIndexValues struct {
 
 type UpdateListItemByIndex struct {
 	Fields    []string                    `query:"projectID"`
-	ListName  string                      `param:"listName"`
+	ListName  string                      `param:"name"`
 	Locale    string                      `param:"locale"`
 	Index     int64                       `param:"index"`
 	Values    UpdateListItemByIndexValues `json:"values"`

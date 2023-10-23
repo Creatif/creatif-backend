@@ -134,7 +134,6 @@ func testCreateListAndReturnVariables(projectId, name string, varNum int) []map[
 		return map[string]string{
 			"id":     value.ID,
 			"name":   value.Name,
-			"index":  value.Index,
 			"listId": list.ID,
 		}
 	})

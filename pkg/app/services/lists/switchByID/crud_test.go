@@ -20,8 +20,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 
-		gomega.Expect(view.Source.Index).Should(gomega.Equal(destination["index"]))
-		gomega.Expect(view.Destination.Index).Should(gomega.Equal(source["index"]))
 		gomega.Expect(view.Destination.Locale).Should(gomega.Equal("eng"))
 		gomega.Expect(view.Source.Locale).Should(gomega.Equal("eng"))
 	})
@@ -44,8 +42,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 				view, err := handler.Handle()
 				testAssertErrNil(err)
 
-				gomega.Expect(view.Source.Index).ShouldNot(gomega.BeEmpty())
-				gomega.Expect(view.Destination.Index).ShouldNot(gomega.BeEmpty())
 				gomega.Expect(view.Destination.Locale).Should(gomega.Equal("eng"))
 				gomega.Expect(view.Source.Locale).Should(gomega.Equal("eng"))
 			}()
@@ -88,8 +84,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 				view, err := handler.Handle()
 				testAssertErrNil(err)
 
-				gomega.Expect(view.Source.Index).ShouldNot(gomega.BeEmpty())
-				gomega.Expect(view.Destination.Index).ShouldNot(gomega.BeEmpty())
 				gomega.Expect(view.Destination.Locale).Should(gomega.Equal("eng"))
 				gomega.Expect(view.Source.Locale).Should(gomega.Equal("eng"))
 			}()

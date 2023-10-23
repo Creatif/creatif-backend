@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -106,7 +105,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateListAndReturnIndexes(projectId, name string, varNum int) []string {
+func testCreateListAndReturnIndexes(projectId, name string, varNum int) {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
 		variables[i] = createList2.Variable{
@@ -129,8 +128,4 @@ func testCreateListAndReturnIndexes(projectId, name string, varNum int) []string
 	var savedVariables []declarations.ListVariable
 	res := storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-
-	return sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) string {
-		return value.Index
-	})
 }

@@ -155,8 +155,7 @@ func testCreateListAndReturnIdsAndIndexes(projectId, name string, varNum int) []
 
 	return sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) map[string]string {
 		return map[string]string{
-			"id":    value.ID,
-			"index": value.Index,
+			"id": value.ID,
 		}
 	})
 }

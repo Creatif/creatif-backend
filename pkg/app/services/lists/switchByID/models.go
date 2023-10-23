@@ -36,7 +36,6 @@ type LogicResult struct {
 
 type ViewSourceDestination struct {
 	ID        string   `json:"id"`
-	Index     string   `json:"index"`
 	Locale    string   `json:"locale"`
 	ShortID   string   `json:"shortId"`
 	Name      string   `json:"name"`
@@ -53,7 +52,6 @@ func newView(model LogicResult) View {
 	return View{
 		Source: ViewSourceDestination{
 			ID:        model.From.ID,
-			Index:     model.From.Index,
 			Locale:    model.Locale,
 			ShortID:   model.From.ShortID,
 			Name:      model.From.Name,
@@ -62,7 +60,6 @@ func newView(model LogicResult) View {
 		},
 		Destination: ViewSourceDestination{
 			ID:        model.To.ID,
-			Index:     model.To.Index,
 			Locale:    model.Locale,
 			ShortID:   model.To.ShortID,
 			Name:      model.To.Name,

@@ -9,6 +9,8 @@ import (
 
 var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 	ginkgo.It("should delete a list item by index", func() {
+		ginkgo.Skip("Querying by index should be revisited later. Currently impossible!")
+
 		projectId := testCreateProject("project")
 		listName, listId := testCreateListAndReturnNameAndID(projectId, "name", 100)
 

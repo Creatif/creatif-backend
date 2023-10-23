@@ -27,7 +27,6 @@ var _ = ginkgo.Describe("Declaration list replace tests", func() {
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("newName"))
-		gomega.Expect(item["index"]).Should(gomega.Equal(view.Index))
 
 		var listVariable declarations.ListVariable
 		res := storage.Gorm().Where("list_id = ? AND id = ?", item["listId"], item["id"]).First(&listVariable)

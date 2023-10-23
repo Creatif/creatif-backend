@@ -68,7 +68,6 @@ func (a Model) Validate() map[string]string {
 
 type View struct {
 	ID        string      `json:"id"`
-	Index     string      `json:"index"`
 	Name      string      `json:"name"`
 	Metadata  interface{} `json:"metadata"`
 	Groups    []string    `json:"groups"`
@@ -81,7 +80,6 @@ type View struct {
 func newView(model declarations.ListVariable) View {
 	return View{
 		ID:        model.ID,
-		Index:     model.Index,
 		Name:      model.Name,
 		Metadata:  model.Metadata,
 		Groups:    model.Groups,
