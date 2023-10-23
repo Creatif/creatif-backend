@@ -75,8 +75,8 @@ func declarationRoutes(group *echo.Group) {
 	group.POST("/lists/switch-id/:projectID/:name/:locale/:source/:destination", lists.SwitchByIDHandler())
 	group.POST("/lists/switch-index/:projectID/:name/:locale/:source/:destination", lists.SwitchByIndexHandler())
 	group.POST("/list/update/:projectID/:name/:locale", lists.UpdateListHandler())
-	group.POST("/list/update-item-by-id/:projectID/:locale/:listName/:itemID", lists.UpdateListItemByIDHandler())
-	group.POST("/list/update-item-by-index/:projectID/:locale/:listName/:index", lists.UpdateListItemByIndexHandler())
+	group.POST("/list/update-item-by-id/:projectID/:name/:itemID/:locale", lists.UpdateListItemByIDHandler())
+	group.POST("/list/update-item-by-index/:projectID/:name/:index/:locale", lists.UpdateListItemByIndexHandler())
 
 	group.POST("/map/add/:projectID/:locale", maps.AddToMapHandler())
 	group.POST("/map/update/:projectID/:locale", maps.UpdateMapVariableHandler())

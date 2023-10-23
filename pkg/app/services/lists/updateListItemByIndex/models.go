@@ -31,13 +31,13 @@ type ModelValues struct {
 type Model struct {
 	Fields    []string
 	ListName  string
-	ItemIndex string
+	ItemIndex int64
 	Values    ModelValues
 	ProjectID string
 	Locale    string
 }
 
-func NewModel(projectId, locale string, fields []string, listName, itemIndex, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
+func NewModel(projectId, locale string, fields []string, listName string, itemIndex int64, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
 	return Model{
 		Fields:    fields,
 		ProjectID: projectId,

@@ -15,7 +15,7 @@ type UpdateListItemByIDValues struct {
 
 type UpdateListItemByID struct {
 	Fields    []string                 `query:"projectID"`
-	ListName  string                   `param:"listName"`
+	ListName  string                   `param:"name"`
 	Locale    string                   `param:"locale"`
 	ItemID    string                   `param:"itemID"`
 	Values    UpdateListItemByIDValues `json:"values"`
