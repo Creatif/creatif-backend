@@ -10,11 +10,11 @@ type UpdateListValues struct {
 }
 
 type UpdateList struct {
-	Fields    []string
-	Name      string
-	Values    UpdateListValues
-	ProjectID string
-	Locale    string
+	Fields    []string         `json:"fields"`
+	Name      string           `param:"name"`
+	Values    UpdateListValues `json:"values"`
+	ProjectID string           `param:"projectID"`
+	Locale    string           `param:"localeID"`
 }
 
 func SanitizeUpdateList(model UpdateList) UpdateList {

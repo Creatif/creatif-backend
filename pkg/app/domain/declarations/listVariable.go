@@ -14,7 +14,7 @@ import (
 type ListVariable struct {
 	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
 	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
-	Index   string `gorm:"type:text;uniqueIndex:unique_list_variable"`
+	Index   string `gorm:"<-:create"`
 
 	Name      string
 	Behaviour string
@@ -22,8 +22,8 @@ type ListVariable struct {
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	LocaleID string `gorm:"uniqueIndex:unique_list_variable;type:text"`
-	ListID   string `gorm:"uniqueIndex:unique_list_variable;type:text"`
+	LocaleID string `gorm:"type:text"`
+	ListID   string `gorm:"type:text"`
 	List     List   `gorm:"foreignKey:ListID"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`
