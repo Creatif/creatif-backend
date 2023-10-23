@@ -78,9 +78,19 @@ func (a *Model) Validate() map[string]string {
 					return nil
 				}
 
+				localeID, err := locales.GetIDWithAlpha(a.Locale)
+				if err != nil {
+					return errors.New(fmt.Sprintf("Locale '%s' not found.", a.Locale))
+				}
+
 				var exists declarations.List
-				if err := storage.GetBy((declarations.List{}).TableName(), "name", t, &exists, "id"); !errors.Is(err, gorm.ErrRecordNotFound) {
-					return errors.New(fmt.Sprintf("Variable with name '%s' already exists.", t))
+				res := storage.Gorm().Where("project_id = ? AND name = ? AND locale_id = ?", a.ProjectID, a.Values.Name, localeID).Select("ID").First(&exists)
+				if res.Error != nil && !errors.Is(res.Error, gorm.ErrRecordNotFound) {
+					return errors.New(fmt.Sprintf("List with name '%s' already exists.", t))
+				}
+
+				if exists.ID != "" {
+					return errors.New(fmt.Sprintf("List with name '%s' already exists.", t))
 				}
 
 				return nil
@@ -117,6 +127,8 @@ func newView(model declarations.List, locale string) View {
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
+		ShortID:   model.ShortID,
+		ProjectID: model.ProjectID,
 		Locale:    locale,
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
