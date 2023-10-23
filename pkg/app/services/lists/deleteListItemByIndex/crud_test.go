@@ -8,7 +8,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Declaration list item delete tests", func() {
-	ginkgo.It("should delete a list item by ID", func() {
+	ginkgo.It("should delete a list item by index", func() {
 		projectId := testCreateProject("project")
 		listName, listId := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
@@ -16,7 +16,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		res := storage.Gorm().Where("list_id = ?", listId).Select("index").First(&listItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", listName, listItem.Index))
+		handler := New(NewModel(projectId, "eng", listName, 6))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

@@ -7,8 +7,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
-	"errors"
-	"gorm.io/gorm"
+	"fmt"
 	"gorm.io/gorm/clause"
 )
 
@@ -43,18 +42,17 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 	if err != nil {
 		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("updateListItemByIndex.Logic", nil)
 	}
-	var list declarations.List
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.ListName, c.model.ProjectID, localeID).Select("id").First(&list); res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByIndex.Logic", nil)
-		}
 
-		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByIndex.Logic", nil)
-	}
-
+	offset := c.model.ItemIndex
 	var existing declarations.ListVariable
-	if res := storage.Gorm().Where("index = ? AND list_id = ? AND locale_id = ?", c.model.ItemIndex, list.ID, localeID).First(&existing); res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	if res := storage.Gorm().
+		Raw(fmt.Sprintf(`
+			SELECT lv.id
+			FROM %s AS lv INNER JOIN %s AS l
+			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND l.locale_id = ?
+			OFFSET ? LIMIT 1`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.ListName, localeID, offset).
+		Scan(&existing); res.Error != nil || res.RowsAffected == 0 {
+		if res.RowsAffected == 0 {
 			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByIndex.Logic", nil)
 		}
 

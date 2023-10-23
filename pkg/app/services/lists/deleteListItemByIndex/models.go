@@ -10,12 +10,12 @@ import (
 
 type Model struct {
 	Name      string
-	ItemIndex string
+	ItemIndex int64
 	ProjectID string
 	Locale    string
 }
 
-func NewModel(projectId, locale, name, itemIndex string) Model {
+func NewModel(projectId, locale, name string, itemIndex int64) Model {
 	return Model{
 		Name:      name,
 		ItemIndex: itemIndex,
@@ -28,15 +28,13 @@ func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":      a.Name,
 		"projectID": a.ProjectID,
-		"itemIndex": a.ItemIndex,
 		"locale":    a.Locale,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
-			validation.Key("projectID", validation.Required, validation.RuneLength(1, 26)),
-			validation.Key("itemIndex", validation.Required, validation.RuneLength(1, 26)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)
 

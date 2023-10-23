@@ -2,7 +2,6 @@ package declarations
 
 import (
 	"creatif/pkg/app/domain"
-	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/lib/pq"
@@ -12,9 +11,9 @@ import (
 )
 
 type ListVariable struct {
-	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
-	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
-	Index   string `gorm:"<-:create"`
+	ID      string    `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ShortID string    `gorm:"uniqueIndex:unique_variable;type:text"`
+	Index   time.Time `gorm:"autoCreateTime"`
 
 	Name      string
 	Behaviour string
@@ -26,8 +25,8 @@ type ListVariable struct {
 	ListID   string `gorm:"type:text"`
 	List     List   `gorm:"foreignKey:ListID"`
 
-	CreatedAt time.Time `gorm:"<-:create;index"`
-	UpdatedAt time.Time
+	CreatedAt time.Time `gorm:"autoCreateTime;index"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
 func NewListVariable(listId, localeID, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) ListVariable {
@@ -48,14 +47,6 @@ func (u *ListVariable) BeforeCreate(tx *gorm.DB) (err error) {
 		return err
 	}
 	u.ShortID = shortId
-
-	if u.Index == "" {
-		idx, err := sdk.NewULID()
-		if err != nil {
-			return err
-		}
-		u.Index = idx
-	}
 
 	return nil
 }

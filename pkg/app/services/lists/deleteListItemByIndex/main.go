@@ -8,6 +8,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -43,10 +44,16 @@ func (c Main) Logic() (*struct{}, error) {
 		return nil, appErrors.NewApplicationError(err).AddError("deleteListItemByIndex.Logic", nil)
 	}
 
-	var list declarations.List
-	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&list)
-	if res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	offset := c.model.ItemIndex
+	var existing declarations.ListVariable
+	if res := storage.Gorm().
+		Raw(fmt.Sprintf(`
+			SELECT lv.id
+			FROM %s AS lv INNER JOIN %s AS l
+			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND l.locale_id = ?
+			OFFSET ? LIMIT 1`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.Name, localeID, offset).
+		Scan(&existing); res.Error != nil || res.RowsAffected == 0 {
+		if res.RowsAffected == 0 {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteListItemByIndex.Logic", nil)
 		}
 
@@ -54,7 +61,7 @@ func (c Main) Logic() (*struct{}, error) {
 	}
 
 	var variable declarations.ListVariable
-	res = storage.Gorm().Where("index = ? AND list_id = ? AND locale_id = ?", c.model.ItemIndex, list.ID, localeID).Delete(&variable)
+	res := storage.Gorm().Where("id = ? AND locale_id = ?", existing.ID, localeID).Delete(&variable)
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteListItemByIndex.Logic", nil)
