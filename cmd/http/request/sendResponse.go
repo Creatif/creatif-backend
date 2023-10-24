@@ -3,6 +3,7 @@ package request
 import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
@@ -45,6 +46,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 			}
 
 			if os.Getenv("APP_ENV") != "prod" {
+				fmt.Println(otherError)
 				return context.JSON(http.StatusInternalServerError, ErrorResponse[DevErrorResponse]{
 					Data: DevErrorResponse{
 						StackTrace: otherError.StackTrace(),

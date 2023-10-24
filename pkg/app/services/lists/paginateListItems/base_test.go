@@ -126,3 +126,47 @@ func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (strin
 
 	return list.Name, list.ID
 }
+
+func testCreateListWithFragmentedGroups(projectId, name string, varNum int) (string, string, map[string]int) {
+	variables := make([]createList2.Variable, varNum)
+	fragmentedGroups := map[string]int{}
+	fragmentedGroups["one"] = 0
+	fragmentedGroups["two"] = 0
+	fragmentedGroups["three"] = 0
+
+	for i := 0; i < varNum; i++ {
+		var groups []string
+		if i%2 == 0 {
+			groups = []string{"one"}
+			fragmentedGroups["one"]++
+		}
+
+		if i%3 == 0 {
+			groups = []string{"two"}
+			fragmentedGroups["two"]++
+		}
+
+		if i%5 == 0 {
+			groups = []string{"three"}
+			fragmentedGroups["three"]++
+		}
+
+		variables[i] = createList2.Variable{
+			Name:      fmt.Sprintf("one-%d", i),
+			Metadata:  nil,
+			Groups:    groups,
+			Behaviour: "readonly",
+			Value:     nil,
+		}
+	}
+
+	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables))
+
+	list, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
+
+	return list.Name, list.ID, fragmentedGroups
+}

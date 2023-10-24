@@ -55,7 +55,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 
 	var groupsWhereClause string
 	if len(c.model.Groups) != 0 {
-		groupsWhereClause = fmt.Sprintf("WHERE '{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "groups")
+		groupsWhereClause = fmt.Sprintf("WHERE '{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "lv.groups")
 	}
 
 	offset := (c.model.Page - 1) * c.model.Limit
@@ -81,8 +81,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		(declarations.List{}).TableName(),
 		groupsWhereClause,
 		c.model.OrderBy,
-		c.model.OrderDirection,
-	)
+		c.model.OrderDirection)
 
 	var items []declarations.ListVariable
 	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.ListName, localeID, offset, c.model.Limit).Scan(&items)

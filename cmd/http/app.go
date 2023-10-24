@@ -42,6 +42,7 @@ func app() {
 	}
 
 	srv := setupServer()
+	srv.Use(middleware.Recover())
 	srv.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowCredentials: true,
 		AllowOrigins:     []string{"http://localhost:5173"},

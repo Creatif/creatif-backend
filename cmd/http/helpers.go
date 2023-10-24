@@ -66,6 +66,7 @@ func runAssets() {
 func setupServer() *echo.Echo {
 	srv := echo.New()
 
+	srv.HideBanner = true
 	srv.Server.ReadTimeout = 20 * time.Second
 	srv.Server.WriteTimeout = 20 * time.Second
 

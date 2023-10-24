@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/queryBuilder"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -44,18 +43,46 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 		return sdk.LogicView[declarations.Variable]{}, appErrors.NewApplicationError(err).AddError("Variables.Paginate.Logic", nil)
 	}
 
-	qb := queryBuilder.NewQueryBuilder(fmt.Sprintf("%s as v", (declarations.Variable{}).TableName()), c.model.OrderBy, c.model.OrderDirection, c.model.Limit, c.model.Page)
-	qb = qb.Fields("v.id", "v.short_id", "v.groups", "v.name", "v.behaviour", "v.metadata", "v.value", "v.created_at", "v.updated_at").
-		AddWhere("v.locale_id = ?", localeID).
-		AddWhere("v.project_id = ?", c.model.ProjectID)
-
-	if len(c.model.Groups) != 0 {
-		qb.AddWhere(fmt.Sprintf("'{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "groups"))
+	if c.model.OrderBy == "" {
+		c.model.OrderBy = "created_at"
 	}
 
+	if c.model.OrderDirection == "" {
+		c.model.OrderDirection = "ASC"
+	}
+
+	c.model.OrderDirection = strings.ToUpper(c.model.OrderDirection)
+
+	var groupsWhereClause string
+	if len(c.model.Groups) != 0 {
+		groupsWhereClause = fmt.Sprintf("AND '{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "groups")
+	}
+
+	sql := fmt.Sprintf(`
+SELECT id, short_id, groups, name, behaviour, metadata, value, created_at, updated_at
+FROM declarations.variables
+WHERE locale_id = ? AND project_id = ?
+%s
+ORDER BY %s %s
+OFFSET ? LIMIT ?
+`, groupsWhereClause, c.model.OrderBy, c.model.OrderDirection)
+
+	offset := (c.model.Page - 1) * c.model.Limit
 	var items []declarations.Variable
+	res := storage.Gorm().Raw(sql, localeID, c.model.ProjectID, offset, c.model.Limit).Scan(&items)
+	if res.Error != nil {
+		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(err).AddError("Variables.Paginate.Logic", nil)
+	}
+
 	var count int64
-	if err := qb.Run(&items, &count, qb.Build()); err != nil {
+	countSql := fmt.Sprintf(`
+SELECT count(v.id) AS count
+FROM declarations.variables AS v
+WHERE v.locale_id = ? AND v.project_id = ?
+%s
+`, groupsWhereClause)
+	res = storage.Gorm().Raw(countSql, localeID, c.model.ProjectID).Scan(&count)
+	if res.Error != nil {
 		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(err).AddError("Variables.Paginate.Logic", nil)
 	}
 
