@@ -137,17 +137,17 @@ func testCreateListWithFragmentedGroups(projectId, name string, varNum int) (str
 	for i := 0; i < varNum; i++ {
 		var groups []string
 		if i%2 == 0 {
-			groups = []string{"one"}
+			groups = append(groups, "one")
 			fragmentedGroups["one"]++
 		}
 
 		if i%3 == 0 {
-			groups = []string{"two"}
+			groups = append(groups, "two")
 			fragmentedGroups["two"]++
 		}
 
 		if i%5 == 0 {
-			groups = []string{"three"}
+			groups = append(groups, "three")
 			fragmentedGroups["three"]++
 		}
 

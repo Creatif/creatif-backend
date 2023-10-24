@@ -60,8 +60,6 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByIndex.Logic", nil)
 	}
 
-	fmt.Println(existing.ID)
-
 	for _, f := range c.model.Fields {
 		if f == "name" {
 			existing.Name = c.model.Values.Name

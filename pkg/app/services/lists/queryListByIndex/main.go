@@ -61,8 +61,6 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByIndex.Logic", nil)
 	}
 
-	fmt.Println(variable.ID, variable.Name)
-
 	return variable, nil
 }
 

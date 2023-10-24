@@ -111,6 +111,35 @@ func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) c
 	}, []byte{})
 }
 
+func testCreateVariablesWithFragmentedGroups(projectId, behaviour string, varNum int) map[string]int {
+	fragmentedGroups := map[string]int{}
+	fragmentedGroups["one"] = 0
+	fragmentedGroups["two"] = 0
+	fragmentedGroups["three"] = 0
+
+	for i := 0; i < varNum; i++ {
+		var groups []string
+		if i%2 == 0 {
+			groups = append(groups, "one")
+			fragmentedGroups["one"]++
+		}
+
+		if i%3 == 0 {
+			groups = append(groups, "two")
+			fragmentedGroups["two"]++
+		}
+
+		if i%5 == 0 {
+			groups = append(groups, "three")
+			fragmentedGroups["three"]++
+		}
+
+		testCreateDeclarationVariable(projectId, fmt.Sprintf("name-%d", i), behaviour, groups, []byte{})
+	}
+
+	return fragmentedGroups
+}
+
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }

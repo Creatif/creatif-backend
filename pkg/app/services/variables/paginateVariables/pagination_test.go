@@ -48,4 +48,16 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		gomega.Expect(len(views.Data)).Should(gomega.Equal(0))
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(0)))
 	})
+
+	ginkgo.It("should return the exact number of items by group", func() {
+		projectId := testCreateProject("project")
+		testCreateVariablesWithFragmentedGroups(projectId, "modifiable", 100)
+
+		handler := New(NewModel(projectId, "eng", "created_at", "desc", 75, 1, []string{"one"}, nil))
+		views, err := handler.Handle()
+		testAssertErrNil(err)
+
+		gomega.Expect(len(views.Data)).Should(gomega.Equal(50))
+		gomega.Expect(views.Total).Should(gomega.Equal(int64(50)))
+	})
 })

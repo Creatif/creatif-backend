@@ -37,6 +37,8 @@ func SanitizePaginateVariables(model PaginateVariables) PaginateVariables {
 		})
 
 		model.SanitizedGroups = newGroups
+	} else {
+		model.SanitizedGroups = make([]string, 0)
 	}
 
 	return model
