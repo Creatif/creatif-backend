@@ -28,16 +28,18 @@ type Model struct {
 	Fields    []string
 	ProjectID string
 	Locale    string
+	Groups    []string
 
 	validFields []string
 }
 
-func NewModel(projectId, locale, name string, fields []string) Model {
+func NewModel(projectId, locale, name string, fields []string, groups []string) Model {
 	return Model{
 		Name:        name,
 		ProjectID:   projectId,
 		Locale:      locale,
 		Fields:      fields,
+		Groups:      groups,
 		validFields: validFields,
 	}
 }

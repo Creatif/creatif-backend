@@ -10,7 +10,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", view.Name, []string{}))
+		handler := New(NewModel(projectId, "eng", view.Name, []string{}, []string{}))
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
@@ -23,12 +23,32 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", view.Name, []string{"groups", "value"}))
+		handler := New(NewModel(projectId, "eng", view.Name, []string{"groups", "value"}, []string{}))
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(mapVariablesView.ID)
 		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(10))
+		gomega.Expect(mapVariablesView.Locale).Should(gomega.Equal("eng"))
+
+		for _, n := range mapVariablesView.Variables {
+			gomega.Expect(n["id"]).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(n["name"]).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(n["value"]).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(n["groups"]).ShouldNot(gomega.BeEmpty())
+		}
+	})
+
+	ginkgo.It("should get map variables of a specific group", func() {
+		projectId := testCreateProject("project")
+		view := testCreateMap(projectId, "mapName", 100)
+
+		handler := New(NewModel(projectId, "eng", view.Name, []string{"groups", "value"}, []string{"one"}))
+
+		mapVariablesView, err := handler.Handle()
+		testAssertErrNil(err)
+		testAssertIDValid(mapVariablesView.ID)
+		gomega.Expect(len(mapVariablesView.Variables)).Should(gomega.Equal(50))
 		gomega.Expect(mapVariablesView.Locale).Should(gomega.Equal("eng"))
 
 		for _, n := range mapVariablesView.Variables {

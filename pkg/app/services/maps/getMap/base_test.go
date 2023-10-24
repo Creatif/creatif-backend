@@ -85,6 +85,10 @@ var _ = GinkgoAfterHandler(func() {
 
 func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	entries := make([]mapCreate.Entry, 0)
+	fragmentedGroups := map[string]int{}
+	fragmentedGroups["one"] = 0
+	fragmentedGroups["two"] = 0
+	fragmentedGroups["three"] = 0
 
 	m := map[string]interface{}{
 		"one":   "one",
@@ -112,17 +116,29 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 			}
 		}
 
+		var groups []string = []string{"unfragmented"}
+		if i%2 == 0 {
+			groups = append(groups, "one")
+			fragmentedGroups["one"]++
+		}
+
+		if i%3 == 0 {
+			groups = append(groups, "two")
+			fragmentedGroups["two"]++
+		}
+
+		if i%5 == 0 {
+			groups = append(groups, "three")
+			fragmentedGroups["three"]++
+		}
+
 		v, err := json.Marshal(value)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		variableModel := mapCreate.VariableModel{
-			Name:     fmt.Sprintf("name-%d", i),
-			Metadata: b,
-			Groups: []string{
-				"one",
-				"two",
-				"three",
-			},
+			Name:      fmt.Sprintf("name-%d", i),
+			Metadata:  b,
+			Groups:    groups,
 			Value:     v,
 			Behaviour: "modifiable",
 		}

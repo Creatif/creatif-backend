@@ -1,7 +1,9 @@
 package maps
 
 import (
+	"creatif/pkg/lib/sdk"
 	"github.com/microcosm-cc/bluemonday"
+	"strings"
 )
 
 type GetMap struct {
@@ -9,6 +11,9 @@ type GetMap struct {
 	Fields    string `query:"fields"`
 	ProjectID string `param:"projectID"`
 	Locale    string `param:"locale"`
+	Groups    string `query:"groups"`
+
+	SanitizedGroups []string
 }
 
 func SanitizeGetMap(model GetMap) GetMap {
@@ -17,6 +22,14 @@ func SanitizeGetMap(model GetMap) GetMap {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Fields = p.Sanitize(model.Fields)
 	model.Locale = p.Sanitize(model.Locale)
+
+	if model.Groups != "" {
+		newGroups := sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {
+			return p.Sanitize(strings.TrimSpace(value))
+		})
+
+		model.SanitizedGroups = newGroups
+	}
 
 	return model
 }

@@ -44,7 +44,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var variables []Variable
-	if err := queryVariables(m.ID, localeID, c.model.Fields, &variables); err != nil {
+	if err := queryVariables(m.ID, localeID, c.model.Fields, c.model.Groups, &variables); err != nil {
 		return LogicModel{}, err
 	}
 

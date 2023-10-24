@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func queryVariables(mapId, localeID string, fields []string, model interface{}) error {
+func queryVariables(mapId, localeID string, fields, groups []string, model interface{}) error {
 	resolvedFields := strings.Join(sdk.Map(fields, func(idx int, value string) string {
 		return fmt.Sprintf("n.%s", value)
 	}), ",")
@@ -18,16 +18,23 @@ func queryVariables(mapId, localeID string, fields []string, model interface{}) 
 		delimiter = ","
 	}
 
+	var groupsWhereClause string
+	if len(groups) != 0 {
+		groupsWhereClause = fmt.Sprintf("AND '{%s}'::text[] && %s", strings.Join(groups, ","), "n.groups")
+	}
+
 	sql := fmt.Sprintf(`
 SELECT 
     n.id,
     n.name%s %s
 		FROM %s AS n
-		WHERE n.map_id = ? AND locale_id = ?
+		WHERE n.map_id = ? AND n.locale_id = ?
+%s
 `,
 		delimiter,
 		resolvedFields,
 		(declarations.MapVariable{}).TableName(),
+		groupsWhereClause,
 	)
 
 	if res := storage.Gorm().Raw(sql, mapId, localeID).Scan(model); res.Error != nil {
