@@ -46,31 +46,75 @@ func (c Main) Logic() (LogicResult, error) {
 	}
 
 	var m declarations.Map
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).First(&m); res.Error != nil {
+	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.MapName, c.model.ProjectID, localeID).First(&m); res.Error != nil {
 		return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
 	}
 
 	pqGroups := pq.StringArray{}
-	if c.model.Entry.Groups == nil {
+	if c.model.Values.Groups == nil {
 		pqGroups = pq.StringArray{}
 	} else {
-		for _, v := range c.model.Entry.Groups {
+		for _, v := range c.model.Values.Groups {
 			pqGroups = append(pqGroups, v)
 		}
 	}
 
-	returningFields := []string{"id", "name", "behaviour", "metadata", "groups", "value", "created_at", "updated_at"}
+	placeholders := make(map[string]interface{})
+	updateableFields := ""
+	for idx, value := range c.model.Fields {
+		var field string
+		if value == "name" {
+			field = "name = @newName"
+			placeholders["newName"] = c.model.Values.Name
+		}
 
+		if value == "behaviour" {
+			field = "behaviour = @behaviour"
+			placeholders["behaviour"] = c.model.Values.Behaviour
+		}
+
+		if value == "groups" {
+			field = "groups = @groups"
+			// HACK: named parameters do not support casting to []text and gorm does not do that but
+			// destructures every entry in the array into its parts
+			start := "{"
+			for i, g := range c.model.Values.Groups {
+				start += g
+				if i != len(c.model.Values.Groups)-1 {
+					start += ","
+				}
+			}
+			start += "}"
+			placeholders["groups"] = start
+		}
+
+		if value == "metadata" {
+			field = "metadata = @metadata"
+			placeholders["metadata"] = c.model.Values.Metadata
+		}
+
+		if value == "value" {
+			field = "value = @value"
+			placeholders["value"] = c.model.Values.Value
+		}
+
+		updateableFields += field
+		if idx != len(c.model.Fields)-1 {
+			updateableFields += ","
+		}
+	}
+
+	fmt.Println(updateableFields)
+
+	placeholders["name"] = c.model.VariableName
+	placeholders["mapID"] = m.ID
+	placeholders["localeID"] = localeID
+
+	returningFields := []string{"id", "short_id", "name", "behaviour", "metadata", "groups", "value", "created_at", "updated_at"}
 	var model declarations.MapVariable
 	if res := storage.Gorm().Raw(fmt.Sprintf(
-		"UPDATE %s SET behaviour = ?, metadata = ?, groups = ?, value = ? WHERE name = ? AND map_id = ? AND locale_id = ? RETURNING %s", (declarations.MapVariable{}).TableName(), strings.Join(returningFields, ",")),
-		c.model.Entry.Behaviour,
-		c.model.Entry.Metadata,
-		pqGroups,
-		c.model.Entry.Value,
-		c.model.Entry.Name,
-		m.ID,
-		localeID,
+		"UPDATE %s SET %s WHERE name = @name AND map_id = @mapID AND locale_id = @localeID RETURNING %s", (declarations.MapVariable{}).TableName(), updateableFields, strings.Join(returningFields, ",")),
+		placeholders,
 	).Scan(&model); res.Error != nil || res.RowsAffected == 0 {
 		return LogicResult{}, appErrors.NewNotFoundError(errors.New("Could not update map")).AddError("updateMapVariable.Logic", nil)
 	}

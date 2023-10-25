@@ -1,6 +1,7 @@
 package updateMapVariable
 
 import (
+	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -18,7 +19,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", m.Name, VariableModel{
+		handler := New(NewModel(projectId, "eng", m.Name, "name-0", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
 			Name:      "name-0",
 			Metadata:  b,
 			Groups:    []string{"updated1", "updated2", "updated3"},
@@ -45,5 +46,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(metadata).Should(gomega.Equal("this is metadata"))
 		gomega.Expect(value).Should(gomega.Equal("this is value"))
 		gomega.Expect(entry.Behaviour).Should(gomega.Equal("readonly"))
+		gomega.Expect(sdk.Includes(entry.Groups, "updated1")).Should(gomega.Equal(true))
+		gomega.Expect(sdk.Includes(entry.Groups, "updated2")).Should(gomega.Equal(true))
+		gomega.Expect(sdk.Includes(entry.Groups, "updated3")).Should(gomega.Equal(true))
 	})
 })

@@ -8,8 +8,17 @@ import (
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"strings"
 	"time"
 )
+
+var validUpdateableFields = []string{
+	"name",
+	"metadata",
+	"groups",
+	"behaviour",
+	"value",
+}
 
 type VariableModel struct {
 	Name      string
@@ -20,18 +29,22 @@ type VariableModel struct {
 }
 
 type Model struct {
-	Entry     VariableModel
-	Name      string
-	ProjectID string
-	Locale    string
+	Fields       []string
+	Values       VariableModel
+	MapName      string
+	VariableName string
+	ProjectID    string
+	Locale       string
 }
 
-func NewModel(projectId, locale, name string, entry VariableModel) Model {
+func NewModel(projectId, locale, mapName, variableName string, fields []string, values VariableModel) Model {
 	return Model{
-		Name:      name,
-		Locale:    locale,
-		ProjectID: projectId,
-		Entry:     entry,
+		MapName:      mapName,
+		Locale:       locale,
+		Fields:       fields,
+		ProjectID:    projectId,
+		Values:       values,
+		VariableName: variableName,
 	}
 }
 
@@ -43,16 +56,19 @@ type LogicResult struct {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"groups":    a.Entry.Groups,
-		"name":      a.Name,
-		"behaviour": a.Entry.Behaviour,
-		"projectID": a.ProjectID,
-		"locale":    a.Locale,
+		"groups":       a.Values.Groups,
+		"mapName":      a.MapName,
+		"fieldsValid":  a.Fields,
+		"variableName": a.VariableName,
+		"behaviour":    a.Values.Behaviour,
+		"projectID":    a.ProjectID,
+		"locale":       a.Locale,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("mapName", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("variableName", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("behaviour", validation.Required, validation.By(func(value interface{}) error {
 				v := value.(string)
@@ -62,9 +78,22 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("groups", validation.When(len(a.Entry.Groups) != 0, validation.Each(validation.RuneLength(1, 100))), validation.By(func(value interface{}) error {
-				if a.Entry.Groups != nil {
-					if len(a.Entry.Groups) > 20 {
+			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
+				t := value.([]string)
+
+				if len(t) == 0 || len(t) > 5 {
+					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
+				}
+
+				if !sdk.ArrEqual(t, validUpdateableFields) {
+					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
+				}
+
+				return nil
+			})),
+			validation.Key("groups", validation.When(len(a.Values.Groups) != 0, validation.Each(validation.RuneLength(1, 100))), validation.By(func(value interface{}) error {
+				if a.Values.Groups != nil {
+					if len(a.Values.Groups) > 20 {
 						return errors.New("Maximum number of groups is 20.")
 					}
 
@@ -93,6 +122,7 @@ func (a *Model) Validate() map[string]string {
 type ViewEntry struct {
 	ID        string      `json:"id"`
 	Name      string      `json:"name"`
+	ShortID   string      `json:"shortID"`
 	Metadata  interface{} `json:"metadata"`
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
@@ -127,6 +157,7 @@ func newView(logicResult LogicResult) View {
 		Entry: ViewEntry{
 			ID:        variable.ID,
 			Name:      variable.Name,
+			ShortID:   variable.ShortID,
 			Metadata:  variable.Metadata,
 			Groups:    variable.Groups,
 			Behaviour: variable.Behaviour,
