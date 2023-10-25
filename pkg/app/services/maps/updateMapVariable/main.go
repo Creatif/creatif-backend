@@ -22,6 +22,36 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
+	}
+
+	var count int
+	res := storage.Gorm().Raw(fmt.Sprintf(`
+SELECT cardinality(mv.groups) AS count 
+FROM %s AS mv 
+INNER JOIN %s AS m ON m.name = ? AND m.project_id = ? AND m.locale_id = ? AND m.id = mv.map_id AND mv.name = ?`,
+		(declarations.MapVariable{}).TableName(),
+		(declarations.Map{}).TableName()),
+		c.model.MapName,
+		c.model.ProjectID,
+		localeID,
+		c.model.VariableName,
+	).Scan(&count)
+
+	if res.Error != nil || res.RowsAffected == 0 {
+		return appErrors.NewValidationError(map[string]string{
+			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.VariableName),
+		})
+	}
+
+	if count+len(c.model.Values.Groups) > 20 {
+		return appErrors.NewValidationError(map[string]string{
+			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.VariableName),
+		})
+	}
+
 	return nil
 }
 
@@ -40,10 +70,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicResult, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		return LogicResult{}, appErrors.NewApplicationError(err).AddError("updateMapVariable.Logic", nil)
-	}
+	localeID, _ := locales.GetIDWithAlpha(c.model.Locale)
 
 	pqGroups := pq.StringArray{}
 	if c.model.Values.Groups == nil {

@@ -1,6 +1,7 @@
 package updateMapVariable
 
 import (
+	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	"github.com/onsi/ginkgo/v2"
@@ -50,5 +51,32 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(sdk.Includes(entry.Groups, "updated1")).Should(gomega.Equal(true))
 		gomega.Expect(sdk.Includes(entry.Groups, "updated2")).Should(gomega.Equal(true))
 		gomega.Expect(sdk.Includes(entry.Groups, "updated3")).Should(gomega.Equal(true))
+	})
+
+	ginkgo.It("should fail updating a map variable because of invalid number of groups", func() {
+		projectId := testCreateProject("project")
+		m := testCreateMap(projectId, "map", 10)
+
+		b, err := json.Marshal("this is metadata")
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		v, err := json.Marshal("this is value")
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		handler := New(NewModel(projectId, "eng", m.Name, "name-0", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
+			Name:      "name-0",
+			Metadata:  b,
+			Groups:    []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"},
+			Behaviour: "readonly",
+			Value:     v,
+		}))
+
+		_, err = handler.Handle()
+		gomega.Expect(err).ShouldNot(gomega.BeNil())
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		gomega.Expect(ok).Should(gomega.Equal(true))
+
+		errs := validationError.Data()
+		gomega.Expect(errs["groups"]).ShouldNot(gomega.BeEmpty())
 	})
 })
