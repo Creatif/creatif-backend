@@ -8,6 +8,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -19,6 +20,25 @@ type Main struct {
 func (c Main) Validate() error {
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
+	}
+
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
+	}
+
+	var count int
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count FROM %s WHERE name = ? AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName()), c.model.Name, c.model.ProjectID, localeID).Scan(&count)
+	if res.Error != nil {
+		return appErrors.NewValidationError(map[string]string{
+			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.Name),
+		})
+	}
+
+	if count+len(c.model.Values.Groups) > 20 {
+		return appErrors.NewValidationError(map[string]string{
+			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.Name),
+		})
 	}
 
 	return nil
@@ -39,10 +59,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.Variable, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		return declarations.Variable{}, appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
-	}
+	localeID, _ := locales.GetIDWithAlpha(c.model.Locale)
 
 	var existing declarations.Variable
 	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).First(&existing); res.Error != nil {

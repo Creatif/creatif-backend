@@ -42,6 +42,7 @@ func (a Model) Validate() map[string]string {
 		"projectID":   a.ProjectID,
 		"locale":      a.Locale,
 		"variableLen": len(a.Variables),
+		"groups":      nil,
 	}
 
 	if err := validation.Validate(v,
@@ -69,7 +70,7 @@ func (a Model) Validate() map[string]string {
 			})),
 			validation.Key("variableLen", validation.By(func(value interface{}) error {
 				l := value.(int)
-				
+
 				if l > 1000 {
 					return errors.New("The number of variables when creating a list cannot be higher than 1000.")
 				}
@@ -81,6 +82,21 @@ func (a Model) Validate() map[string]string {
 
 				if !locales.ExistsByAlpha(t) {
 					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
+				}
+
+				return nil
+			})),
+			validation.Key("groups", validation.By(func(value interface{}) error {
+				for _, variable := range a.Variables {
+					if len(variable.Groups) > 20 {
+						return errors.New(fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", variable.Name))
+					}
+
+					for _, g := range variable.Groups {
+						if len(g) > 100 {
+							return errors.New(fmt.Sprintf("Invalid group length for '%s'. Maximum number of characters per groups is 200.", g))
+						}
+					}
 				}
 
 				return nil

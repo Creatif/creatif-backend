@@ -2,6 +2,7 @@ package updateVariable
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"github.com/onsi/ginkgo/v2"
@@ -95,5 +96,32 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(checkModel.Groups).Should(gomega.HaveLen(3))
 		gomega.Expect(checkModel.Groups[0]).Should(gomega.Equal("first"))
 		gomega.Expect(checkModel.Behaviour).Should(gomega.Equal("readonly"))
+	})
+
+	ginkgo.It("should fail updating groups if the total number of groups is > 20", func() {
+		projectId := testCreateProject("project")
+		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
+
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel(
+			projectId,
+			"eng",
+			[]string{"name", "behaviour", "groups"},
+			view.Name,
+			"newName",
+			"readonly",
+			[]string{"1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"},
+			[]byte{}, v),
+		)
+
+		_, err = handler.Handle()
+		gomega.Expect(err).ShouldNot(gomega.BeNil())
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		gomega.Expect(ok).Should(gomega.Equal(true))
+
+		errs := validationError.Data()
+		gomega.Expect(errs["groups"]).ShouldNot(gomega.BeEmpty())
 	})
 })

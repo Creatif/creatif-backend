@@ -70,7 +70,12 @@ func (a Model) Validate() map[string]string {
 			validation.Key("groups", validation.When(len(a.Groups) != 0, validation.Each(validation.RuneLength(1, 200))), validation.By(func(value interface{}) error {
 				groups := value.([]string)
 				if len(groups) > 20 {
-					return errors.New("Maximum number of groups is 20.")
+					return errors.New(fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", a.Name))
+				}
+				for _, g := range a.Groups {
+					if len(g) > 100 {
+						return errors.New(fmt.Sprintf("Invalid group length for '%s'. Maximum number of characters per groups is 100.", g))
+					}
 				}
 
 				return nil

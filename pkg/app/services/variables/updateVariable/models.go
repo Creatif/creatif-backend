@@ -60,15 +60,15 @@ func (a *Model) Validate() map[string]string {
 		"locale":             a.Locale,
 		"fieldsValid":        a.Fields,
 		"name":               a.Values.Name,
-		"groups":             a.Values.Groups,
 		"behaviour":          a.Values.Behaviour,
 		"updatingNameExists": a.Values.Name,
+		"groups":             a.Values.Groups,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)
 
@@ -87,14 +87,6 @@ func (a *Model) Validate() map[string]string {
 
 				if !sdk.ArrEqual(t, validUpdateableFields) {
 					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
-				}
-
-				return nil
-			})),
-			validation.Key("groups", validation.When(len(a.Values.Groups) != 0, validation.Each(validation.RuneLength(1, 200))), validation.By(func(value interface{}) error {
-				groups := value.([]string)
-				if len(groups) > 20 {
-					return errors.New("Maximum number of groups is 20.")
 				}
 
 				return nil
@@ -126,6 +118,14 @@ func (a *Model) Validate() map[string]string {
 				var exists declarations.Variable
 				if err := storage.GetBy((declarations.Variable{}).TableName(), "name", t, &exists, "id"); !errors.Is(err, gorm.ErrRecordNotFound) {
 					return errors.New(fmt.Sprintf("Variable with name '%s' already exists.", t))
+				}
+
+				return nil
+			})),
+			validation.Key("groups", validation.When(len(a.Values.Groups) != 0, validation.Each(validation.RuneLength(1, 100))), validation.By(func(value interface{}) error {
+				groups := value.([]string)
+				if len(groups) > 20 {
+					return errors.New(fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", a.Name))
 				}
 
 				return nil

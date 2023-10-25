@@ -154,8 +154,8 @@ func (a *Model) Validate() map[string]string {
 						}
 
 						for _, g := range o.Groups {
-							if len(g) > 200 {
-								return errors.New(fmt.Sprintf("Invalid group length for '%s'. Maximum number of characters per groups is 200.", g))
+							if len(g) > 100 {
+								return errors.New(fmt.Sprintf("Invalid group length for '%s'. Maximum number of characters per groups is 100.", g))
 							}
 						}
 					}

@@ -104,7 +104,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string, groups []s
 }
 
 func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable2.View {
-	return testCreateDeclarationVariable(projectId, name, behaviour, []string{}, []byte{})
+	return testCreateDeclarationVariable(projectId, name, behaviour, []string{"one", "two", "three"}, []byte{})
 }
 
 func testAssertErrNil(err error) {

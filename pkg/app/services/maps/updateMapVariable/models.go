@@ -62,7 +62,7 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("groups", validation.When(len(a.Entry.Groups) != 0, validation.Each(validation.RuneLength(1, 200))), validation.By(func(value interface{}) error {
+			validation.Key("groups", validation.When(len(a.Entry.Groups) != 0, validation.Each(validation.RuneLength(1, 100))), validation.By(func(value interface{}) error {
 				if a.Entry.Groups != nil {
 					if len(a.Entry.Groups) > 20 {
 						return errors.New("Maximum number of groups is 20.")
