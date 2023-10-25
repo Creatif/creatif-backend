@@ -45,11 +45,6 @@ func (c Main) Logic() (LogicResult, error) {
 		return LogicResult{}, appErrors.NewApplicationError(err).AddError("updateMapVariable.Logic", nil)
 	}
 
-	var m declarations.Map
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.MapName, c.model.ProjectID, localeID).First(&m); res.Error != nil {
-		return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
-	}
-
 	pqGroups := pq.StringArray{}
 	if c.model.Values.Groups == nil {
 		pqGroups = pq.StringArray{}
@@ -104,25 +99,25 @@ func (c Main) Logic() (LogicResult, error) {
 		}
 	}
 
-	fmt.Println(updateableFields)
-
 	placeholders["name"] = c.model.VariableName
-	placeholders["mapID"] = m.ID
+	placeholders["mapName"] = c.model.MapName
+	placeholders["projectID"] = c.model.ProjectID
+	placeholders["mapLocaleID"] = localeID
 	placeholders["localeID"] = localeID
 
-	returningFields := []string{"id", "short_id", "name", "behaviour", "metadata", "groups", "value", "created_at", "updated_at"}
-	var model declarations.MapVariable
+	returningFields := []string{"mv.id", "mv.short_id", "mv.name", "mv.behaviour", "mv.metadata", "mv.groups", "mv.value", "mv.created_at", "mv.updated_at", "m.id AS map_id", "m.name AS map_name", "m.created_at AS map_created_at", "m.updated_at AS map_updated_at"}
+	var model MapVariableWithMap
 	if res := storage.Gorm().Raw(fmt.Sprintf(
-		"UPDATE %s SET %s WHERE name = @name AND map_id = @mapID AND locale_id = @localeID RETURNING %s", (declarations.MapVariable{}).TableName(), updateableFields, strings.Join(returningFields, ",")),
+		"UPDATE %s AS mv SET %s FROM %s AS m WHERE mv.name = @name AND mv.map_id = m.id AND mv.locale_id = @localeID AND m.name = @mapName AND m.project_id = @projectID AND m.locale_id = @mapLocaleID RETURNING %s", (declarations.MapVariable{}).TableName(), updateableFields, (declarations.Map{}).TableName(), strings.Join(returningFields, ",")),
 		placeholders,
 	).Scan(&model); res.Error != nil || res.RowsAffected == 0 {
 		return LogicResult{}, appErrors.NewNotFoundError(errors.New("Could not update map")).AddError("updateMapVariable.Logic", nil)
 	}
 
 	return LogicResult{
-		Map:    m,
-		Locale: c.model.Locale,
-		Entry:  model,
+		Locale:    c.model.Locale,
+		Entry:     model,
+		ProjectID: c.model.ProjectID,
 	}, nil
 }
 

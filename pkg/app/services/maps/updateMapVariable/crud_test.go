@@ -28,6 +28,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		}))
 
 		view, err := handler.Handle()
+
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
@@ -36,12 +37,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(view.ProjectID).Should(gomega.Equal(m.ProjectID))
 
 		var metadata string
-		gomega.Expect(json.Unmarshal(view.Entry.Metadata.(datatypes.JSON), &metadata)).Should(gomega.BeNil())
+		gomega.Expect(json.Unmarshal(view.Variable.Metadata.(datatypes.JSON), &metadata)).Should(gomega.BeNil())
 
 		var value string
-		gomega.Expect(json.Unmarshal(view.Entry.Value.(datatypes.JSON), &value)).Should(gomega.BeNil())
+		gomega.Expect(json.Unmarshal(view.Variable.Value.(datatypes.JSON), &value)).Should(gomega.BeNil())
 
-		entry := view.Entry
+		entry := view.Variable
 		gomega.Expect(entry.Name).Should(gomega.Equal("name-0"))
 		gomega.Expect(metadata).Should(gomega.Equal("this is metadata"))
 		gomega.Expect(value).Should(gomega.Equal("this is value"))

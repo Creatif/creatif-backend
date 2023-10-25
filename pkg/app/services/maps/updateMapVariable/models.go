@@ -1,13 +1,14 @@
 package updateMapVariable
 
 import (
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/lib/pq"
+	"gorm.io/datatypes"
 	"strings"
 	"time"
 )
@@ -18,6 +19,27 @@ var validUpdateableFields = []string{
 	"groups",
 	"behaviour",
 	"value",
+}
+
+type MapVariableWithMap struct {
+	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
+
+	Name      string `gorm:"uniqueIndex:unique_map_variable"`
+	Behaviour string
+	Groups    pq.StringArray `gorm:"type:text[]"`
+	Metadata  datatypes.JSON `gorm:"type:jsonb"`
+	Value     datatypes.JSON `gorm:"type:jsonb"`
+
+	MapID    string `gorm:"column:map_id"`
+	LocaleID string `gorm:"uniqueIndex:unique_map_variable;type:text"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	MapName      string    `gorm:"column:map_name"`
+	MapCreatedAt time.Time `gorm:"column:map_created_at"`
+	MapUpdatedAt time.Time `gorm:"column:map_updated_at"`
 }
 
 type VariableModel struct {
@@ -49,9 +71,9 @@ func NewModel(projectId, locale, mapName, variableName string, fields []string, 
 }
 
 type LogicResult struct {
-	Map    declarations.Map
-	Entry  declarations.MapVariable
-	Locale string
+	Entry     MapVariableWithMap
+	Locale    string
+	ProjectID string
 }
 
 func (a *Model) Validate() map[string]string {
@@ -119,7 +141,7 @@ func (a *Model) Validate() map[string]string {
 	return nil
 }
 
-type ViewEntry struct {
+type Variable struct {
 	ID        string      `json:"id"`
 	Name      string      `json:"name"`
 	ShortID   string      `json:"shortID"`
@@ -140,21 +162,20 @@ type View struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 
-	Entry ViewEntry `json:"entry"`
+	Variable Variable `json:"variable"`
 }
 
 func newView(logicResult LogicResult) View {
-	m := logicResult.Map
 	variable := logicResult.Entry
 
 	return View{
-		ID:        m.ID,
-		Name:      m.Name,
+		ID:        logicResult.Entry.MapID,
+		Name:      logicResult.Entry.MapName,
 		Locale:    logicResult.Locale,
-		ProjectID: m.ProjectID,
-		CreatedAt: m.CreatedAt,
-		UpdatedAt: m.UpdatedAt,
-		Entry: ViewEntry{
+		ProjectID: logicResult.ProjectID,
+		CreatedAt: logicResult.Entry.MapCreatedAt,
+		UpdatedAt: logicResult.Entry.MapUpdatedAt,
+		Variable: Variable{
 			ID:        variable.ID,
 			Name:      variable.Name,
 			ShortID:   variable.ShortID,
