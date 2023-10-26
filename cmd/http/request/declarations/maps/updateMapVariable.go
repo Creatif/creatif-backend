@@ -6,17 +6,26 @@ import (
 )
 
 type UpdateMapVariable struct {
-	ProjectID string           `param:"projectID"`
-	Locale    string           `param:"locale"`
-	Name      string           `json:"name"`
-	Entry     MapVariableModel `json:"entry"`
+	ProjectID    string           `param:"projectID"`
+	Locale       string           `param:"locale"`
+	MapName      string           `param:"mapName"`
+	VariableName string           `param:"variableName"`
+	Fields       []string         `json:"fields"`
+	Entry        MapVariableModel `json:"variable"`
+
+	SanitizedFields []string
 }
 
 func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Name = p.Sanitize(model.Name)
+	model.MapName = p.Sanitize(model.MapName)
+	model.VariableName = p.Sanitize(model.VariableName)
 	model.Locale = p.Sanitize(model.Locale)
+
+	model.SanitizedFields = sdk.Map(model.Fields, func(idx int, value string) string {
+		return p.Sanitize(value)
+	})
 
 	variable := model.Entry
 	variable.Name = p.Sanitize(variable.Name)

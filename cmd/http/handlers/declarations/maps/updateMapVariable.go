@@ -20,7 +20,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			model.Locale = "eng"
 		}
 
-		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Locale, model.Name, updateMapVariable2.VariableModel{
+		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Locale, model.MapName, model.VariableName, model.SanitizedFields, updateMapVariable2.VariableModel{
 			Name:      model.Entry.Name,
 			Metadata:  []byte(model.Entry.Metadata),
 			Groups:    model.Entry.Groups,
