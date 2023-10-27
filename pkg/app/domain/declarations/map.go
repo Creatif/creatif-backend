@@ -12,7 +12,7 @@ type Map struct {
 	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
 	ShortID string `gorm:"uniqueIndex:unique_map;type:text"`
 
-	Name string `gorm:"uniqueIndex:unique_map_name"`
+	Name string `gorm:"uniqueIndex:unique_map_name;not null"`
 
 	ProjectID    string        `gorm:"uniqueIndex:unique_map_name;type:text"`
 	LocaleID     string        `gorm:"uniqueIndex:unique_map_name;type:text"`

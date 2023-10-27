@@ -12,10 +12,10 @@ import (
 
 type MapVariable struct {
 	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
-	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
+	ShortID string `gorm:"uniqueIndex:unique_variable;type:text;not null"`
 
-	Name      string `gorm:"uniqueIndex:unique_map_variable"`
-	Behaviour string
+	Name      string         `gorm:"uniqueIndex:unique_map_variable;not null"`
+	Behaviour string         `gorm:"not null"`
 	Groups    pq.StringArray `gorm:"type:text[];not null"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`

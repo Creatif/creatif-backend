@@ -12,11 +12,11 @@ import (
 
 type Variable struct {
 	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
-	ShortID string `gorm:"uniqueIndex:unique_short_id;type:text"`
+	ShortID string `gorm:"uniqueIndex:unique_short_id;type:text;not null"`
 
-	Name      string `gorm:"uniqueIndex:unique_variable_per_project"`
-	Behaviour string
-	Groups    pq.StringArray `gorm:"type:text[]"`
+	Name      string         `gorm:"uniqueIndex:unique_variable_per_project;not null"`
+	Behaviour string         `gorm:"not null"`
+	Groups    pq.StringArray `gorm:"type:text[];not null"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
@@ -45,7 +45,7 @@ func NewVariable(projectId, localeID, name, behaviour string, groups []string, m
 	if groups == nil || len(groups) == 0 {
 		groups = make(pq.StringArray, 0)
 	}
-	
+
 	return Variable{
 		Name:      name,
 		LocaleID:  localeID,

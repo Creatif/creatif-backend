@@ -10,9 +10,9 @@ import (
 
 type List struct {
 	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
-	ShortID string `gorm:"uniqueIndex:unique_list;type:text"`
+	ShortID string `gorm:"uniqueIndex:unique_list;type:text;not null"`
 
-	Name          string         `gorm:"uniqueIndex:unique_list_name"`
+	Name          string         `gorm:"uniqueIndex:unique_list_name;not null"`
 	ProjectID     string         `gorm:"uniqueIndex:unique_list_name;type:text"`
 	LocaleID      string         `gorm:"uniqueIndex:unique_list_name;type:text"`
 	ListVariables []ListVariable `gorm:"foreignKey:ListID;constraint:OnDelete:CASCADE;"`
