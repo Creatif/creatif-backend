@@ -105,7 +105,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
+func testCreateMap(projectId, name string, variablesNum int, behaviour string) mapCreate.View {
 	entries := make([]mapCreate.Entry, 0)
 
 	m := map[string]interface{}{
@@ -146,7 +146,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 				"three",
 			},
 			Value:     v,
-			Behaviour: "modifiable",
+			Behaviour: behaviour,
 		}
 
 		entries = append(entries, mapCreate.Entry{

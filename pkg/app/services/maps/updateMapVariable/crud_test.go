@@ -12,7 +12,7 @@ import (
 var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	ginkgo.It("should update an entry in the map by replacing it completely", func() {
 		projectId := testCreateProject("project")
-		m := testCreateMap(projectId, "map", 10)
+		m := testCreateMap(projectId, "map", 10, "modifiable")
 
 		b, err := json.Marshal("this is metadata")
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -55,7 +55,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 
 	ginkgo.It("should fail updating a map variable because of invalid number of groups", func() {
 		projectId := testCreateProject("project")
-		m := testCreateMap(projectId, "map", 10)
+		m := testCreateMap(projectId, "map", 10, "modifiable")
 
 		b, err := json.Marshal("this is metadata")
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -78,5 +78,32 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 
 		errs := validationError.Data()
 		gomega.Expect(errs["groups"]).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("should fail updating a readonly map variable", func() {
+		projectId := testCreateProject("project")
+		m := testCreateMap(projectId, "map", 10, "readonly")
+
+		b, err := json.Marshal("this is metadata")
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		v, err := json.Marshal("this is value")
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		handler := New(NewModel(projectId, "eng", m.Name, "name-0", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
+			Name:      "name-0",
+			Metadata:  b,
+			Groups:    []string{"1", "2", "3", "4", "5"},
+			Behaviour: "readonly",
+			Value:     v,
+		}))
+
+		_, err = handler.Handle()
+		gomega.Expect(err).ShouldNot(gomega.BeNil())
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		gomega.Expect(ok).Should(gomega.Equal(true))
+
+		errs := validationError.Data()
+		gomega.Expect(errs["behaviour"]).ShouldNot(gomega.BeEmpty())
 	})
 })

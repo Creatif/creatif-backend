@@ -104,7 +104,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateList(projectId, name string, varNum int, addGroups bool) string {
+func testCreateList(projectId, name string, varNum int, addGroups bool, behaviour string) string {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
 		var groups []string = nil
@@ -116,7 +116,7 @@ func testCreateList(projectId, name string, varNum int, addGroups bool) string {
 			Name:      fmt.Sprintf("one-%d", i),
 			Metadata:  nil,
 			Groups:    groups,
-			Behaviour: "modifiable",
+			Behaviour: behaviour,
 			Value:     nil,
 		}
 	}
