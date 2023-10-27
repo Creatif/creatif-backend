@@ -6,6 +6,7 @@ import (
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -27,17 +28,28 @@ func (c Main) Validate() error {
 		return appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
 	}
 
-	var count int
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count FROM %s WHERE name = ? AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName()), c.model.Name, c.model.ProjectID, localeID).Scan(&count)
-	if res.Error != nil {
+	type GroupBehaviourCheck struct {
+		Count     int    `gorm:"column:count"`
+		Behaviour string `gorm:"column:behaviour"`
+	}
+
+	var check GroupBehaviourCheck
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count, behaviour FROM %s WHERE name = ? AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName()), c.model.Name, c.model.ProjectID, localeID).Scan(&check)
+	if res.Error != nil || res.RowsAffected == 0 {
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.Name),
 		})
 	}
 
-	if count+len(c.model.Values.Groups) > 20 {
+	if check.Count+len(c.model.Values.Groups) > 20 {
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.Name),
+		})
+	}
+
+	if check.Behaviour == constants.ReadonlyBehaviour {
+		return appErrors.NewValidationError(map[string]string{
+			"behaviour": fmt.Sprintf("Cannot update a readonly variable '%s'", c.model.Name),
 		})
 	}
 

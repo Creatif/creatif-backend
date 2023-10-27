@@ -41,7 +41,6 @@ INNER JOIN %s AS l ON l.name = ? AND l.project_id = ? AND l.locale_id = ? AND l.
 	).Scan(&count)
 
 	if res.Error != nil || res.RowsAffected == 0 {
-		fmt.Println(res.Error, res.RowsAffected)
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.ItemID),
 		})

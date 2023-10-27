@@ -124,4 +124,31 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		errs := validationError.Data()
 		gomega.Expect(errs["groups"]).ShouldNot(gomega.BeEmpty())
 	})
+
+	ginkgo.It("should fail updating readonly variable", func() {
+		projectId := testCreateProject("project")
+		view := testCreateBasicDeclarationTextVariable(projectId, "name", "readonly")
+
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel(
+			projectId,
+			"eng",
+			[]string{"name", "behaviour", "groups"},
+			view.Name,
+			"newName",
+			"readonly",
+			[]string{"1", "1", "2"},
+			[]byte{}, v),
+		)
+
+		_, err = handler.Handle()
+		gomega.Expect(err).ShouldNot(gomega.BeNil())
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		gomega.Expect(ok).Should(gomega.Equal(true))
+
+		errs := validationError.Data()
+		gomega.Expect(errs["behaviour"]).ShouldNot(gomega.BeEmpty())
+	})
 })
