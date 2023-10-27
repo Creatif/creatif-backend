@@ -42,6 +42,10 @@ func (Variable) TableName() string {
 }
 
 func NewVariable(projectId, localeID, name, behaviour string, groups []string, metadata, value []byte) Variable {
+	if groups == nil || len(groups) == 0 {
+		groups = make(pq.StringArray, 0)
+	}
+	
 	return Variable{
 		Name:      name,
 		LocaleID:  localeID,

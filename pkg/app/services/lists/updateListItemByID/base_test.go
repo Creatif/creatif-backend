@@ -104,14 +104,19 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateList(projectId, name string, varNum int) string {
+func testCreateList(projectId, name string, varNum int, addGroups bool) string {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
+		var groups []string = nil
+		if addGroups {
+			groups = []string{"one", "two", "three"}
+		}
+
 		variables[i] = createList2.Variable{
 			Name:      fmt.Sprintf("one-%d", i),
 			Metadata:  nil,
-			Groups:    nil,
-			Behaviour: "readonly",
+			Groups:    groups,
+			Behaviour: "modifiable",
 			Value:     nil,
 		}
 	}

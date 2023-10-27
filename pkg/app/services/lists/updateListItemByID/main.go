@@ -8,6 +8,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -21,6 +22,36 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		return appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
+	}
+
+	var count int
+	res := storage.Gorm().Raw(fmt.Sprintf(`
+SELECT cardinality(lv.groups) AS count 
+FROM %s AS lv 
+INNER JOIN %s AS l ON l.name = ? AND l.project_id = ? AND l.locale_id = ? AND l.id = lv.list_id AND lv.id = ?`,
+		(declarations.ListVariable{}).TableName(),
+		(declarations.List{}).TableName()),
+		c.model.ListName,
+		c.model.ProjectID,
+		localeID,
+		c.model.ItemID,
+	).Scan(&count)
+
+	if res.Error != nil || res.RowsAffected == 0 {
+		fmt.Println(res.Error, res.RowsAffected)
+		return appErrors.NewValidationError(map[string]string{
+			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.ItemID),
+		})
+	}
+
+	if count+len(c.model.Values.Groups) > 20 {
+		return appErrors.NewValidationError(map[string]string{
+			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.ItemID),
+		})
+	}
 	return nil
 }
 

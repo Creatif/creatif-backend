@@ -100,9 +100,9 @@ func (c Main) Logic() (LogicResult, error) {
 			// HACK: named parameters do not support casting to []text and gorm does not do that but
 			// destructures every entry in the array into its parts
 			start := "{"
-			for i, g := range c.model.Values.Groups {
+			for i, g := range pqGroups {
 				start += g
-				if i != len(c.model.Values.Groups)-1 {
+				if i != len(pqGroups)-1 {
 					start += ","
 				}
 			}

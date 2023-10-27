@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/sdk"
 	"encoding/json"
+	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	"gorm.io/datatypes"
@@ -77,6 +78,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(ok).Should(gomega.Equal(true))
 
 		errs := validationError.Data()
+		fmt.Println(errs)
 		gomega.Expect(errs["groups"]).ShouldNot(gomega.BeEmpty())
 	})
 })

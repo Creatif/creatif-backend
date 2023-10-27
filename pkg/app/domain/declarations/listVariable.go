@@ -17,7 +17,7 @@ type ListVariable struct {
 
 	Name      string
 	Behaviour string
-	Groups    pq.StringArray `gorm:"type:text[]"`
+	Groups    pq.StringArray `gorm:"type:text[];not null"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
@@ -30,6 +30,9 @@ type ListVariable struct {
 }
 
 func NewListVariable(listId, localeID, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) ListVariable {
+	if groups == nil || len(groups) == 0 {
+		groups = make(pq.StringArray, 0)
+	}
 	return ListVariable{
 		ListID:    listId,
 		LocaleID:  localeID,

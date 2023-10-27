@@ -7,6 +7,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
+	"github.com/lib/pq"
 )
 
 type Main struct {
@@ -44,6 +45,19 @@ func (c Main) Logic() (declarations.List, error) {
 	var list declarations.List
 	if err := storage.GetBy((declarations.List{}).TableName(), "name", c.model.Name, &list, "id"); err != nil {
 		return declarations.List{}, appErrors.NewNotFoundError(err).AddError("appendToList.Logic", nil)
+	}
+
+	for _, v := range c.model.Variables {
+		pqGroups := pq.StringArray{}
+		if v.Groups == nil {
+			v.Groups = pq.StringArray{}
+		}
+
+		for _, k := range v.Groups {
+			pqGroups = append(pqGroups, k)
+		}
+
+		v.Groups = pqGroups
 	}
 
 	listVariables := make([]declarations.ListVariable, len(c.model.Variables))
