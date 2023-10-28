@@ -27,6 +27,6 @@ func DeleteListHandler() func(e echo.Context) error {
 			model.Name,
 		))
 
-		return request.SendResponse[deleteList.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[deleteList.Model](handler, c, http.StatusOK)
 	}
 }

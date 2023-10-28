@@ -29,6 +29,6 @@ func UpdateListHandler() func(e echo.Context) error {
 			model.Values.Name,
 		))
 
-		return request.SendResponse[updateList.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[updateList.Model](handler, c, http.StatusOK)
 	}
 }

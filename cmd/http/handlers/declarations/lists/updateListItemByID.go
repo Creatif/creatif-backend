@@ -34,6 +34,6 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			[]byte(model.Values.Value),
 		))
 
-		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK)
 	}
 }

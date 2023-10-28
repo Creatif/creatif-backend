@@ -28,6 +28,6 @@ func QueryListByIDHandler() func(e echo.Context) error {
 			model.ID,
 		))
 
-		return request.SendResponse[queryListByID.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK)
 	}
 }

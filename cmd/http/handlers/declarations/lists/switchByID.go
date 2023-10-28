@@ -29,6 +29,6 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.Destination,
 		))
 
-		return request.SendResponse[switchByID.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK)
 	}
 }

@@ -22,6 +22,6 @@ func DeleteMapEntry() func(e echo.Context) error {
 
 		handler := removeMapEntry.New(removeMapEntry.NewModel(model.ProjectID, model.Locale, model.Name, model.EntryName))
 
-		return request.SendResponse[removeMapEntry.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[removeMapEntry.Model](handler, c, http.StatusOK)
 	}
 }

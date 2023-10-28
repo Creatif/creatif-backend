@@ -23,6 +23,6 @@ func GetVariableHandler() func(e echo.Context) error {
 
 		handler := getVariable2.New(getVariable2.NewModel(model.ProjectID, model.Name, model.Locale, model.Fields))
 
-		return request.SendResponse[getVariable2.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[getVariable2.Model](handler, c, http.StatusOK)
 	}
 }

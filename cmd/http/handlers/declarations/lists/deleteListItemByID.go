@@ -28,6 +28,6 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 			model.ItemID,
 		))
 
-		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK)
 	}
 }

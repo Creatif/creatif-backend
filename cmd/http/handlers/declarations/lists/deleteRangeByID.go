@@ -28,6 +28,6 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 			model.Items,
 		))
 
-		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK)
 	}
 }

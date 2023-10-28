@@ -23,6 +23,6 @@ func DeleteMap() func(e echo.Context) error {
 
 		handler := removeMap.New(removeMap.NewModel(model.ProjectID, model.Locale, model.Name))
 
-		return request.SendResponse[removeMap.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[removeMap.Model](handler, c, http.StatusOK)
 	}
 }

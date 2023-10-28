@@ -35,6 +35,6 @@ func ReplaceListItemHandler() func(e echo.Context) error {
 			},
 		))
 
-		return request.SendResponse[replaceListItem.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[replaceListItem.Model](handler, c, http.StatusOK)
 	}
 }
