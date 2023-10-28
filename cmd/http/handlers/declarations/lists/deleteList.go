@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/services/lists/deleteList"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,12 +22,13 @@ func DeleteListHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := deleteList.New(deleteList.NewModel(
 			model.ProjectID,
 			model.Locale,
 			model.Name,
 		))
 
-		return request.SendResponse[deleteList.Model](handler, c, http.StatusOK)
+		return request.SendResponse[deleteList.Model](handler, c, http.StatusOK, l)
 	}
 }

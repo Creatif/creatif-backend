@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
 	paginateVariables2 "creatif/pkg/app/services/variables/paginateVariables"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -22,6 +23,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := paginateVariables2.New(paginateVariables2.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -33,6 +35,6 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 			sdk.ParseFilters(model.Filters),
 		))
 
-		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK)
+		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK, l)
 	}
 }

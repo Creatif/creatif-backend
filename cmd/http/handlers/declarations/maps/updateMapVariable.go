@@ -4,6 +4,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	updateMapVariable2 "creatif/pkg/app/services/maps/updateMapVariable"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -20,6 +21,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			model.Locale = "eng"
 		}
 
+		l := logger.NewLogBuilder()
 		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Locale, model.MapName, model.VariableName, model.SanitizedFields, updateMapVariable2.VariableModel{
 			Name:      model.Entry.Name,
 			Metadata:  []byte(model.Entry.Metadata),
@@ -28,6 +30,6 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Value:     []byte(model.Entry.Value),
 		}))
 
-		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK)
+		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l)
 	}
 }

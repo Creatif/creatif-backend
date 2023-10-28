@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
 	"creatif/pkg/app/services/variables/updateVariable"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,6 +22,7 @@ func UpdateVariableHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := updateVariable.New(updateVariable.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -33,6 +35,6 @@ func UpdateVariableHandler() func(e echo.Context) error {
 			[]byte(model.Values.Value)),
 		)
 
-		return request.SendResponse[updateVariable.Model](handler, c, http.StatusOK)
+		return request.SendResponse[updateVariable.Model](handler, c, http.StatusOK, l)
 	}
 }

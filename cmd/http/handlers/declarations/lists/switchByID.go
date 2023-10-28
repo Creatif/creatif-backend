@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/services/lists/switchByID"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,6 +22,7 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := switchByID.New(switchByID.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -29,6 +31,6 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.Destination,
 		))
 
-		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK)
+		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK, l)
 	}
 }

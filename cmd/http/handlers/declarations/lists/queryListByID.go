@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/services/lists/queryListByID"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,6 +22,7 @@ func QueryListByIDHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := queryListByID.New(queryListByID.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -28,6 +30,6 @@ func QueryListByIDHandler() func(e echo.Context) error {
 			model.ID,
 		))
 
-		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK)
+		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK, l)
 	}
 }

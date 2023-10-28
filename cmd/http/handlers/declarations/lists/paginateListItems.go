@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/services/lists/paginateListItems"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -22,6 +23,7 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := paginateListItems.New(paginateListItems.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -34,6 +36,6 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			sdk.ParseFilters(model.Filters),
 		))
 
-		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK)
+		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK, l)
 	}
 }

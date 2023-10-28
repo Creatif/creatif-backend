@@ -4,6 +4,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	addToMap2 "creatif/pkg/app/services/maps/addToMap"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -20,6 +21,7 @@ func AddToMapHandler() func(e echo.Context) error {
 			model.Locale = "eng"
 		}
 
+		l := logger.NewLogBuilder()
 		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Locale, model.Name, addToMap2.VariableModel{
 			Name:      model.Entry.Name,
 			Metadata:  []byte(model.Entry.Metadata),
@@ -28,6 +30,6 @@ func AddToMapHandler() func(e echo.Context) error {
 			Value:     []byte(model.Entry.Value),
 		}))
 
-		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l)
 	}
 }

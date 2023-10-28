@@ -4,6 +4,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/services/maps/removeMapEntry"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -20,8 +21,9 @@ func DeleteMapEntry() func(e echo.Context) error {
 			model.Locale = "eng"
 		}
 
+		l := logger.NewLogBuilder()
 		handler := removeMapEntry.New(removeMapEntry.NewModel(model.ProjectID, model.Locale, model.Name, model.EntryName))
 
-		return request.SendResponse[removeMapEntry.Model](handler, c, http.StatusOK)
+		return request.SendResponse[removeMapEntry.Model](handler, c, http.StatusOK, l)
 	}
 }

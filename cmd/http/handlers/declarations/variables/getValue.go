@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
 	getValue2 "creatif/pkg/app/services/variables/getValue"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,8 +22,9 @@ func GetValueHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.Name, model.Locale))
 
-		return request.SendResponse[getValue2.Model](handler, c, http.StatusOK)
+		return request.SendResponse[getValue2.Model](handler, c, http.StatusOK, l)
 	}
 }

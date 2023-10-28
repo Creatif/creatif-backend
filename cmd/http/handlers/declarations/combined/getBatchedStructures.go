@@ -4,6 +4,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/combined"
 	"creatif/pkg/app/combined/getBatchStructures"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,8 +22,9 @@ func GetBatchedStructuresHandler() func(e echo.Context) error {
 			serviceModel[m.Name] = m.Type
 		}
 
+		l := logger.NewLogBuilder()
 		handler := getBatchStructures.New(getBatchStructures.NewModel(model.ProjectID, serviceModel))
 
-		return request.SendResponse[*getBatchStructures.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[*getBatchStructures.Model](handler, c, http.StatusCreated, l)
 	}
 }

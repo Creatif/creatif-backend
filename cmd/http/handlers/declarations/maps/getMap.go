@@ -4,6 +4,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	getMap2 "creatif/pkg/app/services/maps/getMap"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
@@ -29,8 +30,9 @@ func GetMapHandler() func(e echo.Context) error {
 			}
 		}
 
+		l := logger.NewLogBuilder()
 		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Locale, model.Name, newFields, model.SanitizedGroups))
 
-		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK)
+		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK, l)
 	}
 }

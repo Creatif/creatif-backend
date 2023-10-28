@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
 	"creatif/pkg/app/services/variables/deleteVariable"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,8 +22,9 @@ func DeleteVariableHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := deleteVariable.New(deleteVariable.NewModel(model.ProjectID, model.Name, model.Locale))
 
-		return request.SendResponse[deleteVariable.Model](handler, c, http.StatusOK)
+		return request.SendResponse[deleteVariable.Model](handler, c, http.StatusOK, l)
 	}
 }

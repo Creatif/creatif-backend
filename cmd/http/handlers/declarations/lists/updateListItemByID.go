@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/services/lists/updateListItemByID"
+	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,6 +22,7 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := updateListItemByID.New(updateListItemByID.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -34,6 +36,6 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			[]byte(model.Values.Value),
 		))
 
-		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK)
+		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/services/lists/appendToList"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -22,6 +23,7 @@ func AppendToListHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		l := logger.NewLogBuilder()
 		handler := appendToList.New(appendToList.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -37,6 +39,6 @@ func AppendToListHandler() func(e echo.Context) error {
 			}),
 		))
 
-		return request.SendResponse[appendToList.Model](handler, c, http.StatusCreated)
+		return request.SendResponse[appendToList.Model](handler, c, http.StatusCreated, l)
 	}
 }
