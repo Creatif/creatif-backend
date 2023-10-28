@@ -7,6 +7,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -15,7 +16,8 @@ import (
 )
 
 type Main struct {
-	model Model
+	model      Model
+	logBuilder logger.LogBuilder
 }
 
 func (c Main) Validate() error {
@@ -182,6 +184,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model) pkg.Job[Model, View, LogicResult] {
-	return Main{model: model}
+func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
+	return Main{model: model, logBuilder: logBuilder}
 }

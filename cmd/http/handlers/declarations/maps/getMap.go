@@ -31,7 +31,7 @@ func GetMapHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Locale, model.Name, newFields, model.SanitizedGroups))
+		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Locale, model.Name, newFields, model.SanitizedGroups), l)
 
 		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK, l)
 	}

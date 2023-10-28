@@ -32,8 +32,7 @@ func UpdateVariableHandler() func(e echo.Context) error {
 			model.Values.Behaviour,
 			model.Values.Groups,
 			[]byte(model.Values.Metadata),
-			[]byte(model.Values.Value)),
-		)
+			[]byte(model.Values.Value)), l)
 
 		return request.SendResponse[updateVariable.Model](handler, c, http.StatusOK, l)
 	}

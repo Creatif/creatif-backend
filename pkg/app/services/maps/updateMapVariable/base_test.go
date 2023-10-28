@@ -166,7 +166,7 @@ func testCreateMap(projectId, name string, variablesNum int, behaviour string) m
 		})
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries))
+	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

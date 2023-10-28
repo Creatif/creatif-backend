@@ -28,7 +28,7 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 			model.Locale,
 			model.Name,
 			model.ItemID,
-		))
+		), l)
 
 		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l)
 	}

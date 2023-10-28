@@ -106,7 +106,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string) createVari
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, []string{"one", "two", "three"}, b, b))
+	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, []string{"one", "two", "three"}, b, b), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

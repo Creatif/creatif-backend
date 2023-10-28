@@ -1,6 +1,7 @@
 package mapCreate
 
 import (
+	"creatif/pkg/lib/logger"
 	"encoding/json"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -59,7 +60,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries))
+		handler := New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -68,7 +69,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "otherMapName", entries))
+		handler = New(NewModel(projectId, "eng", "otherMapName", entries), logger.NewLogBuilder())
 		view, err = handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -128,7 +129,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries))
+		handler := New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -137,7 +138,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "mapName", entries))
+		handler = New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
 		_, err = handler.Logic()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})
@@ -193,7 +194,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries))
+		handler := New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -202,7 +203,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "mapName", entries))
+		handler = New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})

@@ -2,6 +2,7 @@ package deleteList
 
 import (
 	declarations2 "creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -12,7 +13,7 @@ var _ = ginkgo.Describe("Declaration list delete tests", func() {
 		projectId := testCreateProject("project")
 		listName, listId := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName))
+		handler := New(NewModel(projectId, "eng", listName), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

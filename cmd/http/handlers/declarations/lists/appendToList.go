@@ -37,7 +37,7 @@ func AppendToListHandler() func(e echo.Context) error {
 					Value:     []byte(value.Value),
 				}
 			}),
-		))
+		), l)
 
 		return request.SendResponse[appendToList.Model](handler, c, http.StatusCreated, l)
 	}

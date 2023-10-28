@@ -29,7 +29,7 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.Name,
 			model.Source,
 			model.Destination,
-		))
+		), l)
 
 		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK, l)
 	}

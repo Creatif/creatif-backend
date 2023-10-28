@@ -127,7 +127,7 @@ func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (strin
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables))
+	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)
@@ -171,7 +171,7 @@ func testCreateListWithFragmentedGroups(projectId, name string, varNum int) (str
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables))
+	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

@@ -2,6 +2,7 @@ package deleteVariable
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"github.com/onsi/ginkgo/v2"
@@ -14,7 +15,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) variable tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(projectId, view.Name, "eng"))
+		handler := New(NewModel(projectId, view.Name, "eng"), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

@@ -28,7 +28,7 @@ func QueryListByIDHandler() func(e echo.Context) error {
 			model.Locale,
 			model.Name,
 			model.ID,
-		))
+		), l)
 
 		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK, l)
 	}

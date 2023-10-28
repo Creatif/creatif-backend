@@ -23,7 +23,7 @@ func CreateVariableHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := createVariable.New(createVariable.NewModel(model.ProjectID, model.Locale, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)))
+		handler := createVariable.New(createVariable.NewModel(model.ProjectID, model.Locale, model.Name, model.Behaviour, model.Groups, []byte(model.Metadata), []byte(model.Value)), l)
 
 		return request.SendResponse[createVariable.Model](handler, c, http.StatusCreated, l)
 	}

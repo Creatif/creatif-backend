@@ -28,7 +28,7 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 			model.Locale,
 			model.Name,
 			model.Items,
-		))
+		), l)
 
 		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, l)
 	}

@@ -29,7 +29,7 @@ func UpdateListHandler() func(e echo.Context) error {
 			model.Fields,
 			model.Name,
 			model.Values.Name,
-		))
+		), l)
 
 		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, l)
 	}

@@ -1,6 +1,7 @@
 package paginateListItems
 
 import (
+	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -10,7 +11,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 1, []string{"one"}, nil))
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 1, []string{"one"}, nil), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -22,7 +23,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 50, []string{"one"}, nil))
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 50, []string{"one"}, nil), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -34,7 +35,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 1, []string{"not_exists"}, nil))
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 1, []string{"not_exists"}, nil), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -46,7 +47,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _, groups := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 50, 1, []string{"one"}, nil))
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 50, 1, []string{"one"}, nil), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

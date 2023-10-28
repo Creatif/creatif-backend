@@ -7,13 +7,15 @@ import (
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"gorm.io/gorm"
 )
 
 type Main struct {
-	model Model
+	model      Model
+	logBuilder logger.LogBuilder
 }
 
 func (c Main) Validate() error {
@@ -89,6 +91,6 @@ func (c Main) Handle() (*struct{}, error) {
 	return nil, nil
 }
 
-func New(model Model) pkg.Job[Model, *struct{}, *struct{}] {
-	return Main{model: model}
+func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
+	return Main{model: model, logBuilder: logBuilder}
 }

@@ -37,7 +37,7 @@ func CreateListHandler() func(e echo.Context) error {
 					Value:     []byte(value.Value),
 				}
 			}),
-		))
+		), l)
 
 		return request.SendResponse[createList.Model](handler, c, http.StatusCreated, l)
 	}

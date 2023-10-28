@@ -23,7 +23,7 @@ func DeleteVariableHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := deleteVariable.New(deleteVariable.NewModel(model.ProjectID, model.Name, model.Locale))
+		handler := deleteVariable.New(deleteVariable.NewModel(model.ProjectID, model.Name, model.Locale), l)
 
 		return request.SendResponse[deleteVariable.Model](handler, c, http.StatusOK, l)
 	}

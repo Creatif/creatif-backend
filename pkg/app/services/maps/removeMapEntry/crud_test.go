@@ -2,6 +2,7 @@ package removeMapEntry
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"github.com/onsi/ginkgo/v2"
@@ -16,7 +17,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		entryName := variables[0]["name"]
-		handler := New(NewModel(projectId, "eng", "mapName", entryName))
+		handler := New(NewModel(projectId, "eng", "mapName", entryName), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

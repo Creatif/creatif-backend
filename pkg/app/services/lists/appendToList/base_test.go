@@ -128,7 +128,7 @@ func testCreateList(projectId, name string, varNum int) string {
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables))
+	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

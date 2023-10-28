@@ -101,7 +101,7 @@ func testCreateDetailedVariable(projectId, name, behaviour string, groups []stri
 		"four": "six",
 	})
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b))
+	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

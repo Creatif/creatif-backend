@@ -39,7 +39,7 @@ func CreateMapHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Locale, model.Name, serviceEntries))
+		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Locale, model.Name, serviceEntries), l)
 
 		return request.SendResponse[mapCreate2.Model](handler, c, http.StatusCreated, l)
 	}

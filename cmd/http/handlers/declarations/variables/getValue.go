@@ -23,7 +23,7 @@ func GetValueHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.Name, model.Locale))
+		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.Name, model.Locale), l)
 
 		return request.SendResponse[getValue2.Model](handler, c, http.StatusOK, l)
 	}

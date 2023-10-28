@@ -1,6 +1,7 @@
 package appendToList
 
 import (
+	"creatif/pkg/lib/logger"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -22,7 +23,7 @@ var _ = ginkgo.Describe("Declaration list append tests", func() {
 			}
 		}
 
-		handler := New(NewModel(projectId, "eng", listName, variables))
+		handler := New(NewModel(projectId, "eng", listName, variables), logger.NewLogBuilder())
 
 		list, err := handler.Handle()
 		testAssertErrNil(err)

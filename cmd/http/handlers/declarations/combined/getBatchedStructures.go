@@ -23,7 +23,7 @@ func GetBatchedStructuresHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := getBatchStructures.New(getBatchStructures.NewModel(model.ProjectID, serviceModel))
+		handler := getBatchStructures.New(getBatchStructures.NewModel(model.ProjectID, serviceModel), l)
 
 		return request.SendResponse[*getBatchStructures.Model](handler, c, http.StatusCreated, l)
 	}

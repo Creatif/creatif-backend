@@ -35,7 +35,7 @@ func ReplaceListItemHandler() func(e echo.Context) error {
 				Behaviour: model.Variable.Behaviour,
 				Value:     []byte(model.Variable.Value),
 			},
-		))
+		), l)
 
 		return request.SendResponse[replaceListItem.Model](handler, c, http.StatusOK, l)
 	}

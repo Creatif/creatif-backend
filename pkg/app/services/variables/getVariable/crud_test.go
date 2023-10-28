@@ -1,6 +1,7 @@
 package getVariable
 
 import (
+	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -11,7 +12,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		name := "variable"
 		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 
-		handler := New(NewModel(projectId, createdVariable.Name, "eng", []string{}))
+		handler := New(NewModel(projectId, createdVariable.Name, "eng", []string{}), logger.NewLogBuilder())
 		variable, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

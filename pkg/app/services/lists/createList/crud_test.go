@@ -1,6 +1,7 @@
 package createList
 
 import (
+	"creatif/pkg/lib/logger"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -20,7 +21,7 @@ var _ = ginkgo.Describe("Declaration list create tests", func() {
 			}
 		}
 
-		handler := New(NewModel(projectId, "eng", "list", variables))
+		handler := New(NewModel(projectId, "eng", "list", variables), logger.NewLogBuilder())
 
 		list, err := handler.Handle()
 		testAssertErrNil(err)

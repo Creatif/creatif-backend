@@ -33,7 +33,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 			model.Page,
 			model.SanitizedGroups,
 			sdk.ParseFilters(model.Filters),
-		))
+		), l)
 
 		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK, l)
 	}
