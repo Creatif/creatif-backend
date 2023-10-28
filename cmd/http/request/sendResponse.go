@@ -80,6 +80,10 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 		})
 	}
 
+	if err := flushLogger(logger, "info", context); err != nil {
+		return err
+	}
+
 	return context.JSON(status, model)
 }
 

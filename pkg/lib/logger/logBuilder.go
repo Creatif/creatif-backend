@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -21,36 +20,31 @@ type logBuilder struct {
 }
 
 func (l *logBuilder) Add(key, message string) {
-	_, ok := l.messages[key]
+	_, ok := l.equalKeyCounter[key]
 	if !ok {
 		l.equalKeyCounter[key] = 0
 	} else {
-		l.equalKeyCounter[key]++
+		l.equalKeyCounter[key] = l.equalKeyCounter[key] + 1
 	}
-
+	
 	l.messages[fmt.Sprintf("%s_%d", key, l.equalKeyCounter[key])] = message
 }
 
 func (l *logBuilder) Flush(t string) error {
-	b, err := json.Marshal(l.messages)
-	if err != nil {
-		return err
-	}
-
 	if t == info {
-		Info(string(b))
+		Info(l.messages)
 
 		return nil
 	}
 
 	if t == errorLog {
-		Error(string(b))
+		Error(l.messages)
 
 		return nil
 	}
 
 	if t == warn {
-		Warn(string(b))
+		Warn(l.messages)
 
 		return nil
 	}

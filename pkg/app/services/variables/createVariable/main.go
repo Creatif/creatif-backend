@@ -20,6 +20,7 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("createVariable", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
@@ -44,6 +45,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.Variable, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("createVariable", err.Error())
 		return declarations.Variable{}, appErrors.NewApplicationError(err)
 	}
 
@@ -52,6 +54,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 	if len(c.model.Metadata) > 0 {
 		m, err := sdk.CovertToGeneric(c.model.Metadata)
 		if err != nil {
+			c.logBuilder.Add("createVariable", err.Error())
 			return declarations.Variable{}, appErrors.NewApplicationError(err)
 		}
 
@@ -61,6 +64,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 	if len(c.model.Value) > 0 {
 		m, err := sdk.CovertToGeneric(c.model.Value)
 		if err != nil {
+			c.logBuilder.Add("createVariable", err.Error())
 			return declarations.Variable{}, appErrors.NewApplicationError(err)
 		}
 
@@ -80,11 +84,17 @@ func (c Main) Logic() (declarations.Variable, error) {
 	}}).Create(&model)
 
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
-		return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("createProject.Logic", nil)
+		if res.Error != nil {
+			c.logBuilder.Add("createVariable", res.Error.Error())
+		} else {
+			c.logBuilder.Add("createVariable", "No rows returned. Returning 404 not found.")
+		}
+		return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("createVariable.Logic", nil)
 	}
 
 	if res.Error != nil {
-		return declarations.Variable{}, appErrors.NewDatabaseError(res.Error).AddError("createProject.Logic", nil)
+		c.logBuilder.Add("createVariable", res.Error.Error())
+		return declarations.Variable{}, appErrors.NewDatabaseError(res.Error).AddError("createVariable.Logic", nil)
 	}
 
 	return model, nil
@@ -113,5 +123,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.Variable] {
+	logBuilder.Add("createVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

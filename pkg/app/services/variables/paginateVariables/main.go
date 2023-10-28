@@ -19,10 +19,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("paginateVariables", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-
+	c.logBuilder.Add("paginateVariables", "Validated")
 	return nil
 }
 func (c Main) Authenticate() error {
@@ -42,6 +43,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("paginateVariables", err.Error())
 		return sdk.LogicView[declarations.Variable]{}, appErrors.NewApplicationError(err).AddError("Variables.Paginate.Logic", nil)
 	}
 
@@ -73,6 +75,7 @@ OFFSET ? LIMIT ?
 	var items []declarations.Variable
 	res := storage.Gorm().Raw(sql, localeID, c.model.ProjectID, offset, c.model.Limit).Scan(&items)
 	if res.Error != nil {
+		c.logBuilder.Add("paginateVariables", res.Error.Error())
 		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(err).AddError("Variables.Paginate.Logic", nil)
 	}
 
@@ -85,6 +88,7 @@ WHERE v.locale_id = ? AND v.project_id = ?
 `, groupsWhereClause)
 	res = storage.Gorm().Raw(countSql, localeID, c.model.ProjectID).Scan(&count)
 	if res.Error != nil {
+		c.logBuilder.Add("paginateVariables", res.Error.Error())
 		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(err).AddError("Variables.Paginate.Logic", nil)
 	}
 
@@ -121,5 +125,6 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[declarations.Variable]] {
+	logBuilder.Add("paginateVariables", "Created.")
 	return Main{model: model, logBuilder: logBuilder}
 }

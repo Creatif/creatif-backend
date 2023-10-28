@@ -21,12 +21,14 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("updateVariable", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("updateVariable", err.Error())
 		return appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
 	}
 
@@ -38,6 +40,11 @@ func (c Main) Validate() error {
 	var check GroupBehaviourCheck
 	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count, behaviour FROM %s WHERE name = ? AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName()), c.model.Name, c.model.ProjectID, localeID).Scan(&check)
 	if res.Error != nil || res.RowsAffected == 0 {
+		if res.Error != nil {
+			c.logBuilder.Add("updateVariable", res.Error.Error())
+		} else {
+			c.logBuilder.Add("updateVariable", "No rows returned in group check")
+		}
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.Name),
 		})
@@ -54,6 +61,8 @@ func (c Main) Validate() error {
 			"behaviour": fmt.Sprintf("Cannot update a readonly variable '%s'", c.model.Name),
 		})
 	}
+
+	c.logBuilder.Add("updateVariable", "Validated.")
 
 	return nil
 }
@@ -77,6 +86,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 
 	var existing declarations.Variable
 	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
+		c.logBuilder.Add("updateVariable", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("updateVariable.Logic", nil)
 		}
@@ -118,6 +128,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 		{Name: "created_at"},
 		{Name: "updated_at"},
 	}}).Where("id = ?", existing.ID).Select(c.model.Fields).Updates(existing); res.Error != nil {
+		c.logBuilder.Add("updateVariable", res.Error.Error())
 		return declarations.Variable{}, appErrors.NewApplicationError(res.Error).AddError("updateVariable.Logic", nil)
 	}
 
@@ -147,5 +158,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.Variable] {
+	logBuilder.Add("updateVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

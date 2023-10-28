@@ -18,10 +18,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("getValue", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-
+	c.logBuilder.Add("getValue", "Validated")
 	return nil
 }
 func (c Main) Authenticate() error {
@@ -41,11 +42,13 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (Variable, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("getValue", err.Error())
 		return Variable{}, appErrors.NewApplicationError(err)
 	}
 
 	value, err := queryValue(c.model.ProjectID, c.model.Name, localeID)
 	if err != nil {
+		c.logBuilder.Add("getValue", err.Error())
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return Variable{}, appErrors.NewNotFoundError(err)
 		}
@@ -79,5 +82,6 @@ func (c Main) Handle() (datatypes.JSON, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, datatypes.JSON, Variable] {
+	logBuilder.Add("getValue", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

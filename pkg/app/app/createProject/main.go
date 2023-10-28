@@ -43,7 +43,7 @@ func (c Main) Logic() (app.Project, error) {
 		return app.Project{}, appErrors.NewApplicationError(err).AddError("createProject", nil)
 	}
 
-	c.logBuilder.Add("projectCreated", fmt.Sprintf("Project %s created", c.model.Name))
+	c.logBuilder.Add("projectService", fmt.Sprintf("Project %s created", c.model.Name))
 	return model, nil
 }
 
