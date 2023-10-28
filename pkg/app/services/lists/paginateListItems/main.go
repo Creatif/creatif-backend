@@ -42,6 +42,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("paginateListItems", err.Error())
 		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewApplicationError(err).AddError("ListItems.Paginate.Logic", nil)
 	}
 
@@ -88,6 +89,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	var items []declarations.ListVariable
 	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.ListName, localeID, offset, c.model.Limit).Scan(&items)
 	if res.Error != nil {
+		c.logBuilder.Add("paginateListItems", res.Error.Error())
 		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
 	}
 
@@ -107,6 +109,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	var count int64
 	res = storage.Gorm().Raw(countSql, c.model.ProjectID, c.model.ListName).Scan(&count)
 	if res.Error != nil {
+		c.logBuilder.Add("paginateListItem", res.Error.Error())
 		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
 	}
 
@@ -148,5 +151,6 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[declarations.ListVariable]] {
+	logBuilder.Add("paginateListItems", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

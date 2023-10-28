@@ -19,10 +19,12 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("replaceListItem", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
+	c.logBuilder.Add("replaceListItem", "Validated")
 	return nil
 }
 
@@ -43,6 +45,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.ListVariable, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("replaceListItem", err.Error())
 		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("replaceListItem.Logic", nil)
 	}
 
@@ -52,6 +55,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 
 	listAndItem, err := queryListAndItem(c.model.ProjectID, c.model.Name, c.model.ItemName)
 	if err != nil {
+		c.logBuilder.Add("replaceListItem", err.Error())
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return declarations.ListVariable{}, appErrors.NewNotFoundError(err).AddError("replaceListItem.Logic", nil)
 		}
@@ -75,16 +79,17 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 			{Name: "updated_at"},
 		}}).Create(&listItem)
 
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
-			return res.Error
-		}
-
 		if res.Error != nil {
 			return res.Error
 		}
 
+		if res.RowsAffected == 0 {
+			return gorm.ErrRecordNotFound
+		}
+
 		return nil
 	}); err != nil {
+		c.logBuilder.Add("replaceListItem", err.Error())
 		return declarations.ListVariable{}, appErrors.NewDatabaseError(err).AddError("createList.Logic", nil)
 	}
 
@@ -114,5 +119,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.ListVariable] {
+	logBuilder.Add("replaceListItem", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

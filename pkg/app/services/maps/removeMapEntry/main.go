@@ -38,19 +38,23 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (interface{}, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("removeMapEntry", err.Error())
 		return nil, appErrors.NewApplicationError(err).AddError("removeMapEntry.Logic", nil)
 	}
 	var m declarations.Map
 	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&m); res.Error != nil {
+		c.logBuilder.Add("removeMapEntry", res.Error.Error())
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapEntry.Logic", nil)
 	}
 
 	res := storage.Gorm().Where("map_id = ? AND name = ? AND locale_id = ?", m.ID, c.model.EntryName, localeID).Delete(&declarations.MapVariable{})
 	if res.Error != nil {
+		c.logBuilder.Add("removeMapEntry", res.Error.Error())
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapEntry.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
+		c.logBuilder.Add("removeMapEntry", "No rows returned. Returning 404 status.")
 		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Variable with name '%s' not found.", c.model.EntryName))).AddError("removeMapEntry.Logic", nil)
 	}
 
@@ -80,5 +84,6 @@ func (c Main) Handle() (interface{}, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
+	logBuilder.Add("removeMapEntry", "Created.")
 	return Main{model: model, logBuilder: logBuilder}
 }

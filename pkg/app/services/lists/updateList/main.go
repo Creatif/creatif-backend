@@ -19,9 +19,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("updateList", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
+	c.logBuilder.Add("updateList", "Validated")
 
 	return nil
 }
@@ -43,11 +45,14 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.List, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("updateList", err.Error())
 		return declarations.List{}, appErrors.NewNotFoundError(err).AddError("updateList.Logic", nil)
 	}
 
 	var existing declarations.List
 	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
+		c.logBuilder.Add("updateList", res.Error.Error())
+
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.List{}, appErrors.NewNotFoundError(res.Error).AddError("updateList.Logic", nil)
 		}
@@ -70,6 +75,7 @@ func (c Main) Logic() (declarations.List, error) {
 		{Name: "created_at"},
 		{Name: "updated_at"},
 	}}).Where("id = ?", existing.ID).Select(c.model.Fields).Updates(existing); res.Error != nil {
+		c.logBuilder.Add("replaceListItem", res.Error.Error())
 		return declarations.List{}, appErrors.NewApplicationError(res.Error).AddError("updateList.Logic", nil)
 	}
 
@@ -99,5 +105,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {
+	logBuilder.Add("updateList", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

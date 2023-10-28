@@ -19,10 +19,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("removeMap", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-
+	c.logBuilder.Add("removeMap", "Validated")
 	return nil
 }
 
@@ -47,6 +48,7 @@ func (c Main) Logic() (interface{}, error) {
 	}
 	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Delete(&declarations.Map{})
 	if res.Error != nil {
+		c.logBuilder.Add("removeMap", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMap.Logic", nil)
 		}
@@ -55,6 +57,7 @@ func (c Main) Logic() (interface{}, error) {
 	}
 
 	if res.RowsAffected == 0 {
+		c.logBuilder.Add("removeMap", "No rows found. Returning 404.")
 		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Map with name '%s' not found.", c.model.Name))).AddError("removeMap.Logic", nil)
 	}
 
@@ -84,5 +87,6 @@ func (c Main) Handle() (interface{}, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
+	logBuilder.Add("removeMap", "Created.")
 	return Main{model: model, logBuilder: logBuilder}
 }

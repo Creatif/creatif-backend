@@ -17,10 +17,12 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("appendToList", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
+	c.logBuilder.Add("appendToList", "Validated.")
 	return nil
 }
 
@@ -41,11 +43,13 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.List, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("appendToList", err.Error())
 		return declarations.List{}, appErrors.NewApplicationError(err).AddError("appendToList.Logic", nil)
 	}
 
 	var list declarations.List
 	if err := storage.GetBy((declarations.List{}).TableName(), "name", c.model.Name, &list, "id"); err != nil {
+		c.logBuilder.Add("appendToList", err.Error())
 		return declarations.List{}, appErrors.NewNotFoundError(err).AddError("appendToList.Logic", nil)
 	}
 
@@ -69,6 +73,7 @@ func (c Main) Logic() (declarations.List, error) {
 	}
 
 	if res := storage.Gorm().Create(&listVariables); res.Error != nil {
+		c.logBuilder.Add("appendToList", res.Error.Error())
 		return declarations.List{}, res.Error
 	}
 
@@ -98,5 +103,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {
+	logBuilder.Add("appendToList", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

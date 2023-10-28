@@ -15,10 +15,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("getMap", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-
+	c.logBuilder.Add("getMap", "Validated.")
 	return nil
 }
 
@@ -33,20 +34,24 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (LogicModel, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("getMap", err.Error())
 		return LogicModel{}, appErrors.NewApplicationError(err).AddError("getMap.Logic", nil)
 	}
 
 	m, err := queryMap(c.model.ProjectID, c.model.Name, localeID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
+		c.logBuilder.Add("getMap", err.Error())
 		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
 	}
 
 	if err != nil {
+		c.logBuilder.Add("getMap", err.Error())
 		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("getMap.Logic", nil)
 	}
 
 	var variables []Variable
 	if err := queryVariables(m.ID, localeID, c.model.Fields, c.model.Groups, &variables); err != nil {
+		c.logBuilder.Add("getMap", err.Error())
 		return LogicModel{}, err
 	}
 
@@ -79,5 +84,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
+	logBuilder.Add("getMap", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

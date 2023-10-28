@@ -21,12 +21,14 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("updateListItemByID", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("updateListItemByID", err.Error())
 		return appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
 	}
 
@@ -49,6 +51,9 @@ INNER JOIN %s AS l ON l.name = ? AND l.project_id = ? AND l.locale_id = ? AND l.
 	).Scan(&check)
 
 	if res.Error != nil || res.RowsAffected == 0 {
+		if res.Error != nil {
+			c.logBuilder.Add("updateListItemByID", res.Error.Error())
+		}
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.ItemID),
 		})
@@ -86,10 +91,14 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.ListVariable, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("updateListItemByID", err.Error())
 		return declarations.ListVariable{}, appErrors.NewNotFoundError(err).AddError("updateListItemByID.Logic", nil)
 	}
+
 	var list declarations.List
 	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.ListName, c.model.ProjectID, localeID).Select("id").First(&list); res.Error != nil {
+		c.logBuilder.Add("updateListItemByID", res.Error.Error())
+
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByID.Logic", nil)
 		}
@@ -99,6 +108,8 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 
 	var existing declarations.ListVariable
 	if res := storage.Gorm().Where("id = ? AND list_id = ? AND locale_id = ?", c.model.ItemID, list.ID, localeID).First(&existing); res.Error != nil {
+		c.logBuilder.Add("updateListItemByID", res.Error.Error())
+
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByID.Logic", nil)
 		}
@@ -139,6 +150,8 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		{Name: "created_at"},
 		{Name: "updated_at"},
 	}}).Where("id = ?", existing.ID).Select(c.model.Fields).Updates(existing); res.Error != nil {
+		c.logBuilder.Add("updateListItemByID", res.Error.Error())
+
 		return declarations.ListVariable{}, appErrors.NewApplicationError(res.Error).AddError("updateListItemByID.Logic", nil)
 	}
 
@@ -168,5 +181,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.ListVariable] {
+	logBuilder.Add("updateListItemByID", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

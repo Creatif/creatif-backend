@@ -18,10 +18,12 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("deleteList", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
+	c.logBuilder.Add("deleteList", "Validated")
 	return nil
 }
 
@@ -42,12 +44,14 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (*struct{}, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("deleteList", err.Error())
 		return nil, appErrors.NewApplicationError(err).AddError("deleteList.Logic", nil)
 	}
 
 	var list declarations.List
 	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Delete(&list)
 	if res.Error != nil {
+		c.logBuilder.Add("deleteList", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteList.Logic", nil)
 		}
@@ -56,6 +60,7 @@ func (c Main) Logic() (*struct{}, error) {
 	}
 
 	if res.RowsAffected == 0 {
+		c.logBuilder.Add("deleteList", "No rows found. That means 404")
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteList.Logic", nil)
 	}
 
@@ -85,5 +90,6 @@ func (c Main) Handle() (*struct{}, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
+	logBuilder.Add("deleteList", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

@@ -49,6 +49,11 @@ INNER JOIN %s AS m ON m.name = ? AND m.project_id = ? AND m.locale_id = ? AND m.
 	).Scan(&check)
 
 	if res.Error != nil || res.RowsAffected == 0 {
+		if res.Error != nil {
+			c.logBuilder.Add("updateMapVariable", res.Error.Error())
+		} else {
+			c.logBuilder.Add("updateMapVariable", "No rows returned. Might be a bug")
+		}
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.VariableName),
 		})
@@ -152,6 +157,12 @@ func (c Main) Logic() (LogicResult, error) {
 		"UPDATE %s AS mv SET %s FROM %s AS m WHERE mv.name = @name AND mv.map_id = m.id AND mv.locale_id = @localeID AND m.name = @mapName AND m.project_id = @projectID AND m.locale_id = @mapLocaleID RETURNING %s", (declarations.MapVariable{}).TableName(), updateableFields, (declarations.Map{}).TableName(), strings.Join(returningFields, ",")),
 		placeholders,
 	).Scan(&model); res.Error != nil || res.RowsAffected == 0 {
+		if res.Error != nil {
+			c.logBuilder.Add("updateMapVariable", res.Error.Error())
+		} else {
+			c.logBuilder.Add("getMap", "No rows returned. Returning 404 status.")
+		}
+
 		return LogicResult{}, appErrors.NewNotFoundError(errors.New("Could not update map")).AddError("updateMapVariable.Logic", nil)
 	}
 
@@ -185,5 +196,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
+	logBuilder.Add("updateMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

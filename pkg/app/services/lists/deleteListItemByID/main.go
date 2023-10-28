@@ -18,10 +18,12 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("deleteListItemByID", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
+	c.logBuilder.Add("deleteListItemByID", "Validated")
 	return nil
 }
 
@@ -42,11 +44,13 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (*struct{}, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("deleteListItemByID", err.Error())
 		return nil, appErrors.NewApplicationError(err).AddError("deleteListItemByID.Logic", nil)
 	}
 	var list declarations.List
 	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&list)
 	if res.Error != nil {
+		c.logBuilder.Add("deleteListItemByID", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteListItemByID.Logic", nil)
 		}
@@ -57,6 +61,8 @@ func (c Main) Logic() (*struct{}, error) {
 	var variable declarations.ListVariable
 	res = storage.Gorm().Where("id = ? AND list_id = ? AND locale_id = ?", c.model.ItemID, list.ID, localeID).Delete(&variable)
 	if res.Error != nil {
+		c.logBuilder.Add("deleteListItemByID", res.Error.Error())
+
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteListItemByID.Logic", nil)
 		}
@@ -90,5 +96,6 @@ func (c Main) Handle() (*struct{}, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
+	logBuilder.Add("deleteListItemByID", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

@@ -17,9 +17,13 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("queryListByID", "Validating...")
+
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
+
+	c.logBuilder.Add("queryListByID", "Validated")
 
 	return nil
 }
@@ -41,6 +45,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.ListVariable, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("queryListByID", err.Error())
 		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("queryListByID.Logic", nil)
 	}
 	var variable declarations.ListVariable
@@ -53,10 +58,12 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		Scan(&variable)
 
 	if res.Error != nil {
+		c.logBuilder.Add("queryListByID", res.Error.Error())
 		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryListByID.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
+		c.logBuilder.Add("queryListByID", "No rows returned. 404 status code.")
 		return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByID.Logic", nil)
 	}
 
@@ -86,5 +93,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.ListVariable] {
+	logBuilder.Add("queryListByID", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

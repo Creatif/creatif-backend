@@ -18,10 +18,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("addToMap", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-
+	c.logBuilder.Add("addToMap", "Validated.")
 	return nil
 }
 
@@ -42,10 +43,13 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (interface{}, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("addToMap", err.Error())
 		return nil, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
+
 	var m declarations.Map
 	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID", "locale_id").First(&m); res.Error != nil {
+		c.logBuilder.Add("addToMap", res.Error.Error())
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
 
@@ -55,6 +59,8 @@ func (c Main) Logic() (interface{}, error) {
 
 	mapNode := declarations.NewMapVariable(m.ID, m.LocaleID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
 	if res := storage.Gorm().Create(&mapNode); res.Error != nil {
+		c.logBuilder.Add("addToMap", res.Error.Error())
+
 		return nil, appErrors.NewApplicationError(errors.New(fmt.Sprintf("Entry with name '%s' already exists", c.model.Entry.Name))).AddError("addToMap.Logic", nil)
 	}
 
@@ -84,5 +90,6 @@ func (c Main) Handle() (interface{}, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
+	logBuilder.Add("getMap", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

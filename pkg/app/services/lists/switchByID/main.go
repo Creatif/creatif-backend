@@ -15,9 +15,12 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("switchByID", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
+
+	c.logBuilder.Add("replaceListItem", "Validated")
 
 	return nil
 }
@@ -39,10 +42,12 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (LogicResult, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("switchByID", err.Error())
 		return LogicResult{}, appErrors.NewApplicationError(err)
 	}
 	source, destination, err := tryUpdates(c.model.ProjectID, localeID, c.model.Name, c.model.Source, c.model.Destination, 0, 10)
 	if err != nil {
+		c.logBuilder.Add("switchByID", err.Error())
 		return LogicResult{}, appErrors.NewDatabaseError(err)
 	}
 
@@ -76,5 +81,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
+	logBuilder.Add("switchByID", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }

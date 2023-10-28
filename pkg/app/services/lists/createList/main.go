@@ -17,10 +17,12 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("createList", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
+	c.logBuilder.Add("createList", "Validated")
 	return nil
 }
 
@@ -28,6 +30,7 @@ func (c Main) Authenticate() error {
 	// user check by project id should be gotten here, with authentication cookie
 	var project app.Project
 	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
+		c.logBuilder.Add("appendToList", err.Error())
 		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
 	}
 
@@ -41,6 +44,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.List, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
+		c.logBuilder.Add("createList", err.Error())
 		return declarations.List{}, appErrors.NewApplicationError(err).AddError("createList.Logic", nil)
 	}
 
@@ -62,6 +66,7 @@ func (c Main) Logic() (declarations.List, error) {
 
 		return nil
 	}); err != nil {
+		c.logBuilder.Add("createList", err.Error())
 		return declarations.List{}, appErrors.NewDatabaseError(err).AddError("createList.Logic", nil)
 	}
 
@@ -91,5 +96,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {
+	logBuilder.Add("createList", "Created")
 	return Main{model: model, logBuilder: logBuilder}
 }
