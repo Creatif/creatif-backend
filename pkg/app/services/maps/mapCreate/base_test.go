@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -32,6 +33,16 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
 	GinkgoRunSpecs(t, "Maps -> CRUD tests")
+}
+
+func runLogger() {
+	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
+		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
+	}
+
+	logger.Info("Health info logger health check... Ignore!")
+	logger.Warn("Health warning logger health check... Ignore!")
+	logger.Error("Health error logger health check... Ignore!")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -92,7 +103,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name))
+	handler := createProject.New(createProject.NewModel(name), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)

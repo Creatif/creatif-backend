@@ -6,6 +6,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -37,8 +38,19 @@ func TestApi(t *testing.T) {
 	GinkgoRunSpecs(t, "Declaration Lists -> CRUD tests")
 }
 
+func runLogger() {
+	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
+		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
+	}
+
+	logger.Info("Health info logger health check... Ignore!")
+	logger.Warn("Health warning logger health check... Ignore!")
+	logger.Error("Health error logger health check... Ignore!")
+}
+
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
+	runLogger()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
@@ -95,7 +107,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name))
+	handler := createProject.New(createProject.NewModel(name), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
