@@ -29,6 +29,7 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			model.Locale,
 			model.ListName,
 			model.OrderBy,
+			model.Search,
 			model.OrderDirection,
 			model.Limit,
 			model.Page,

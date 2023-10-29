@@ -30,10 +30,11 @@ type Model struct {
 	Groups         []string
 }
 
-func NewModel(projectId, locale, listName, orderBy, direction string, limit, page int, groups []string, filters map[string]string) Model {
+func NewModel(projectId, locale, listName, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string) Model {
 	return Model{
 		ProjectID:      projectId,
 		Locale:         locale,
+		Search:         search,
 		ListName:       listName,
 		OrderBy:        orderBy,
 		Page:           page,

@@ -46,6 +46,18 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewApplicationError(err).AddError("ListItems.Paginate.Logic", nil)
 	}
 
+	offset := (c.model.Page - 1) * c.model.Limit
+	placeholders := make(map[string]interface{})
+	placeholders["localeID"] = localeID
+	placeholders["projectID"] = c.model.ProjectID
+	placeholders["offset"] = offset
+	placeholders["name"] = c.model.ListName
+	placeholders["limit"] = c.model.Limit
+
+	countPlaceholders := make(map[string]interface{})
+	countPlaceholders["projectID"] = c.model.ProjectID
+	countPlaceholders["name"] = c.model.ListName
+
 	if c.model.OrderBy == "" {
 		c.model.OrderBy = "created_at"
 	}
@@ -61,7 +73,20 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		groupsWhereClause = fmt.Sprintf("WHERE '{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "lv.groups")
 	}
 
-	offset := (c.model.Page - 1) * c.model.Limit
+	var search string
+	if c.model.Search != "" {
+		search = fmt.Sprintf("AND (%s ILIKE @searchOne OR %s ILIKE @searchTwo OR %s ILIKE @searchThree OR %s ILIKE @searchFour)", "lv.name", "lv.name", "lv.name", "lv.name")
+		placeholders["searchOne"] = fmt.Sprintf("%%%s", c.model.Search)
+		placeholders["searchTwo"] = fmt.Sprintf("%s%%", c.model.Search)
+		placeholders["searchThree"] = fmt.Sprintf("%%%s%%", c.model.Search)
+		placeholders["searchFour"] = c.model.Search
+
+		countPlaceholders["searchOne"] = fmt.Sprintf("%%%s", c.model.Search)
+		countPlaceholders["searchTwo"] = fmt.Sprintf("%s%%", c.model.Search)
+		countPlaceholders["searchThree"] = fmt.Sprintf("%%%s%%", c.model.Search)
+		countPlaceholders["searchFour"] = c.model.Search
+	}
+
 	sql := fmt.Sprintf(`SELECT 
     	lv.id, 
     	lv.index, 
@@ -76,18 +101,19 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	lv.updated_at 
 			FROM %s AS lv
 			INNER JOIN %s AS l
-		ON l.project_id = ? AND l.name = ? AND l.id = lv.list_id AND l.locale_id = ?
+		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id AND l.locale_id = @localeID %s
 		%s
 		ORDER BY lv.%s %s
-		OFFSET ? LIMIT ?`,
+		OFFSET @offset LIMIT @limit`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
+		search,
 		groupsWhereClause,
 		c.model.OrderBy,
 		c.model.OrderDirection)
 
 	var items []declarations.ListVariable
-	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.ListName, localeID, offset, c.model.Limit).Scan(&items)
+	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateListItems", res.Error.Error())
 		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
@@ -98,16 +124,17 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	    count(lv.id) AS count
 		FROM %s AS lv
 		INNER JOIN %s AS l
-		ON l.project_id = ? AND l.name = ? AND l.id = lv.list_id
+		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id %s
     	%s
 	`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
+		search,
 		groupsWhereClause,
 	)
 
 	var count int64
-	res = storage.Gorm().Raw(countSql, c.model.ProjectID, c.model.ListName).Scan(&count)
+	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateListItem", res.Error.Error())
 		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)

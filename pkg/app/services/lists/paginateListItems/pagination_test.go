@@ -11,7 +11,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 1, []string{"one"}, nil), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 1, []string{"one"}, nil), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -23,7 +23,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 50, []string{"one"}, nil), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 50, []string{"one"}, nil), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -35,7 +35,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 10, 1, []string{"not_exists"}, nil), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -47,11 +47,35 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _, groups := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "desc", 50, 1, []string{"one"}, nil), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 50, 1, []string{"one"}, nil), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
 		gomega.Expect(len(views.Data)).Should(gomega.Equal(50))
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(groups["one"])))
+	})
+
+	ginkgo.It("should return items search by name with regex", func() {
+		projectId := testCreateProject("project")
+		listName, _, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
+
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "1", "desc", 10, 1, []string{}, nil), logger.NewLogBuilder())
+		views, err := handler.Handle()
+		testAssertErrNil(err)
+
+		gomega.Expect(len(views.Data)).Should(gomega.Equal(10))
+		gomega.Expect(views.Total).Should(gomega.Equal(int64(19)))
+	})
+
+	ginkgo.It("should return items search by name with regex with groups", func() {
+		projectId := testCreateProject("project")
+		listName, _, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
+
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "1", "desc", 10, 1, []string{"one"}, nil), logger.NewLogBuilder())
+		views, err := handler.Handle()
+		testAssertErrNil(err)
+
+		gomega.Expect(len(views.Data)).Should(gomega.Equal(5))
+		gomega.Expect(views.Total).Should(gomega.Equal(int64(5)))
 	})
 })
