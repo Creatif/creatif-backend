@@ -17,6 +17,8 @@ type Project struct {
 	Maps      []declarations.Map      `gorm:"foreignKey:ProjectID;references:ID"`
 	Lists     []declarations.List     `gorm:"foreignKey:ProjectID;references:ID"`
 
+	UserID string `gorm:"type:text"`
+
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }
