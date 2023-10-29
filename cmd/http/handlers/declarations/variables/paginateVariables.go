@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
+	"creatif/pkg/app/auth"
 	paginateVariables2 "creatif/pkg/app/services/variables/paginateVariables"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
@@ -34,7 +35,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 			model.Page,
 			model.SanitizedGroups,
 			sdk.ParseFilters(model.Filters),
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK, l)
 	}

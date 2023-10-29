@@ -1,6 +1,7 @@
 package removeMapEntry
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
@@ -17,7 +18,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		entryName := variables[0]["name"]
-		handler := New(NewModel(projectId, "eng", "mapName", entryName), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName", entryName), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

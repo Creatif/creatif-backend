@@ -1,6 +1,7 @@
 package createProject
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -12,6 +13,7 @@ import (
 type Main struct {
 	model      Model
 	logBuilder logger.LogBuilder
+	auth       auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -69,7 +71,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, builder logger.LogBuilder) pkg.Job[Model, View, app.Project] {
+func New(model Model, auth auth.Authentication, builder logger.LogBuilder) pkg.Job[Model, View, app.Project] {
 	builder.Add("projectService", "Created")
-	return Main{model: model, logBuilder: builder}
+	return Main{model: model, logBuilder: builder, auth: auth}
 }

@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
+	"creatif/pkg/app/auth"
 	getValue2 "creatif/pkg/app/services/variables/getValue"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -23,7 +24,7 @@ func GetValueHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.Name, model.Locale), l)
+		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.Name, model.Locale), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[getValue2.Model](handler, c, http.StatusOK, l)
 	}

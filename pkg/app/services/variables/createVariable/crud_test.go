@@ -1,6 +1,7 @@
 package createVariable
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"encoding/json"
@@ -17,7 +18,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
@@ -41,7 +42,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
@@ -65,7 +66,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)
@@ -80,7 +81,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(view.UpdatedAt).ShouldNot(gomega.BeNil())
 		gomega.Expect(view.ProjectID).ShouldNot(gomega.BeEmpty())
 
-		handler = New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		// skipping validation
 		_, err = handler.Logic()
@@ -95,7 +96,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 			"two":  "three",
 			"four": "six",
 		})
-		handler := New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		view, err := handler.Logic()
 		testAssertErrNil(err)
@@ -110,7 +111,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		gomega.Expect(view.ProjectID).ShouldNot(gomega.BeEmpty())
 
 		projectId = testCreateProject("different project")
-		handler = New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "eng", name, "modifiable", []string{"one", "two", "three"}, b, b), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		logicView, err := handler.Logic()
 		testAssertErrNil(err)

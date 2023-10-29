@@ -2,6 +2,7 @@ package deleteRangeByID
 
 import "C"
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
@@ -16,6 +17,7 @@ import (
 type Main struct {
 	model      Model
 	logBuilder logger.LogBuilder
+	auth       auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -97,7 +99,7 @@ func (c Main) Handle() (*struct{}, error) {
 	return nil, nil
 }
 
-func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
 	logBuilder.Add("deleteRangeByID", "Created")
-	return Main{model: model, logBuilder: logBuilder}
+	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

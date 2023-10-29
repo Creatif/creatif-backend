@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/variables/deleteVariable"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -23,7 +24,7 @@ func DeleteVariableHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := deleteVariable.New(deleteVariable.NewModel(model.ProjectID, model.Name, model.Locale), l)
+		handler := deleteVariable.New(deleteVariable.NewModel(model.ProjectID, model.Name, model.Locale), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[deleteVariable.Model](handler, c, http.StatusOK, l)
 	}

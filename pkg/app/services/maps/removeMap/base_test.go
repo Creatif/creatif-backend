@@ -2,6 +2,7 @@ package removeMap
 
 import (
 	"creatif/pkg/app/app/createProject"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/mapCreate"
@@ -108,7 +109,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name), logger.NewLogBuilder())
+	handler := createProject.New(createProject.NewModel(name), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -169,7 +170,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 		})
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

@@ -1,6 +1,7 @@
 package appendToList
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -23,7 +24,7 @@ var _ = ginkgo.Describe("Declaration list append tests", func() {
 			}
 		}
 
-		handler := New(NewModel(projectId, "eng", listName, variables), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, variables), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		list, err := handler.Handle()
 		testAssertErrNil(err)

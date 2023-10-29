@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/replaceListItem"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -35,7 +36,7 @@ func ReplaceListItemHandler() func(e echo.Context) error {
 				Behaviour: model.Variable.Behaviour,
 				Value:     []byte(model.Variable.Value),
 			},
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[replaceListItem.Model](handler, c, http.StatusOK, l)
 	}

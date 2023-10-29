@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/maps/removeMap"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -23,7 +24,7 @@ func DeleteMap() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := removeMap.New(removeMap.NewModel(model.ProjectID, model.Locale, model.Name), l)
+		handler := removeMap.New(removeMap.NewModel(model.ProjectID, model.Locale, model.Name), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[removeMap.Model](handler, c, http.StatusOK, l)
 	}

@@ -3,6 +3,7 @@ package maps
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
+	"creatif/pkg/app/auth"
 	mapCreate2 "creatif/pkg/app/services/maps/mapCreate"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -39,7 +40,7 @@ func CreateMapHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Locale, model.Name, serviceEntries), l)
+		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Locale, model.Name, serviceEntries), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[mapCreate2.Model](handler, c, http.StatusCreated, l)
 	}

@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/switchByID"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -29,7 +30,7 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.Name,
 			model.Source,
 			model.Destination,
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK, l)
 	}

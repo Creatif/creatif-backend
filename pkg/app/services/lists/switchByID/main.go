@@ -1,6 +1,7 @@
 package switchByID
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
@@ -12,6 +13,7 @@ import (
 type Main struct {
 	model      Model
 	logBuilder logger.LogBuilder
+	auth       auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -80,7 +82,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
 	logBuilder.Add("switchByID", "Created")
-	return Main{model: model, logBuilder: logBuilder}
+	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

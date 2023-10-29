@@ -1,6 +1,7 @@
 package replaceListItem
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
@@ -21,7 +22,7 @@ var _ = ginkgo.Describe("Declaration list replace tests", func() {
 			Groups:    nil,
 			Behaviour: "readonly",
 			Value:     nil,
-		}), logger.NewLogBuilder())
+		}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)

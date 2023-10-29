@@ -1,6 +1,7 @@
 package deleteRangeByID
 
 import (
+	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
@@ -22,7 +23,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, "eng", listName, ids), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, ids), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

@@ -2,6 +2,7 @@ package updateVariable
 
 import (
 	"creatif/pkg/app/app/createProject"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/locales"
 	createVariable2 "creatif/pkg/app/services/variables/createVariable"
@@ -108,7 +109,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string, groups []s
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b), logger.NewLogBuilder())
+	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -132,7 +133,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name), logger.NewLogBuilder())
+	handler := createProject.New(createProject.NewModel(name), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)

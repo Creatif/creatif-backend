@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/deleteList"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -27,7 +28,7 @@ func DeleteListHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Locale,
 			model.Name,
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[deleteList.Model](handler, c, http.StatusOK, l)
 	}

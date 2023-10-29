@@ -1,6 +1,7 @@
 package queryListByID
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -13,7 +14,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariable := variableIds[3]
 
-		handler := New(NewModel(projectId, "eng", "name", selectedVariable["id"]), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "name", selectedVariable["id"]), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)

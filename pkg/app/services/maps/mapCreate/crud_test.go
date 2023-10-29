@@ -1,6 +1,7 @@
 package mapCreate
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"encoding/json"
 	"fmt"
@@ -60,7 +61,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -69,7 +70,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "otherMapName", entries), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "eng", "otherMapName", entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		view, err = handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -129,7 +130,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -138,7 +139,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		_, err = handler.Logic()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})
@@ -194,7 +195,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -203,7 +204,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "mapName", entries), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})

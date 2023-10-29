@@ -1,6 +1,7 @@
 package getBatchStructures
 
 import (
+	"creatif/pkg/app/auth"
 	create "creatif/pkg/app/services/variables/createVariable"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
@@ -27,7 +28,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "variable"
 		}
 
-		handler := New(NewModel(projectId, model), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -52,7 +53,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "map"
 		}
 
-		handler := New(NewModel(projectId, model), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -88,7 +89,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "variable"
 		}
 
-		handler := New(NewModel(projectId, model), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

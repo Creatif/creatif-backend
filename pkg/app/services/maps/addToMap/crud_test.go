@@ -1,6 +1,7 @@
 package addToMap
 
 import (
+	"creatif/pkg/app/auth"
 	getMap2 "creatif/pkg/app/services/maps/getMap"
 	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
@@ -18,12 +19,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    nil,
 			Behaviour: "readonly",
 			Value:     nil,
-		}), logger.NewLogBuilder())
+		}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", m.Name, []string{}, []string{}), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", m.Name, []string{}, []string{}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		maps, err := getMapHandler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(maps.ID)

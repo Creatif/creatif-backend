@@ -1,6 +1,7 @@
 package getMap
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -11,7 +12,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", view.Name, []string{}, []string{}), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", view.Name, []string{}, []string{}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
@@ -24,7 +25,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", view.Name, []string{"groups", "value"}, []string{}), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", view.Name, []string{"groups", "value"}, []string{}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
@@ -44,7 +45,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 100)
 
-		handler := New(NewModel(projectId, "eng", view.Name, []string{"groups", "value"}, []string{"one"}), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", view.Name, []string{"groups", "value"}, []string{"one"}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)

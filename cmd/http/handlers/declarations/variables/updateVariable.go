@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/variables/updateVariable"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -32,7 +33,7 @@ func UpdateVariableHandler() func(e echo.Context) error {
 			model.Values.Behaviour,
 			model.Values.Groups,
 			[]byte(model.Values.Metadata),
-			[]byte(model.Values.Value)), l)
+			[]byte(model.Values.Value)), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[updateVariable.Model](handler, c, http.StatusOK, l)
 	}

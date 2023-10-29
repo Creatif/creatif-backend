@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/deleteRangeByID"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -28,7 +29,7 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 			model.Locale,
 			model.Name,
 			model.Items,
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, l)
 	}

@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/updateList"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -29,7 +30,7 @@ func UpdateListHandler() func(e echo.Context) error {
 			model.Fields,
 			model.Name,
 			model.Values.Name,
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, l)
 	}

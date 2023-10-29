@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/updateListItemByID"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -34,7 +35,7 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			model.Values.Groups,
 			[]byte(model.Values.Metadata),
 			[]byte(model.Values.Value),
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l)
 	}

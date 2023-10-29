@@ -1,6 +1,7 @@
 package getMap
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -12,6 +13,7 @@ import (
 type Main struct {
 	model      Model
 	logBuilder logger.LogBuilder
+	auth       auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -83,7 +85,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model, c.model.Fields, c.model.Locale), nil
 }
 
-func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
 	logBuilder.Add("getMap", "Created")
-	return Main{model: model, logBuilder: logBuilder}
+	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

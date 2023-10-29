@@ -1,6 +1,7 @@
 package removeMap
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
@@ -15,7 +16,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) a map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", "mapName"), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

@@ -1,6 +1,7 @@
 package switchByID
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -17,7 +18,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		source := idsAndIndexes[0]
 		destination := idsAndIndexes[5]
 
-		handler := New(NewModel(projectId, "eng", "list", source["id"], destination["id"]), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "list", source["id"], destination["id"]), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -39,7 +40,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "eng", "list", source["id"], destination["id"]), logger.NewLogBuilder())
+				handler := New(NewModel(projectId, "eng", "list", source["id"], destination["id"]), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 				view, err := handler.Handle()
 				testAssertErrNil(err)
 
@@ -81,7 +82,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "eng", "list", ids[sourceIdx]["id"], ids[destinationIdx]["id"]), logger.NewLogBuilder())
+				handler := New(NewModel(projectId, "eng", "list", ids[sourceIdx]["id"], ids[destinationIdx]["id"]), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 				view, err := handler.Handle()
 				testAssertErrNil(err)
 

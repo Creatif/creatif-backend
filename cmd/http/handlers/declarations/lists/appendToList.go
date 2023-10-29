@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/appendToList"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
@@ -37,7 +38,7 @@ func AppendToListHandler() func(e echo.Context) error {
 					Value:     []byte(value.Value),
 				}
 			}),
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[appendToList.Model](handler, c, http.StatusCreated, l)
 	}

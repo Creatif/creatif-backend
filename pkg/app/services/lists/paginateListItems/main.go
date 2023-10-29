@@ -1,6 +1,7 @@
 package paginateListItems
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
@@ -16,6 +17,7 @@ import (
 type Main struct {
 	model      Model
 	logBuilder logger.LogBuilder
+	auth       auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -177,7 +179,7 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 	}, nil
 }
 
-func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[declarations.ListVariable]] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[declarations.ListVariable]] {
 	logBuilder.Add("paginateListItems", "Created")
-	return Main{model: model, logBuilder: logBuilder}
+	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

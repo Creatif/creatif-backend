@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/deleteListItemByID"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
@@ -28,7 +29,7 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 			model.Locale,
 			model.Name,
 			model.ItemID,
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l)
 	}

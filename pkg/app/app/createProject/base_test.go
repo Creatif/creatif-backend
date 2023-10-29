@@ -1,6 +1,7 @@
 package createProject
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
@@ -92,7 +93,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := New(NewModel(name), logger.NewLogBuilder())
+	handler := New(NewModel(name), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)

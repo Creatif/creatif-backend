@@ -1,16 +1,16 @@
 package getBatchStructures
 
 import (
-	"creatif/pkg/app/domain/app"
+	"creatif/pkg/app/auth"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
-	"creatif/pkg/lib/storage"
 )
 
 type Main struct {
 	model      *Model
 	logBuilder logger.LogBuilder
+	auth       auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -22,13 +22,7 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
-	}
-
-	return nil
+	return c.auth.Authenticate()
 }
 
 func (c Main) Authorize() error {
@@ -101,6 +95,6 @@ func (c Main) Handle() (map[string]interface{}, error) {
 	return newView(model), nil
 }
 
-func New(model *Model, logBuilder logger.LogBuilder) pkg.Job[*Model, map[string]interface{}, map[string]interface{}] {
-	return Main{model: model, logBuilder: logBuilder}
+func New(model *Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[*Model, map[string]interface{}, map[string]interface{}] {
+	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

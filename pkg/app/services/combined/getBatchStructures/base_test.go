@@ -2,6 +2,7 @@ package getBatchStructures
 
 import (
 	"creatif/pkg/app/app/createProject"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/mapCreate"
@@ -20,7 +21,7 @@ import (
 )
 
 func loadEnv() {
-	err := godotenv.Load("../../../../.env")
+	err := godotenv.Load("../../../../../.env")
 
 	if err != nil {
 		log.Fatal(err)
@@ -89,7 +90,7 @@ var _ = GinkgoAfterHandler(func() {
 })
 
 func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name), logger.NewLogBuilder())
+	handler := createProject.New(createProject.NewModel(name), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -111,7 +112,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string) createVari
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, []string{"one", "two", "three"}, b, b), logger.NewLogBuilder())
+	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, []string{"one", "two", "three"}, b, b), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -170,7 +171,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 		})
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

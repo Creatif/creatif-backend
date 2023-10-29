@@ -3,7 +3,8 @@ package combined
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/combined"
-	"creatif/pkg/app/combined/getBatchStructures"
+	"creatif/pkg/app/auth"
+	getBatchStructures2 "creatif/pkg/app/services/combined/getBatchStructures"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -23,8 +24,8 @@ func GetBatchedStructuresHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := getBatchStructures.New(getBatchStructures.NewModel(model.ProjectID, serviceModel), l)
+		handler := getBatchStructures2.New(getBatchStructures2.NewModel(model.ProjectID, serviceModel), auth.NewApiAuthentication(), l)
 
-		return request.SendResponse[*getBatchStructures.Model](handler, c, http.StatusCreated, l)
+		return request.SendResponse[*getBatchStructures2.Model](handler, c, http.StatusCreated, l)
 	}
 }

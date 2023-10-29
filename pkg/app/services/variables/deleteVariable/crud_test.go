@@ -1,6 +1,7 @@
 package deleteVariable
 
 import (
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
@@ -15,7 +16,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) variable tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(projectId, view.Name, "eng"), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.Name, "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

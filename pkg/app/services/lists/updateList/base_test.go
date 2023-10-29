@@ -2,6 +2,7 @@ package updateList
 
 import (
 	"creatif/pkg/app/app/createProject"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
@@ -106,7 +107,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name), logger.NewLogBuilder())
+	handler := createProject.New(createProject.NewModel(name), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -129,7 +130,7 @@ func testCreateList(projectId, name string, varNum int) string {
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

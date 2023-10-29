@@ -4,6 +4,7 @@ import (
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
+	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/paginateListItems"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
@@ -35,7 +36,7 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			model.Page,
 			model.SanitizedGroups,
 			sdk.ParseFilters(model.Filters),
-		), l)
+		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK, l)
 	}

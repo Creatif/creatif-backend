@@ -1,6 +1,7 @@
 package deleteList
 
 import (
+	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
@@ -13,7 +14,7 @@ var _ = ginkgo.Describe("Declaration list delete tests", func() {
 		projectId := testCreateProject("project")
 		listName, listId := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
