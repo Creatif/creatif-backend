@@ -28,6 +28,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Locale,
 			model.OrderBy,
+			model.Search,
 			model.OrderDirection,
 			model.Limit,
 			model.Page,

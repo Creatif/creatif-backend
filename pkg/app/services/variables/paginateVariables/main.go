@@ -26,6 +26,7 @@ func (c Main) Validate() error {
 	c.logBuilder.Add("paginateVariables", "Validated")
 	return nil
 }
+
 func (c Main) Authenticate() error {
 	// user check by project id should be gotten here, with authentication cookie
 	var project app.Project
@@ -47,6 +48,17 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 		return sdk.LogicView[declarations.Variable]{}, appErrors.NewApplicationError(err).AddError("Variables.Paginate.Logic", nil)
 	}
 
+	offset := (c.model.Page - 1) * c.model.Limit
+	placeholders := make(map[string]interface{})
+	placeholders["localeID"] = localeID
+	placeholders["projectID"] = c.model.ProjectID
+	placeholders["offset"] = offset
+	placeholders["limit"] = c.model.Limit
+
+	countPlaceholders := make(map[string]interface{})
+	countPlaceholders["localeID"] = localeID
+	countPlaceholders["projectID"] = c.model.ProjectID
+
 	if c.model.OrderBy == "" {
 		c.model.OrderBy = "created_at"
 	}
@@ -62,34 +74,47 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 		groupsWhereClause = fmt.Sprintf("AND '{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "groups")
 	}
 
+	var search string
+	if c.model.Search != "" {
+		search = fmt.Sprintf("AND (%s ILIKE @searchOne OR %s ILIKE @searchTwo OR %s ILIKE @searchThree OR %s ILIKE @searchFour)", "name", "name", "name", "name")
+		placeholders["searchOne"] = fmt.Sprintf("%%%s", c.model.Search)
+		placeholders["searchTwo"] = fmt.Sprintf("%s%%", c.model.Search)
+		placeholders["searchThree"] = fmt.Sprintf("%%%s%%", c.model.Search)
+		placeholders["searchFour"] = c.model.Search
+
+		countPlaceholders["searchOne"] = fmt.Sprintf("%%%s", c.model.Search)
+		countPlaceholders["searchTwo"] = fmt.Sprintf("%s%%", c.model.Search)
+		countPlaceholders["searchThree"] = fmt.Sprintf("%%%s%%", c.model.Search)
+		countPlaceholders["searchFour"] = c.model.Search
+	}
+
 	sql := fmt.Sprintf(`
 SELECT id, short_id, groups, name, behaviour, metadata, value, created_at, updated_at
-FROM declarations.variables
-WHERE locale_id = ? AND project_id = ?
+FROM %s
+WHERE locale_id = @localeID AND project_id = @projectID %s
 %s
 ORDER BY %s %s
-OFFSET ? LIMIT ?
-`, groupsWhereClause, c.model.OrderBy, c.model.OrderDirection)
+OFFSET @offset LIMIT @limit
+`, (declarations.Variable{}).TableName(), search, groupsWhereClause, c.model.OrderBy, c.model.OrderDirection)
 
-	offset := (c.model.Page - 1) * c.model.Limit
 	var items []declarations.Variable
-	res := storage.Gorm().Raw(sql, localeID, c.model.ProjectID, offset, c.model.Limit).Scan(&items)
+	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateVariables", res.Error.Error())
-		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(err).AddError("Variables.Paginate.Logic", nil)
+		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(res.Error).AddError("Variables.Paginate.Logic", nil)
 	}
 
 	var count int64
 	countSql := fmt.Sprintf(`
 SELECT count(v.id) AS count
-FROM declarations.variables AS v
-WHERE v.locale_id = ? AND v.project_id = ?
+FROM %s AS v
+WHERE v.locale_id = @localeID AND v.project_id = @projectID %s
 %s
-`, groupsWhereClause)
-	res = storage.Gorm().Raw(countSql, localeID, c.model.ProjectID).Scan(&count)
+`, (declarations.Variable{}).TableName(), search, groupsWhereClause)
+	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateVariables", res.Error.Error())
-		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(err).AddError("Variables.Paginate.Logic", nil)
+		return sdk.LogicView[declarations.Variable]{}, appErrors.NewDatabaseError(res.Error).AddError("Variables.Paginate.Logic", nil)
 	}
 
 	return sdk.LogicView[declarations.Variable]{
