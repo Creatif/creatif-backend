@@ -3,6 +3,7 @@ package getMap
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -40,7 +41,8 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewApplicationError(err).AddError("getMap.Logic", nil)
 	}
 
-	m, err := queryMap(c.model.ProjectID, c.model.Name, localeID)
+	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
+	m, err := queryMap(c.model.ProjectID, id, val, localeID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		c.logBuilder.Add("getMap", err.Error())
 		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)

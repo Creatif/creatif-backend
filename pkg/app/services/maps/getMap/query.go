@@ -44,9 +44,9 @@ SELECT
 	return nil
 }
 
-func queryMap(projectId, mapName, localeID string) (declarations.Map, error) {
+func queryMap(projectId, mapId, val, localeID string) (declarations.Map, error) {
 	var m declarations.Map
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", mapName, projectId, localeID).First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", mapId), val, projectId, localeID).First(&m); res.Error != nil {
 		return declarations.Map{}, res.Error
 	}
 

@@ -23,6 +23,7 @@ type VariableModel struct {
 type View struct {
 	ID        string              `json:"id"`
 	ProjectID string              `json:"projectID"`
+	ShortID   string              `json:"shortID"`
 	Locale    string              `json:"locale"`
 	Name      string              `json:"name"`
 	Variables []map[string]string `json:"variables"`
@@ -43,6 +44,7 @@ type Model struct {
 type LogicResult struct {
 	ID        string
 	Locale    string
+	ShortID   string
 	ProjectID string
 	Variables []map[string]string
 	Name      string
@@ -175,6 +177,7 @@ func newView(model LogicResult) View {
 	return View{
 		ID:        model.ID,
 		Locale:    model.Locale,
+		ShortID:   model.ShortID,
 		ProjectID: model.ProjectID,
 		Name:      model.Name,
 		Variables: model.Variables,
