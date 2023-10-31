@@ -8,11 +8,33 @@ import (
 )
 
 var _ = ginkgo.Describe("GET value of declaration variable", func() {
-	ginkgo.It("should return a variable value", func() {
+	ginkgo.It("should return a variable value by name", func() {
 		projectId := testCreateProject("project")
 		createdVariable := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(projectId, createdVariable.Name, "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "", "", createdVariable.Name, "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		value, err := handler.Handle()
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		gomega.Expect(value).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("should return a variable value by id", func() {
+		projectId := testCreateProject("project")
+		createdVariable := testCreateDeclarationVariable(projectId, "variable", "modifiable")
+
+		handler := New(NewModel(projectId, createdVariable.ID, "", "", "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		value, err := handler.Handle()
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		gomega.Expect(value).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("should return a variable value by shortId", func() {
+		projectId := testCreateProject("project")
+		createdVariable := testCreateDeclarationVariable(projectId, "variable", "modifiable")
+
+		handler := New(NewModel(projectId, "", createdVariable.ShortID, "", "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 		value, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
@@ -39,8 +40,9 @@ func (c Main) Validate() error {
 		Behaviour string `gorm:"column:behaviour"`
 	}
 
+	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var check GroupBehaviourCheck
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count, behaviour FROM %s WHERE name = ? AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName()), c.model.Name, c.model.ProjectID, localeID).Scan(&check)
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count, behaviour FROM %s WHERE %s AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName(), id), val, c.model.ProjectID, localeID).Scan(&check)
 	if res.Error != nil || res.RowsAffected == 0 {
 		if res.Error != nil {
 			c.logBuilder.Add("updateVariable", res.Error.Error())
@@ -86,8 +88,9 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.Variable, error) {
 	localeID, _ := locales.GetIDWithAlpha(c.model.Locale)
 
+	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var existing declarations.Variable
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", id), val, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateVariable", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("updateVariable.Logic", nil)
@@ -122,6 +125,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 	if res := storage.Gorm().Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
 		{Name: "id"},
 		{Name: "project_id"},
+		{Name: "short_id"},
 		{Name: "name"},
 		{Name: "behaviour"},
 		{Name: "metadata"},

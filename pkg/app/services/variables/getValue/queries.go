@@ -2,12 +2,13 @@ package getValue
 
 import (
 	"creatif/pkg/lib/storage"
+	"fmt"
 	"gorm.io/gorm"
 )
 
-func queryValue(projectId, name, localeID string) (Variable, error) {
+func queryValue(projectId, id, value, localeID string) (Variable, error) {
 	var variable Variable
-	res := storage.Gorm().Raw(`SELECT n.value FROM declarations.variables AS n WHERE n.name = ? AND n.project_id = ? AND locale_id = ?`, name, projectId, localeID).Scan(&variable)
+	res := storage.Gorm().Raw(fmt.Sprintf(`SELECT n.value FROM declarations.variables AS n WHERE %s AND n.project_id = ? AND locale_id = ?`, id), value, projectId, localeID).Scan(&variable)
 	if res.RowsAffected == 0 {
 		return Variable{}, gorm.ErrRecordNotFound
 	}

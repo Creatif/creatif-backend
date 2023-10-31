@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -48,7 +49,8 @@ func (c Main) Logic() (Variable, error) {
 		return Variable{}, appErrors.NewApplicationError(err)
 	}
 
-	value, err := queryValue(c.model.ProjectID, c.model.Name, localeID)
+	id, val := shared.DetermineID("n", c.model.Name, c.model.ID, c.model.ShortID)
+	value, err := queryValue(c.model.ProjectID, id, val, localeID)
 	if err != nil {
 		c.logBuilder.Add("getValue", err.Error())
 		if errors.Is(err, gorm.ErrRecordNotFound) {

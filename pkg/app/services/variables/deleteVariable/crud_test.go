@@ -12,11 +12,39 @@ import (
 )
 
 var _ = ginkgo.Describe("Declaration (DELETE) variable tests", func() {
-	ginkgo.It("should delete a declaration variable and all assignment variables", func() {
+	ginkgo.It("should delete a variable by name", func() {
 		projectId := testCreateProject("project")
 		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(projectId, view.Name, "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "", "", view.Name, "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+
+		_, err := handler.Handle()
+		testAssertErrNil(err)
+
+		res := storage.Gorm().Where("id = ?", view.ID).First(&declarations.Variable{})
+		gomega.Expect(res.Error).ShouldNot(gomega.BeNil())
+		gomega.Expect(errors.Is(res.Error, gorm.ErrRecordNotFound)).Should(gomega.BeTrue())
+	})
+
+	ginkgo.It("should delete a variable by ID", func() {
+		projectId := testCreateProject("project")
+		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
+
+		handler := New(NewModel(projectId, view.ID, "", "", "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+
+		_, err := handler.Handle()
+		testAssertErrNil(err)
+
+		res := storage.Gorm().Where("id = ?", view.ID).First(&declarations.Variable{})
+		gomega.Expect(res.Error).ShouldNot(gomega.BeNil())
+		gomega.Expect(errors.Is(res.Error, gorm.ErrRecordNotFound)).Should(gomega.BeTrue())
+	})
+
+	ginkgo.It("should delete a variable by shortID", func() {
+		projectId := testCreateProject("project")
+		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
+
+		handler := New(NewModel(projectId, "", view.ShortID, "", "eng"), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

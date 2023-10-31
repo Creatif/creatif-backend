@@ -16,6 +16,8 @@ type UpdateVariableValues struct {
 type UpdateVariable struct {
 	Fields    []string             `json:"fields"`
 	Name      string               `json:"name"`
+	ID        string               `json:"id"`
+	ShortID   string               `json:"shortID"`
 	Locale    string               `json:"locale"`
 	Values    UpdateVariableValues `json:"values"`
 	ProjectID string               `param:"projectID"`
@@ -26,6 +28,8 @@ func SanitizeUpdateVariable(model UpdateVariable) UpdateVariable {
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
+	model.ShortID = p.Sanitize(model.ShortID)
+	model.ID = p.Sanitize(model.ID)
 
 	newFields := sdk.Map(model.Fields, func(idx int, value string) string {
 		return p.Sanitize(value)

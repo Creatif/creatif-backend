@@ -110,6 +110,7 @@ type View struct {
 	ID        string      `json:"id"`
 	ProjectID string      `json:"projectID"`
 	Locale    string      `json:"locale"`
+	ShortID   string      `json:"shortID"`
 	Name      string      `json:"name"`
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
@@ -124,6 +125,7 @@ func newView(model declarations.Variable, locale string) View {
 	return View{
 		ID:        model.ID,
 		ProjectID: model.ProjectID,
+		ShortID:   model.ShortID,
 		Locale:    locale,
 		Name:      model.Name,
 		Groups:    model.Groups,

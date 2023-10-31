@@ -20,7 +20,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour"}, "name", "newName", "readonly", []string{}, []byte{}, v), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour"}, "name", "", "", "newName", "readonly", []string{}, []byte{}, v), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -47,7 +47,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, "name", "", "", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -76,7 +76,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour", "groups"}, "name", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour", "groups"}, "name", "", "", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewNoopAuthentication(), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -112,6 +112,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			"eng",
 			[]string{"name", "behaviour", "groups"},
 			view.Name,
+			"",
+			"",
 			"newName",
 			"readonly",
 			[]string{"1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"},
@@ -141,6 +143,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			"eng",
 			[]string{"name", "behaviour", "groups"},
 			view.Name,
+			"",
+			"",
 			"newName",
 			"readonly",
 			[]string{"1", "1", "2"},

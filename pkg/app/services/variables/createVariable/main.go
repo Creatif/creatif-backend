@@ -77,6 +77,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 	res := storage.Gorm().Model(&model).Clauses(clause.Returning{Columns: []clause.Column{
 		{Name: "id"},
 		{Name: "name"},
+		{Name: "short_id"},
 		{Name: "behaviour"},
 		{Name: "metadata"},
 		{Name: "value"},
