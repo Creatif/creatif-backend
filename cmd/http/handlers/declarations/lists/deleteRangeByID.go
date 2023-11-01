@@ -28,6 +28,8 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Locale,
 			model.Name,
+			model.ID,
+			model.ShortID,
 			model.Items,
 		), auth.NewApiAuthentication(), l)
 

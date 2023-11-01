@@ -118,7 +118,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (string, string) {
+func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (string, string, string) {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
 		variables[i] = createList2.Variable{
@@ -138,5 +138,5 @@ func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (strin
 
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
-	return list.Name, list.ID
+	return list.Name, list.ID, list.ShortID
 }

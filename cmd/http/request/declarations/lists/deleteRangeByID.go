@@ -7,6 +7,8 @@ import (
 
 type DeleteRangeByID struct {
 	Name      string   `param:"name"`
+	ID        string   `json:"id"`
+	ShortID   string   `json:"shortID"`
 	Items     []string `json:"items"`
 	ProjectID string   `param:"projectID"`
 	Locale    string   `param:"locale"`
@@ -17,6 +19,8 @@ func SanitizeDeleteRangeByID(model DeleteRangeByID) DeleteRangeByID {
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
+	model.ID = p.Sanitize(model.ID)
+	model.ShortID = p.Sanitize(model.ShortID)
 
 	model.Items = sdk.Map(model.Items, func(idx int, value string) string {
 		return p.Sanitize(value)

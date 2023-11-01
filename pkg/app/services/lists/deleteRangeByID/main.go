@@ -6,12 +6,12 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
-	"gorm.io/gorm"
+	"fmt"
 )
 
 type Main struct {
@@ -52,26 +52,22 @@ func (c Main) Logic() (*struct{}, error) {
 		return nil, appErrors.NewApplicationError(err).AddError("deleteRangeByID.Logic", nil)
 	}
 
-	var list declarations.List
-	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&list)
+	listId, listVal := shared.DetermineID("l", c.model.Name, c.model.ID, c.model.ShortID)
+	sql := fmt.Sprintf(
+		`DELETE FROM %s AS lv USING %s AS l WHERE %s AND l.project_id = ? AND l.locale_id = ? AND lv.list_id = l.id AND lv.id IN(?)`,
+		(declarations.ListVariable{}).TableName(),
+		(declarations.List{}).TableName(),
+		listId,
+	)
+
+	res := storage.Gorm().Exec(sql, listVal, c.model.ProjectID, localeID, c.model.Items)
 	if res.Error != nil {
 		c.logBuilder.Add("deleteRangeByID", res.Error.Error())
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteRangeByID.Logic", nil)
-		}
-
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
 	}
-
-	var variable declarations.ListVariable
-	res = storage.Gorm().Where("list_id = ? AND locale_id = ? AND id IN(?)", list.ID, localeID, c.model.Items).Delete(&variable)
-	if res.Error != nil {
-		c.logBuilder.Add("deleteRangeByID", res.Error.Error())
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteRangeByID.Logic", nil)
-		}
-
-		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
+	
+	if res.RowsAffected == 0 {
+		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteRangeByID.Logic", nil)
 	}
 
 	return nil, nil
