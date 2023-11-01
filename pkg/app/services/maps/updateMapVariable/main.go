@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
@@ -154,9 +155,14 @@ func (c Main) Logic() (LogicResult, error) {
 	placeholders["localeID"] = localeID
 
 	returningFields := []string{"mv.id", "mv.short_id", "mv.name", "mv.behaviour", "mv.metadata", "mv.groups", "mv.value", "mv.created_at", "mv.updated_at", "m.id AS map_id", "m.name AS map_name", "m.created_at AS map_created_at", "m.updated_at AS map_updated_at"}
+	mapId, mapVal := shared.DetermineIDWithNamedPlaceholder("m", "mapName", c.model.MapName, c.model.ID, c.model.ShortID)
+	varId, varVal := shared.DetermineIDWithNamedPlaceholder("mv", "", c.model.VariableName, c.model.VariableID, c.model.VariableShortID)
+	placeholders["mapName"] = mapVal
+	placeholders["name"] = varVal
+
 	var model MapVariableWithMap
 	if res := storage.Gorm().Raw(fmt.Sprintf(
-		"UPDATE %s AS mv SET %s FROM %s AS m WHERE mv.name = @name AND mv.map_id = m.id AND mv.locale_id = @localeID AND m.name = @mapName AND m.project_id = @projectID AND m.locale_id = @mapLocaleID RETURNING %s", (declarations.MapVariable{}).TableName(), updateableFields, (declarations.Map{}).TableName(), strings.Join(returningFields, ",")),
+		"UPDATE %s AS mv SET %s FROM %s AS m WHERE %s AND mv.map_id = m.id AND mv.locale_id = @localeID AND %s AND m.project_id = @projectID AND m.locale_id = @mapLocaleID RETURNING %s", (declarations.MapVariable{}).TableName(), updateableFields, (declarations.Map{}).TableName(), mapId, varId, strings.Join(returningFields, ",")),
 		placeholders,
 	).Scan(&model); res.Error != nil || res.RowsAffected == 0 {
 		if res.Error != nil {

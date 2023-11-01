@@ -23,7 +23,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Locale, model.MapName, model.VariableName, model.SanitizedFields, updateMapVariable2.VariableModel{
+		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Locale, model.MapName, model.ID, model.ShortID, model.VariableName, model.VariableID, model.VariableShortID, model.SanitizedFields, updateMapVariable2.VariableModel{
 			Name:      model.Entry.Name,
 			Metadata:  []byte(model.Entry.Metadata),
 			Groups:    model.Entry.Groups,

@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", m.Name, "name-0", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
+		handler := New(NewModel(projectId, "eng", m.Name, "", "", "name-0", "", "", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
 			Name:      "name-0",
 			Metadata:  b,
 			Groups:    []string{"updated1", "updated2", "updated3"},
@@ -65,7 +65,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", m.Name, "name-0", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
+		handler := New(NewModel(projectId, "eng", m.Name, "", "", "name-0", "", "", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
 			Name:      "name-0",
 			Metadata:  b,
 			Groups:    []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"},
@@ -92,7 +92,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", m.Name, "name-0", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
+		handler := New(NewModel(projectId, "eng", m.Name, "", "", "name-0", "", "", []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
 			Name:      "name-0",
 			Metadata:  b,
 			Groups:    []string{"1", "2", "3", "4", "5"},

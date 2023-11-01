@@ -6,12 +6,16 @@ import (
 )
 
 type UpdateMapVariable struct {
-	ProjectID    string           `param:"projectID"`
-	Locale       string           `param:"locale"`
-	MapName      string           `param:"mapName"`
-	VariableName string           `param:"variableName"`
-	Fields       []string         `json:"fields"`
-	Entry        MapVariableModel `json:"variable"`
+	ProjectID       string           `param:"projectID"`
+	Locale          string           `param:"locale"`
+	MapName         string           `param:"mapName"`
+	ID              string           `json:"id"`
+	ShortID         string           `json:"shortID"`
+	VariableID      string           `json:"variableID"`
+	VariableShortID string           `json:"variableShortID"`
+	VariableName    string           `param:"variableName"`
+	Fields          []string         `json:"fields"`
+	Entry           MapVariableModel `json:"variable"`
 
 	SanitizedFields []string
 }
@@ -21,6 +25,10 @@ func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.MapName = p.Sanitize(model.MapName)
 	model.VariableName = p.Sanitize(model.VariableName)
+	model.ShortID = p.Sanitize(model.ShortID)
+	model.ID = p.Sanitize(model.ID)
+	model.VariableID = p.Sanitize(model.VariableID)
+	model.VariableShortID = p.Sanitize(model.VariableShortID)
 	model.Locale = p.Sanitize(model.Locale)
 
 	model.SanitizedFields = sdk.Map(model.Fields, func(idx int, value string) string {

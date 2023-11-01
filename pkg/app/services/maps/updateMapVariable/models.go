@@ -51,22 +51,30 @@ type VariableModel struct {
 }
 
 type Model struct {
-	Fields       []string
-	Values       VariableModel
-	MapName      string
-	VariableName string
-	ProjectID    string
-	Locale       string
+	Fields          []string
+	Values          VariableModel
+	MapName         string
+	ID              string
+	ShortID         string
+	VariableName    string
+	VariableID      string
+	VariableShortID string
+	ProjectID       string
+	Locale          string
 }
 
-func NewModel(projectId, locale, mapName, variableName string, fields []string, values VariableModel) Model {
+func NewModel(projectId, locale, mapName, id, shortID, variableName, variableID, variableShortID string, fields []string, values VariableModel) Model {
 	return Model{
-		MapName:      mapName,
-		Locale:       locale,
-		Fields:       fields,
-		ProjectID:    projectId,
-		Values:       values,
-		VariableName: variableName,
+		MapName:         mapName,
+		ID:              id,
+		ShortID:         shortID,
+		VariableID:      variableID,
+		VariableShortID: variableShortID,
+		Locale:          locale,
+		Fields:          fields,
+		ProjectID:       projectId,
+		Values:          values,
+		VariableName:    variableName,
 	}
 }
 
