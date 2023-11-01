@@ -23,7 +23,7 @@ func AddToMapHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Locale, model.Name, addToMap2.VariableModel{
+		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Locale, model.Name, model.ID, model.ShortID, addToMap2.VariableModel{
 			Name:      model.Entry.Name,
 			Metadata:  []byte(model.Entry.Metadata),
 			Groups:    model.Entry.Groups,

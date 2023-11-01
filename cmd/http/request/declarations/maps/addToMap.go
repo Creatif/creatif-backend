@@ -10,6 +10,8 @@ type AddToMap struct {
 	ProjectID string           `param:"projectID"`
 	Entry     MapVariableModel `json:"entry"`
 	Name      string           `json:"name"`
+	ID        string           `json:"id"`
+	ShortID   string           `json:"shortID"`
 }
 
 func SanitizeAddToMap(model AddToMap) AddToMap {
@@ -17,6 +19,8 @@ func SanitizeAddToMap(model AddToMap) AddToMap {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
 	model.Name = p.Sanitize(model.Name)
+	model.ID = p.Sanitize(model.ID)
+	model.ShortID = p.Sanitize(model.ShortID)
 
 	variable := model.Entry
 	variable.Name = p.Sanitize(variable.Name)

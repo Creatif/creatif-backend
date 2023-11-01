@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -49,8 +50,9 @@ func (c Main) Logic() (interface{}, error) {
 		return nil, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
 
+	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var m declarations.Map
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID", "locale_id").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", id), val, c.model.ProjectID, localeID).Select("ID", "locale_id").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToMap", res.Error.Error())
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
