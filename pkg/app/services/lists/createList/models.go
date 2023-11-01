@@ -111,6 +111,7 @@ func (a Model) Validate() map[string]string {
 
 type View struct {
 	ID        string `json:"id"`
+	ShortID   string `json:"shortID"`
 	ProjectID string `json:"projectID"`
 	Name      string `json:"name"`
 	Locale    string `json:"locale"`
@@ -122,6 +123,7 @@ type View struct {
 func newView(model declarations.List, locale string) View {
 	return View{
 		ID:        model.ID,
+		ShortID:   model.ShortID,
 		ProjectID: model.ProjectID,
 		Locale:    locale,
 		Name:      model.Name,

@@ -5,11 +5,13 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -50,8 +52,9 @@ func (c Main) Logic() (*struct{}, error) {
 		return nil, appErrors.NewApplicationError(err).AddError("deleteList.Logic", nil)
 	}
 
+	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var list declarations.List
-	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Delete(&list)
+	res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", id), val, c.model.ProjectID, localeID).Delete(&list)
 	if res.Error != nil {
 		c.logBuilder.Add("deleteList", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {

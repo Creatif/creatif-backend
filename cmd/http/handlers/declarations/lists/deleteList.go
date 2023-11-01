@@ -28,6 +28,8 @@ func DeleteListHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Locale,
 			model.Name,
+			model.ID,
+			model.ShortID,
 		), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[deleteList.Model](handler, c, http.StatusOK, l)
