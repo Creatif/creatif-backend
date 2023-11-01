@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -43,13 +44,19 @@ func (c Main) Logic() (interface{}, error) {
 		c.logBuilder.Add("removeMapEntry", err.Error())
 		return nil, appErrors.NewApplicationError(err).AddError("removeMapEntry.Logic", nil)
 	}
-	var m declarations.Map
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&m); res.Error != nil {
-		c.logBuilder.Add("removeMapEntry", res.Error.Error())
-		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapEntry.Logic", nil)
-	}
 
-	res := storage.Gorm().Where("map_id = ? AND name = ? AND locale_id = ?", m.ID, c.model.EntryName, localeID).Delete(&declarations.MapVariable{})
+	mapId, mapVal := shared.DetermineID("m", c.model.Name, c.model.MapID, c.model.MapShortID)
+	varId, varVal := shared.DetermineID("mv", c.model.VariableName, c.model.VariableID, c.model.VariableShortID)
+
+	sql := fmt.Sprintf(
+		`DELETE FROM %s AS mv USING %s AS m WHERE m.project_id = ? AND m.locale_id = ? AND mv.map_id = m.id AND %s AND %s`,
+		(declarations.MapVariable{}).TableName(),
+		(declarations.Map{}).TableName(),
+		mapId,
+		varId,
+	)
+
+	res := storage.Gorm().Exec(sql, c.model.ProjectID, localeID, mapVal, varVal)
 	if res.Error != nil {
 		c.logBuilder.Add("removeMapEntry", res.Error.Error())
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapEntry.Logic", nil)
@@ -57,7 +64,7 @@ func (c Main) Logic() (interface{}, error) {
 
 	if res.RowsAffected == 0 {
 		c.logBuilder.Add("removeMapEntry", "No rows returned. Returning 404 status.")
-		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Variable with name '%s' not found.", c.model.EntryName))).AddError("removeMapEntry.Logic", nil)
+		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Variable with name '%s' not found.", c.model.VariableName))).AddError("removeMapEntry.Logic", nil)
 	}
 
 	return nil, nil

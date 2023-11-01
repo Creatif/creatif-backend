@@ -154,7 +154,8 @@ func (a *Model) Validate() map[string]string {
 					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this variable.")
 				}
 				return nil
-			})), validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			})),
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)
 

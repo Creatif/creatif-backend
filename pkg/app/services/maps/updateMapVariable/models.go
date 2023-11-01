@@ -86,19 +86,45 @@ type LogicResult struct {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"groups":       a.Values.Groups,
-		"mapName":      a.MapName,
-		"fieldsValid":  a.Fields,
-		"variableName": a.VariableName,
-		"behaviour":    a.Values.Behaviour,
-		"projectID":    a.ProjectID,
-		"locale":       a.Locale,
+		"groups":           a.Values.Groups,
+		"mapName":          a.MapName,
+		"id":               a.ID,
+		"mapIdExists":      nil,
+		"variableIdExists": nil,
+		"fieldsValid":      a.Fields,
+		"variableName":     a.VariableName,
+		"variableID":       a.VariableID,
+		"behaviour":        a.Values.Behaviour,
+		"projectID":        a.ProjectID,
+		"locale":           a.Locale,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("mapName", validation.Required, validation.RuneLength(1, 200)),
-			validation.Key("variableName", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("mapName", validation.When(a.MapName != "", validation.RuneLength(1, 200))),
+			validation.Key("id", validation.When(a.ID != "", validation.RuneLength(26, 26))),
+			validation.Key("mapIdExists", validation.By(func(value interface{}) error {
+				name := a.MapName
+				shortId := a.ShortID
+				id := a.ID
+
+				if name == "" && shortId == "" && id == "" {
+					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this map.")
+				}
+				return nil
+			})),
+			validation.Key("variableName", validation.When(a.VariableName != "", validation.RuneLength(1, 200))),
+			validation.Key("variableID", validation.When(a.VariableID != "", validation.RuneLength(26, 26))),
+			validation.Key("variableIdExists", validation.By(func(value interface{}) error {
+				name := a.VariableName
+				shortId := a.VariableShortID
+				id := a.VariableID
+
+				if name == "" && shortId == "" && id == "" {
+					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this variable.")
+				}
+				return nil
+			})),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("behaviour", validation.Required, validation.By(func(value interface{}) error {
 				v := value.(string)

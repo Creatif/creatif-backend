@@ -81,8 +81,10 @@ func (c Main) Logic() (LogicResult, error) {
 		for _, d := range domainEntries {
 			if d.ID != "" {
 				names = append(names, map[string]string{
-					"name": d.Name,
-					"type": "variable",
+					"name":    d.Name,
+					"ID":      d.ID,
+					"shortID": d.ShortID,
+					"type":    "variable",
 				})
 			}
 		}

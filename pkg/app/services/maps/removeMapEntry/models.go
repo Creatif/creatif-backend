@@ -9,18 +9,26 @@ import (
 )
 
 type Model struct {
-	Name      string `json:"name"`
-	EntryName string `json:"entryName"`
-	ProjectID string `json:"projectID"`
-	Locale    string `json:"locale"`
+	Name            string
+	MapID           string
+	MapShortID      string
+	VariableName    string
+	VariableID      string
+	VariableShortID string
+	ProjectID       string
+	Locale          string
 }
 
-func NewModel(projectId, locale, name, entryName string) Model {
+func NewModel(projectId, locale, name, mapId, mapShortId, variableName, variableID, variableShortID string) Model {
 	return Model{
-		Name:      name,
-		Locale:    locale,
-		ProjectID: projectId,
-		EntryName: entryName,
+		Name:            name,
+		MapID:           mapId,
+		MapShortID:      mapShortId,
+		Locale:          locale,
+		ProjectID:       projectId,
+		VariableName:    variableName,
+		VariableID:      variableID,
+		VariableShortID: variableShortID,
 	}
 }
 

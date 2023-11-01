@@ -23,7 +23,7 @@ func DeleteMapEntry() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := removeMapEntry.New(removeMapEntry.NewModel(model.ProjectID, model.Locale, model.Name, model.EntryName), auth.NewApiAuthentication(), l)
+		handler := removeMapEntry.New(removeMapEntry.NewModel(model.ProjectID, model.Locale, model.Name, model.MapID, model.MapShortID, model.VariableName, model.VariableID, model.VariableShortID), auth.NewApiAuthentication(), l)
 
 		return request.SendResponse[removeMapEntry.Model](handler, c, http.StatusOK, l)
 	}
