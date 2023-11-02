@@ -28,6 +28,8 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Locale,
 			model.Name,
+			model.ID,
+			model.ShortID,
 			model.Source,
 			model.Destination,
 		), auth.NewApiAuthentication(), l)

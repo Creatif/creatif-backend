@@ -47,7 +47,7 @@ func (c Main) Logic() (LogicResult, error) {
 		c.logBuilder.Add("switchByID", err.Error())
 		return LogicResult{}, appErrors.NewApplicationError(err)
 	}
-	source, destination, err := tryUpdates(c.model.ProjectID, localeID, c.model.Name, c.model.Source, c.model.Destination, 0, 10)
+	source, destination, err := tryUpdates(c.model.ProjectID, localeID, c.model.Name, c.model.ID, c.model.ShortID, c.model.Source, c.model.Destination, 0, 10)
 	if err != nil {
 		c.logBuilder.Add("switchByID", err.Error())
 		return LogicResult{}, appErrors.NewDatabaseError(err)

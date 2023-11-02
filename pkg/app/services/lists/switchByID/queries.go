@@ -2,6 +2,7 @@ package switchByID
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -9,9 +10,10 @@ import (
 	"time"
 )
 
-func queryList(tx *gorm.DB, projectId, name string) (declarations.List, error) {
+func queryList(tx *gorm.DB, projectId, name, id, shortID string) (declarations.List, error) {
+	id, val := shared.DetermineID("", name, id, shortID)
 	var list declarations.List
-	if res := tx.Table((declarations.List{}).TableName()).Where("project_id = ? AND name = ?", projectId, name).Select("ID").First(&list); res.Error != nil {
+	if res := tx.Table((declarations.List{}).TableName()).Where(fmt.Sprintf("project_id = ? AND %s", id), projectId, val).Select("ID").First(&list); res.Error != nil {
 		return declarations.List{}, res.Error
 	}
 
@@ -74,11 +76,11 @@ func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination decl
 	return toVariable, fromVariable, nil
 }
 
-func tryUpdates(projectId, localeID, name, s, d string, currentUpdate, maxUpdates int) (declarations.ListVariable, declarations.ListVariable, error) {
+func tryUpdates(projectId, localeID, name, id, shortID, s, d string, currentUpdate, maxUpdates int) (declarations.ListVariable, declarations.ListVariable, error) {
 	var to, from declarations.ListVariable
 	var lastError error
 	if err := storage.Gorm().Transaction(func(tx *gorm.DB) error {
-		list, err := queryList(tx, projectId, name)
+		list, err := queryList(tx, projectId, name, id, shortID)
 		if err != nil {
 			return err
 		}
@@ -105,7 +107,7 @@ func tryUpdates(projectId, localeID, name, s, d string, currentUpdate, maxUpdate
 		lastError = err
 		time.Sleep(time.Millisecond * 10)
 		if currentUpdate < maxUpdates {
-			return tryUpdates(projectId, localeID, name, s, d, currentUpdate+1, maxUpdates)
+			return tryUpdates(projectId, localeID, name, id, shortID, s, d, currentUpdate+1, maxUpdates)
 		}
 	}
 
