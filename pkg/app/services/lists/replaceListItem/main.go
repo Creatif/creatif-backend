@@ -55,7 +55,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		c.model.Variable.Groups = []string{}
 	}
 
-	listAndItem, err := queryListAndItem(c.model.ProjectID, c.model.Name, c.model.ItemName)
+	listAndItem, err := queryListAndItem(c.model.ProjectID, c.model.Name, c.model.ID, c.model.ShortID, c.model.ItemID, c.model.ItemShortID)
 	if err != nil {
 		c.logBuilder.Add("replaceListItem", err.Error())
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -73,6 +73,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		res := tx.Model(&listItem).Clauses(clause.Returning{Columns: []clause.Column{
 			{Name: "id"},
 			{Name: "name"},
+			{Name: "short_id"},
 			{Name: "behaviour"},
 			{Name: "metadata"},
 			{Name: "value"},

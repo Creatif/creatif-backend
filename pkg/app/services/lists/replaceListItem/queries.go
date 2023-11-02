@@ -2,6 +2,7 @@ package replaceListItem
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
@@ -14,13 +15,15 @@ type ListWithItem struct {
 	ItemIndex time.Time
 }
 
-func queryListAndItem(projectId, listName, itemName string) (ListWithItem, error) {
+func queryListAndItem(projectId, listName, listId, listShortId, itemID, itemShortID string) (ListWithItem, error) {
+	listId, listVal := shared.DetermineID("l", listName, listId, listShortId)
+	varId, varVal := shared.DetermineID("lv", "", itemID, itemShortID)
 	sql := fmt.Sprintf(`
-		SELECT lv.id as item_id, lv.index as item_index, l.id as list_id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.project_id = ? AND l.name = ? AND lv.name = ?
-`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
+		SELECT lv.id as item_id, lv.index as item_index, l.id as list_id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.project_id = ? AND %s AND %s
+`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName(), listId, varId)
 
 	var variable ListWithItem
-	res := storage.Gorm().Raw(sql, projectId, listName, itemName).Scan(&variable)
+	res := storage.Gorm().Raw(sql, projectId, listVal, varVal).Scan(&variable)
 	if res.Error != nil {
 		return ListWithItem{}, res.Error
 	}

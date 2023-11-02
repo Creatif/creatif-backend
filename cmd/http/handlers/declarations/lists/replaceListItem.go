@@ -28,7 +28,10 @@ func ReplaceListItemHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Locale,
 			model.Name,
-			model.ItemName,
+			model.ID,
+			model.ShortID,
+			model.ItemID,
+			model.ItemShortID,
 			replaceListItem.Variable{
 				Name:      model.Variable.Name,
 				Metadata:  []byte(model.Variable.Metadata),
