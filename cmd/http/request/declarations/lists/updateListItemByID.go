@@ -14,21 +14,27 @@ type UpdateListItemByIDValues struct {
 }
 
 type UpdateListItemByID struct {
-	Fields    []string                 `query:"projectID"`
-	ListName  string                   `param:"name"`
-	Locale    string                   `param:"locale"`
-	ItemID    string                   `param:"itemID"`
-	Values    UpdateListItemByIDValues `json:"values"`
-	ProjectID string                   `param:"projectID"`
+	Fields      []string                 `query:"projectID"`
+	ListName    string                   `param:"name"`
+	ListID      string                   `json:"id"`
+	ListShortID string                   `json:"shortID"`
+	Locale      string                   `param:"locale"`
+	ItemID      string                   `param:"itemID"`
+	ItemShortID string                   `param:"itemShortID"`
+	Values      UpdateListItemByIDValues `json:"values"`
+	ProjectID   string                   `param:"projectID"`
 }
 
 func SanitizeUpdateListItemByID(model UpdateListItemByID) UpdateListItemByID {
 	p := bluemonday.StrictPolicy()
 
 	model.ListName = p.Sanitize(model.ListName)
+	model.ListID = p.Sanitize(model.ListID)
+	model.ListShortID = p.Sanitize(model.ListShortID)
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
 	model.ItemID = p.Sanitize(model.ItemID)
+	model.ItemShortID = p.Sanitize(model.ItemShortID)
 	model.Fields = sdk.Map(model.Fields, func(idx int, value string) string {
 		return p.Sanitize(value)
 	})

@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
@@ -97,8 +98,9 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		return declarations.ListVariable{}, appErrors.NewNotFoundError(err).AddError("updateListItemByID.Logic", nil)
 	}
 
+	listId, listVal := shared.DetermineID("", c.model.ListName, c.model.ListID, c.model.ListShortID)
 	var list declarations.List
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.ListName, c.model.ProjectID, localeID).Select("id").First(&list); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", listId), listVal, c.model.ProjectID, localeID).Select("id").First(&list); res.Error != nil {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
@@ -108,8 +110,9 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByID.Logic", nil)
 	}
 
+	varId, varVal := shared.DetermineID("", "", c.model.ItemID, c.model.ItemShortID)
 	var existing declarations.ListVariable
-	if res := storage.Gorm().Where("id = ? AND list_id = ? AND locale_id = ?", c.model.ItemID, list.ID, localeID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("%s AND list_id = ? AND locale_id = ?", varId), varVal, list.ID, localeID).First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {

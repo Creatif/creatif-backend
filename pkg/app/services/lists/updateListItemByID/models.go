@@ -29,21 +29,27 @@ type ModelValues struct {
 }
 
 type Model struct {
-	Fields    []string
-	ListName  string
-	Locale    string
-	ItemID    string
-	Values    ModelValues
-	ProjectID string
+	Fields      []string
+	ListName    string
+	ListID      string
+	ListShortID string
+	Locale      string
+	ItemID      string
+	ItemShortID string
+	Values      ModelValues
+	ProjectID   string
 }
 
-func NewModel(projectId, locale string, fields []string, listName, itemId, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
+func NewModel(projectId, locale string, fields []string, listName, listID, listShortID, itemId, itemShortId, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
 	return Model{
-		Fields:    fields,
-		ProjectID: projectId,
-		Locale:    locale,
-		ListName:  listName,
-		ItemID:    itemId,
+		Fields:      fields,
+		ProjectID:   projectId,
+		Locale:      locale,
+		ListName:    listName,
+		ListID:      listID,
+		ListShortID: listShortID,
+		ItemID:      itemId,
+		ItemShortID: itemShortId,
 		Values: ModelValues{
 			Name:      updatingName,
 			Metadata:  metadata,
@@ -56,17 +62,48 @@ func NewModel(projectId, locale string, fields []string, listName, itemId, updat
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"fieldsValid": a.Fields,
-		"name":        a.Values.Name,
-		"projectID":   a.ProjectID,
-		"locale":      a.Locale,
-		"groups":      a.Values.Groups,
-		"behaviour":   a.Values.Behaviour,
+		"fieldsValid":  a.Fields,
+		"name":         a.ListName,
+		"id":           a.ListID,
+		"idExists":     nil,
+		"itemIDExists": nil,
+		"projectID":    a.ProjectID,
+		"locale":       a.Locale,
+		"groups":       a.Values.Groups,
+		"behaviour":    a.Values.Behaviour,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("name", validation.When(a.ListName != "", validation.RuneLength(1, 200))),
+			validation.Key("id", validation.When(a.ListID != "", validation.RuneLength(26, 26))),
+			validation.Key("idExists", validation.By(func(value interface{}) error {
+				name := a.ListName
+				shortId := a.ListShortID
+				id := a.ListID
+
+				if id != "" && len(id) != 26 {
+					return errors.New("ID must have 26 characters")
+				}
+
+				if name == "" && shortId == "" && id == "" {
+					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this list.")
+				}
+				return nil
+			})),
+			validation.Key("itemIDExists", validation.By(func(value interface{}) error {
+				shortId := a.ItemShortID
+				id := a.ItemID
+
+				if id != "" && len(id) != 26 {
+					return errors.New("ID must have 26 characters")
+				}
+
+				if shortId == "" && id == "" {
+					return errors.New("At least one of 'id' or 'shortID' must be supplied in order to identify this variable.")
+				}
+				return nil
+			})),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
 				t := value.([]string)
