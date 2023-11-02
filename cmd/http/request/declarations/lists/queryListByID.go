@@ -5,10 +5,13 @@ import (
 )
 
 type QueryListByID struct {
-	Name      string `param:"name"`
-	ID        string `param:"id"`
-	ProjectID string `param:"projectID"`
-	Locale    string `param:"locale"`
+	Name        string `param:"name"`
+	ShortID     string `json:"shortID"`
+	ID          string `json:"id"`
+	ItemID      string `json:"itemID"`
+	ItemShortID string `json:"itemShortID"`
+	ProjectID   string `param:"projectID"`
+	Locale      string `param:"locale"`
 }
 
 func SanitizeQueryListByID(model QueryListByID) QueryListByID {
@@ -17,6 +20,9 @@ func SanitizeQueryListByID(model QueryListByID) QueryListByID {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
 	model.ID = p.Sanitize(model.ID)
+	model.ShortID = p.Sanitize(model.ShortID)
+	model.ItemID = p.Sanitize(model.ItemID)
+	model.ItemShortID = p.Sanitize(model.ItemShortID)
 
 	return model
 }

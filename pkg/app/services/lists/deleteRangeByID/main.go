@@ -65,7 +65,7 @@ func (c Main) Logic() (*struct{}, error) {
 		c.logBuilder.Add("deleteRangeByID", res.Error.Error())
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
 	}
-	
+
 	if res.RowsAffected == 0 {
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteRangeByID.Logic", nil)
 	}

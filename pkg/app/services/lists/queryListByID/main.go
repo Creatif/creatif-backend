@@ -5,10 +5,12 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
+	"errors"
 	"fmt"
 )
 
@@ -50,13 +52,18 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		c.logBuilder.Add("queryListByID", err.Error())
 		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("queryListByID.Logic", nil)
 	}
-	var variable declarations.ListVariable
-	res := storage.Gorm().
-		Raw(fmt.Sprintf(`
+
+	listId, listVal := shared.DetermineID("l", c.model.Name, c.model.ID, c.model.ShortID)
+	listItemID, listItemVal := shared.DetermineID("lv", "", c.model.ItemID, c.model.ItemShortID)
+	sql := fmt.Sprintf(`
 			SELECT lv.id, lv.name, lv.index, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at
 			FROM %s AS lv INNER JOIN %s AS l
-			ON l.project_id = ? AND l.name = ? AND lv.list_id = l.id AND lv.id = ? AND l.locale_id = ?`,
-			(declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()), c.model.ProjectID, c.model.Name, c.model.ID, localeID).
+			ON l.project_id = ? AND %s AND lv.list_id = l.id AND %s AND l.locale_id = ?`,
+		(declarations.ListVariable{}).TableName(), (declarations.List{}).TableName(), listId, listItemID)
+
+	var variable declarations.ListVariable
+	res := storage.Gorm().
+		Raw(sql, c.model.ProjectID, listVal, listItemVal, localeID).
 		Scan(&variable)
 
 	if res.Error != nil {
@@ -66,7 +73,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 
 	if res.RowsAffected == 0 {
 		c.logBuilder.Add("queryListByID", "No rows returned. 404 status code.")
-		return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("queryListByID.Logic", nil)
+		return declarations.ListVariable{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryListByID.Logic", nil)
 	}
 
 	return variable, nil
