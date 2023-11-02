@@ -5,11 +5,15 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
+	"errors"
+	"fmt"
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -49,10 +53,14 @@ func (c Main) Logic() (declarations.List, error) {
 		return declarations.List{}, appErrors.NewApplicationError(err).AddError("appendToList.Logic", nil)
 	}
 
+	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var list declarations.List
-	if err := storage.GetBy((declarations.List{}).TableName(), "name", c.model.Name, &list, "id"); err != nil {
-		c.logBuilder.Add("appendToList", err.Error())
-		return declarations.List{}, appErrors.NewNotFoundError(err).AddError("appendToList.Logic", nil)
+	if res := storage.Gorm().Where(fmt.Sprintf("%s", id), val).First(&list); res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return declarations.List{}, appErrors.NewNotFoundError(res.Error).AddError("appendToList.Logic", nil)
+		}
+
+		return declarations.List{}, appErrors.NewDatabaseError(res.Error).AddError("appendToList.Logic", nil)
 	}
 
 	for _, v := range c.model.Variables {

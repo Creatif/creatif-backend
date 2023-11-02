@@ -29,6 +29,8 @@ func AppendToListHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Locale,
 			model.Name,
+			model.ID,
+			model.ShortID,
 			sdk.Map(model.Variables, func(idx int, value lists.AppendToListVariable) appendToList.Variable {
 				return appendToList.Variable{
 					Name:      value.Name,
