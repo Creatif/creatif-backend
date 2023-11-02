@@ -5,11 +5,13 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -51,8 +53,9 @@ func (c Main) Logic() (declarations.List, error) {
 		return declarations.List{}, appErrors.NewNotFoundError(err).AddError("updateList.Logic", nil)
 	}
 
+	listId, listVal := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var existing declarations.List
-	if res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", listId), listVal, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateList", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {

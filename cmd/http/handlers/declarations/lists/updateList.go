@@ -29,6 +29,8 @@ func UpdateListHandler() func(e echo.Context) error {
 			model.Locale,
 			model.Fields,
 			model.Name,
+			model.ID,
+			model.ShortID,
 			model.Values.Name,
 		), auth.NewApiAuthentication(), l)
 
