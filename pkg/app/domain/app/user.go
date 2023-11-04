@@ -13,6 +13,12 @@ type User struct {
 	Name     string
 	LastName string
 	Email    string `gorm:"index"`
+	Password string
+
+	Confirmed      bool
+	PolicyAccepted bool
+
+	Provider string
 
 	Projects []Project `gorm:"foreignKey:UserID;references:ID"`
 
@@ -20,9 +26,15 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func NewUser(name, lastName, email string) User {
+func NewUser(name, lastName, email, password, provider string, confirmed, policyAccepted bool) User {
 	return User{
-		Name: name,
+		Name:           name,
+		LastName:       lastName,
+		Email:          email,
+		Password:       password,
+		Provider:       provider,
+		Confirmed:      confirmed,
+		PolicyAccepted: policyAccepted,
 	}
 }
 
