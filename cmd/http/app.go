@@ -1,7 +1,8 @@
 package main
 
 import (
-	appHandlers "creatif/cmd/http/handlers/app"
+	authHandlers "creatif/cmd/http/handlers/app/auth"
+	appHandlers "creatif/cmd/http/handlers/app/project"
 	"creatif/cmd/http/handlers/declarations/combined"
 	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
@@ -44,7 +45,7 @@ func app() {
 	srv := setupServer()
 	srv.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowCredentials: true,
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderCookie, echo.HeaderAccessControlAllowCredentials},
 		AllowMethods:     []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))
@@ -57,6 +58,8 @@ func app() {
 
 func appRoutes(group *echo.Group) {
 	group.PUT("/project", appHandlers.CreateProjectHandler())
+
+	group.PUT("/register/email", authHandlers.CreateRegisterEmailHandler())
 }
 
 func declarationRoutes(group *echo.Group) {

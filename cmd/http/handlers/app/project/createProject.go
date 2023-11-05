@@ -1,10 +1,10 @@
-package app
+package project
 
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/app"
-	create "creatif/pkg/app/app/createProject"
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -20,8 +20,8 @@ func CreateProjectHandler() func(e echo.Context) error {
 		model = app.SanitizeProject(model)
 
 		l := logger.NewLogBuilder()
-		handler := create.New(create.NewModel(model.Name), auth.NewFrontendAuthentication(), l)
+		handler := createProject.New(createProject.NewModel(model.Name), auth.NewFrontendAuthentication(), l)
 
-		return request.SendResponse[create.Model](handler, c, http.StatusCreated, l)
+		return request.SendResponse[createProject.Model](handler, c, http.StatusCreated, l)
 	}
 }
