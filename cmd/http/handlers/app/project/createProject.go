@@ -22,6 +22,6 @@ func CreateProjectHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := createProject.New(createProject.NewModel(model.Name), auth.NewFrontendAuthentication(), l)
 
-		return request.SendResponse[createProject.Model](handler, c, http.StatusCreated, l)
+		return request.SendResponse[createProject.Model](handler, c, http.StatusCreated, l, nil)
 	}
 }

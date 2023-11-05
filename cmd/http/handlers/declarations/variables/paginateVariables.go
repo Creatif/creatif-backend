@@ -37,6 +37,6 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 			sdk.ParseFilters(model.Filters),
 		), auth.NewApiAuthentication(), l)
 
-		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK, l)
+		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK, l, nil)
 	}
 }

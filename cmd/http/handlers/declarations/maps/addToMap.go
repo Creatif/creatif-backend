@@ -31,6 +31,6 @@ func AddToMapHandler() func(e echo.Context) error {
 			Value:     []byte(model.Entry.Value),
 		}), auth.NewApiAuthentication(), l)
 
-		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l)
+		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l, nil)
 	}
 }

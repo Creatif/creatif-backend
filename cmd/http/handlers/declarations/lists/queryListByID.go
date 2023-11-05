@@ -34,6 +34,6 @@ func QueryListByIDHandler() func(e echo.Context) error {
 			model.ItemShortID,
 		), auth.NewApiAuthentication(), l)
 
-		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK, l)
+		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK, l, nil)
 	}
 }

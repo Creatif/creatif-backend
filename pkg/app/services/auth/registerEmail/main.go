@@ -41,7 +41,7 @@ func (c Main) Logic() (interface{}, error) {
 		return nil, appErrors.NewUnexpectedError(err)
 	}
 
-	user := app.NewUser(c.model.Name, c.model.LastName, c.model.Email, pass, auth2.EmailProvider, false, c.model.PolicyAccepted)
+	user := app.NewUser(c.model.Name, c.model.LastName, c.model.Email, pass, auth2.EmailProvider, true, c.model.PolicyAccepted)
 
 	if res := storage.Gorm().Create(&user); res.Error != nil {
 		return nil, appErrors.NewDatabaseError(res.Error)

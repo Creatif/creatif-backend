@@ -106,6 +106,18 @@ func NewUnexpectedError(err error) AppError[struct{}] {
 	}
 }
 
+func NewUserUnconfirmedError(err error) AppError[struct{}] {
+	errs := make([]error, 0)
+	errs = append(errs, err)
+
+	return &appError[struct{}]{
+		data:   struct{}{},
+		t:      USER_UNCOFIRMED,
+		errors: errs,
+		stack:  nil,
+	}
+}
+
 func NewNotFoundError(err error) AppError[struct{}] {
 	errs := make([]error, 0)
 	errs = append(errs, err)

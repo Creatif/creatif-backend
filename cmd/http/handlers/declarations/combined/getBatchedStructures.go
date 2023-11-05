@@ -26,6 +26,6 @@ func GetBatchedStructuresHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := getBatchStructures2.New(getBatchStructures2.NewModel(model.ProjectID, serviceModel), auth.NewApiAuthentication(), l)
 
-		return request.SendResponse[*getBatchStructures2.Model](handler, c, http.StatusCreated, l)
+		return request.SendResponse[*getBatchStructures2.Model](handler, c, http.StatusCreated, l, nil)
 	}
 }

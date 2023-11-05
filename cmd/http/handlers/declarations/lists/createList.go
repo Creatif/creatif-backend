@@ -40,6 +40,6 @@ func CreateListHandler() func(e echo.Context) error {
 			}),
 		), auth.NewApiAuthentication(), l)
 
-		return request.SendResponse[createList.Model](handler, c, http.StatusCreated, l)
+		return request.SendResponse[createList.Model](handler, c, http.StatusCreated, l, nil)
 	}
 }

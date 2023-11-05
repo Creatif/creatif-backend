@@ -4,7 +4,6 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
@@ -19,12 +18,13 @@ type ErrorResponse[T any] struct {
 	Data T `json:"data"`
 }
 
-func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, logger logger.LogBuilder) error {
+func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, logger logger.LogBuilder, callback func(c echo.Context, model interface{})) error {
 	model, err := handler.Handle()
 
 	if err != nil {
 		validationError, ok := err.(appErrors.AppError[map[string]string])
 		if ok {
+			callCallback(context, validationError, callback)
 			if err := flushLogger(logger, "info", context); err != nil {
 				return err
 			}
@@ -35,26 +35,42 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 
 		otherError, ok := err.(appErrors.AppError[struct{}])
 		if ok {
+			callCallback(context, otherError, callback)
 			if otherError.Type() == appErrors.AUTHENTICATION_ERROR {
 				if err := flushLogger(logger, "info", context); err != nil {
 					return err
 				}
-				return context.JSON(http.StatusForbidden, ErrorResponse[string]{
-					Data: "Unauthenticated!",
+				return context.JSON(http.StatusForbidden, ErrorResponse[map[string]string]{
+					Data: map[string]string{
+						"unauthenticated": "You are not authenticated",
+					},
 				})
 			} else if otherError.Type() == appErrors.AUTHORIZATION_ERROR {
 				if err := flushLogger(logger, "info", context); err != nil {
 					return err
 				}
-				return context.JSON(http.StatusUnauthorized, ErrorResponse[string]{
-					Data: "Unauthorized!",
+				return context.JSON(http.StatusUnauthorized, ErrorResponse[map[string]string]{
+					Data: map[string]string{
+						"unauthorized": "You are not authorized",
+					},
 				})
 			} else if otherError.Type() == appErrors.NOT_FOUND_ERROR {
 				if err := flushLogger(logger, "info", context); err != nil {
 					return err
 				}
-				return context.JSON(http.StatusNotFound, ErrorResponse[string]{
-					Data: "The resource does not exist.",
+				return context.JSON(http.StatusNotFound, ErrorResponse[map[string]string]{
+					Data: map[string]string{
+						"notExists": "The requested resource does not exist.",
+					},
+				})
+			} else if otherError.Type() == appErrors.USER_UNCOFIRMED {
+				if err := flushLogger(logger, "info", context); err != nil {
+					return err
+				}
+				return context.JSON(http.StatusNotFound, ErrorResponse[map[string]string]{
+					Data: map[string]string{
+						"userUnconfirmed": "The user is unconfirmed",
+					},
 				})
 			}
 
@@ -62,7 +78,6 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 				if err := flushLogger(logger, "error", context); err != nil {
 					return err
 				}
-				fmt.Println(otherError)
 				return context.JSON(http.StatusInternalServerError, ErrorResponse[DevErrorResponse]{
 					Data: DevErrorResponse{
 						StackTrace: otherError.StackTrace(),
@@ -72,6 +87,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 			}
 		}
 
+		callCallback(context, model, callback)
 		if err := flushLogger(logger, "error", context); err != nil {
 			return err
 		}
@@ -95,4 +111,10 @@ func flushLogger(logger logger.LogBuilder, t string, context echo.Context) error
 	}
 
 	return nil
+}
+
+func callCallback(c echo.Context, model interface{}, cb func(c echo.Context, model interface{})) {
+	if cb != nil {
+		cb(c, model)
+	}
 }

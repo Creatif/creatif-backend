@@ -3,7 +3,9 @@ package app
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
+	"math/rand"
 	"time"
 )
 
@@ -12,9 +14,10 @@ type User struct {
 
 	Name     string
 	LastName string
-	Email    string `gorm:"index"`
+	Email    string `gorm:"uniqueIndex"`
 	Password string
 
+	Key            string `gorm:"uniqueIndex"`
 	Confirmed      bool
 	PolicyAccepted bool
 
@@ -39,6 +42,15 @@ func NewUser(name, lastName, email, password, provider string, confirmed, policy
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, 6)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+
+	key := ksuid.New().String() + string(b)
+	u.Key = key
+
 	return nil
 }
 

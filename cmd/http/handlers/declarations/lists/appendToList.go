@@ -42,6 +42,6 @@ func AppendToListHandler() func(e echo.Context) error {
 			}),
 		), auth.NewApiAuthentication(), l)
 
-		return request.SendResponse[appendToList.Model](handler, c, http.StatusCreated, l)
+		return request.SendResponse[appendToList.Model](handler, c, http.StatusCreated, l, nil)
 	}
 }

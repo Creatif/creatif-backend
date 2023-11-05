@@ -33,6 +33,6 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 			model.Items,
 		), auth.NewApiAuthentication(), l)
 
-		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, l)
+		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, l, nil)
 	}
 }
