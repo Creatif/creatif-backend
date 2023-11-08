@@ -20,6 +20,14 @@ func (a *noopAuthentication) User() AuthenticatedUser {
 	}
 }
 
+func (a *noopAuthentication) Refresh() (string, error) {
+	return "", nil
+}
+
+func (a *noopAuthentication) ShouldRefresh() bool {
+	return false
+}
+
 func NewNoopAuthentication() Authentication {
 	return &noopAuthentication{}
 }

@@ -10,6 +10,7 @@ import (
 	"creatif/cmd/http/handlers/declarations/variables"
 	"creatif/cmd/server"
 	"creatif/pkg/lib/storage"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -20,6 +21,8 @@ func app() {
 	runLogger()
 	runAssets()
 	runDb()
+
+	fmt.Println(len("2XkxS6oynomNaYFzHK8nyfomiUYsXCZuY"))
 	if err := releaseAllLocks(); err != nil {
 		sqlDB, err := storage.SQLDB()
 		if err != nil {
@@ -60,7 +63,7 @@ func appRoutes(group *echo.Group) {
 	group.PUT("/project", appHandlers.CreateProjectHandler())
 
 	group.PUT("/register/email", authHandlers.CreateRegisterEmailHandler())
-	group.PUT("/login/email", authHandlers.CreateLoginEmailHandler())
+	group.POST("/login/email", authHandlers.CreateLoginEmailHandler())
 }
 
 func declarationRoutes(group *echo.Group) {

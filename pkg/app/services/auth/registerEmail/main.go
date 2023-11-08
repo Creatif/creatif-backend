@@ -8,6 +8,9 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
+	"errors"
+	"fmt"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -20,6 +23,15 @@ func (c Main) Validate() error {
 	c.logBuilder.Add("registerEmail", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
+	}
+
+	var user app.User
+	if res := storage.Gorm().Where("email = ?", user.Email).Select("id").First(&user); res.Error != nil {
+		if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return appErrors.NewValidationError(map[string]string{
+				"email": fmt.Sprintf("Invalid email"),
+			})
+		}
 	}
 
 	c.logBuilder.Add("registerEmail", "Validated.")

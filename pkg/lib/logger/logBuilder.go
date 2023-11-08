@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -26,7 +25,7 @@ func (l *logBuilder) Add(key, message string) {
 	} else {
 		l.equalKeyCounter[key] = l.equalKeyCounter[key] + 1
 	}
-	
+
 	l.messages[fmt.Sprintf("%s_%d", key, l.equalKeyCounter[key])] = message
 }
 
@@ -49,7 +48,9 @@ func (l *logBuilder) Flush(t string) error {
 		return nil
 	}
 
-	return errors.New(fmt.Sprintf("Could not determine type of message. '%s' given.", t))
+	Error(l.messages)
+
+	return nil
 }
 
 func NewLogBuilder() LogBuilder {

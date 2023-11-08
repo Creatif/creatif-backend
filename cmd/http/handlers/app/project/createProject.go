@@ -18,10 +18,21 @@ func CreateProjectHandler() func(e echo.Context) error {
 		}
 
 		model = app.SanitizeProject(model)
-
 		l := logger.NewLogBuilder()
-		handler := createProject.New(createProject.NewModel(model.Name), auth.NewFrontendAuthentication(), l)
+		authentication := auth.NewFrontendAuthentication(request.GetAuthenticationCookie(c), l)
+		handler := createProject.New(createProject.NewModel(model.Name), authentication, l)
 
-		return request.SendResponse[createProject.Model](handler, c, http.StatusCreated, l, nil)
+		return request.SendResponse[createProject.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		})
 	}
 }

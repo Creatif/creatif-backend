@@ -20,13 +20,14 @@ func NewModel(email, password string) Model {
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"email": a.Email,
+		"email":    a.Email,
+		"password": a.Password,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("email", is.Email),
-			validation.Key("email", validation.Required, validation.RuneLength(8, 20)),
+			validation.Key("password", validation.Required, validation.RuneLength(8, 20)),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

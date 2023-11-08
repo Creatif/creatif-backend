@@ -43,7 +43,7 @@ func NewUser(name, lastName, email, password, provider string, confirmed, policy
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	b := make([]rune, 6)
+	b := make([]rune, 5)
 	for i := range b {
 		b[i] = letters[rand.Intn(len(letters))]
 	}

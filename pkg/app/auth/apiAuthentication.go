@@ -20,6 +20,14 @@ func (a *apiAuthentication) User() AuthenticatedUser {
 	}
 }
 
+func (a *apiAuthentication) Refresh() (string, error) {
+	return "", nil
+}
+
+func (a *apiAuthentication) ShouldRefresh() bool {
+	return false
+}
+
 func NewApiAuthentication() Authentication {
 	return &apiAuthentication{}
 }
