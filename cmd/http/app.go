@@ -62,8 +62,9 @@ func app() {
 func appRoutes(group *echo.Group) {
 	group.PUT("/project", appHandlers.CreateProjectHandler())
 
-	group.PUT("/register/email", authHandlers.CreateRegisterEmailHandler())
-	group.POST("/login/email", authHandlers.CreateLoginEmailHandler())
+	group.PUT("/auth/register/email", authHandlers.CreateRegisterEmailHandler())
+	group.POST("/auth/login/email", authHandlers.CreateLoginEmailHandler())
+	group.POST("/auth/frontend-authenticated", authHandlers.CreateIsFrontendAuthenticated())
 }
 
 func declarationRoutes(group *echo.Group) {

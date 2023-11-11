@@ -29,7 +29,7 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	return nil
+	return c.auth.Authenticate()
 }
 
 func (c Main) Authorize() error {
