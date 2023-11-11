@@ -30,15 +30,19 @@ func (a *frontendAuthentication) Authenticate() error {
 		return errors.New("Unauthenticated")
 	}
 
-	var session AuthenticationSession
+	var session AuthenticatedFrontendSession
 	if err := json.Unmarshal(jsonToken, &session); err != nil {
 		a.logBuilder.Add("authentication.sessionDecode", err.Error())
 		return errors.New("Unauthenticated")
 	}
 
+	if session.Type != "frontend" {
+		return errors.New("Unauthenticated")
+	}
+
 	var user app.User
 	if res := storage.Gorm().Where("id = ?", session.ID).Select("key", "email").First(&user); res.Error != nil {
-		a.logBuilder.Add("authentication.userNotFound", err.Error())
+		a.logBuilder.Add("authentication.userNotFound", res.Error.Error())
 		return errors.New("Unauthenticated")
 	}
 
@@ -94,6 +98,10 @@ func (a *frontendAuthentication) User() AuthenticatedUser {
 
 func (a *frontendAuthentication) ShouldRefresh() bool {
 	return a.doRefresh
+}
+
+func (a *frontendAuthentication) Logout(cb func()) {
+	cb()
 }
 
 func (a *frontendAuthentication) Refresh() (string, error) {

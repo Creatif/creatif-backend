@@ -15,9 +15,10 @@ type AuthenticatedUser struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-type AuthenticationSession struct {
+type AuthenticatedFrontendSession struct {
 	ID    string `json:"id"`
 	Token string `json:"token"`
+	Type  string `json:"frontend"`
 }
 
 func NewAuthenticatedUser(id, name, lastName, email string, createdAt, updatedAt, refresh time.Time) AuthenticatedUser {
@@ -34,10 +35,11 @@ func NewAuthenticatedUser(id, name, lastName, email string, createdAt, updatedAt
 	}
 }
 
-func NewAuthenticationSession(id, token string) AuthenticationSession {
-	return AuthenticationSession{
+func NewAuthenticatedFrontendSession(id, token string) AuthenticatedFrontendSession {
+	return AuthenticatedFrontendSession{
 		ID:    id,
 		Token: token,
+		Type:  "frontend",
 	}
 }
 
@@ -46,6 +48,7 @@ type Authentication interface {
 	User() AuthenticatedUser
 	ShouldRefresh() bool
 	Refresh() (string, error)
+	Logout(func())
 }
 
 type Loginer interface {

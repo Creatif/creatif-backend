@@ -24,6 +24,9 @@ func (a *noopAuthentication) Refresh() (string, error) {
 	return "", nil
 }
 
+func (a *noopAuthentication) Logout(cb func()) {
+}
+
 func (a *noopAuthentication) ShouldRefresh() bool {
 	return false
 }

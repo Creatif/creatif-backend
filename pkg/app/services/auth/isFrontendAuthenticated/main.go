@@ -3,6 +3,7 @@ package isFrontendAuthenticated
 import (
 	"creatif/pkg/app/auth"
 	pkg "creatif/pkg/lib"
+	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 )
 
@@ -17,7 +18,7 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return err
+		return appErrors.NewAuthenticationError(err)
 	}
 
 	return nil

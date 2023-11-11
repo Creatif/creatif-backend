@@ -28,6 +28,9 @@ func (a *apiAuthentication) ShouldRefresh() bool {
 	return false
 }
 
+func (a *apiAuthentication) Logout(cb func()) {
+}
+
 func NewApiAuthentication() Authentication {
 	return &apiAuthentication{}
 }

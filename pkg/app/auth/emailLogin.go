@@ -27,7 +27,7 @@ func (e EmailLogin) Login() (string, error) {
 	}
 
 	token := base64.StdEncoding.EncodeToString(encryptedUser)
-	session := NewAuthenticationSession(e.user.ID, token)
+	session := NewAuthenticatedFrontendSession(e.user.ID, token)
 
 	b, err := json.Marshal(session)
 	if err != nil {
