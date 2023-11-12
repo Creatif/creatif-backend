@@ -17,7 +17,7 @@ var _ = ginkgo.Describe("Register account tests", func() {
 			"password",
 			true,
 		),
-			auth.NewNoopAuthentication(),
+			auth.NewNoopAuthentication(false),
 			logger.NewLogBuilder())
 
 		_, err := handler.Handle()

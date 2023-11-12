@@ -15,7 +15,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("one-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel(projectId, "eng", "created_at", "", "desc", 10, 1, []string{"one"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "created_at", "", "desc", 10, 1, []string{"one"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -29,7 +29,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("one-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel(projectId, "eng", "created_at", "", "desc", 10, 50, []string{"one"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "created_at", "", "desc", 10, 50, []string{"one"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -43,7 +43,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("one-%d", i), "modifiable")
 		}
 
-		handler := New(NewModel(projectId, "eng", "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -55,7 +55,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		projectId := testCreateProject("project")
 		testCreateVariablesWithFragmentedGroups(projectId, "modifiable", 100)
 
-		handler := New(NewModel(projectId, "eng", "created_at", "", "desc", 75, 1, []string{"one"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "created_at", "", "desc", 75, 1, []string{"one"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -67,7 +67,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		projectId := testCreateProject("project")
 		testCreateVariablesWithFragmentedGroups(projectId, "modifiable", 100)
 
-		handler := New(NewModel(projectId, "eng", "created_at", "1", "desc", 10, 1, []string{}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "created_at", "1", "desc", 10, 1, []string{}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -79,7 +79,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 		projectId := testCreateProject("project")
 		testCreateVariablesWithFragmentedGroups(projectId, "modifiable", 100)
 
-		handler := New(NewModel(projectId, "eng", "created_at", "1", "desc", 10, 1, []string{"one"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "created_at", "1", "desc", 10, 1, []string{"one"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

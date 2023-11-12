@@ -13,7 +13,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		name := "variable"
 		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 
-		handler := New(NewModel(projectId, createdVariable.Name, "", "", "eng", []string{}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, createdVariable.Name, "", "", "eng", []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		variable, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 
@@ -39,7 +39,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		name := "variable"
 		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 
-		handler := New(NewModel(projectId, "", createdVariable.ID, "", "eng", []string{}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "", createdVariable.ID, "", "eng", []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		variable, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 
@@ -65,7 +65,7 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 		name := "variable"
 		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 
-		handler := New(NewModel(projectId, "", "", createdVariable.ShortID, "eng", []string{}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "", "", createdVariable.ShortID, "eng", []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		variable, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

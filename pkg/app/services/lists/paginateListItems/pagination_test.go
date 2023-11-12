@@ -12,7 +12,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 1, []string{"one"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 1, []string{"one"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -24,7 +24,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 50, []string{"one"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 50, []string{"one"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -36,7 +36,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -48,7 +48,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _, groups := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 50, 1, []string{"one"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "", "desc", 50, 1, []string{"one"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -60,7 +60,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "1", "desc", 10, 1, []string{}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "1", "desc", 10, 1, []string{}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -72,7 +72,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		listName, _, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "eng", listName, "created_at", "1", "desc", 10, 1, []string{"one"}, nil), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "created_at", "1", "desc", 10, 1, []string{"one"}, nil), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

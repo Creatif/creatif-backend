@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		entryName := variables[0]["name"]
-		handler := New(NewModel(projectId, "eng", "mapName", "", "", entryName, "", ""), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName", "", "", entryName, "", ""), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -33,7 +33,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		shortId := variables[0]["shortID"]
-		handler := New(NewModel(projectId, "eng", "", view.ID, "", "", "", shortId), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "", view.ID, "", "", "", shortId), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -48,7 +48,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		variableName := variables[0]["name"]
-		handler := New(NewModel(projectId, "eng", "", "", view.ShortID, variableName, "", ""), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "", "", view.ShortID, variableName, "", ""), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -63,7 +63,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		shortId := variables[0]["shortID"]
-		handler := New(NewModel(projectId, "eng", view.Name, "", "", "", "", shortId), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", view.Name, "", "", "", "", shortId), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

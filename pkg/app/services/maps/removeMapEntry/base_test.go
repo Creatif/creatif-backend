@@ -109,7 +109,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -170,7 +170,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 		})
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

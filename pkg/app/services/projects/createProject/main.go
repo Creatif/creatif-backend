@@ -29,7 +29,11 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	return c.auth.Authenticate()
+	if err := c.auth.Authenticate(); err != nil {
+		return appErrors.NewAuthenticationError(err)
+	}
+
+	return nil
 }
 
 func (c Main) Authorize() error {
@@ -37,7 +41,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (app.Project, error) {
-	model := app.NewProject(c.model.Name)
+	model := app.NewProject(c.model.Name, c.auth.User().ID)
 
 	if err := storage.Create((app.Project{}).TableName(), &model, false); err != nil {
 		c.logBuilder.Add("error", err.Error())

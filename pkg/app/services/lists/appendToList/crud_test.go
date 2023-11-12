@@ -24,7 +24,7 @@ var _ = ginkgo.Describe("Declaration list append tests", func() {
 			}
 		}
 
-		handler := New(NewModel(projectId, "eng", listName, "", "", variables), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "", "", variables), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 
 		list, err := handler.Handle()
 		testAssertErrNil(err)

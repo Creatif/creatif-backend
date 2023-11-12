@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("Declaration list replace tests", func() {
 			Groups:    nil,
 			Behaviour: "readonly",
 			Value:     nil,
-		}), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)

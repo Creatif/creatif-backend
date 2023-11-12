@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		res := storage.Gorm().Where("list_id = ?", listId).Select("ID").First(&listItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", listName, "", "", listItem.ID, ""), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "", "", listItem.ID, ""), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -37,7 +37,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		res := storage.Gorm().Where("list_id = ?", listID).Select("short_id").First(&listItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", "", "", listShortID, "", listItem.ShortID), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "", "", listShortID, "", listItem.ShortID), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

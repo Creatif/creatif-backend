@@ -28,7 +28,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "variable"
 		}
 
-		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -53,7 +53,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "map"
 		}
 
-		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -89,7 +89,7 @@ var _ = ginkgo.Describe("Batch variables tests", func() {
 			model[name] = "variable"
 		}
 
-		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, model), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

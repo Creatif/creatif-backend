@@ -1,9 +1,8 @@
-package deleteList
+package paginateProjects
 
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
-	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/lib/logger"
@@ -34,22 +33,11 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration Lists -> CRUD tests")
-}
-
-func runLogger() {
-	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
-	}
-
-	logger.Info("Health info logger health check... Ignore!")
-	logger.Warn("Health warning logger health check... Ignore!")
-	logger.Error("Health error logger health check... Ignore!")
+	GinkgoRunSpecs(t, "Variable paginateProject -> CRUD tests")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
-	runLogger()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
@@ -108,7 +96,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewNoopAuthentication(true), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -117,27 +105,4 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
-}
-
-func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (string, string, string) {
-	variables := make([]createList2.Variable, varNum)
-	for i := 0; i < varNum; i++ {
-		variables[i] = createList2.Variable{
-			Name:      fmt.Sprintf("one-%d", i),
-			Metadata:  nil,
-			Groups:    nil,
-			Behaviour: "readonly",
-			Value:     nil,
-		}
-	}
-
-	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
-
-	list, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(list.ID)
-
-	gomega.Expect(list.Name).Should(gomega.Equal(name))
-
-	return list.Name, list.ID, list.ShortID
 }
