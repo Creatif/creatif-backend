@@ -61,6 +61,7 @@ func app() {
 
 func appRoutes(group *echo.Group) {
 	group.PUT("/project", appHandlers.CreateProjectHandler())
+	group.GET("/projects", appHandlers.PaginateProjectsHandler())
 
 	group.PUT("/auth/register/email", authHandlers.CreateRegisterEmailHandler())
 	group.POST("/auth/login/email", authHandlers.CreateLoginEmailHandler())

@@ -1,7 +1,6 @@
 package paginateProjects
 
 import (
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/services/variables/paginateVariables/pagination"
 	"creatif/pkg/lib/sdk"
 	"time"
@@ -13,22 +12,29 @@ type LogicModel struct {
 }
 
 type View struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	APIKey string `json:"apiKey"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	State string `json:"state"`
+
+	VariableNum int `json:"variableNum"`
+	MapsNum     int `json:"mapsNum"`
+	ListsNum    int `json:"listsNum"`
 
 	CreatedAt time.Time `gorm:"<-:create" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(models []app.Project) []View {
-	return sdk.Map(models, func(idx int, value app.Project) View {
+func newView(models []QueryModel) []View {
+	return sdk.Map(models, func(idx int, value QueryModel) View {
 		return View{
-			ID:        value.ID,
-			APIKey:    value.APIKey,
-			Name:      value.Name,
-			CreatedAt: value.CreatedAt,
-			UpdatedAt: value.UpdatedAt,
+			ID:          value.ID,
+			Name:        value.Name,
+			State:       value.State,
+			VariableNum: value.VariableNum,
+			MapsNum:     value.MapsNum,
+			ListsNum:    value.ListsNum,
+			CreatedAt:   value.CreatedAt,
+			UpdatedAt:   value.UpdatedAt,
 		}
 	})
 }

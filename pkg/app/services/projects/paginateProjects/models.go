@@ -6,6 +6,7 @@ import (
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"strings"
+	"time"
 )
 
 var validOrderByFields []string = []string{
@@ -20,6 +21,19 @@ type Model struct {
 	Search         string
 	OrderBy        string
 	OrderDirection string
+}
+
+type QueryModel struct {
+	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
+
+	Name  string `gorm:"index"`
+	State string
+
+	VariableNum int       `gorm:"column:variable_num"`
+	MapsNum     int       `gorm:"column:maps_num"`
+	ListsNum    int       `gorm:"column:lists_num"`
+	CreatedAt   time.Time `gorm:"<-:create"`
+	UpdatedAt   time.Time
 }
 
 func NewModel(orderBy, search, direction string, limit, page int) Model {

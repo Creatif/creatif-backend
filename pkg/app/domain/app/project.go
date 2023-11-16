@@ -15,6 +15,9 @@ type Project struct {
 
 	Name   string `gorm:"index"`
 	APIKey string `gorm:"uniqueIndex"`
+	Secret string `gorm:"uniqueIndex"`
+
+	State string `gorm:"default: 'draft'"`
 
 	Variables []declarations.Variable `gorm:"foreignKey:ProjectID;references:ID"`
 	Maps      []declarations.Map      `gorm:"foreignKey:ProjectID;references:ID"`
@@ -34,14 +37,29 @@ func NewProject(name, userID string) Project {
 }
 
 func (u *Project) BeforeCreate(tx *gorm.DB) (err error) {
-	id := ksuid.New().String()
-	cost := 10
-	bytes, err := bcrypt.GenerateFromPassword([]byte(id), cost)
+	genereateHash := func() (string, error) {
+		id := ksuid.New().String()
+		cost := 10
+		bytes, err := bcrypt.GenerateFromPassword([]byte(id), cost)
+		if err != nil {
+			return "", err
+		}
+
+		return string(bytes), nil
+	}
+
+	apiKey, err := genereateHash()
 	if err != nil {
 		return err
 	}
 
-	u.APIKey = string(bytes)
+	secret, err := genereateHash()
+	if err != nil {
+		return err
+	}
+
+	u.APIKey = apiKey
+	u.Secret = secret
 	return nil
 }
 

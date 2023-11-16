@@ -39,7 +39,7 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (sdk.LogicView[app.Project], error) {
+func (c Main) Logic() (sdk.LogicView[QueryModel], error) {
 	offset := (c.model.Page - 1) * c.model.Limit
 	placeholders := make(map[string]interface{})
 	placeholders["offset"] = offset
@@ -74,18 +74,26 @@ func (c Main) Logic() (sdk.LogicView[app.Project], error) {
 	}
 
 	sql := fmt.Sprintf(`
-SELECT id, name, api_key, created_at, updated_at
-FROM %s
-WHERE user_id = @user %s
+SELECT 
+    id, 
+    name, 
+    state,
+    created_at,
+    updated_at,
+    (SELECT count(v.id) FROM declarations.variables AS v WHERE v.project_id = p.id) AS variable_num,
+    (SELECT count(v.id) FROM declarations.maps AS v WHERE v.project_id = p.id) AS maps_num,
+    (SELECT count(v.id) FROM declarations.lists AS v WHERE v.project_id = p.id) AS lists_num
+FROM %s AS p
+WHERE p.user_id = @user %s
 ORDER BY %s %s
 OFFSET @offset LIMIT @limit
 `, (app.Project{}).TableName(), search, c.model.OrderBy, c.model.OrderDirection)
 
-	var items []app.Project
+	var items []QueryModel
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateVariables", res.Error.Error())
-		return sdk.LogicView[app.Project]{}, appErrors.NewDatabaseError(res.Error).AddError("Projects.Paginate.Logic", nil)
+		return sdk.LogicView[QueryModel]{}, appErrors.NewDatabaseError(res.Error).AddError("Projects.Paginate.Logic", nil)
 	}
 
 	var count int64
@@ -98,10 +106,10 @@ WHERE v.user_id = @user
 	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateVariables", res.Error.Error())
-		return sdk.LogicView[app.Project]{}, appErrors.NewDatabaseError(res.Error).AddError("Projects.Paginate.Logic", nil)
+		return sdk.LogicView[QueryModel]{}, appErrors.NewDatabaseError(res.Error).AddError("Projects.Paginate.Logic", nil)
 	}
 
-	return sdk.LogicView[app.Project]{
+	return sdk.LogicView[QueryModel]{
 		Total: count,
 		Data:  items,
 	}, nil
@@ -133,7 +141,7 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 	}, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[app.Project]] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[QueryModel]] {
 	logBuilder.Add("paginateProjects", "Created.")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }
