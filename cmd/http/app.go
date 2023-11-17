@@ -9,8 +9,8 @@ import (
 	"creatif/cmd/http/handlers/declarations/maps"
 	"creatif/cmd/http/handlers/declarations/variables"
 	"creatif/cmd/server"
+	"creatif/pkg/lib/cache"
 	"creatif/pkg/lib/storage"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -21,8 +21,10 @@ func app() {
 	runLogger()
 	runAssets()
 	runDb()
+	if err := cache.NewCache(); err != nil {
+		log.Fatalln(err)
+	}
 
-	fmt.Println(len("2XkxS6oynomNaYFzHK8nyfomiUYsXCZuY"))
 	if err := releaseAllLocks(); err != nil {
 		sqlDB, err := storage.SQLDB()
 		if err != nil {
@@ -48,7 +50,7 @@ func app() {
 	srv := setupServer()
 	srv.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowCredentials: true,
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173"},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderCookie, echo.HeaderAccessControlAllowCredentials},
 		AllowMethods:     []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))
@@ -62,11 +64,16 @@ func app() {
 func appRoutes(group *echo.Group) {
 	group.PUT("/project", appHandlers.CreateProjectHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
+	group.GET("/project/:id", appHandlers.GetProjectHandler())
 
 	group.PUT("/auth/register/email", authHandlers.CreateRegisterEmailHandler())
 	group.POST("/auth/login/email", authHandlers.CreateLoginEmailHandler())
+	group.POST("/auth/login/api", authHandlers.CreateLoginApiHandler())
 	group.POST("/auth/frontend-authenticated", authHandlers.CreateIsFrontendAuthenticated())
 	group.POST("/auth/frontend-logout", authHandlers.CreateFrontendLogout())
+
+	group.POST("/auth/api-auth-session", authHandlers.CreateApiAuthSessionHandler())
+	group.GET("/auth/api-auth-session/:session", authHandlers.GetApiAuthSession())
 }
 
 func declarationRoutes(group *echo.Group) {

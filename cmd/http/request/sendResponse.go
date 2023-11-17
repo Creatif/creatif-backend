@@ -4,7 +4,6 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
@@ -24,7 +23,6 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 
 	if err != nil {
 		validationError, ok := err.(appErrors.AppError[map[string]string])
-		fmt.Println(err, validationError, ok)
 		if ok {
 			if err := flushLogger(logger, "info", context); err != nil {
 				return err

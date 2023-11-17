@@ -21,6 +21,12 @@ type AuthenticatedFrontendSession struct {
 	Type  string `json:"frontend"`
 }
 
+type AuthenticatedApiSession struct {
+	ID    string `json:"id"`
+	Token string `json:"token"`
+	Type  string `json:"frontend"`
+}
+
 func NewAuthenticatedUser(id, name, lastName, email string, createdAt, updatedAt, refresh time.Time) AuthenticatedUser {
 	return AuthenticatedUser{
 		ID:       id,
@@ -40,6 +46,14 @@ func NewAuthenticatedFrontendSession(id, token string) AuthenticatedFrontendSess
 		ID:    id,
 		Token: token,
 		Type:  "frontend",
+	}
+}
+
+func NewAuthenticatedApiSession(id, token string) AuthenticatedApiSession {
+	return AuthenticatedApiSession{
+		ID:    id,
+		Token: token,
+		Type:  "api",
 	}
 }
 

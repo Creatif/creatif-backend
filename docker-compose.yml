@@ -29,6 +29,13 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
     volumes:
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+  cache:
+    container_name: "redis"
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --loglevel warning --requirepass ${REDIS_PASSWORD}
 volumes:
   app:
 
