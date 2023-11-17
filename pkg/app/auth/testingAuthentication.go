@@ -12,15 +12,15 @@ import (
 
 var testSessionUser AuthenticatedUser
 
-type noopAuthentication struct {
+type testingAuthentication struct {
 	shouldCreateUser bool
 }
 
-func (a *noopAuthentication) Authenticate() error {
+func (a *testingAuthentication) Authenticate() error {
 	return nil
 }
 
-func (a *noopAuthentication) User() AuthenticatedUser {
+func (a *testingAuthentication) User() AuthenticatedUser {
 	if a.shouldCreateUser && testSessionUser.ID == "" {
 		user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true)
 		res := storage2.Gorm().Create(&user)
@@ -42,17 +42,17 @@ func (a *noopAuthentication) User() AuthenticatedUser {
 	return testSessionUser
 }
 
-func (a *noopAuthentication) Refresh() (string, error) {
+func (a *testingAuthentication) Refresh() (string, error) {
 	return "", nil
 }
 
-func (a *noopAuthentication) Logout(cb func()) {
+func (a *testingAuthentication) Logout(cb func()) {
 }
 
-func (a *noopAuthentication) ShouldRefresh() bool {
+func (a *testingAuthentication) ShouldRefresh() bool {
 	return false
 }
 
-func NewNoopAuthentication(shouldCreateUser bool) Authentication {
-	return &noopAuthentication{shouldCreateUser: shouldCreateUser}
+func NewTestingAuthentication(shouldCreateUser bool) Authentication {
+	return &testingAuthentication{shouldCreateUser: shouldCreateUser}
 }

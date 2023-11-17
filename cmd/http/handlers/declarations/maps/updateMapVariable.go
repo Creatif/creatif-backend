@@ -29,7 +29,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Groups:    model.Entry.Groups,
 			Behaviour: model.Entry.Behaviour,
 			Value:     []byte(model.Entry.Value),
-		}), auth.NewApiAuthentication(), l)
+		}), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l, nil)
 	}

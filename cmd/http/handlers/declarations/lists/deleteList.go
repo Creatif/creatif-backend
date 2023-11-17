@@ -30,7 +30,7 @@ func DeleteListHandler() func(e echo.Context) error {
 			model.Name,
 			model.ID,
 			model.ShortID,
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[deleteList.Model](handler, c, http.StatusOK, l, nil)
 	}

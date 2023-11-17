@@ -90,7 +90,7 @@ var _ = GinkgoAfterHandler(func() {
 })
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -112,7 +112,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string) createVari
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, []string{"one", "two", "three"}, b, b), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, []string{"one", "two", "three"}, b, b), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -171,7 +171,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 		})
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

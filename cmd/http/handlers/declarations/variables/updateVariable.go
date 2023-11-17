@@ -35,7 +35,7 @@ func UpdateVariableHandler() func(e echo.Context) error {
 			model.Values.Behaviour,
 			model.Values.Groups,
 			[]byte(model.Values.Metadata),
-			[]byte(model.Values.Value)), auth.NewApiAuthentication(), l)
+			[]byte(model.Values.Value)), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[updateVariable.Model](handler, c, http.StatusOK, l, nil)
 	}

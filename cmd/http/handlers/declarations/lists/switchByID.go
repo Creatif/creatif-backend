@@ -32,7 +32,7 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.ShortID,
 			model.Source,
 			model.Destination,
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK, l, nil)
 	}

@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Projects pagination tests", func() {
 			testCreateProject(fmt.Sprintf("name-%d", i))
 		}
 
-		handler := New(NewModel("created_at", "", "desc", 2, 1), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel("created_at", "", "desc", 2, 1), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -27,7 +27,7 @@ var _ = ginkgo.Describe("Projects pagination tests", func() {
 			testCreateProject(fmt.Sprintf("name-%d", i))
 		}
 
-		handler := New(NewModel("created_at", "", "desc", 2, 50), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel("created_at", "", "desc", 2, 50), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		views, err := handler.Handle()
 		testAssertErrNil(err)
@@ -42,7 +42,7 @@ var _ = ginkgo.Describe("Projects pagination tests", func() {
 			testCreateProject(fmt.Sprintf("name-%d", i))
 		}
 
-		handler := New(NewModel("created_at", "", "desc", 10, 1), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel("created_at", "", "desc", 10, 1), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		views, err := handler.Handle()
 		testAssertErrNil(err)

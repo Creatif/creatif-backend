@@ -12,7 +12,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", view.Name, "", "", []string{}, []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", view.Name, "", "", []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
@@ -25,7 +25,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", "", view.ID, "", []string{}, []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "", view.ID, "", []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
@@ -38,7 +38,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", "", "", view.ShortID, []string{}, []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "", "", view.ShortID, []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
@@ -51,7 +51,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", view.Name, "", "", []string{"groups", "value"}, []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", view.Name, "", "", []string{"groups", "value"}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
@@ -71,7 +71,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 100)
 
-		handler := New(NewModel(projectId, "eng", view.Name, "", "", []string{"groups", "value"}, []string{"one"}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", view.Name, "", "", []string{"groups", "value"}, []string{"one"}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)

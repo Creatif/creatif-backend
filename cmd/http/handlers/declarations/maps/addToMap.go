@@ -29,7 +29,7 @@ func AddToMapHandler() func(e echo.Context) error {
 			Groups:    model.Entry.Groups,
 			Behaviour: model.Entry.Behaviour,
 			Value:     []byte(model.Entry.Value),
-		}), auth.NewApiAuthentication(), l)
+		}), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l, nil)
 	}

@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariable := variableIds[3]
 
-		handler := New(NewModel(projectId, "eng", "name", "", "", selectedVariable["id"], ""), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "name", "", "", selectedVariable["id"], ""), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)

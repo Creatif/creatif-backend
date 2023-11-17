@@ -38,7 +38,7 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			model.Values.Groups,
 			[]byte(model.Values.Metadata),
 			[]byte(model.Values.Value),
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l, nil)
 	}

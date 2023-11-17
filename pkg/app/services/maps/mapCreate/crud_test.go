@@ -61,7 +61,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -70,7 +70,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "otherMapName", entries), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "eng", "otherMapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err = handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -130,7 +130,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -139,7 +139,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		_, err = handler.Logic()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})
@@ -195,7 +195,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 			})
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -204,7 +204,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "mapName", entries), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})

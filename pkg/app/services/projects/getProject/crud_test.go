@@ -10,7 +10,7 @@ import (
 var _ = ginkgo.Describe("Get project tests", func() {
 	ginkgo.It("should get a project by ID", func() {
 		projectId := testCreateProject("project")
-		handler := New(NewModel(projectId), auth.NewNoopAuthentication(true), logger.NewLogBuilder())
+		handler := New(NewModel(projectId), auth.NewTestingAuthentication(true), logger.NewLogBuilder())
 
 		model, err := handler.Handle()
 		testAssertErrNil(err)

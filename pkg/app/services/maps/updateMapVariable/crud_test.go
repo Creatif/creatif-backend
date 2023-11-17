@@ -28,7 +28,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{"updated1", "updated2", "updated3"},
 			Behaviour: "readonly",
 			Value:     v,
-		}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		view, err := handler.Handle()
 
@@ -71,7 +71,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"},
 			Behaviour: "readonly",
 			Value:     v,
-		}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
@@ -98,7 +98,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{"1", "2", "3", "4", "5"},
 			Behaviour: "readonly",
 			Value:     v,
-		}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())

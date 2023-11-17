@@ -39,7 +39,7 @@ func ReplaceListItemHandler() func(e echo.Context) error {
 				Behaviour: model.Variable.Behaviour,
 				Value:     []byte(model.Variable.Value),
 			},
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[replaceListItem.Model](handler, c, http.StatusOK, l, nil)
 	}

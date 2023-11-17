@@ -32,7 +32,7 @@ func QueryListByIDHandler() func(e echo.Context) error {
 			model.ShortID,
 			model.ItemID,
 			model.ItemShortID,
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK, l, nil)
 	}

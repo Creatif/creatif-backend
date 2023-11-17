@@ -12,7 +12,7 @@ var _ = ginkgo.Describe("Declaration list create tests", func() {
 		projectId := testCreateProject("project")
 		listName := testCreateList(projectId, "list", 1)
 
-		handler := New(NewModel(projectId, "eng", []string{"name"}, listName, "", "", "newNameList"), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name"}, listName, "", "", "newNameList"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		view, err := handler.Handle()
 		testAssertErrNil(err)

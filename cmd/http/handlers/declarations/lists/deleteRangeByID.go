@@ -31,7 +31,7 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 			model.ID,
 			model.ShortID,
 			model.Items,
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, l, nil)
 	}

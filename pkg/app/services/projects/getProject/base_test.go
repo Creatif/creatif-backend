@@ -104,7 +104,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name), auth.NewNoopAuthentication(true), logger.NewLogBuilder())
+	handler := createProject.New(createProject.NewModel(name), auth.NewTestingAuthentication(true), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)

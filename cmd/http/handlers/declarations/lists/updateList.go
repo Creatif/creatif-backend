@@ -32,7 +32,7 @@ func UpdateListHandler() func(e echo.Context) error {
 			model.ID,
 			model.ShortID,
 			model.Values.Name,
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, l, nil)
 	}

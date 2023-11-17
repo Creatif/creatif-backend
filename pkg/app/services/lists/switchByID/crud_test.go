@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		source := idsAndIndexes[0]
 		destination := idsAndIndexes[5]
 
-		handler := New(NewModel(projectId, "eng", "list", "", "", source["id"], destination["id"]), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "list", "", "", source["id"], destination["id"]), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -40,7 +40,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "eng", "list", "", "", source["id"], destination["id"]), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+				handler := New(NewModel(projectId, "eng", "list", "", "", source["id"], destination["id"]), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 				view, err := handler.Handle()
 				testAssertErrNil(err)
 
@@ -82,7 +82,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "eng", "list", "", "", ids[sourceIdx]["id"], ids[destinationIdx]["id"]), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+				handler := New(NewModel(projectId, "eng", "list", "", "", ids[sourceIdx]["id"], ids[destinationIdx]["id"]), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 				view, err := handler.Handle()
 				testAssertErrNil(err)
 

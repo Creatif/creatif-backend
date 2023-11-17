@@ -19,12 +19,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    nil,
 			Behaviour: "readonly",
 			Value:     nil,
-		}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", m.Name, "", "", []string{}, []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", m.Name, "", "", []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		maps, err := getMapHandler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(maps.ID)
@@ -52,12 +52,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    nil,
 			Behaviour: "readonly",
 			Value:     nil,
-		}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", m.Name, "", "", []string{}, []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", m.Name, "", "", []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		maps, err := getMapHandler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(maps.ID)
@@ -85,12 +85,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    nil,
 			Behaviour: "readonly",
 			Value:     nil,
-		}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", "", "", m.ShortID, []string{}, []string{}), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, "eng", "", "", m.ShortID, []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		maps, err := getMapHandler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(maps.ID)

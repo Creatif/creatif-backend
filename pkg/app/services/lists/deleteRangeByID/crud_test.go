@@ -23,7 +23,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, "eng", listName, "", "", ids), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", listName, "", "", ids), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -46,7 +46,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, "eng", "", listId, "", ids), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "", listId, "", ids), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -69,7 +69,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, "eng", "", "", shortID, ids), auth.NewNoopAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", "", "", shortID, ids), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

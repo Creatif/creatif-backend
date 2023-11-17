@@ -32,7 +32,7 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 			model.ShortID,
 			model.ItemID,
 			model.ShortID,
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l, nil)
 	}

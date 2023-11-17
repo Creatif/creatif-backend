@@ -38,7 +38,7 @@ func CreateListHandler() func(e echo.Context) error {
 					Value:     []byte(value.Value),
 				}
 			}),
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[createList.Model](handler, c, http.StatusCreated, l, nil)
 	}

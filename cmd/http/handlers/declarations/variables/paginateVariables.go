@@ -35,7 +35,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 			model.Page,
 			model.SanitizedGroups,
 			sdk.ParseFilters(model.Filters),
-		), auth.NewApiAuthentication(), l)
+		), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK, l, nil)
 	}
