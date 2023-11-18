@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"creatif/cmd"
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/lib/cache"
 	"creatif/pkg/lib/logger"
@@ -13,12 +14,12 @@ import (
 
 func GetApiAuthSession() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		apiKey := c.Request().Header.Get("X-CREATIF-API-KEY")
+		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		if apiKey == "" {
 			return c.JSON(http.StatusForbidden, "Unauthenticated")
 		}
 
-		projectId := c.Request().Header.Get("X-CREATIF-PROJECT-ID")
+		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 		if apiKey == "" {
 			return c.JSON(http.StatusForbidden, "Unauthenticated")
 		}

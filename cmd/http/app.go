@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif/cmd"
 	authHandlers "creatif/cmd/http/handlers/app/auth"
 	appHandlers "creatif/cmd/http/handlers/app/project"
 	"creatif/cmd/http/handlers/declarations/combined"
@@ -57,8 +58,8 @@ func app() {
 			echo.HeaderAccept,
 			echo.HeaderCookie,
 			echo.HeaderAccessControlAllowCredentials,
-			"X-CREATIF-API-KEY",
-			"X-CREATIF-PROJECT-ID",
+			cmd.CreatifApiHeader,
+			cmd.CreatifProjectIDHeader,
 		},
 		AllowMethods: []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))
