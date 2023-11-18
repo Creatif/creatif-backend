@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"os"
 )
 
 const info = "info"
@@ -30,6 +31,10 @@ func (l *logBuilder) Add(key, message string) {
 }
 
 func (l *logBuilder) Flush(t string) error {
+	if os.Getenv("APP_ENV") != "prod" {
+		fmt.Println(l.messages)
+	}
+
 	if t == info {
 		Info(l.messages)
 

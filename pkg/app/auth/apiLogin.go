@@ -16,13 +16,14 @@ type ApiLogin struct {
 func (e ApiLogin) Login() (string, error) {
 	serializedUser, err := json.Marshal(&e.user)
 	if err != nil {
+		e.logBuilder.Add("apiLogin", err.Error())
 		return "", appErrors.NewApplicationError(err)
 	}
 
 	encryptedUser, err := encrypt(serializedUser, &e.key)
 	if err != nil {
 		// TODO: send immediate slack message here
-		e.logBuilder.Add("login.cannotEncryptKey", "Key should have length of 32 characters.")
+		e.logBuilder.Add("apiLogin.cannotEncryptKey", err.Error())
 		return "", appErrors.NewUnexpectedError(err)
 	}
 
@@ -32,7 +33,7 @@ func (e ApiLogin) Login() (string, error) {
 	b, err := json.Marshal(session)
 	if err != nil {
 		// TODO: send immediate slack message here
-		e.logBuilder.Add("login.cannotEncryptKey", "Key should have length of 32 characters.")
+		e.logBuilder.Add("apiLogin.cannotEncryptKey", "Key should have length of 32 characters.")
 		return "", appErrors.NewUnexpectedError(err)
 	}
 

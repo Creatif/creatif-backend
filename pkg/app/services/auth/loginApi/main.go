@@ -1,13 +1,18 @@
 package loginApi
 
 import (
+	"context"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/cache"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+	"strings"
 	"time"
 )
 
@@ -18,12 +23,40 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("loginEmail", "Validating...")
+	defer func() {
+		delCtx, cancel := context.WithDeadline(context.Background(), time.Now().Add(5*time.Second))
+		defer cancel()
+		_, err := cache.Cache().Del(delCtx, c.model.Session).Result()
+		if err != nil {
+			c.logBuilder.Add("loginApi", fmt.Sprintf("Session cache could not be deleted: %s", err.Error()))
+		}
+	}()
+
+	c.logBuilder.Add("loginApi", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
-	c.logBuilder.Add("loginEmail", "Validated.")
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(5*time.Second))
+	defer cancel()
+	key, err := cache.Cache().Get(ctx, c.model.Session).Result()
+	if err != nil {
+		return appErrors.NewAuthenticationError(errors.New("Unauthenticated"))
+	}
+
+	split := strings.Split(key, "-")
+	if len(split) != 2 {
+		return appErrors.NewAuthenticationError(errors.New("Unauthenticated"))
+	}
+
+	cacheApiKey := split[0]
+	cacheProjectId := split[1]
+
+	if cacheApiKey != c.model.ApiKey || cacheProjectId != c.model.ProjectID {
+		return appErrors.NewAuthenticationError(errors.New("Unauthenticated"))
+	}
+
+	c.logBuilder.Add("loginApi", "Validated.")
 	return nil
 }
 
@@ -37,13 +70,37 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (string, error) {
 	var user app.User
-	if res := storage.Gorm().Where("email = ?", c.model.Email).Select("id", "key", "confirmed", "name", "last_name", "email", "created_at", "updated_at").First(&user); res.Error != nil {
-		return "", appErrors.NewAuthenticationError(res.Error)
+	res := storage.Gorm().Raw(fmt.Sprintf(`
+SELECT 
+	u.id,
+	u.key,
+	u.confirmed,
+	u.name,
+	u.password,
+	u.last_name,
+	u.email,
+	u.created_at,
+	u.updated_at
+FROM %s AS u
+INNER JOIN %s AS p
+ON p.user_id = u.id AND p.api_key = ? AND p.id = ? AND u.email = ?
+`, (app.User{}).TableName(), (app.Project{}).TableName()), c.model.ApiKey, c.model.ProjectID, c.model.Email).Scan(&user)
+
+	if res.Error != nil {
+		c.logBuilder.Add("apiLogin.getUser", res.Error.Error())
+		return "", appErrors.NewAuthenticationError(errors.New("Unauthenticated"))
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.model.Password))
+	if err != nil {
+		return "", appErrors.NewAuthenticationError(err)
 	}
 
 	if !user.Confirmed {
-		return "", appErrors.NewUserUnconfirmedError(errors.New("The user is not confirmed"))
+		c.logBuilder.Add("apiLogin.notConfirmed", "User not confirmed")
+		return "", appErrors.NewAuthenticationError(errors.New("The user is not confirmed"))
 	}
+
 	var key [32]byte
 	for i, v := range user.Key {
 		key[i] = byte(v)
@@ -76,6 +133,6 @@ func (c Main) Handle() (string, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, string, string] {
-	logBuilder.Add("loginEmail", "Created")
+	logBuilder.Add("loginApi", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

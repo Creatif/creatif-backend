@@ -8,6 +8,7 @@ import (
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -37,8 +38,13 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (string, error) {
 	var user app.User
-	if res := storage.Gorm().Where("email = ?", c.model.Email).Select("id", "key", "confirmed", "name", "last_name", "email", "created_at", "updated_at").First(&user); res.Error != nil {
+	if res := storage.Gorm().Where("email = ?", c.model.Email).Select("id", "key", "confirmed", "password", "name", "last_name", "email", "created_at", "updated_at").First(&user); res.Error != nil {
 		return "", appErrors.NewAuthenticationError(res.Error)
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.model.Password))
+	if err != nil {
+		return "", appErrors.NewAuthenticationError(err)
 	}
 
 	if !user.Confirmed {

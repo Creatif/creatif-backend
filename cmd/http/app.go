@@ -51,8 +51,16 @@ func app() {
 	srv.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowCredentials: true,
 		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173"},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderCookie, echo.HeaderAccessControlAllowCredentials},
-		AllowMethods:     []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderCookie,
+			echo.HeaderAccessControlAllowCredentials,
+			"X-CREATIF-API-KEY",
+			"X-CREATIF-PROJECT-ID",
+		},
+		AllowMethods: []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))
 
 	declarationRoutes(srv.Group("/api/v1/declarations"))

@@ -18,13 +18,12 @@ func CreateLoginApiHandler() func(e echo.Context) error {
 
 		model = app.SanitizeLoginApi(model)
 
+		apiKey := c.Request().Header.Get("X-CREATIF-API-KEY")
+		projectId := c.Request().Header.Get("X-CREATIF-PROJECT-ID")
+
 		l := logger.NewLogBuilder()
-		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password), nil, l)
+		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password, apiKey, projectId, model.Session), nil, l)
 
-		return request.SendResponse[loginApi.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
-			c.SetCookie(request.EncryptAuthenticationCookie(model.(string)))
-
-			return nil
-		})
+		return request.SendResponse[loginApi.Model](handler, c, http.StatusOK, l, nil)
 	}
 }
