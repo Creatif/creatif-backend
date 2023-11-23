@@ -27,13 +27,13 @@ func (a *apiAuthentication) Authenticate() error {
 	jsonToken, err := base64.StdEncoding.DecodeString(a.session)
 	if err != nil {
 		a.logBuilder.Add("authentication.base64DecodeSession", err.Error())
-		return errors.New("Unauthenticated")
+		return errors.New("Failed to decode session cookie")
 	}
 
 	var session AuthenticatedApiSession
 	if err := json.Unmarshal(jsonToken, &session); err != nil {
 		a.logBuilder.Add("authentication.sessionDecode", err.Error())
-		return errors.New("Unauthenticated")
+		return errors.New("Failed to decode API session object")
 	}
 
 	if session.Type != "api" {
@@ -43,13 +43,13 @@ func (a *apiAuthentication) Authenticate() error {
 	var user app.User
 	if res := storage.Gorm().Where("id = ?", session.ID).Select("key", "email").First(&user); res.Error != nil {
 		a.logBuilder.Add("authentication.userNotFound", res.Error.Error())
-		return errors.New("Unauthenticated")
+		return errors.New("User not found")
 	}
 
 	encrypedUser, err := base64.StdEncoding.DecodeString(session.Token)
 	if err != nil {
 		a.logBuilder.Add("authentication.base64DecodeToken", err.Error())
-		return errors.New("Unauthenticated")
+		return errors.New("Failed to decode token.")
 	}
 
 	var key [32]byte
@@ -60,30 +60,28 @@ func (a *apiAuthentication) Authenticate() error {
 	jsonAuthenticatedUser, err := decrypt(encrypedUser, &key)
 	if err != nil {
 		a.logBuilder.Add("authentication.decryptUser", err.Error())
-		return errors.New("Unauthenticated")
+		return errors.New("Failed to decrypt decoded user.")
 	}
 
 	var authenticatedUser AuthenticatedUser
 	if err := json.Unmarshal(jsonAuthenticatedUser, &authenticatedUser); err != nil {
 		a.logBuilder.Add("authentication.tokenDecode", err.Error())
-		return errors.New("Unauthenticated")
+		return errors.New("Failed to decode authenticated user.")
 	}
 
 	if authenticatedUser.Email != user.Email {
 		a.logBuilder.Add("authentication.differentEmails", fmt.Sprintf("Provided email %s did not match the user email %s", authenticatedUser.Email, user.Email))
-		return errors.New("Unauthenticated")
+		return errors.New("Failed email")
 	}
 
 	refresh := authenticatedUser.Refresh
-	if time.Now().After(refresh.Add(1 * time.Hour)) {
-		return errors.New("Unauthenticated")
+	if time.Now().After(refresh.Add(61 * time.Minute)) {
+		return errors.New("Users session has expired")
 	}
 
-	if time.Now().After(refresh.Add(45 * time.Minute)) {
+	if time.Now().After(refresh.Add(15 * time.Minute)) {
 		authenticatedUser.Refresh = time.Now()
 		a.doRefresh = true
-
-		return errors.New("Unauthenticated")
 	}
 
 	a.key = key

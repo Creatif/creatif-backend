@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 func LoginApiCheckHandler() func(e echo.Context) error {
@@ -12,27 +13,26 @@ func LoginApiCheckHandler() func(e echo.Context) error {
 		cookie := request.GetApiAuthenticationCookie(c)
 
 		if cookie == "" {
-			return c.NoContent(403)
+			return c.NoContent(http.StatusForbidden)
 		}
 
 		l := logger.NewLogBuilder()
 		a := auth.NewApiAuthentication(cookie, l)
 		if err := a.Authenticate(); err != nil {
-			return c.NoContent(403)
+			return c.NoContent(http.StatusForbidden)
 		}
 
 		if a.ShouldRefresh() {
-			newToken, err := a.Refresh()
+			session, err := a.Refresh()
 			if err != nil {
-				return c.NoContent(403)
+				return c.NoContent(http.StatusForbidden)
 			}
 
-			newAuthCookie := request.EncryptApiAuthenticationCookie(newToken)
-			c.SetCookie(newAuthCookie)
-
-			return c.NoContent(200)
+			c.SetCookie(request.EncryptAuthenticationCookie(session))
 		}
 
-		return c.NoContent(200)
+		l.Flush("")
+
+		return c.NoContent(http.StatusOK)
 	}
 }

@@ -18,7 +18,7 @@ type AppendToList struct {
 	ID        string                 `json:"id"`
 	ShortID   string                 `json:"shortID"`
 	ProjectID string                 `param:"projectID"`
-	Locale    string                 `json:"locale"`
+	Locale    string                 `param:"locale"`
 	Variables []AppendToListVariable `json:"variables"`
 }
 

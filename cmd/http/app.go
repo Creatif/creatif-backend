@@ -90,7 +90,7 @@ func declarationRoutes(group *echo.Group) {
 	group.POST("/structures/:projectID/:locale", combined.GetBatchedStructuresHandler())
 
 	group.PUT("/list/:projectID/:locale", lists.CreateListHandler())
-	group.PUT("/list/append/:projectID", lists.AppendToListHandler())
+	group.PUT("/list/append/:projectID/:locale", lists.AppendToListHandler())
 	group.DELETE("/list/:projectID/:name/:locale", lists.DeleteListHandler())
 	group.DELETE("/list/item-id/:projectID/:name/:itemID/:locale", lists.DeleteListItemByIDHandler())
 	group.POST("/list/range/:projectID/:name/:locale", lists.DeleteRangeByIDHandler())

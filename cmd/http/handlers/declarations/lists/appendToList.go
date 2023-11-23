@@ -25,6 +25,7 @@ func AppendToListHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := appendToList.New(appendToList.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -40,8 +41,19 @@ func AppendToListHandler() func(e echo.Context) error {
 					Value:     []byte(value.Value),
 				}
 			}),
-		), auth.NewNoopAuthentication(), l)
+		), authentication, l)
 
-		return request.SendResponse[appendToList.Model](handler, c, http.StatusCreated, l, nil, false)
+		return request.SendResponse[appendToList.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }
