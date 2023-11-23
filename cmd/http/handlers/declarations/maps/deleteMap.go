@@ -26,6 +26,6 @@ func DeleteMap() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := removeMap.New(removeMap.NewModel(model.ProjectID, model.Locale, model.Name, model.ID, model.ShortID), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[removeMap.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[removeMap.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

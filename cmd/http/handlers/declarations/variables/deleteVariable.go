@@ -26,6 +26,6 @@ func DeleteVariableHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := deleteVariable.New(deleteVariable.NewModel(model.ProjectID, model.ID, model.ShortID, model.Name, model.Locale), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[deleteVariable.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[deleteVariable.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

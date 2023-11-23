@@ -37,6 +37,6 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 			sdk.ParseFilters(model.Filters),
 		), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[paginateVariables2.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

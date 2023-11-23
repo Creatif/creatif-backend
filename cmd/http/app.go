@@ -82,13 +82,14 @@ func appRoutes(group *echo.Group) {
 	group.POST("/auth/frontend-logout", authHandlers.CreateFrontendLogout())
 
 	group.POST("/auth/api-auth-session", authHandlers.CreateApiAuthSessionHandler())
+	group.POST("/auth/api-check", authHandlers.LoginApiCheckHandler())
 	group.GET("/auth/api-auth-session/:session", authHandlers.GetApiAuthSession())
 }
 
 func declarationRoutes(group *echo.Group) {
 	group.POST("/structures/:projectID/:locale", combined.GetBatchedStructuresHandler())
 
-	group.PUT("/list/:projectID", lists.CreateListHandler())
+	group.PUT("/list/:projectID/:locale", lists.CreateListHandler())
 	group.PUT("/list/append/:projectID", lists.AppendToListHandler())
 	group.DELETE("/list/:projectID/:name/:locale", lists.DeleteListHandler())
 	group.DELETE("/list/item-id/:projectID/:name/:itemID/:locale", lists.DeleteListItemByIDHandler())
@@ -109,7 +110,7 @@ func declarationRoutes(group *echo.Group) {
 
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 
-	group.PUT("/variable", variables.CreateVariableHandler())
+	group.PUT("/variable/:projectID/:locale", variables.CreateVariableHandler())
 	group.POST("/variable/:projectID", variables.UpdateVariableHandler())
 	group.DELETE("/variable/:projectID", variables.DeleteVariableHandler())
 	group.GET("/variable/:projectID/:name/:locale", variables.GetVariableHandler())

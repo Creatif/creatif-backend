@@ -41,6 +41,6 @@ func ReplaceListItemHandler() func(e echo.Context) error {
 			},
 		), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[replaceListItem.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[replaceListItem.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

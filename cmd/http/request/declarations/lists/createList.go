@@ -14,10 +14,11 @@ type CreateListVariable struct {
 }
 
 type CreateList struct {
-	Name      string               `json:"name"`
-	ProjectID string               `param:"projectID"`
-	Locale    string               `json:"locale"`
-	Variables []CreateListVariable `json:"variables"`
+	Name         string               `json:"name"`
+	ProjectID    string               `param:"projectID"`
+	Locale       string               `param:"locale"`
+	Variables    []CreateListVariable `json:"variables"`
+	GracefulFail bool                 `json:"gracefulFail"`
 }
 
 func SanitizeCreateList(model CreateList) CreateList {

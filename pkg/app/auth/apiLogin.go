@@ -41,7 +41,7 @@ func (e ApiLogin) Login() (string, error) {
 }
 
 func NewApiLogin(user AuthenticatedUser, key [32]byte, logger logger.LogBuilder) Loginer {
-	return EmailLogin{
+	return ApiLogin{
 		user:       user,
 		key:        key,
 		logBuilder: logger,

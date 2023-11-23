@@ -25,6 +25,6 @@ func CreateLoginEmailHandler() func(e echo.Context) error {
 			c.SetCookie(request.EncryptAuthenticationCookie(model.(string)))
 
 			return nil
-		})
+		}, false)
 	}
 }

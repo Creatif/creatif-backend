@@ -26,6 +26,6 @@ func GetValueHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := getValue2.New(getValue2.NewModel(model.ProjectID, model.ID, model.ShortID, model.Name, model.Locale), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[getValue2.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[getValue2.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

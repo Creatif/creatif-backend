@@ -34,6 +34,6 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.Destination,
 		), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

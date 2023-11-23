@@ -34,6 +34,6 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 			model.ShortID,
 		), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

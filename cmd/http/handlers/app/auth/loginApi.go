@@ -25,6 +25,10 @@ func CreateLoginApiHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password, apiKey, projectId, model.Session), nil, l)
 
-		return request.SendResponse[loginApi.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[loginApi.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			c.SetCookie(request.EncryptApiAuthenticationCookie(model.(string)))
+
+			return nil
+		}, false)
 	}
 }

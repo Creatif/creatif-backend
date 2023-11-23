@@ -26,6 +26,6 @@ func CreateIsFrontendAuthenticated() func(e echo.Context) error {
 			}
 
 			return nil
-		})
+		}, false)
 	}
 }

@@ -4,11 +4,9 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
-	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -48,26 +46,7 @@ func (a Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("name", validation.Required, validation.RuneLength(1, 200), validation.By(func(value interface{}) error {
-				name := value.(string)
-
-				var variable declarations.List
-				res := storage.Gorm().Where("name = ? AND project_id = ?", name, a.ProjectID).Select("ID").First(&variable)
-
-				if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-					return nil
-				}
-
-				if res.Error != nil {
-					return errors.New(fmt.Sprintf("Record with name '%s' already exists", name))
-				}
-
-				if variable.ID != "" {
-					return errors.New(fmt.Sprintf("Record with name '%s' already exists", name))
-				}
-
-				return nil
-			})),
+			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("variableLen", validation.By(func(value interface{}) error {
 				l := value.(int)
 

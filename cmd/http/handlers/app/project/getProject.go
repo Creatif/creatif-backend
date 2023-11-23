@@ -22,6 +22,6 @@ func GetProjectHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := getProject.New(getProject.NewModel(model.ProjectID), auth.NewFrontendAuthentication(request.GetAuthenticationCookie(c), l), l)
 
-		return request.SendResponse[getProject.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[getProject.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

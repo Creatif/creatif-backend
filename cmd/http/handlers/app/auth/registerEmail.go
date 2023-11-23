@@ -21,6 +21,6 @@ func CreateRegisterEmailHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := registerEmail.New(registerEmail.NewModel(model.Name, model.LastName, model.Email, model.Password, model.PolicyAccepted), nil, l)
 
-		return request.SendResponse[registerEmail.Model](handler, c, http.StatusCreated, l, nil)
+		return request.SendResponse[registerEmail.Model](handler, c, http.StatusCreated, l, nil, false)
 	}
 }

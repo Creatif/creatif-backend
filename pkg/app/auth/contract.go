@@ -18,13 +18,13 @@ type AuthenticatedUser struct {
 type AuthenticatedFrontendSession struct {
 	ID    string `json:"id"`
 	Token string `json:"token"`
-	Type  string `json:"frontend"`
+	Type  string `json:"type"`
 }
 
 type AuthenticatedApiSession struct {
 	ID    string `json:"id"`
 	Token string `json:"token"`
-	Type  string `json:"frontend"`
+	Type  string `json:"type"`
 }
 
 func NewAuthenticatedUser(id, name, lastName, email string, createdAt, updatedAt, refresh time.Time) AuthenticatedUser {

@@ -30,7 +30,7 @@ func (a *apiAuthentication) Authenticate() error {
 		return errors.New("Unauthenticated")
 	}
 
-	var session AuthenticatedFrontendSession
+	var session AuthenticatedApiSession
 	if err := json.Unmarshal(jsonToken, &session); err != nil {
 		a.logBuilder.Add("authentication.sessionDecode", err.Error())
 		return errors.New("Unauthenticated")
@@ -106,7 +106,7 @@ func (a *apiAuthentication) Logout(cb func()) {
 
 func (a *apiAuthentication) Refresh() (string, error) {
 	if a.doRefresh {
-		loginer := NewEmailLogin(a.user, a.key, a.logBuilder)
+		loginer := NewApiLogin(a.user, a.key, a.logBuilder)
 		return loginer.Login()
 	}
 

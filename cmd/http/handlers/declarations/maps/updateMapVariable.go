@@ -31,6 +31,6 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Value:     []byte(model.Entry.Value),
 		}), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

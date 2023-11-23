@@ -40,6 +40,6 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			[]byte(model.Values.Value),
 		), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

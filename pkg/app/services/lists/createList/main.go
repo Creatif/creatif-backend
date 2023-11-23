@@ -9,6 +9,8 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
+	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +24,31 @@ func (c Main) Validate() error {
 	c.logBuilder.Add("createList", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
+	}
+
+	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	if err != nil {
+		c.logBuilder.Add("createList.locale", err.Error())
+		return appErrors.NewApplicationError(err)
+	}
+
+	var variable declarations.List
+	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&variable)
+
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return nil
+	}
+
+	if res.Error != nil {
+		return appErrors.NewValidationError(map[string]string{
+			"nameExists": fmt.Sprintf("Record with name '%s' already exists", c.model.Name),
+		})
+	}
+
+	if variable.ID != "" {
+		return appErrors.NewValidationError(map[string]string{
+			"nameExists": fmt.Sprintf("Record with name '%s' already exists", c.model.Name),
+		})
 	}
 
 	c.logBuilder.Add("createList", "Validated")
@@ -56,14 +83,16 @@ func (c Main) Logic() (declarations.List, error) {
 			return res.Error
 		}
 
-		listVariables := make([]declarations.ListVariable, len(c.model.Variables))
-		for i := 0; i < len(c.model.Variables); i++ {
-			v := c.model.Variables[i]
-			listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
-		}
+		if len(c.model.Variables) > 0 {
+			listVariables := make([]declarations.ListVariable, len(c.model.Variables))
+			for i := 0; i < len(c.model.Variables); i++ {
+				v := c.model.Variables[i]
+				listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
+			}
 
-		if res := tx.Create(&listVariables); res.Error != nil {
-			return res.Error
+			if res := tx.Create(&listVariables); res.Error != nil {
+				return res.Error
+			}
 		}
 
 		return nil

@@ -31,6 +31,6 @@ func AddToMapHandler() func(e echo.Context) error {
 			Value:     []byte(model.Entry.Value),
 		}), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l, nil)
+		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l, nil, false)
 	}
 }

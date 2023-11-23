@@ -33,6 +33,6 @@ func CreateProjectHandler() func(e echo.Context) error {
 			}
 
 			return nil
-		})
+		}, false)
 	}
 }

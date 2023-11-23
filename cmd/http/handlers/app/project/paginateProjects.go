@@ -28,6 +28,6 @@ func PaginateProjectsHandler() func(e echo.Context) error {
 			model.Page,
 		), auth.NewFrontendAuthentication(request.GetAuthenticationCookie(c), l), l)
 
-		return request.SendResponse[paginateProjects.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[paginateProjects.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

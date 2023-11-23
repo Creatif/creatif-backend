@@ -26,6 +26,6 @@ func GetVariableHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := getVariable2.New(getVariable2.NewModel(model.ProjectID, model.ID, model.ShortID, model.Name, model.Locale, model.Fields), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[getVariable2.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[getVariable2.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

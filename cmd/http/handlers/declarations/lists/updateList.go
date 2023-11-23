@@ -34,6 +34,6 @@ func UpdateListHandler() func(e echo.Context) error {
 			model.Values.Name,
 		), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, l, nil)
+		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }
