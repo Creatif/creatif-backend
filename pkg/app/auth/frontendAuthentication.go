@@ -82,8 +82,6 @@ func (a *frontendAuthentication) Authenticate() error {
 	if time.Now().After(refresh.Add(45 * time.Minute)) {
 		authenticatedUser.Refresh = time.Now()
 		a.doRefresh = true
-
-		return errors.New("Unauthenticated")
 	}
 
 	a.key = key
