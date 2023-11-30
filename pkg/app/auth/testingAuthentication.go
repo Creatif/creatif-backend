@@ -6,7 +6,7 @@ import (
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/google/uuid"
-	"log"
+	"github.com/onsi/ginkgo/v2"
 	"time"
 )
 
@@ -25,9 +25,9 @@ func (a *testingAuthentication) User() AuthenticatedUser {
 		user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true)
 		res := storage2.Gorm().Create(&user)
 		if res.Error != nil {
-			log.Fatal(res.Error)
+			ginkgo.Fail(res.Error.Error())
 		}
-
+		
 		testSessionUser = AuthenticatedUser{
 			ID:        user.ID,
 			Name:      user.Name,

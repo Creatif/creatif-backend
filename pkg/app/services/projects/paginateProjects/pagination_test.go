@@ -9,7 +9,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Projects pagination tests", func() {
-	ginkgo.It("should paginate through variables", func() {
+	ginkgo.It("should paginate through projects", func() {
 		for i := 0; i < 10; i++ {
 			testCreateProject(fmt.Sprintf("name-%d", i))
 		}
@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("Projects pagination tests", func() {
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(10)))
 	})
 
-	ginkgo.It("should get an empty result from the end of the variables listing", func() {
+	ginkgo.It("should get an empty result from the end of the projects listing", func() {
 		for i := 0; i < 10; i++ {
 			testCreateProject(fmt.Sprintf("name-%d", i))
 		}
