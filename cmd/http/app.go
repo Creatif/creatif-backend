@@ -72,7 +72,7 @@ func app() {
 
 func appRoutes(group *echo.Group) {
 	group.PUT("/project", appHandlers.CreateProjectHandler())
-	group.PUT("/project-metadata", appHandlers.GetProjectMetadataHandler())
+	group.GET("/project-metadata", appHandlers.GetProjectMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
 	group.GET("/project/:id", appHandlers.GetProjectHandler())
 

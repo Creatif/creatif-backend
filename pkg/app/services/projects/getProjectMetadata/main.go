@@ -3,6 +3,8 @@ package getProjectMetadata
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
+	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -31,28 +33,98 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (LogicModel, error) {
-	var logicModel LogicModel
+func (c Main) Logic() (PreViewModel, error) {
+	var logicModels []LogicModel
 	res := storage.Gorm().Raw(fmt.Sprintf(`
 SELECT 
 p.id,
 p.name,
 p.state,
 p.user_id,
-v.name = ARRAY(SELECT name FROM declarations.variables AS n WHERE n.project_id = p.id AND p.id = ?) AS variable_names,
-m.name = ARRAY(SELECT name FROM declarations.maps AS n WHERE n.project_id = p.id AND p.id = ?) AS map_names,
-l.name = ARRAY(SELECT name FROM declarations.lists AS n WHERE n.project_id = p.id AND p.id = ?) AS list_names
+v.name AS variable_name,
+m.name AS map_name,
+l.name AS list_name,
+v.locale_id AS variable_locale,
+m.locale_id AS map_locale,
+l.locale_id AS list_locale
 FROM %s AS p
+LEFT JOIN %s AS v ON p.id = ? AND p.user_id = ? AND v.project_id = p.id AND v.project_id = ?
+LEFT JOIN %s AS m ON m.project_id = p.id AND m.project_id = ?
+LEFT JOIN %s AS l ON l.project_id = p.id AND l.project_id = ?
 WHERE p.id = ? AND p.user_id = ?
 `,
 		(app.Project{}).TableName(),
-	), c.auth.User().ProjectID, c.auth.User().ID).Scan(&logicModel)
+		(declarations.Variable{}).TableName(),
+		(declarations.Map{}).TableName(),
+		(declarations.List{}).TableName(),
+	),
+		c.auth.User().ProjectID, c.auth.User().ID, c.auth.User().ProjectID,
+		c.auth.User().ProjectID,
+		c.auth.User().ProjectID,
+		c.auth.User().ProjectID, c.auth.User().ID,
+	).Scan(&logicModels)
 
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewNotFoundError(res.Error)
+		return PreViewModel{}, appErrors.NewNotFoundError(res.Error)
 	}
 
-	return LogicModel{}, nil
+	preViewModel := PreViewModel{
+		ID:        logicModels[0].ID,
+		Name:      logicModels[0].Name,
+		State:     logicModels[0].State,
+		UserID:    logicModels[0].UserID,
+		Variables: make(map[string][]string),
+		Maps:      make(map[string][]string),
+		Lists:     make(map[string][]string),
+	}
+
+	if len(logicModels) == 1 && logicModels[0].VariableName == "" && logicModels[0].Map == "" && logicModels[0].List == "" {
+		return preViewModel, nil
+	}
+
+	for _, v := range logicModels {
+		variableLocale, _ := locales.GetAlphaWithID(v.VariableLocale)
+		mapLocale, _ := locales.GetAlphaWithID(v.MapLocale)
+		listLocale, _ := locales.GetAlphaWithID(v.ListLocale)
+
+		if _, ok := preViewModel.Variables[v.VariableLocale]; !ok && variableLocale != "" {
+			preViewModel.Variables[variableLocale] = make([]string, 0)
+		}
+
+		if _, ok := preViewModel.Maps[mapLocale]; !ok && mapLocale != "" {
+			preViewModel.Maps[mapLocale] = make([]string, 0)
+		}
+
+		if _, ok := preViewModel.Lists[listLocale]; !ok && listLocale != "" {
+			preViewModel.Lists[listLocale] = make([]string, 0)
+		}
+
+		if v.VariableName != "" {
+			preViewModel.Variables[variableLocale] = append(preViewModel.Variables[variableLocale], v.VariableName)
+		}
+
+		if v.Map != "" {
+			preViewModel.Maps[mapLocale] = append(preViewModel.Maps[mapLocale], v.Map)
+		}
+
+		if v.List != "" {
+			preViewModel.Lists[listLocale] = append(preViewModel.Lists[listLocale], v.List)
+		}
+	}
+
+	if len(preViewModel.Variables) == 0 {
+		preViewModel.Variables = nil
+	}
+
+	if len(preViewModel.Maps) == 0 {
+		preViewModel.Maps = nil
+	}
+
+	if len(preViewModel.Lists) == 0 {
+		preViewModel.Lists = nil
+	}
+
+	return preViewModel, nil
 }
 
 func (c Main) Handle() (View, error) {
@@ -77,7 +149,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(auth auth.Authentication, builder logger.LogBuilder) pkg.Job[interface{}, View, LogicModel] {
+func New(auth auth.Authentication, builder logger.LogBuilder) pkg.Job[interface{}, View, PreViewModel] {
 	builder.Add("projectService", "Get project")
 	return Main{logBuilder: builder, auth: auth}
 }
