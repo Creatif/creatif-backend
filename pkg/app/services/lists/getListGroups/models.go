@@ -1,8 +1,10 @@
 package getListGroups
 
 import (
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"errors"
+	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -11,16 +13,20 @@ type LogicModel struct {
 }
 
 type Model struct {
-	ID      string
-	Name    string
-	ShortID string
+	ID        string
+	Name      string
+	ShortID   string
+	ProjectID string
+	Locale    string
 }
 
-func NewModel(listID, name, shortId string) Model {
+func NewModel(listID, name, shortId, projectID, locale string) Model {
 	return Model{
-		ID:      listID,
-		Name:    name,
-		ShortID: shortId,
+		ID:        listID,
+		Name:      name,
+		ShortID:   shortId,
+		ProjectID: projectID,
+		Locale:    locale,
 	}
 }
 
@@ -35,13 +41,16 @@ func newView(model []LogicModel) []string {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"listID":   a.ID,
-		"idExists": nil,
+		"listID":    a.ID,
+		"projectID": a.ProjectID,
+		"idExists":  nil,
+		"locale":    a.Locale,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("listID", validation.When(a.ID != "", validation.RuneLength(26, 26))),
+			validation.Key("projectID", validation.When(a.ProjectID != "", validation.RuneLength(26, 26))),
 			validation.Key("idExists", validation.By(func(value interface{}) error {
 				name := a.Name
 				shortId := a.ShortID
@@ -54,6 +63,15 @@ func (a *Model) Validate() map[string]string {
 				if name == "" && shortId == "" && id == "" {
 					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this list.")
 				}
+				return nil
+			})),
+			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+				t := value.(string)
+
+				if !locales.ExistsByAlpha(t) {
+					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
+				}
+
 				return nil
 			})),
 		),
