@@ -79,6 +79,11 @@ func (a *apiAuthentication) Authenticate() error {
 		return errors.New("Users session has expired")
 	}
 
+	/**
+		- Refresh is the time when the token was created
+	    - Now is the time when the request was sent
+	    - Now() must be > than refresh time + refresh interval
+	*/
 	if time.Now().After(refresh.Add(15 * time.Minute)) {
 		authenticatedUser.Refresh = time.Now()
 		a.doRefresh = true

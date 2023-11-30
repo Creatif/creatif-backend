@@ -55,7 +55,7 @@ func (c Main) Logic() (string, error) {
 		key[i] = byte(v)
 	}
 
-	authenticatedUser := auth.NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now())
+	authenticatedUser := auth.NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now(), "")
 	return auth.NewEmailLogin(authenticatedUser, key, c.logBuilder).Login()
 }
 

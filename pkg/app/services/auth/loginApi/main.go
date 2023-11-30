@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"strings"
 	"time"
 )
@@ -106,7 +107,25 @@ ON p.user_id = u.id AND p.api_key = ? AND p.id = ? AND u.email = ?
 		key[i] = byte(v)
 	}
 
-	authenticatedUser := auth.NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now())
+	var project app.Project
+	res = storage.Gorm().Where("user_id = ? AND api_key = ?", user.ID, c.model.ApiKey).Select("ID", "api_key").First(&project)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return "", appErrors.NewAuthenticationError(errors.New("Associated project does not exist"))
+	}
+
+	if res.Error != nil {
+		return "", appErrors.NewAuthenticationError(res.Error)
+	}
+
+	if project.ID != c.model.ProjectID {
+		return "", appErrors.NewAuthenticationError(errors.New("Invalid project ID."))
+	}
+
+	if project.APIKey != c.model.ApiKey {
+		return "", appErrors.NewAuthenticationError(errors.New("Invalid API key."))
+	}
+
+	authenticatedUser := auth.NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now(), project.ID)
 	return auth.NewApiLogin(authenticatedUser, key, c.logBuilder).Login()
 }
 

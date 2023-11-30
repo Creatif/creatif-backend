@@ -25,6 +25,7 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := paginateListItems.New(paginateListItems.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -36,8 +37,19 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			model.Page,
 			model.SanitizedGroups,
 			sdk.ParseFilters(model.Filters),
-		), auth.NewNoopAuthentication(), l)
+		), authentication, l)
 
-		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

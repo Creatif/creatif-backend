@@ -61,7 +61,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	countPlaceholders["name"] = c.model.ListName
 
 	if c.model.OrderBy == "" {
-		c.model.OrderBy = "created_at"
+		c.model.OrderBy = "index"
 	}
 
 	if c.model.OrderDirection == "" {

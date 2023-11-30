@@ -14,6 +14,7 @@ var validOrderByFields []string = []string{
 	"created_at",
 	"updated_at",
 	"behaviour",
+	"index",
 }
 
 type Model struct {

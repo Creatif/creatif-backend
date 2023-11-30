@@ -72,6 +72,7 @@ func app() {
 
 func appRoutes(group *echo.Group) {
 	group.PUT("/project", appHandlers.CreateProjectHandler())
+	group.PUT("/project-metadata", appHandlers.GetProjectMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
 	group.GET("/project/:id", appHandlers.GetProjectHandler())
 
@@ -94,7 +95,7 @@ func declarationRoutes(group *echo.Group) {
 	group.DELETE("/list/:projectID/:name/:locale", lists.DeleteListHandler())
 	group.DELETE("/list/item-id/:projectID/:name/:itemID/:locale", lists.DeleteListItemByIDHandler())
 	group.POST("/list/range/:projectID/:name/:locale", lists.DeleteRangeByIDHandler())
-	group.GET("/lists/:projectID/:name/:locale", lists.PaginateListItemsHandler())
+	group.GET("/lists/:projectID/:locale/:name", lists.PaginateListItemsHandler())
 	group.GET("/lists/query-id/:projectID/:name/:locale/:id", lists.QueryListByIDHandler())
 	group.POST("/lists/:projectID/:name/:itemName/:locale", lists.ReplaceListItemHandler())
 	group.POST("/lists/switch-id/:projectID/:name/:locale/:source/:destination", lists.SwitchByIDHandler())
