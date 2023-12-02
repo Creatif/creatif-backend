@@ -3,10 +3,10 @@ package lists
 import "github.com/microcosm-cc/bluemonday"
 
 type DeleteListItemByID struct {
-	Name        string `param:"name"`
+	Name        string `json:"name"`
 	ID          string `json:"id"`
 	ShortID     string `json:"shortID"`
-	ItemID      string `param:"itemID"`
+	ItemID      string `json:"itemID"`
 	ItemShortID string `json:"itemShortID"`
 	ProjectID   string `param:"projectID"`
 	Locale      string `param:"locale"`

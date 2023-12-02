@@ -64,6 +64,13 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		c.model.OrderBy = "index"
 	}
 
+	var behaviour string
+	if c.model.Behaviour != "" {
+		behaviour = fmt.Sprintf("AND lv.behaviour = @behaviour")
+		placeholders["behaviour"] = c.model.Behaviour
+		countPlaceholders["behaviour"] = c.model.Behaviour
+	}
+
 	if c.model.OrderDirection == "" {
 		c.model.OrderDirection = "ASC"
 	}
@@ -105,12 +112,14 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 			INNER JOIN %s AS l
 		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id AND l.locale_id = @localeID %s
 		%s
+		%s
 		ORDER BY lv.%s %s
 		OFFSET @offset LIMIT @limit`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
 		search,
 		groupsWhereClause,
+		behaviour,
 		c.model.OrderBy,
 		c.model.OrderDirection)
 
@@ -128,10 +137,12 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		INNER JOIN %s AS l
 		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id %s
     	%s
+    	%s
 	`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
 		search,
+		behaviour,
 		groupsWhereClause,
 	)
 

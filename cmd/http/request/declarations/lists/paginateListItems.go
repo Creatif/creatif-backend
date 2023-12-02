@@ -13,6 +13,7 @@ type PaginateListItems struct {
 	Limit          int    `query:"limit"`
 	Page           int    `query:"page"`
 	Filters        string `query:"filters"`
+	Behaviour      string `query:"behaviour"`
 	Groups         string `query:"groups"`
 	Search         string `query:"search"`
 	OrderBy        string `query:"orderBy"`
@@ -31,6 +32,7 @@ func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
 	model.In = p.Sanitize(model.In)
 	model.OrderBy = p.Sanitize(model.OrderBy)
 	model.Locale = p.Sanitize(model.Locale)
+	model.Behaviour = p.Sanitize(model.Behaviour)
 
 	if model.Groups != "" {
 		newGroups := sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {

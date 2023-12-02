@@ -24,6 +24,7 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := deleteListItemByID.New(deleteListItemByID.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -32,8 +33,19 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 			model.ShortID,
 			model.ItemID,
 			model.ShortID,
-		), auth.NewNoopAuthentication(), l)
+		), a, l)
 
-		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if a.ShouldRefresh() {
+				session, err := a.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }
