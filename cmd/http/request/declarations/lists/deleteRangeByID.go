@@ -6,7 +6,7 @@ import (
 )
 
 type DeleteRangeByID struct {
-	Name      string   `param:"name"`
+	Name      string   `json:"name"`
 	ID        string   `json:"id"`
 	ShortID   string   `json:"shortID"`
 	Items     []string `json:"items"`

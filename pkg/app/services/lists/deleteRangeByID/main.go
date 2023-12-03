@@ -3,7 +3,6 @@ package deleteRangeByID
 import "C"
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
@@ -31,11 +30,8 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		c.logBuilder.Add("deleteRangeByID", err.Error())
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return err
 	}
 
 	return nil

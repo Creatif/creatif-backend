@@ -24,6 +24,7 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := deleteRangeByID.New(deleteRangeByID.NewModel(
 			model.ProjectID,
 			model.Locale,
@@ -31,8 +32,19 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 			model.ID,
 			model.ShortID,
 			model.Items,
-		), auth.NewNoopAuthentication(), l)
+		), a, l)
 
-		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if a.ShouldRefresh() {
+				session, err := a.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

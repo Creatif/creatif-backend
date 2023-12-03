@@ -95,7 +95,7 @@ func declarationRoutes(group *echo.Group) {
 	group.DELETE("/list/:projectID/:name/:locale", lists.DeleteListHandler())
 	group.POST("/list/item-id/:projectID/:locale", lists.DeleteListItemByIDHandler())
 	group.POST("/list/groups/:projectID/:locale", lists.GetListGroupsHandler())
-	group.POST("/list/range/:projectID/:name/:locale", lists.DeleteRangeByIDHandler())
+	group.POST("/list/range/:projectID/:locale", lists.DeleteRangeByIDHandler())
 	group.GET("/lists/:projectID/:locale/:name", lists.PaginateListItemsHandler())
 	group.GET("/lists/query-id/:projectID/:name/:locale/:id", lists.QueryListByIDHandler())
 	group.POST("/lists/:projectID/:name/:itemName/:locale", lists.ReplaceListItemHandler())
