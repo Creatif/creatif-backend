@@ -12,8 +12,8 @@ import (
 func LoginApiCheckHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		cookie := request.GetApiAuthenticationCookie(c)
-
 		if cookie == "" {
+			fmt.Println("no cookie in loginApiCheck")
 			return c.NoContent(http.StatusForbidden)
 		}
 

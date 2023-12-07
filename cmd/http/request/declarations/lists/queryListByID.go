@@ -8,7 +8,7 @@ type QueryListByID struct {
 	Name        string `param:"name"`
 	ShortID     string `json:"shortID"`
 	ID          string `json:"id"`
-	ItemID      string `json:"itemID"`
+	ItemID      string `param:"itemID"`
 	ItemShortID string `json:"itemShortID"`
 	ProjectID   string `param:"projectID"`
 	Locale      string `param:"locale"`
