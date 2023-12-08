@@ -20,14 +20,12 @@ func LoginApiCheckHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		a := auth.NewApiAuthentication(cookie, l)
 		if err := a.Authenticate(); err != nil {
-			fmt.Println(err)
 			return c.NoContent(http.StatusForbidden)
 		}
 
 		if a.ShouldRefresh() {
 			session, err := a.Refresh()
 			if err != nil {
-				fmt.Println(err)
 				return c.NoContent(http.StatusForbidden)
 			}
 

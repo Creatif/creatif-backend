@@ -3,6 +3,7 @@ package lists
 import (
 	"creatif/pkg/lib/sdk"
 	"github.com/microcosm-cc/bluemonday"
+	"strings"
 )
 
 type UpdateListItemByIDValues struct {
@@ -14,30 +15,30 @@ type UpdateListItemByIDValues struct {
 }
 
 type UpdateListItemByID struct {
-	Fields      []string                 `query:"projectID"`
-	ListName    string                   `param:"name"`
-	ListID      string                   `json:"id"`
-	ListShortID string                   `json:"shortID"`
-	Locale      string                   `param:"locale"`
-	ItemID      string                   `param:"itemID"`
-	ItemShortID string                   `param:"itemShortID"`
-	Values      UpdateListItemByIDValues `json:"values"`
-	ProjectID   string                   `param:"projectID"`
+	Name      string                   `param:"name"`
+	ItemID    string                   `param:"itemID"`
+	Locale    string                   `param:"locale"`
+	Values    UpdateListItemByIDValues `json:"values"`
+	ProjectID string                   `param:"projectID"`
+	Fields    string                   `query:"fields"`
+
+	ResolvedFields []string
 }
 
 func SanitizeUpdateListItemByID(model UpdateListItemByID) UpdateListItemByID {
 	p := bluemonday.StrictPolicy()
 
-	model.ListName = p.Sanitize(model.ListName)
-	model.ListID = p.Sanitize(model.ListID)
-	model.ListShortID = p.Sanitize(model.ListShortID)
+	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
 	model.ItemID = p.Sanitize(model.ItemID)
-	model.ItemShortID = p.Sanitize(model.ItemShortID)
-	model.Fields = sdk.Map(model.Fields, func(idx int, value string) string {
-		return p.Sanitize(value)
+	model.Fields = p.Sanitize(model.Fields)
+
+	model.ResolvedFields = sdk.Map(strings.Split(model.Fields, "|"), func(idx int, value string) string {
+		trimmed := strings.Trim(value, " ")
+		return trimmed
 	})
+
 	model.Values = UpdateListItemByIDValues{
 		Name:      p.Sanitize(model.Values.Name),
 		Behaviour: p.Sanitize(model.Values.Behaviour),

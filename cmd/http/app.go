@@ -71,6 +71,8 @@ func app() {
 }
 
 func appRoutes(group *echo.Group) {
+	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
+
 	group.PUT("/project", appHandlers.CreateProjectHandler())
 	group.GET("/project-metadata", appHandlers.GetProjectMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
@@ -97,11 +99,11 @@ func declarationRoutes(group *echo.Group) {
 	group.POST("/list/groups/:projectID/:locale", lists.GetListGroupsHandler())
 	group.POST("/list/range/:projectID/:locale", lists.DeleteRangeByIDHandler())
 	group.GET("/lists/:projectID/:locale/:name", lists.PaginateListItemsHandler())
-	group.GET("/lists/query-id/:projectID/:locale/:name/:itemId", lists.QueryListByIDHandler())
+	group.GET("/list/query-id/:projectID/:locale/:name/:itemId", lists.QueryListByIDHandler())
 	group.POST("/lists/:projectID/:name/:itemName/:locale", lists.ReplaceListItemHandler())
 	group.POST("/lists/switch-id/:projectID/:name/:locale/:source/:destination", lists.SwitchByIDHandler())
 	group.POST("/list/update/:projectID/:name/:locale", lists.UpdateListHandler())
-	group.POST("/list/update-item-by-id/:projectID/:name/:itemID/:locale", lists.UpdateListItemByIDHandler())
+	group.POST("/list/update-item-by-id/:projectID/:locale/:name/:itemID", lists.UpdateListItemByIDHandler())
 
 	group.POST("/map/add/:projectID/:locale", maps.AddToMapHandler())
 	group.POST("/map/update/:projectID/:locale", maps.UpdateMapVariableHandler())
@@ -109,8 +111,6 @@ func declarationRoutes(group *echo.Group) {
 	group.DELETE("/map/:projectID/:name/:locale", maps.DeleteMap())
 	group.PUT("/map/:projectID/:locale", maps.CreateMapHandler())
 	group.GET("/map/:projectID/:name/:locale", maps.GetMapHandler())
-
-	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 
 	group.PUT("/variable/:projectID/:locale", variables.CreateVariableHandler())
 	group.POST("/variable/:projectID", variables.UpdateVariableHandler())

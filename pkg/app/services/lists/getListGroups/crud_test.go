@@ -3,7 +3,6 @@ package getListGroups
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
-	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -18,7 +17,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		groups, err := handler.Handle()
 		testAssertErrNil(err)
 
-		fmt.Println(groups)
 		gomega.Expect(len(groups)).To(gomega.Equal(3))
 	})
 })

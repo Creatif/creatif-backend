@@ -4,6 +4,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
+	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
@@ -80,18 +81,23 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 			}
 
 			if os.Getenv("APP_ENV") != "prod" {
-				if err := flushLogger(logger, "error", context); err != nil {
-					return err
-				}
-				return context.JSON(http.StatusInternalServerError, ErrorResponse[DevErrorResponse]{
+				er := ErrorResponse[DevErrorResponse]{
 					Data: DevErrorResponse{
 						StackTrace: otherError.StackTrace(),
 						Error:      otherError.Error(),
 					},
-				})
+				}
+				lb, _ := json.Marshal(er)
+				logger.Add("Internal server error", string(lb))
+
+				if err := flushLogger(logger, "error", context); err != nil {
+					return err
+				}
+				return context.JSON(http.StatusInternalServerError, er)
 			}
 		}
 
+		logger.Add("Unable to determine error", otherError.Error())
 		if err := flushLogger(logger, "error", context); err != nil {
 			return err
 		}
@@ -101,6 +107,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 	}
 
 	if err := callCallback(context, model, callback); err != nil {
+		logger.Add("Callback error", err.Error())
 		if err := flushLogger(logger, "info", context); err != nil {
 			return err
 		}

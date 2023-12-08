@@ -2,10 +2,8 @@ package updateListItemByID
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
@@ -44,12 +42,15 @@ func (c Main) Validate() error {
 	res := storage.Gorm().Raw(fmt.Sprintf(`
 SELECT cardinality(lv.groups) AS count, behaviour
 FROM %s AS lv 
-INNER JOIN %s AS l ON l.name = ? AND l.project_id = ? AND l.locale_id = ? AND l.id = lv.list_id AND lv.id = ?`,
+INNER JOIN %s AS l ON (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND l.locale_id = ? AND l.id = lv.list_id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName()),
 		c.model.ListName,
+		c.model.ListName,
+		c.model.ListName,
 		c.model.ProjectID,
 		localeID,
+		c.model.ItemID,
 		c.model.ItemID,
 	).Scan(&check)
 
@@ -78,10 +79,8 @@ INNER JOIN %s AS l ON l.name = ? AND l.project_id = ? AND l.locale_id = ? AND l.
 }
 
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return err
 	}
 
 	return nil
@@ -98,9 +97,15 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		return declarations.ListVariable{}, appErrors.NewNotFoundError(err).AddError("updateListItemByID.Logic", nil)
 	}
 
-	listId, listVal := shared.DetermineID("", c.model.ListName, c.model.ListID, c.model.ListShortID)
 	var list declarations.List
-	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", listId), listVal, c.model.ProjectID, localeID).Select("id").First(&list); res.Error != nil {
+	if res := storage.Gorm().Where(
+		fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ? AND locale_id = ?"),
+		c.model.ListName,
+		c.model.ListName,
+		c.model.ListName,
+		c.model.ProjectID,
+		localeID).
+		Select("id").First(&list); res.Error != nil {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
@@ -110,9 +115,13 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByID.Logic", nil)
 	}
 
-	varId, varVal := shared.DetermineID("", "", c.model.ItemID, c.model.ItemShortID)
 	var existing declarations.ListVariable
-	if res := storage.Gorm().Where(fmt.Sprintf("%s AND list_id = ? AND locale_id = ?", varId), varVal, list.ID, localeID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("(id = ? OR short_id = ?) AND list_id = ? AND locale_id = ?"),
+		c.model.ItemID,
+		c.model.ItemID,
+		list.ID,
+		localeID).
+		First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {

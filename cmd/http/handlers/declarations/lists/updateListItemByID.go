@@ -17,6 +17,8 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
+		// hack! query tag just won't work
+		model.Fields = c.QueryParam("fields")
 
 		model = lists.SanitizeUpdateListItemByID(model)
 		if model.Locale == "" {
@@ -24,22 +26,33 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := updateListItemByID.New(updateListItemByID.NewModel(
 			model.ProjectID,
 			model.Locale,
-			model.Fields,
-			model.ListName,
-			model.ListID,
-			model.ListShortID,
+			model.ResolvedFields,
+			model.Name,
 			model.ItemID,
-			model.ItemShortID,
 			model.Values.Name,
 			model.Values.Behaviour,
 			model.Values.Groups,
 			[]byte(model.Values.Metadata),
 			[]byte(model.Values.Value),
-		), auth.NewNoopAuthentication(), l)
+		), authentication, l)
 
-		return request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l, nil, false)
+		res := request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
+
+		return res
 	}
 }

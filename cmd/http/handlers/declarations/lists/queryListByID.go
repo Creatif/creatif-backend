@@ -24,16 +24,25 @@ func QueryListByIDHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := queryListByID.New(queryListByID.NewModel(
 			model.ProjectID,
 			model.Locale,
 			model.Name,
-			model.ID,
-			model.ShortID,
 			model.ItemID,
-			model.ItemShortID,
-		), auth.NewNoopAuthentication(), l)
+		), authentication, l)
 
-		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }
