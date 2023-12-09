@@ -68,7 +68,7 @@ func (a Model) Validate() map[string]string {
 			validation.Key("variableLocales", validation.By(func(value interface{}) error {
 				for _, v := range a.Variables {
 					l := v.Locale
-					if !locales.ExistsByAlpha(l) {
+					if l != "" && !locales.ExistsByAlpha(l) {
 						return errors.New(fmt.Sprintf("Locale '%s' does not exist for variable with name '%s'", l, v.Name))
 					}
 				}

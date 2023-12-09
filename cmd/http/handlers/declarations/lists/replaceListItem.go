@@ -26,7 +26,6 @@ func ReplaceListItemHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := replaceListItem.New(replaceListItem.NewModel(
 			model.ProjectID,
-			model.Locale,
 			model.Name,
 			model.ID,
 			model.ShortID,
@@ -36,6 +35,7 @@ func ReplaceListItemHandler() func(e echo.Context) error {
 				Name:      model.Variable.Name,
 				Metadata:  []byte(model.Variable.Metadata),
 				Groups:    model.Variable.Groups,
+				Locale:    "eng",
 				Behaviour: model.Variable.Behaviour,
 				Value:     []byte(model.Variable.Value),
 			},

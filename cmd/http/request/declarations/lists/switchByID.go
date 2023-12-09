@@ -9,7 +9,6 @@ type SwitchByID struct {
 	Source      string `param:"source"`
 	Destination string `param:"destination"`
 	ProjectID   string `param:"projectID"`
-	Locale      string `param:"locale"`
 }
 
 func SanitizeSwitchByID(model SwitchByID) SwitchByID {
@@ -18,7 +17,6 @@ func SanitizeSwitchByID(model SwitchByID) SwitchByID {
 	model.Source = p.Sanitize(model.Source)
 	model.Destination = p.Sanitize(model.Destination)
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Locale = p.Sanitize(model.Locale)
 	model.ID = p.Sanitize(model.ID)
 	model.ShortID = p.Sanitize(model.ShortID)
 

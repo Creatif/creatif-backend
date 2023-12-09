@@ -18,12 +18,14 @@ var validUpdateableFields = []string{
 	"groups",
 	"behaviour",
 	"value",
+	"locale",
 }
 
 type ModelValues struct {
 	Name      string
 	Metadata  []byte
 	Groups    []string
+	Locale    string
 	Behaviour string
 	Value     []byte
 }
@@ -31,7 +33,6 @@ type ModelValues struct {
 type Model struct {
 	Fields    []string
 	ListName  string
-	Locale    string
 	ItemID    string
 	Values    ModelValues
 	ProjectID string
@@ -41,12 +42,12 @@ func NewModel(projectId, locale string, fields []string, listName, itemId, updat
 	return Model{
 		Fields:    fields,
 		ProjectID: projectId,
-		Locale:    locale,
 		ListName:  listName,
 		ItemID:    itemId,
 		Values: ModelValues{
 			Name:      updatingName,
 			Metadata:  metadata,
+			Locale:    locale,
 			Groups:    groups,
 			Behaviour: behaviour,
 			Value:     value,
@@ -60,7 +61,7 @@ func (a *Model) Validate() map[string]string {
 		"name":        a.ListName,
 		"itemID":      a.ItemID,
 		"projectID":   a.ProjectID,
-		"locale":      a.Locale,
+		"locale":      a.Values.Locale,
 		"groups":      a.Values.Groups,
 		"behaviour":   a.Values.Behaviour,
 	}
@@ -73,7 +74,7 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
 				t := value.([]string)
 
-				if len(t) == 0 || len(t) > 5 {
+				if len(t) == 0 || len(t) > 6 {
 					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
 				}
 
@@ -107,6 +108,10 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)
 
+				if !sdk.Includes(a.Fields, "locale") {
+					return nil
+				}
+
 				if !locales.ExistsByAlpha(t) {
 					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
 				}
@@ -134,7 +139,7 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.ListVariable, locale string) View {
+func newView(model declarations.ListVariable) View {
 	var m interface{} = model.Metadata
 	if len(model.Metadata) == 0 {
 		m = nil
@@ -144,6 +149,8 @@ func newView(model declarations.ListVariable, locale string) View {
 	if len(model.Value) == 0 {
 		v = nil
 	}
+
+	locale, _ := locales.GetAlphaWithID(model.LocaleID)
 	return View{
 		ID:        model.ID,
 		Locale:    locale,

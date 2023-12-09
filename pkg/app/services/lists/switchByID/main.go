@@ -3,7 +3,6 @@ package switchByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
-	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -42,21 +41,15 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicResult, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("switchByID", err.Error())
-		return LogicResult{}, appErrors.NewApplicationError(err)
-	}
-	source, destination, err := tryUpdates(c.model.ProjectID, localeID, c.model.Name, c.model.ID, c.model.ShortID, c.model.Source, c.model.Destination, 0, 10)
+	source, destination, err := tryUpdates(c.model.ProjectID, c.model.Name, c.model.ID, c.model.ShortID, c.model.Source, c.model.Destination, 0, 10)
 	if err != nil {
 		c.logBuilder.Add("switchByID", err.Error())
 		return LogicResult{}, appErrors.NewDatabaseError(err)
 	}
 
 	return LogicResult{
-		To:     source,
-		From:   destination,
-		Locale: c.model.Locale,
+		To:   source,
+		From: destination,
 	}, nil
 }
 

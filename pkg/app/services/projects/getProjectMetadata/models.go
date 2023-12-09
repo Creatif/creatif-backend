@@ -20,7 +20,7 @@ type PreViewModel struct {
 	UserID    string
 	Variables map[string][]string
 	Maps      map[string][]string
-	Lists     map[string][]string
+	Lists     []string
 }
 
 type View struct {
@@ -31,7 +31,7 @@ type View struct {
 
 	Variables map[string][]string `json:"variables"`
 	Maps      map[string][]string `json:"maps"`
-	Lists     map[string][]string `json:"lists"`
+	Lists     []string            `json:"lists"`
 }
 
 func newView(model PreViewModel) View {

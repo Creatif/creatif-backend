@@ -16,7 +16,6 @@ type UpdateList struct {
 	ShortID   string           `json:"shortID"`
 	Values    UpdateListValues `json:"values"`
 	ProjectID string           `param:"projectID"`
-	Locale    string           `param:"localeID"`
 }
 
 func SanitizeUpdateList(model UpdateList) UpdateList {
@@ -26,7 +25,6 @@ func SanitizeUpdateList(model UpdateList) UpdateList {
 	model.ID = p.Sanitize(model.ID)
 	model.ShortID = p.Sanitize(model.ShortID)
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Locale = p.Sanitize(model.Locale)
 	model.Fields = sdk.Map(model.Fields, func(idx int, value string) string {
 		return p.Sanitize(value)
 	})

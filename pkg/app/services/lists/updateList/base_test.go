@@ -125,12 +125,13 @@ func testCreateList(projectId, name string, varNum int) string {
 			Name:      fmt.Sprintf("one-%d", i),
 			Metadata:  nil,
 			Groups:    nil,
+			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

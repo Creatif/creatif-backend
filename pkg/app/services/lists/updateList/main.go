@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -47,15 +46,9 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.List, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("updateList", err.Error())
-		return declarations.List{}, appErrors.NewNotFoundError(err).AddError("updateList.Logic", nil)
-	}
-
 	listId, listVal := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var existing declarations.List
-	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", listId), listVal, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ?", listId), listVal, c.model.ProjectID).First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateList", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
@@ -106,7 +99,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Locale), nil
+	return newView(model), nil
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {

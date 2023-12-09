@@ -1,7 +1,6 @@
 package lists
 
 import (
-	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
@@ -19,14 +18,10 @@ func SwitchByIDHandler() func(e echo.Context) error {
 		}
 
 		model = lists.SanitizeSwitchByID(model)
-		if model.Locale == "" {
-			model.Locale = declarations2.DefaultLocale
-		}
 
 		l := logger.NewLogBuilder()
 		handler := switchByID.New(switchByID.NewModel(
 			model.ProjectID,
-			model.Locale,
 			model.Name,
 			model.ID,
 			model.ShortID,

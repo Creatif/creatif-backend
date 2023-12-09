@@ -124,13 +124,14 @@ func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (strin
 		variables[i] = createList2.Variable{
 			Name:      fmt.Sprintf("one-%d", i),
 			Metadata:  nil,
+			Locale:    "eng",
 			Groups:    []string{"one", "two", "three"},
 			Behaviour: "readonly",
 			Value:     nil,
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)
@@ -169,12 +170,13 @@ func testCreateListWithFragmentedGroups(projectId, name string, varNum int) (str
 			Name:      fmt.Sprintf("one-%d", i),
 			Metadata:  nil,
 			Groups:    groups,
+			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, "eng", name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

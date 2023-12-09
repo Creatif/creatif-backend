@@ -1,7 +1,6 @@
 package lists
 
 import (
-	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
@@ -21,15 +20,12 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 		model.Fields = c.QueryParam("fields")
 
 		model = lists.SanitizeUpdateListItemByID(model)
-		if model.Locale == "" {
-			model.Locale = declarations2.DefaultLocale
-		}
 
 		l := logger.NewLogBuilder()
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := updateListItemByID.New(updateListItemByID.NewModel(
 			model.ProjectID,
-			model.Locale,
+			model.Values.Locale,
 			model.ResolvedFields,
 			model.Name,
 			model.ItemID,

@@ -36,7 +36,7 @@ func AppendToListHandler() func(e echo.Context) error {
 					Name:      value.Name,
 					Metadata:  []byte(value.Metadata),
 					Groups:    value.Groups,
-					Locale:    "eng",
+					Locale:    value.Locale,
 					Behaviour: value.Behaviour,
 					Value:     []byte(value.Value),
 				}

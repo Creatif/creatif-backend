@@ -2,7 +2,6 @@ package updateList
 
 import (
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
@@ -28,14 +27,12 @@ type Model struct {
 	ShortID   string
 	Values    ModelValues
 	ProjectID string
-	Locale    string
 }
 
-func NewModel(projectId, locale string, fields []string, name, id, shortID, updatingName string) Model {
+func NewModel(projectId string, fields []string, name, id, shortID, updatingName string) Model {
 	return Model{
 		Fields:    fields,
 		ProjectID: projectId,
-		Locale:    locale,
 		Name:      name,
 		ID:        id,
 		ShortID:   shortID,
@@ -52,7 +49,6 @@ func (a *Model) Validate() map[string]string {
 		"id":                 a.ID,
 		"idExists":           nil,
 		"projectID":          a.ProjectID,
-		"locale":             a.Locale,
 		"updatingNameExists": a.Values.Name,
 	}
 
@@ -99,28 +95,14 @@ func (a *Model) Validate() map[string]string {
 					return nil
 				}
 
-				localeID, err := locales.GetIDWithAlpha(a.Locale)
-				if err != nil {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", a.Locale))
-				}
-
 				var exists declarations.List
-				res := storage.Gorm().Where("project_id = ? AND name = ? AND locale_id = ?", a.ProjectID, a.Values.Name, localeID).Select("ID").First(&exists)
+				res := storage.Gorm().Where("project_id = ? AND name = ?", a.ProjectID, a.Values.Name).Select("ID").First(&exists)
 				if res.Error != nil && !errors.Is(res.Error, gorm.ErrRecordNotFound) {
 					return errors.New(fmt.Sprintf("List with name '%s' already exists.", t))
 				}
 
 				if exists.ID != "" {
 					return errors.New(fmt.Sprintf("List with name '%s' already exists.", t))
-				}
-
-				return nil
-			})),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
 				}
 
 				return nil
@@ -137,20 +119,18 @@ type View struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	ShortID   string `json:"shortID"`
-	Locale    string `json:"locale"`
 	ProjectID string `json:"projectID"`
 
 	CreatedAt time.Time `gorm:"<-:create" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.List, locale string) View {
+func newView(model declarations.List) View {
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
 		ShortID:   model.ShortID,
 		ProjectID: model.ProjectID,
-		Locale:    locale,
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 	}

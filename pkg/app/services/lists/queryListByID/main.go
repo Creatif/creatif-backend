@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -46,21 +45,15 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.ListVariable, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("queryListByID", err.Error())
-		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("queryListByID.Logic", nil)
-	}
-
 	sql := fmt.Sprintf(`
-			SELECT lv.id, lv.name, lv.index, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at
+			SELECT lv.id, lv.name, lv.index, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at, lv.locale_id
 			FROM %s AS lv INNER JOIN %s AS l
-			ON l.project_id = ? AND (l.name = ? OR l.short_id = ? OR l.id = ?) AND lv.list_id = l.id AND (lv.id = ? OR lv.short_id = ?) AND l.locale_id = ?`,
+			ON l.project_id = ? AND (l.name = ? OR l.short_id = ? OR l.id = ?) AND lv.list_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
 
 	var variable declarations.ListVariable
 	res := storage.Gorm().
-		Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID, localeID).
+		Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID).
 		Scan(&variable)
 
 	if res.Error != nil {
@@ -95,7 +88,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Locale), nil
+	return newView(model), nil
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.ListVariable] {

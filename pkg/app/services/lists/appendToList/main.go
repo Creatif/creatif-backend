@@ -69,6 +69,10 @@ func (c Main) Logic() (declarations.List, error) {
 
 	listVariables := make([]declarations.ListVariable, len(c.model.Variables))
 	for i := 0; i < len(c.model.Variables); i++ {
+		if c.model.Variables[i].Locale == "" {
+			c.model.Variables[i].Locale = "eng"
+		}
+
 		localeID, _ := locales.GetIDWithAlpha(c.model.Variables[i].Locale)
 		v := c.model.Variables[i]
 		listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)

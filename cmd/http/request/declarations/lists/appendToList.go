@@ -8,6 +8,7 @@ import (
 type AppendToListVariable struct {
 	Name      string   `json:"name"`
 	Metadata  string   `json:"metadata"`
+	Locale    string   `json:"locale"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
 	Value     string   `json:"value"`
@@ -40,6 +41,7 @@ func SanitizeAppendToList(model AppendToList) AppendToList {
 			Name:      p.Sanitize(variable.Name),
 			Metadata:  variable.Metadata,
 			Groups:    newGroups,
+			Locale:    p.Sanitize(variable.Locale),
 			Behaviour: p.Sanitize(variable.Behaviour),
 			Value:     variable.Value,
 		}

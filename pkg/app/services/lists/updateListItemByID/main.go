@@ -27,12 +27,6 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("updateListItemByID", err.Error())
-		return appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
-	}
-
 	type GroupBehaviourCheck struct {
 		Count     int    `gorm:"column:count"`
 		Behaviour string `gorm:"column:behaviour"`
@@ -42,14 +36,13 @@ func (c Main) Validate() error {
 	res := storage.Gorm().Raw(fmt.Sprintf(`
 SELECT cardinality(lv.groups) AS count, behaviour
 FROM %s AS lv 
-INNER JOIN %s AS l ON (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND l.locale_id = ? AND l.id = lv.list_id AND (lv.id = ? OR lv.short_id = ?)`,
+INNER JOIN %s AS l ON (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND l.id = lv.list_id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName()),
 		c.model.ListName,
 		c.model.ListName,
 		c.model.ListName,
 		c.model.ProjectID,
-		localeID,
 		c.model.ItemID,
 		c.model.ItemID,
 	).Scan(&check)
@@ -91,20 +84,13 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.ListVariable, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("updateListItemByID", err.Error())
-		return declarations.ListVariable{}, appErrors.NewNotFoundError(err).AddError("updateListItemByID.Logic", nil)
-	}
-
 	var list declarations.List
 	if res := storage.Gorm().Where(
-		fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ? AND locale_id = ?"),
+		fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ?"),
 		c.model.ListName,
 		c.model.ListName,
 		c.model.ListName,
-		c.model.ProjectID,
-		localeID).
+		c.model.ProjectID).
 		Select("id").First(&list); res.Error != nil {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
@@ -116,11 +102,10 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 	}
 
 	var existing declarations.ListVariable
-	if res := storage.Gorm().Where(fmt.Sprintf("(id = ? OR short_id = ?) AND list_id = ? AND locale_id = ?"),
+	if res := storage.Gorm().Where(fmt.Sprintf("(id = ? OR short_id = ?) AND list_id = ?"),
 		c.model.ItemID,
 		c.model.ItemID,
-		list.ID,
-		localeID).
+		list.ID).
 		First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
@@ -151,6 +136,16 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		if f == "behaviour" {
 			existing.Behaviour = c.model.Values.Behaviour
 		}
+
+		if f == "locale" {
+			localeID, err := locales.GetIDWithAlpha(c.model.Values.Locale)
+			if err != nil {
+				c.logBuilder.Add("updateListItemByID", err.Error())
+				return declarations.ListVariable{}, appErrors.NewNotFoundError(err).AddError("updateListItemByID.Logic", nil)
+			}
+
+			existing.LocaleID = localeID
+		}
 	}
 
 	var updated declarations.ListVariable
@@ -159,6 +154,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		{Name: "name"},
 		{Name: "behaviour"},
 		{Name: "metadata"},
+		{Name: "locale_id"},
 		{Name: "value"},
 		{Name: "groups"},
 		{Name: "created_at"},
@@ -191,7 +187,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Locale), nil
+	return newView(model), nil
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.ListVariable] {

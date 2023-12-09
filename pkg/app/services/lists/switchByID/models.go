@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"errors"
-	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -17,13 +16,11 @@ type Model struct {
 	Source      string
 	Destination string
 	ProjectID   string
-	Locale      string
 }
 
-func NewModel(projectId, locale, name, id, shortID, source, destination string) Model {
+func NewModel(projectId, name, id, shortID, source, destination string) Model {
 	return Model{
 		ProjectID:   projectId,
-		Locale:      locale,
 		Source:      source,
 		Destination: destination,
 		Name:        name,
@@ -33,9 +30,8 @@ func NewModel(projectId, locale, name, id, shortID, source, destination string) 
 }
 
 type LogicResult struct {
-	To     declarations.ListVariable
-	From   declarations.ListVariable
-	Locale string
+	To   declarations.ListVariable
+	From declarations.ListVariable
 }
 
 type ViewSourceDestination struct {
@@ -53,19 +49,21 @@ type View struct {
 }
 
 func newView(model LogicResult) View {
+	sourceLocale, _ := locales.GetAlphaWithID(model.To.LocaleID)
+	destinationLocale, _ := locales.GetAlphaWithID(model.From.LocaleID)
 	return View{
 		Source: ViewSourceDestination{
 			ID:        model.From.ID,
-			Locale:    model.Locale,
 			ShortID:   model.From.ShortID,
 			Name:      model.From.Name,
+			Locale:    destinationLocale,
 			Behaviour: model.From.Behaviour,
 			Groups:    model.From.Groups,
 		},
 		Destination: ViewSourceDestination{
 			ID:        model.To.ID,
-			Locale:    model.Locale,
 			ShortID:   model.To.ShortID,
+			Locale:    sourceLocale,
 			Name:      model.To.Name,
 			Behaviour: model.To.Behaviour,
 			Groups:    model.To.Groups,
@@ -81,7 +79,6 @@ func (a *Model) Validate() map[string]string {
 		"projectID":   a.ProjectID,
 		"source":      a.Source,
 		"destination": a.Destination,
-		"locale":      a.Locale,
 	}
 
 	if err := validation.Validate(v,
@@ -105,15 +102,6 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("source", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("destination", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
-				}
-
-				return nil
-			})),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

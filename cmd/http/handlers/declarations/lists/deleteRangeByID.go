@@ -27,7 +27,6 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := deleteRangeByID.New(deleteRangeByID.NewModel(
 			model.ProjectID,
-			model.Locale,
 			model.Name,
 			model.ID,
 			model.ShortID,

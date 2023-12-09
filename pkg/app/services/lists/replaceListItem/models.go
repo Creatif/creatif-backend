@@ -13,6 +13,7 @@ import (
 type Variable struct {
 	Name      string
 	Metadata  []byte
+	Locale    string
 	Groups    []string
 	Behaviour string
 	Value     []byte
@@ -25,16 +26,14 @@ type Model struct {
 	ItemID      string
 	ItemShortID string
 	ProjectID   string
-	Locale      string
 	Variable    Variable
 }
 
-func NewModel(projectId, locale, name, id, shortID, itemID, itemShortID string, variable Variable) Model {
+func NewModel(projectId, name, id, shortID, itemID, itemShortID string, variable Variable) Model {
 	return Model{
 		Name:        name,
 		ID:          id,
 		ShortID:     shortID,
-		Locale:      locale,
 		ItemID:      itemID,
 		ItemShortID: itemShortID,
 		ProjectID:   projectId,
@@ -46,9 +45,9 @@ func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":         a.Name,
 		"id":           a.ID,
+		"localeValid":  a.Variable.Locale,
 		"idExists":     nil,
 		"projectID":    a.ProjectID,
-		"locale":       a.Locale,
 		"itemIDExists": nil,
 	}
 
@@ -70,6 +69,14 @@ func (a Model) Validate() map[string]string {
 				}
 				return nil
 			})),
+			validation.Key("localeValid", validation.By(func(value interface{}) error {
+				l := value.(string)
+				if !locales.ExistsByAlpha(l) {
+					return errors.New(fmt.Sprintf("Locale '%s' for variable with name '%s' does not exist.", l, a.Variable.Locale))
+				}
+
+				return nil
+			})),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("itemIDExists", validation.By(func(value interface{}) error {
 				id := a.ItemID
@@ -82,15 +89,6 @@ func (a Model) Validate() map[string]string {
 				if shortId == "" && id == "" {
 					return errors.New("At least one of 'id' or 'shortID' must be supplied in order to identify this variable.")
 				}
-				return nil
-			})),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
-				}
-
 				return nil
 			})),
 		),
@@ -107,6 +105,7 @@ type View struct {
 	Metadata  interface{} `json:"metadata"`
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
+	Locale    string      `json:"locale"`
 	Value     interface{} `json:"value"`
 	CreatedAt time.Time   `json:"createdAt"`
 	UpdatedAt time.Time   `json:"UpdatedAt"`

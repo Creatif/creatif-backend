@@ -8,7 +8,7 @@ import (
 
 type PaginateListItems struct {
 	ProjectID      string `param:"projectID"`
-	Locale         string `param:"locale"`
+	Locale         string `query:"locale"`
 	ListName       string `param:"name"`
 	Limit          int    `query:"limit"`
 	Page           int    `query:"page"`

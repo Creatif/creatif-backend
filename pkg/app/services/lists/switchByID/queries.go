@@ -20,7 +20,7 @@ func queryList(tx *gorm.DB, projectId, name, id, shortID string) (declarations.L
 	return list, nil
 }
 
-func queryVariableByID(g *gorm.DB, localeID, listId string, id string, acquireLock bool) (declarations.ListVariable, error) {
+func queryVariableByID(g *gorm.DB, listId string, id string, acquireLock bool) (declarations.ListVariable, error) {
 	var variable declarations.ListVariable
 	lock := ""
 	if acquireLock {
@@ -29,7 +29,7 @@ func queryVariableByID(g *gorm.DB, localeID, listId string, id string, acquireLo
 	res := g.
 		Raw(fmt.Sprintf(`
 			SELECT lv.id, lv.index
-			FROM %s AS lv WHERE lv.list_id = ? AND id = ? AND locale_id = ? %s`, (declarations.ListVariable{}).TableName(), lock), listId, id, localeID).
+			FROM %s AS lv WHERE lv.list_id = ? AND id = ? %s`, (declarations.ListVariable{}).TableName(), lock), listId, id).
 		Scan(&variable)
 
 	if res.Error != nil {
@@ -43,8 +43,8 @@ func queryVariableByID(g *gorm.DB, localeID, listId string, id string, acquireLo
 	return variable, nil
 }
 
-func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination declarations.ListVariable, localeID string) (declarations.ListVariable, declarations.ListVariable, error) {
-	res := g.Exec(fmt.Sprintf(`UPDATE %s SET index = NULL WHERE id = ? AND locale_id = ?`, (declarations.ListVariable{}).TableName()), source.ID, localeID)
+func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination declarations.ListVariable) (declarations.ListVariable, declarations.ListVariable, error) {
+	res := g.Exec(fmt.Sprintf(`UPDATE %s SET index = NULL WHERE id = ?`, (declarations.ListVariable{}).TableName()), source.ID)
 	if res.Error != nil {
 		return declarations.ListVariable{}, declarations.ListVariable{}, res.Error
 	}
@@ -54,7 +54,7 @@ func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination decl
 	}
 
 	var toVariable declarations.ListVariable
-	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? AND locale_id = ? RETURNING id, name, index, short_id, behaviour, groups`, (declarations.ListVariable{}).TableName()), source.Index, destination.ID, localeID).Scan(&toVariable)
+	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? RETURNING id, name, index, short_id, behaviour, groups, locale_id`, (declarations.ListVariable{}).TableName()), source.Index, destination.ID).Scan(&toVariable)
 	if res.Error != nil {
 		return declarations.ListVariable{}, declarations.ListVariable{}, res.Error
 	}
@@ -64,7 +64,7 @@ func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination decl
 	}
 
 	var fromVariable declarations.ListVariable
-	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? AND locale_id = ? RETURNING id, name, index, short_id, behaviour, groups`, (declarations.ListVariable{}).TableName()), destination.Index, source.ID, localeID).Scan(&fromVariable)
+	res = g.Raw(fmt.Sprintf(`UPDATE %s SET index = ? WHERE id = ? RETURNING id, name, index, short_id, behaviour, groups, locale_id`, (declarations.ListVariable{}).TableName()), destination.Index, source.ID).Scan(&fromVariable)
 	if res.Error != nil {
 		return declarations.ListVariable{}, declarations.ListVariable{}, res.Error
 	}
@@ -76,7 +76,7 @@ func handleUpdate(g *gorm.DB, source declarations.ListVariable, destination decl
 	return toVariable, fromVariable, nil
 }
 
-func tryUpdates(projectId, localeID, name, id, shortID, s, d string, currentUpdate, maxUpdates int) (declarations.ListVariable, declarations.ListVariable, error) {
+func tryUpdates(projectId, name, id, shortID, s, d string, currentUpdate, maxUpdates int) (declarations.ListVariable, declarations.ListVariable, error) {
 	var to, from declarations.ListVariable
 	var lastError error
 	if err := storage.Gorm().Transaction(func(tx *gorm.DB) error {
@@ -85,16 +85,16 @@ func tryUpdates(projectId, localeID, name, id, shortID, s, d string, currentUpda
 			return err
 		}
 
-		source, err := queryVariableByID(tx, localeID, list.ID, s, false)
+		source, err := queryVariableByID(tx, list.ID, s, false)
 		if err != nil {
 			return err
 		}
-		destination, err := queryVariableByID(tx, localeID, list.ID, d, false)
+		destination, err := queryVariableByID(tx, list.ID, d, false)
 		if err != nil {
 			return err
 		}
 
-		newToVariable, newFromVariable, err := handleUpdate(tx, source, destination, localeID)
+		newToVariable, newFromVariable, err := handleUpdate(tx, source, destination)
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func tryUpdates(projectId, localeID, name, id, shortID, s, d string, currentUpda
 		lastError = err
 		time.Sleep(time.Millisecond * 10)
 		if currentUpdate < maxUpdates {
-			return tryUpdates(projectId, localeID, name, id, shortID, s, d, currentUpdate+1, maxUpdates)
+			return tryUpdates(projectId, name, id, shortID, s, d, currentUpdate+1, maxUpdates)
 		}
 	}
 

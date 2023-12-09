@@ -2,7 +2,6 @@ package paginateListItems
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
@@ -28,10 +27,8 @@ func (c Main) Validate() error {
 	return nil
 }
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("paginateVariables.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return err
 	}
 
 	return nil
@@ -42,15 +39,8 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("paginateListItems", err.Error())
-		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewApplicationError(err).AddError("ListItems.Paginate.Logic", nil)
-	}
-
 	offset := (c.model.Page - 1) * c.model.Limit
 	placeholders := make(map[string]interface{})
-	placeholders["localeID"] = localeID
 	placeholders["projectID"] = c.model.ProjectID
 	placeholders["offset"] = offset
 	placeholders["name"] = c.model.ListName
@@ -69,6 +59,14 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		behaviour = fmt.Sprintf("AND lv.behaviour = @behaviour")
 		placeholders["behaviour"] = c.model.Behaviour
 		countPlaceholders["behaviour"] = c.model.Behaviour
+	}
+
+	var locale string
+	if c.model.Locale != "" {
+		localeID, _ := locales.GetIDWithAlpha(c.model.Locale)
+		locale = fmt.Sprintf("AND lv.locale_id = @localeID")
+		placeholders["localeID"] = localeID
+		countPlaceholders["localeID"] = localeID
 	}
 
 	if c.model.OrderDirection == "" {
@@ -110,13 +108,14 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	lv.updated_at 
 			FROM %s AS lv
 			INNER JOIN %s AS l
-		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id AND l.locale_id = @localeID %s
+		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id %s %s
 		%s
 		%s
 		ORDER BY lv.%s %s
 		OFFSET @offset LIMIT @limit`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
+		locale,
 		search,
 		groupsWhereClause,
 		behaviour,
@@ -135,12 +134,13 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	    count(lv.id) AS count
 		FROM %s AS lv
 		INNER JOIN %s AS l
-		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id %s
+		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id %s %s
     	%s
     	%s
 	`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
+		locale,
 		search,
 		behaviour,
 		groupsWhereClause,

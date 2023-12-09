@@ -27,7 +27,6 @@ func QueryListByIDHandler() func(e echo.Context) error {
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := queryListByID.New(queryListByID.NewModel(
 			model.ProjectID,
-			model.Locale,
 			model.Name,
 			model.ItemID,
 		), authentication, l)

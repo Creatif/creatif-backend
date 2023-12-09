@@ -9,6 +9,7 @@ import (
 type UpdateListItemByIDValues struct {
 	Name      string   `json:"name"`
 	Metadata  string   `json:"metadata"`
+	Locale    string   `json:"locale"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
 	Value     string   `json:"value"`
@@ -17,7 +18,6 @@ type UpdateListItemByIDValues struct {
 type UpdateListItemByID struct {
 	Name      string                   `param:"name"`
 	ItemID    string                   `param:"itemID"`
-	Locale    string                   `param:"locale"`
 	Values    UpdateListItemByIDValues `json:"values"`
 	ProjectID string                   `param:"projectID"`
 	Fields    string                   `query:"fields"`
@@ -30,7 +30,6 @@ func SanitizeUpdateListItemByID(model UpdateListItemByID) UpdateListItemByID {
 
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Locale = p.Sanitize(model.Locale)
 	model.ItemID = p.Sanitize(model.ItemID)
 	model.Fields = p.Sanitize(model.Fields)
 
@@ -41,6 +40,7 @@ func SanitizeUpdateListItemByID(model UpdateListItemByID) UpdateListItemByID {
 
 	model.Values = UpdateListItemByIDValues{
 		Name:      p.Sanitize(model.Values.Name),
+		Locale:    p.Sanitize(model.Values.Locale),
 		Behaviour: p.Sanitize(model.Values.Behaviour),
 		Groups: sdk.Map(model.Values.Groups, func(idx int, value string) string {
 			return p.Sanitize(value)

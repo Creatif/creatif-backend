@@ -16,10 +16,11 @@ var _ = ginkgo.Describe("Declaration list replace tests", func() {
 		variables := testCreateListAndReturnVariables(projectId, "list", 10)
 
 		item := variables[4]
-		handler := New(NewModel(projectId, "eng", "list", "", "", item["id"], "", Variable{
+		handler := New(NewModel(projectId, "list", "", "", item["id"], "", Variable{
 			Name:      "newName",
 			Metadata:  nil,
 			Groups:    nil,
+			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
 		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())

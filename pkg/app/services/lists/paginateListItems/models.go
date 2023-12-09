@@ -62,8 +62,12 @@ func (a *Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+			validation.Key("locale", validation.By(func(value interface{}) error {
 				t := value.(string)
+
+				if t == "" {
+					return nil
+				}
 
 				if !locales.ExistsByAlpha(t) {
 					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))

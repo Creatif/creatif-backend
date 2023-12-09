@@ -45,11 +45,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.ListVariable, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("replaceListItem", err.Error())
-		return declarations.ListVariable{}, appErrors.NewApplicationError(err).AddError("replaceListItem.Logic", nil)
-	}
+	localeID, _ := locales.GetIDWithAlpha(c.model.Variable.Locale)
 
 	if c.model.Variable.Groups == nil {
 		c.model.Variable.Groups = []string{}
@@ -75,6 +71,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 			{Name: "name"},
 			{Name: "short_id"},
 			{Name: "behaviour"},
+			{Name: "locale_id"},
 			{Name: "metadata"},
 			{Name: "value"},
 			{Name: "groups"},
