@@ -28,7 +28,6 @@ func AppendToListHandler() func(e echo.Context) error {
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := appendToList.New(appendToList.NewModel(
 			model.ProjectID,
-			model.Locale,
 			model.Name,
 			model.ID,
 			model.ShortID,
@@ -37,6 +36,7 @@ func AppendToListHandler() func(e echo.Context) error {
 					Name:      value.Name,
 					Metadata:  []byte(value.Metadata),
 					Groups:    value.Groups,
+					Locale:    "eng",
 					Behaviour: value.Behaviour,
 					Value:     []byte(value.Value),
 				}

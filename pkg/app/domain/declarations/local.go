@@ -14,7 +14,6 @@ type Locale struct {
 	Alpha string `gorm:"unique"`
 
 	Maps      []Map      `gorm:"foreignKey:LocaleID"`
-	Lists     []List     `gorm:"foreignKey:LocaleID"`
 	Variables []Variable `gorm:"foreignKey:LocaleID"`
 
 	CreatedAt time.Time `gorm:"<-:create"`

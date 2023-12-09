@@ -15,20 +15,19 @@ type Variable struct {
 	Metadata  []byte
 	Groups    []string
 	Behaviour string
+	Locale    string
 	Value     []byte
 }
 
 type Model struct {
 	Name      string
 	ProjectID string
-	Locale    string
 	Variables []Variable
 }
 
-func NewModel(projectId, locale, name string, variables []Variable) Model {
+func NewModel(projectId, name string, variables []Variable) Model {
 	return Model{
 		Name:      name,
-		Locale:    locale,
 		ProjectID: projectId,
 		Variables: variables,
 	}
@@ -36,11 +35,11 @@ func NewModel(projectId, locale, name string, variables []Variable) Model {
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"name":        a.Name,
-		"projectID":   a.ProjectID,
-		"locale":      a.Locale,
-		"variableLen": len(a.Variables),
-		"groups":      nil,
+		"name":            a.Name,
+		"projectID":       a.ProjectID,
+		"variableLen":     len(a.Variables),
+		"variableLocales": nil,
+		"groups":          nil,
 	}
 
 	if err := validation.Validate(v,
@@ -56,11 +55,12 @@ func (a Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
+			validation.Key("variableLocales", validation.By(func(value interface{}) error {
+				for _, v := range a.Variables {
+					l := v.Locale
+					if !locales.ExistsByAlpha(l) {
+						return errors.New(fmt.Sprintf("Locale '%s' does not exist for variable with name '%s'", l, v.Name))
+					}
 				}
 
 				return nil
@@ -93,18 +93,16 @@ type View struct {
 	ShortID   string `json:"shortID"`
 	ProjectID string `json:"projectID"`
 	Name      string `json:"name"`
-	Locale    string `json:"locale"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.List, locale string) View {
+func newView(model declarations.List) View {
 	return View{
 		ID:        model.ID,
 		ShortID:   model.ShortID,
 		ProjectID: model.ProjectID,
-		Locale:    locale,
 		Name:      model.Name,
 
 		CreatedAt: model.CreatedAt,

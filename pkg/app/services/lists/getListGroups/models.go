@@ -1,10 +1,8 @@
 package getListGroups
 
 import (
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"errors"
-	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -26,7 +24,6 @@ func NewModel(listID, name, shortId, projectID, locale string) Model {
 		Name:      name,
 		ShortID:   shortId,
 		ProjectID: projectID,
-		Locale:    locale,
 	}
 }
 
@@ -44,7 +41,6 @@ func (a *Model) Validate() map[string]string {
 		"listID":    a.ID,
 		"projectID": a.ProjectID,
 		"idExists":  nil,
-		"locale":    a.Locale,
 	}
 
 	if err := validation.Validate(v,
@@ -63,15 +59,6 @@ func (a *Model) Validate() map[string]string {
 				if name == "" && shortId == "" && id == "" {
 					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this list.")
 				}
-				return nil
-			})),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
-				}
-
 				return nil
 			})),
 		),

@@ -26,7 +26,6 @@ func DeleteListHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := deleteList.New(deleteList.NewModel(
 			model.ProjectID,
-			model.Locale,
 			model.Name,
 			model.ID,
 			model.ShortID,

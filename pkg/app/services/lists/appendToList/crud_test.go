@@ -19,18 +19,18 @@ var _ = ginkgo.Describe("Declaration list append tests", func() {
 				Name:      fmt.Sprintf("one-%d", i),
 				Metadata:  nil,
 				Groups:    nil,
+				Locale:    "eng",
 				Behaviour: "readonly",
 				Value:     nil,
 			}
 		}
 
-		handler := New(NewModel(projectId, "eng", listName, "", "", variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, listName, "", "", variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		list, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(list.ID)
 
 		gomega.Expect(list.Name).Should(gomega.Equal(listName))
-		gomega.Expect(list.Locale).Should(gomega.Equal("eng"))
 	})
 })

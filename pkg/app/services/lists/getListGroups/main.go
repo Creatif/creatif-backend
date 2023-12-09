@@ -3,7 +3,6 @@ package getListGroups
 import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -43,23 +42,17 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() ([]LogicModel, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("appendToList", err.Error())
-		return nil, appErrors.NewApplicationError(err).AddError("getListGroups.Logic", nil)
-	}
-
 	varId, varVal := shared.DetermineID("l", c.model.Name, c.model.ID, c.model.ShortID)
 
 	sql := fmt.Sprintf(`
 SELECT DISTINCT unnest(ARRAY(
 	SELECT groups FROM %s AS lv 
-    INNER JOIN %s AS l ON l.project_id = ? AND lv.list_id = l.id AND l.locale_id = ? AND %s
+    INNER JOIN %s AS l ON l.project_id = ? AND lv.list_id = l.id AND %s
 	)
 ) AS group
 `, (declarations2.ListVariable{}).TableName(), (declarations2.List{}).TableName(), varId)
 	var model []LogicModel
-	res := storage.Gorm().Raw(sql, c.model.ProjectID, localeID, varVal).Scan(&model)
+	res := storage.Gorm().Raw(sql, c.model.ProjectID, varVal).Scan(&model)
 
 	if res.Error != nil {
 		return nil, appErrors.NewNotFoundError(res.Error)

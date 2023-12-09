@@ -28,13 +28,13 @@ func CreateListHandler() func(e echo.Context) error {
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := createList.New(createList.NewModel(
 			model.ProjectID,
-			model.Locale,
 			model.Name,
 			sdk.Map(model.Variables, func(idx int, value lists.CreateListVariable) createList.Variable {
 				return createList.Variable{
 					Name:      value.Name,
 					Metadata:  []byte(value.Metadata),
 					Groups:    value.Groups,
+					Locale:    value.Locale,
 					Behaviour: value.Behaviour,
 					Value:     []byte(value.Value),
 				}

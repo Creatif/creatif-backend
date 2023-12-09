@@ -25,14 +25,8 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("createList.locale", err.Error())
-		return appErrors.NewApplicationError(err)
-	}
-
 	var variable declarations.List
-	res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", c.model.Name, c.model.ProjectID, localeID).Select("ID").First(&variable)
+	res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Select("ID").First(&variable)
 
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return nil
@@ -67,13 +61,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.List, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("createList", err.Error())
-		return declarations.List{}, appErrors.NewApplicationError(err).AddError("createList.Logic", nil)
-	}
-
-	list := declarations.NewList(c.model.ProjectID, c.model.Name, localeID)
+	list := declarations.NewList(c.model.ProjectID, c.model.Name)
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&list); res.Error != nil {
 			return res.Error
@@ -82,6 +70,7 @@ func (c Main) Logic() (declarations.List, error) {
 		if len(c.model.Variables) > 0 {
 			listVariables := make([]declarations.ListVariable, len(c.model.Variables))
 			for i := 0; i < len(c.model.Variables); i++ {
+				localeID, _ := locales.GetIDWithAlpha(c.model.Variables[i].Locale)
 				v := c.model.Variables[i]
 				listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
 			}
@@ -119,7 +108,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Locale), nil
+	return newView(model), nil
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {

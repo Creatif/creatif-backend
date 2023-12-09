@@ -10,6 +10,7 @@ type CreateListVariable struct {
 	Metadata  string   `json:"metadata"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
+	Locale    string   `json:"locale"`
 	Value     string   `json:"value"`
 }
 

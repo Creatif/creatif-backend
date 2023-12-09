@@ -1,10 +1,8 @@
 package deleteListItemByID
 
 import (
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"errors"
-	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -15,15 +13,13 @@ type Model struct {
 	ItemID      string
 	ItemShortID string
 	ProjectID   string
-	Locale      string
 }
 
-func NewModel(projectId, locale, name, id, shortID, itemId, itemShortID string) Model {
+func NewModel(projectId, name, id, shortID, itemId, itemShortID string) Model {
 	return Model{
 		Name:        name,
 		ID:          id,
 		ShortID:     shortID,
-		Locale:      locale,
 		ItemID:      itemId,
 		ItemShortID: itemShortID,
 		ProjectID:   projectId,
@@ -37,7 +33,6 @@ func (a Model) Validate() map[string]string {
 		"idExists":     nil,
 		"itemIDExists": nil,
 		"projectID":    a.ProjectID,
-		"locale":       a.Locale,
 	}
 
 	if err := validation.Validate(v,
@@ -73,15 +68,6 @@ func (a Model) Validate() map[string]string {
 			})),
 
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
-				}
-
-				return nil
-			})),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

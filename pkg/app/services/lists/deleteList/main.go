@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -46,15 +45,9 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (*struct{}, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("deleteList", err.Error())
-		return nil, appErrors.NewApplicationError(err).AddError("deleteList.Logic", nil)
-	}
-
 	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var list declarations.List
-	res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", id), val, c.model.ProjectID, localeID).Delete(&list)
+	res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ?", id), val, c.model.ProjectID).Delete(&list)
 	if res.Error != nil {
 		c.logBuilder.Add("deleteList", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {

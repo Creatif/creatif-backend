@@ -14,17 +14,15 @@ type List struct {
 
 	Name          string         `gorm:"uniqueIndex:unique_list_name;not null"`
 	ProjectID     string         `gorm:"uniqueIndex:unique_list_name;type:text"`
-	LocaleID      string         `gorm:"uniqueIndex:unique_list_name;type:text"`
 	ListVariables []ListVariable `gorm:"foreignKey:ListID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }
 
-func NewList(projectId, name, localeID string) List {
+func NewList(projectId, name string) List {
 	return List{
 		Name:      name,
-		LocaleID:  localeID,
 		ProjectID: projectId,
 	}
 }

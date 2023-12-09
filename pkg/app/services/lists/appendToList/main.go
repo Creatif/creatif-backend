@@ -44,12 +44,6 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.List, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("appendToList", err.Error())
-		return declarations.List{}, appErrors.NewApplicationError(err).AddError("appendToList.Logic", nil)
-	}
-
 	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var list declarations.List
 	if res := storage.Gorm().Where(fmt.Sprintf("%s", id), val).First(&list); res.Error != nil {
@@ -75,6 +69,7 @@ func (c Main) Logic() (declarations.List, error) {
 
 	listVariables := make([]declarations.ListVariable, len(c.model.Variables))
 	for i := 0; i < len(c.model.Variables); i++ {
+		localeID, _ := locales.GetIDWithAlpha(c.model.Variables[i].Locale)
 		v := c.model.Variables[i]
 		listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
 	}
@@ -106,7 +101,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Locale), nil
+	return newView(model), nil
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {

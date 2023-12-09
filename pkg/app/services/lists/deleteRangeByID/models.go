@@ -1,10 +1,8 @@
 package deleteRangeByID
 
 import (
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"errors"
-	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -14,15 +12,13 @@ type Model struct {
 	ShortID   string
 	Items     []string
 	ProjectID string
-	Locale    string
 }
 
-func NewModel(projectId, locale, name, id, shortID string, items []string) Model {
+func NewModel(projectId, name, id, shortID string, items []string) Model {
 	return Model{
 		Name:      name,
 		ID:        id,
 		ShortID:   shortID,
-		Locale:    locale,
 		Items:     items,
 		ProjectID: projectId,
 	}
@@ -35,7 +31,6 @@ func (a Model) Validate() map[string]string {
 		"idExists":  nil,
 		"projectID": a.ProjectID,
 		"items":     a.Items,
-		"locale":    a.Locale,
 	}
 
 	if err := validation.Validate(v,
@@ -65,15 +60,6 @@ func (a Model) Validate() map[string]string {
 
 				if len(items) == 0 {
 					return errors.New("Items number must be bigger than 0 (zero).")
-				}
-
-				return nil
-			})),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
 				}
 
 				return nil
