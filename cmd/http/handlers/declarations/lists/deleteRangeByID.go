@@ -1,6 +1,7 @@
 package lists
 
 import (
+	"creatif/cmd"
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
@@ -23,8 +24,11 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
+		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
+
 		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
 		handler := deleteRangeByID.New(deleteRangeByID.NewModel(
 			model.ProjectID,
 			model.Name,

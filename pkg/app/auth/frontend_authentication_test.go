@@ -20,7 +20,8 @@ var _ = ginkgo.Describe("Frontend email login/authentication", func() {
 		for i, v := range user.Key {
 			key[i] = byte(v)
 		}
-		authenticatedUser := NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now(), "")
+
+		authenticatedUser := NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now(), "", "")
 		loginer := NewEmailLogin(authenticatedUser, key, l)
 		token, err := loginer.Login()
 		testAssertErrNil(err)
@@ -38,7 +39,7 @@ var _ = ginkgo.Describe("Frontend email login/authentication", func() {
 			key[i] = byte(v)
 		}
 		l := logger.NewLogBuilder()
-		authenticatedUser := NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now(), "")
+		authenticatedUser := NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now(), "", "")
 		loginer := NewEmailLogin(authenticatedUser, key, l)
 		token, err := loginer.Login()
 		testAssertErrNil(err)

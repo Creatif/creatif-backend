@@ -11,6 +11,7 @@ type AuthenticatedUser struct {
 
 	Refresh   time.Time `json:"refresh"`
 	ProjectID string    `json:"projectID"`
+	ApiKey    string    `json:"apiKey"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -28,12 +29,13 @@ type AuthenticatedApiSession struct {
 	Type  string `json:"type"`
 }
 
-func NewAuthenticatedUser(id, name, lastName, email string, createdAt, updatedAt, refresh time.Time, projectID string) AuthenticatedUser {
+func NewAuthenticatedUser(id, name, lastName, email string, createdAt, updatedAt, refresh time.Time, projectID, apiKey string) AuthenticatedUser {
 	return AuthenticatedUser{
 		ID:        id,
 		Name:      name,
 		LastName:  lastName,
 		Email:     email,
+		ApiKey:    apiKey,
 		ProjectID: projectID,
 
 		Refresh: refresh,

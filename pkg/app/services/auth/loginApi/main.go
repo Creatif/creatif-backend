@@ -125,7 +125,7 @@ ON p.user_id = u.id AND p.api_key = ? AND p.id = ? AND u.email = ?
 		return "", appErrors.NewAuthenticationError(errors.New("Invalid API key."))
 	}
 
-	authenticatedUser := auth.NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now(), project.ID)
+	authenticatedUser := auth.NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now(), project.ID, project.APIKey)
 	return auth.NewApiLogin(authenticatedUser, key, c.logBuilder).Login()
 }
 

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
@@ -17,8 +18,13 @@ func LoginApiCheckHandler() func(e echo.Context) error {
 			return c.NoContent(http.StatusForbidden)
 		}
 
+		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
+		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
+
+		fmt.Println(apiKey, projectId)
+
 		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(cookie, l)
+		a := auth.NewApiAuthentication(cookie, projectId, apiKey, l)
 		if err := a.Authenticate(); err != nil {
 			return c.NoContent(http.StatusForbidden)
 		}

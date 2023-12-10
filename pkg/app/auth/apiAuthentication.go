@@ -16,6 +16,8 @@ type apiAuthentication struct {
 	logBuilder logger.LogBuilder
 	user       AuthenticatedUser
 	key        [32]byte
+	projectId  string
+	apiKey     string
 	doRefresh  bool
 }
 
@@ -74,6 +76,11 @@ func (a *apiAuthentication) Authenticate() error {
 		return errors.New("Failed email")
 	}
 
+	if authenticatedUser.ApiKey != a.apiKey || authenticatedUser.ProjectID != a.projectId {
+		a.logBuilder.Add("authentication.invalidAuthHeaders", fmt.Sprintf("Provided headers did not match the session headers"))
+		return errors.New("Failed auth headers")
+	}
+
 	refresh := authenticatedUser.Refresh
 	if time.Now().After(refresh.Add(61 * time.Minute)) {
 		return errors.New("Users session has expired")
@@ -116,10 +123,12 @@ func (a *apiAuthentication) Refresh() (string, error) {
 	return a.session, nil
 }
 
-func NewApiAuthentication(session string, builder logger.LogBuilder) Authentication {
+func NewApiAuthentication(session, projectId, apiKey string, builder logger.LogBuilder) Authentication {
 	return &apiAuthentication{
 		session:    session,
 		doRefresh:  false,
+		projectId:  projectId,
+		apiKey:     apiKey,
 		logBuilder: builder,
 	}
 }
