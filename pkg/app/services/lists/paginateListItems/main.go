@@ -3,7 +3,6 @@ package paginateListItems
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -62,11 +61,11 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	}
 
 	var locale string
-	if c.model.Locale != "" {
-		localeID, _ := locales.GetIDWithAlpha(c.model.Locale)
-		locale = fmt.Sprintf("AND lv.locale_id = @localeID")
-		placeholders["localeID"] = localeID
-		countPlaceholders["localeID"] = localeID
+	if len(c.model.Locales) != 0 {
+		resolvedLocales := sdk.Map(c.model.Locales, func(idx int, value string) string {
+			return fmt.Sprintf("'%s'", value)
+		})
+		locale = fmt.Sprintf("AND lv.locale_id IN(%s)", strings.Join(resolvedLocales, ","))
 	}
 
 	if c.model.OrderDirection == "" {

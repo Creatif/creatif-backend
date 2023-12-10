@@ -1,6 +1,7 @@
 package lists
 
 import (
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"github.com/microcosm-cc/bluemonday"
 	"strings"
@@ -8,7 +9,7 @@ import (
 
 type PaginateListItems struct {
 	ProjectID      string `param:"projectID"`
-	Locale         string `query:"locale"`
+	Locales        string `query:"locales"`
 	ListName       string `param:"name"`
 	Limit          int    `query:"limit"`
 	Page           int    `query:"page"`
@@ -20,7 +21,8 @@ type PaginateListItems struct {
 	OrderDirection string `query:"direction"`
 	In             string `query:"in"`
 
-	SanitizedGroups []string
+	SanitizedGroups  []string
+	SanitizedLocales []string
 }
 
 func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
@@ -31,15 +33,21 @@ func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
 	model.OrderDirection = p.Sanitize(model.OrderDirection)
 	model.In = p.Sanitize(model.In)
 	model.OrderBy = p.Sanitize(model.OrderBy)
-	model.Locale = p.Sanitize(model.Locale)
 	model.Behaviour = p.Sanitize(model.Behaviour)
 
 	if model.Groups != "" {
-		newGroups := sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {
+		model.SanitizedGroups = sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {
 			return p.Sanitize(strings.TrimSpace(value))
 		})
+	}
 
-		model.SanitizedGroups = newGroups
+	if model.Locales != "" {
+		model.SanitizedLocales = sdk.Map(strings.Split(model.Locales, ","), func(idx int, value string) string {
+			sanitized := p.Sanitize(strings.TrimSpace(value))
+			locale, _ := locales.GetIDWithAlpha(sanitized)
+
+			return locale
+		})
 	}
 
 	return model

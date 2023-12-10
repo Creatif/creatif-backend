@@ -1,7 +1,6 @@
 package paginateListItems
 
 import (
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"errors"
 	"fmt"
@@ -20,7 +19,7 @@ var validOrderByFields = []string{
 type Model struct {
 	ProjectID string
 	ListName  string
-	Locale    string
+	Locales   []string
 
 	Limit          int
 	Page           int
@@ -32,10 +31,10 @@ type Model struct {
 	Groups         []string
 }
 
-func NewModel(projectId, locale, listName, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string, behaviour string) Model {
+func NewModel(projectId string, locales []string, listName, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string, behaviour string) Model {
 	return Model{
 		ProjectID:      projectId,
-		Locale:         locale,
+		Locales:        locales,
 		Search:         search,
 		ListName:       listName,
 		OrderBy:        orderBy,
@@ -51,7 +50,6 @@ func NewModel(projectId, locale, listName, orderBy, search, direction string, li
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"projectID": a.ProjectID,
-		"locale":    a.Locale,
 		"orderBy":   a.OrderBy,
 		"page":      a.Page,
 		"limit":     a.Limit,
@@ -62,19 +60,6 @@ func (a *Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("locale", validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if t == "" {
-					return nil
-				}
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' not found.", t))
-				}
-
-				return nil
-			})),
 			validation.Key("orderBy", validation.By(func(value interface{}) error {
 				t := value.(string)
 

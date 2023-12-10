@@ -24,7 +24,7 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := paginateListItems.New(paginateListItems.NewModel(
 			model.ProjectID,
-			model.Locale,
+			model.SanitizedLocales,
 			model.ListName,
 			model.OrderBy,
 			model.Search,

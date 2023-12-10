@@ -138,12 +138,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		}
 
 		if f == "locale" {
-			localeID, err := locales.GetIDWithAlpha(c.model.Values.Locale)
-			if err != nil {
-				c.logBuilder.Add("updateListItemByID", err.Error())
-				return declarations.ListVariable{}, appErrors.NewNotFoundError(err).AddError("updateListItemByID.Logic", nil)
-			}
-
+			localeID, _ := locales.GetIDWithAlpha(c.model.Values.Locale)
 			existing.LocaleID = localeID
 		}
 	}
@@ -159,7 +154,7 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		{Name: "groups"},
 		{Name: "created_at"},
 		{Name: "updated_at"},
-	}}).Where("id = ?", existing.ID).Select(c.model.Fields).Updates(existing); res.Error != nil {
+	}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		return declarations.ListVariable{}, appErrors.NewApplicationError(res.Error).AddError("updateListItemByID.Logic", nil)
