@@ -120,7 +120,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		behaviour,
 		c.model.OrderBy,
 		c.model.OrderDirection)
-
+	
 	var items []declarations.ListVariable
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {

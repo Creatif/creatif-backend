@@ -20,9 +20,6 @@ var validFields = []string{
 }
 
 type Model struct {
-	// this can be project name
-	ShortID     string
-	ID          string
 	Name        string
 	Fields      []string
 	ProjectID   string
@@ -31,15 +28,13 @@ type Model struct {
 	validFields []string
 }
 
-func NewModel(projectId, name, id, shortId, localeAlpha string, fields []string) Model {
+func NewModel(projectId, name, localeAlpha string, fields []string) Model {
 	if len(fields) == 0 {
 		fields = validFields
 	}
 
 	return Model{
 		Name:        name,
-		ID:          id,
-		ShortID:     shortId,
 		LocaleAlpha: localeAlpha,
 		Fields:      fields,
 		validFields: validFields,
@@ -50,6 +45,7 @@ func NewModel(projectId, name, id, shortId, localeAlpha string, fields []string)
 func newView(model declarations.Variable, returnFields []string, localeAlpha string) map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = model.ID
+	m["shortID"] = model.ShortID
 	m["name"] = model.Name
 	m["projectID"] = model.ProjectID
 	m["locale"] = localeAlpha
@@ -90,8 +86,6 @@ func newView(model declarations.Variable, returnFields []string, localeAlpha str
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":        a.Name,
-		"id":          a.ID,
-		"idExists":    nil,
 		"fieldsValid": a.Fields,
 		"locale":      a.LocaleAlpha,
 		"projectID":   a.ProjectID,
@@ -101,17 +95,6 @@ func (a *Model) Validate() map[string]string {
 		validation.Map(
 			// Name cannot be empty, and the length must be between 5 and 20.
 			validation.Key("name", validation.When(a.Name != "", validation.RuneLength(1, 200))),
-			validation.Key("id", validation.When(a.ID != "", validation.RuneLength(26, 26))),
-			validation.Key("idExists", validation.By(func(value interface{}) error {
-				name := a.Name
-				shortId := a.ShortID
-				id := a.ID
-
-				if name == "" && shortId == "" && id == "" {
-					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this variable.")
-				}
-				return nil
-			})),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)

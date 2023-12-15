@@ -1,6 +1,7 @@
 package variables
 
 import (
+	"creatif/cmd"
 	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
@@ -23,9 +24,24 @@ func GetVariableHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
-		l := logger.NewLogBuilder()
-		handler := getVariable2.New(getVariable2.NewModel(model.ProjectID, model.ID, model.ShortID, model.Name, model.Locale, model.Fields), auth.NewNoopAuthentication(), l)
+		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
+		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
-		return request.SendResponse[getVariable2.Model](handler, c, http.StatusOK, l, nil, false)
+		l := logger.NewLogBuilder()
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		handler := getVariable2.New(getVariable2.NewModel(model.ProjectID, model.Name, model.Locale, model.Fields), authentication, l)
+
+		return request.SendResponse[getVariable2.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

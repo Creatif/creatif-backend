@@ -97,7 +97,6 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 			}
 		}
 
-		logger.Add("Unable to determine error", otherError.Error())
 		if err := flushLogger(logger, "error", context); err != nil {
 			return err
 		}

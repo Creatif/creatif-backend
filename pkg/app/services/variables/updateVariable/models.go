@@ -33,20 +33,16 @@ type ModelValues struct {
 type Model struct {
 	Fields    []string
 	Name      string
-	ID        string
-	ShortID   string
 	Values    ModelValues
 	ProjectID string
 	Locale    string
 }
 
-func NewModel(projectId, locale string, fields []string, name, id, shortId, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
+func NewModel(projectId, locale string, fields []string, name, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
 	return Model{
 		Fields:    fields,
 		ProjectID: projectId,
 		Name:      name,
-		ID:        id,
-		ShortID:   shortId,
 		Locale:    locale,
 		Values: ModelValues{
 			Name:      updatingName,
@@ -65,8 +61,6 @@ func (a *Model) Validate() map[string]string {
 		"fieldsValid":        a.Fields,
 		"updatingName":       a.Values.Name,
 		"name":               a.Name,
-		"id":                 a.ID,
-		"idExists":           nil,
 		"behaviour":          a.Values.Behaviour,
 		"updatingNameExists": a.Values.Name,
 		"groups":             a.Values.Groups,
@@ -77,17 +71,6 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("name", validation.When(a.Name != "", validation.RuneLength(1, 200))),
 			validation.Key("updatingName", validation.When(a.Name != "", validation.RuneLength(1, 200))),
-			validation.Key("id", validation.When(a.ID != "", validation.RuneLength(26, 26))),
-			validation.Key("idExists", validation.By(func(value interface{}) error {
-				name := a.Name
-				shortId := a.ShortID
-				id := a.ID
-
-				if name == "" && shortId == "" && id == "" {
-					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this variable.")
-				}
-				return nil
-			})),
 			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)
 
@@ -172,6 +155,16 @@ type View struct {
 }
 
 func newView(model declarations.Variable, locale string) View {
+	var m interface{} = model.Metadata
+	if len(model.Metadata) == 0 {
+		m = nil
+	}
+
+	var v interface{} = model.Value
+	if len(model.Value) == 0 {
+		v = nil
+	}
+	
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
@@ -179,8 +172,8 @@ func newView(model declarations.Variable, locale string) View {
 		Locale:    locale,
 		Groups:    model.Groups,
 		Behaviour: model.Behaviour,
-		Metadata:  model.Metadata,
-		Value:     model.Value,
+		Metadata:  m,
+		Value:     v,
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 	}

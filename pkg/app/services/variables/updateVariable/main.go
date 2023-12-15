@@ -2,10 +2,8 @@ package updateVariable
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
@@ -40,9 +38,8 @@ func (c Main) Validate() error {
 		Behaviour string `gorm:"column:behaviour"`
 	}
 
-	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var check GroupBehaviourCheck
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count, behaviour FROM %s WHERE %s AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName(), id), val, c.model.ProjectID, localeID).Scan(&check)
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count, behaviour FROM %s WHERE (name = ? OR id = ? OR short_id = ?) AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName()), c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, localeID).Scan(&check)
 	if res.Error != nil || res.RowsAffected == 0 {
 		if res.Error != nil {
 			c.logBuilder.Add("updateVariable", res.Error.Error())
@@ -72,10 +69,8 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return err
 	}
 
 	return nil
@@ -88,9 +83,8 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.Variable, error) {
 	localeID, _ := locales.GetIDWithAlpha(c.model.Locale)
 
-	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var existing declarations.Variable
-	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", id), val, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ? AND locale_id = ?"), c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateVariable", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("updateVariable.Logic", nil)

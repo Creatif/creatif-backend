@@ -2,14 +2,11 @@ package getVariable
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
-	"creatif/pkg/lib/storage"
 	"errors"
 	"gorm.io/gorm"
 )
@@ -30,10 +27,8 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return err
 	}
 
 	return nil
@@ -50,8 +45,7 @@ func (c Main) Logic() (declarations.Variable, error) {
 		return declarations.Variable{}, appErrors.NewNotFoundError(err)
 	}
 
-	id, val := shared.DetermineID("n", c.model.Name, c.model.ID, c.model.ShortID)
-	variable, err := queryValue(c.model.ProjectID, localeID, id, val, c.model.Fields)
+	variable, err := queryValue(c.model.ProjectID, localeID, c.model.Name, c.model.Fields)
 	if err != nil {
 		c.logBuilder.Add("getVariable", err.Error())
 		if errors.Is(err, gorm.ErrRecordNotFound) {
