@@ -21,8 +21,6 @@ func LoginApiCheckHandler() func(e echo.Context) error {
 		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
-		fmt.Println(apiKey, projectId)
-
 		l := logger.NewLogBuilder()
 		a := auth.NewApiAuthentication(cookie, projectId, apiKey, l)
 		if err := a.Authenticate(); err != nil {
@@ -40,6 +38,6 @@ func LoginApiCheckHandler() func(e echo.Context) error {
 
 		l.Flush("")
 
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, nil)
 	}
 }

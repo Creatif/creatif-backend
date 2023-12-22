@@ -5,10 +5,8 @@ import (
 )
 
 type DeleteVariable struct {
-	Name      string `json:"name"`
-	Locale    string `json:"locale"`
-	ID        string `json:"id"`
-	ShortID   string `json:"shortID"`
+	Name      string `param:"name"`
+	Locale    string `param:"locale"`
 	ProjectID string `param:"projectID"`
 }
 
@@ -17,8 +15,6 @@ func SanitizeDeleteVariable(model DeleteVariable) DeleteVariable {
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
-	model.ID = p.Sanitize(model.ID)
-	model.ShortID = p.Sanitize(model.ShortID)
 
 	return model
 }

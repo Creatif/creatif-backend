@@ -1,7 +1,6 @@
 package variables
 
 import (
-	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/variables"
 	"creatif/pkg/app/auth"
@@ -20,20 +19,18 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 		}
 
 		model = variables.SanitizePaginateVariables(model)
-		if model.Locale == "" {
-			model.Locale = declarations2.DefaultLocale
-		}
 
 		l := logger.NewLogBuilder()
 		handler := paginateVariables2.New(paginateVariables2.NewModel(
 			model.ProjectID,
-			model.Locale,
+			model.SanitizedLocales,
 			model.OrderBy,
 			model.Search,
 			model.OrderDirection,
 			model.Limit,
 			model.Page,
 			model.SanitizedGroups,
+			model.Behaviour,
 			sdk.ParseFilters(model.Filters),
 		), auth.NewNoopAuthentication(), l)
 

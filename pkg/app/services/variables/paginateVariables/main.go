@@ -2,7 +2,6 @@ package paginateVariables
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
@@ -30,10 +29,8 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("paginateVariables.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return err
 	}
 
 	return nil
@@ -44,22 +41,15 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("paginateVariables", err.Error())
-		return sdk.LogicView[declarations.Variable]{}, appErrors.NewApplicationError(err).AddError("Variables.Paginate.Logic", nil)
-	}
-
 	offset := (c.model.Page - 1) * c.model.Limit
 	placeholders := make(map[string]interface{})
-	placeholders["localeID"] = localeID
 	placeholders["projectID"] = c.model.ProjectID
 	placeholders["offset"] = offset
 	placeholders["limit"] = c.model.Limit
 
 	countPlaceholders := make(map[string]interface{})
-	countPlaceholders["localeID"] = localeID
 	countPlaceholders["projectID"] = c.model.ProjectID
+	countPlaceholders["behaviour"] = c.model.Behaviour
 
 	if c.model.OrderBy == "" {
 		c.model.OrderBy = "created_at"
@@ -69,11 +59,27 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 		c.model.OrderDirection = "ASC"
 	}
 
+	var behaviour string
+	if c.model.Behaviour != "" {
+		behaviour = fmt.Sprintf("AND behaviour = @behaviour")
+		placeholders["behaviour"] = c.model.Behaviour
+		countPlaceholders["behaviour"] = c.model.Behaviour
+	}
+
 	c.model.OrderDirection = strings.ToUpper(c.model.OrderDirection)
 
 	var groupsWhereClause string
 	if len(c.model.Groups) != 0 {
 		groupsWhereClause = fmt.Sprintf("AND '{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "groups")
+	}
+
+	var locale string
+	if len(c.model.Locales) != 0 {
+		resolvedLocales := sdk.Map(c.model.Locales, func(idx int, value string) string {
+			l, _ := locales.GetIDWithAlpha(value)
+			return fmt.Sprintf("'%s'", l)
+		})
+		locale = fmt.Sprintf("AND locale_id IN(%s)", strings.Join(resolvedLocales, ","))
 	}
 
 	var search string
@@ -91,13 +97,15 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 	}
 
 	sql := fmt.Sprintf(`
-SELECT id, short_id, groups, name, behaviour, metadata, value, created_at, updated_at
+SELECT id, short_id, locale_id, groups, name, behaviour, metadata, value, created_at, updated_at
 FROM %s
-WHERE locale_id = @localeID AND project_id = @projectID %s
+WHERE project_id = @projectID %s
+%s
+%s
 %s
 ORDER BY %s %s
 OFFSET @offset LIMIT @limit
-`, (declarations.Variable{}).TableName(), search, groupsWhereClause, c.model.OrderBy, c.model.OrderDirection)
+`, (declarations.Variable{}).TableName(), search, groupsWhereClause, behaviour, locale, c.model.OrderBy, c.model.OrderDirection)
 
 	var items []declarations.Variable
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
@@ -110,9 +118,9 @@ OFFSET @offset LIMIT @limit
 	countSql := fmt.Sprintf(`
 SELECT count(v.id) AS count
 FROM %s AS v
-WHERE v.locale_id = @localeID AND v.project_id = @projectID %s
-%s
-`, (declarations.Variable{}).TableName(), search, groupsWhereClause)
+WHERE v.project_id = @projectID %s
+%s %s %s
+`, (declarations.Variable{}).TableName(), search, groupsWhereClause, behaviour, locale)
 	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateVariables", res.Error.Error())
@@ -147,7 +155,7 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 	return sdk.PaginationView[View]{
 		Total: model.Total,
 		Page:  c.model.Page,
-		Data:  newView(model.Data, c.model.Locale),
+		Data:  newView(model.Data),
 	}, nil
 }
 

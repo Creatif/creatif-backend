@@ -26,7 +26,7 @@ func GetVariableHandler() func(e echo.Context) error {
 
 		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
+		
 		l := logger.NewLogBuilder()
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
 		handler := getVariable2.New(getVariable2.NewModel(model.ProjectID, model.Name, model.Locale, model.Fields), authentication, l)

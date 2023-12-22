@@ -38,6 +38,7 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			model.SanitizedGroups,
 			sdk.ParseFilters(model.Filters),
 			model.Behaviour,
+			model.SanitizedFields,
 		), authentication, l)
 
 		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {

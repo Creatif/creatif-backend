@@ -23,7 +23,7 @@ func UpdateVariableHandler() func(e echo.Context) error {
 		if model.Locale == "" {
 			model.Locale = declarations2.DefaultLocale
 		}
-
+		
 		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
@@ -38,7 +38,9 @@ func UpdateVariableHandler() func(e echo.Context) error {
 			model.Values.Behaviour,
 			model.Values.Groups,
 			[]byte(model.Values.Metadata),
-			[]byte(model.Values.Value)), authentication, l)
+			[]byte(model.Values.Value),
+			model.Values.Locale,
+		), authentication, l)
 
 		return request.SendResponse[updateVariable.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {

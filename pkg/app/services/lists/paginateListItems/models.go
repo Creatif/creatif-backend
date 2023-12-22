@@ -16,6 +16,20 @@ var validOrderByFields = []string{
 	"index",
 }
 
+var validFields = []string{
+	"value",
+	"metadata",
+	"groups",
+}
+
+var initialReturnFields = []string{
+	"name",
+	"created_at",
+	"updated_at",
+	"behaviour",
+	"index",
+}
+
 type Model struct {
 	ProjectID string
 	ListName  string
@@ -29,9 +43,10 @@ type Model struct {
 	Behaviour      string
 	OrderDirection string
 	Groups         []string
+	Fields         []string
 }
 
-func NewModel(projectId string, locales []string, listName, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string, behaviour string) Model {
+func NewModel(projectId string, locales []string, listName, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string, behaviour string, fields []string) Model {
 	return Model{
 		ProjectID:      projectId,
 		Locales:        locales,
@@ -44,17 +59,19 @@ func NewModel(projectId string, locales []string, listName, orderBy, search, dir
 		OrderDirection: direction,
 		Limit:          limit,
 		Groups:         groups,
+		Fields:         fields,
 	}
 }
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID": a.ProjectID,
-		"orderBy":   a.OrderBy,
-		"page":      a.Page,
-		"limit":     a.Limit,
-		"behaviour": a.Behaviour,
-		"direction": a.OrderDirection,
+		"projectID":   a.ProjectID,
+		"orderBy":     a.OrderBy,
+		"page":        a.Page,
+		"validFields": a.Fields,
+		"limit":       a.Limit,
+		"behaviour":   a.Behaviour,
+		"direction":   a.OrderDirection,
 	}
 
 	if err := validation.Validate(v,
@@ -84,6 +101,20 @@ func (a *Model) Validate() map[string]string {
 
 				if v != "modifiable" && v != "readonly" {
 					return errors.New("Behaviour can be only 'modifiable' and 'readonly'")
+				}
+
+				return nil
+			})),
+			validation.Key("validFields", validation.By(func(value interface{}) error {
+				v := value.([]string)
+				if len(v) == 0 {
+					return nil
+				}
+
+				for _, r := range v {
+					if !sdk.Includes(validFields, r) {
+						return errors.New(fmt.Sprintf("Invalid return field. Valid return fields are '%s'. '%s' given", strings.Join(validFields, ","), r))
+					}
 				}
 
 				return nil

@@ -11,6 +11,7 @@ type UpdateVariableValues struct {
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
 	Value     string   `json:"value"`
+	Locale    string   `json:"locale"`
 }
 
 type UpdateVariable struct {
@@ -39,6 +40,7 @@ func SanitizeUpdateVariable(model UpdateVariable) UpdateVariable {
 		}),
 		Behaviour: p.Sanitize(model.Values.Behaviour),
 		Value:     model.Values.Value,
+		Locale:    p.Sanitize(model.Values.Locale),
 	}
 
 	model.Fields = newFields

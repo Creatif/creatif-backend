@@ -2,10 +2,8 @@ package deleteVariable
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -28,11 +26,8 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	c.logBuilder.Add("deleteVariable", "Validating...")
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return err
 	}
 
 	return nil
@@ -49,10 +44,13 @@ func (c Main) Logic() (interface{}, error) {
 		return declarations.Variable{}, appErrors.NewNotFoundError(err)
 	}
 
-	id, value := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
-	res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", id), value, c.model.ProjectID, localeID).Delete(&declarations.Variable{})
+	res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND locale_id = ? AND (name = ? OR id = ? OR short_id = ?)"), c.model.ProjectID, localeID, c.model.Name, c.model.Name, c.model.Name).Delete(&declarations.Variable{})
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		c.logBuilder.Add("deleteVariable", res.Error.Error())
+		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteVariable.Logic", nil)
+	}
+
+	if res.RowsAffected == 0 {
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteVariable.Logic", nil)
 	}
 

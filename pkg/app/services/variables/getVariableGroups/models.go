@@ -1,4 +1,4 @@
-package getListGroups
+package getVariableGroups
 
 import (
 	"creatif/pkg/lib/sdk"
@@ -25,6 +25,9 @@ type View struct {
 }
 
 func newView(model []LogicModel) []string {
+	if len(model) == 0 {
+
+	}
 	return sdk.Map(model, func(idx int, value LogicModel) string {
 		return value.Group
 	})

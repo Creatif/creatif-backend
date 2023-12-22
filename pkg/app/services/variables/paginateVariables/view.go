@@ -2,6 +2,7 @@ package paginateVariables
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/variables/paginateVariables/pagination"
 	"creatif/pkg/lib/sdk"
 	"time"
@@ -26,8 +27,9 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(models []declarations.Variable, locale string) []View {
+func newView(models []declarations.Variable) []View {
 	return sdk.Map(models, func(idx int, value declarations.Variable) View {
+		locale, _ := locales.GetAlphaWithID(value.LocaleID)
 		return View{
 			ID:        value.ID,
 			ProjectID: value.ProjectID,

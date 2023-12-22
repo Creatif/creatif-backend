@@ -7,6 +7,7 @@ import (
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
+	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -20,7 +21,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour"}, "name", "", "", "newName", "readonly", []string{}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{"name", "behaviour"}, view.ShortID, "newName", "readonly", []string{}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -47,7 +48,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, "name", "", "", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{"name", "groups", "value"}, view.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -76,7 +77,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour", "groups"}, "name", "", "", "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{"name", "behaviour", "groups"}, view.ShortID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -109,15 +110,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		handler := New(NewModel(
 			projectId,
-			"eng",
 			[]string{"name", "behaviour", "groups"},
-			view.Name,
-			"",
-			"",
+			view.ID,
 			"newName",
 			"readonly",
 			[]string{"1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"},
-			[]byte{}, v),
+			[]byte{}, v, "eng"),
 			auth.NewTestingAuthentication(false),
 			logger.NewLogBuilder(),
 		)
@@ -140,15 +138,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		handler := New(NewModel(
 			projectId,
-			"eng",
 			[]string{"name", "behaviour", "groups"},
-			view.Name,
-			"",
-			"",
+			view.ShortID,
 			"newName",
 			"readonly",
 			[]string{"1", "1", "2"},
-			[]byte{}, v),
+			[]byte{}, v, "eng"),
 			auth.NewTestingAuthentication(false),
 			logger.NewLogBuilder(),
 		)
@@ -160,5 +155,131 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 		errs := validationError.Data()
 		gomega.Expect(errs["behaviour"]).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("should fail update if locale does not exist", func() {
+		projectId := testCreateProject("project")
+		view := testCreateBasicDeclarationTextVariable(projectId, "name", "readonly")
+
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel(
+			projectId,
+			[]string{"name", "behaviour", "groups"},
+			view.ID,
+			"newName",
+			"readonly",
+			[]string{"1", "1", "2"},
+			[]byte{},
+			v,
+			"",
+		),
+			auth.NewTestingAuthentication(false),
+			logger.NewLogBuilder(),
+		)
+
+		_, err = handler.Handle()
+		gomega.Expect(err).ShouldNot(gomega.BeNil())
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		gomega.Expect(ok).Should(gomega.Equal(true))
+
+		errs := validationError.Data()
+		gomega.Expect(errs["nameLocaleValid"]).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("should fail updating name if name does not exist", func() {
+		projectId := testCreateProject("project")
+		view := testCreateBasicDeclarationTextVariable(projectId, "name", "readonly")
+
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel(
+			projectId,
+			[]string{"name", "behaviour", "groups"},
+			view.ShortID,
+			"",
+			"readonly",
+			[]string{"1", "1", "2"},
+			[]byte{},
+			v,
+			"eng",
+		),
+			auth.NewTestingAuthentication(false),
+			logger.NewLogBuilder(),
+		)
+
+		_, err = handler.Handle()
+		gomega.Expect(err).ShouldNot(gomega.BeNil())
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		gomega.Expect(ok).Should(gomega.Equal(true))
+
+		errs := validationError.Data()
+		gomega.Expect(errs["nameLocaleValid"]).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("should fail variable update id does not exist", func() {
+		projectId := testCreateProject("project")
+		testCreateBasicDeclarationTextVariable(projectId, "name", "readonly")
+
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel(
+			projectId,
+			[]string{"name", "behaviour", "groups"},
+			"not exists",
+			"name",
+			"readonly",
+			[]string{"1", "1", "2"},
+			[]byte{},
+			v,
+			"eng",
+		),
+			auth.NewTestingAuthentication(false),
+			logger.NewLogBuilder(),
+		)
+
+		_, err = handler.Handle()
+		gomega.Expect(err).ShouldNot(gomega.BeNil())
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		gomega.Expect(ok).Should(gomega.Equal(true))
+
+		errs := validationError.Data()
+		gomega.Expect(errs["notExists"]).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("should fail variable with name and locale already exists", func() {
+		projectId := testCreateProject("project")
+		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
+
+		m := "text value"
+		v, err := json.Marshal(m)
+		gomega.Expect(err).Should(gomega.BeNil())
+		handler := New(NewModel(
+			projectId,
+			[]string{"name", "behaviour", "groups"},
+			view.ShortID,
+			"name",
+			"modifiable",
+			[]string{"1", "1", "2"},
+			[]byte{},
+			v,
+			"eng",
+		),
+			auth.NewTestingAuthentication(false),
+			logger.NewLogBuilder(),
+		)
+
+		_, err = handler.Handle()
+		fmt.Println(err)
+		gomega.Expect(err).ShouldNot(gomega.BeNil())
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		gomega.Expect(ok).Should(gomega.Equal(true))
+
+		errs := validationError.Data()
+		fmt.Println(errs)
+		gomega.Expect(errs["exists"]).ShouldNot(gomega.BeEmpty())
 	})
 })

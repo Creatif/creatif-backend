@@ -1,31 +1,31 @@
-package lists
+package variables
 
 import (
 	"creatif/cmd"
 	"creatif/cmd/http/request"
-	"creatif/cmd/http/request/declarations/lists"
+	"creatif/cmd/http/request/declarations/variables"
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/services/lists/getListGroups"
+	"creatif/pkg/app/services/variables/getVariableGroups"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func GetListGroupsHandler() func(e echo.Context) error {
+func GetVariableGroupsHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model lists.GetListGroups
+		var model variables.GetVariableGroups
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = lists.SanitizeGetListGroups(model)
+		model = variables.SanitizeGetVariableGroups(model)
 
 		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
 		l := logger.NewLogBuilder()
 		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
-		handler := getListGroups.New(getListGroups.NewModel(
+		handler := getVariableGroups.New(getVariableGroups.NewModel(
 			model.Name,
 			model.ProjectID,
 		), a, l)

@@ -18,23 +18,25 @@ var validOrderByFields []string = []string{
 
 type Model struct {
 	ProjectID string
-	Locale    string
+	Locales   []string
 
 	Limit          int
 	Page           int
 	Search         string
+	Behaviour      string
 	Filters        map[string]string
 	OrderBy        string
 	OrderDirection string
 	Groups         []string
 }
 
-func NewModel(projectId, locale, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string) Model {
+func NewModel(projectId string, locales []string, orderBy, search, direction string, limit, page int, groups []string, behaviour string, filters map[string]string) Model {
 	return Model{
 		ProjectID:      projectId,
-		Locale:         locale,
+		Locales:        locales,
 		Search:         search,
 		OrderBy:        orderBy,
+		Behaviour:      behaviour,
 		Page:           page,
 		Filters:        filters,
 		OrderDirection: direction,
@@ -46,8 +48,9 @@ func NewModel(projectId, locale, orderBy, search, direction string, limit, page 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"projectId": a.ProjectID,
-		"locale":    a.Locale,
+		"locales":   a.Locales,
 		"orderBy":   a.OrderBy,
+		"behaviour": a.Behaviour,
 		"page":      a.Page,
 		"limit":     a.Limit,
 		"direction": a.OrderDirection,
@@ -56,11 +59,29 @@ func (a *Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectId", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
+			validation.Key("locales", validation.By(func(value interface{}) error {
+				t := value.([]string)
 
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' does not exist.", t))
+				if len(t) == 0 {
+					return nil
+				}
+
+				for _, l := range t {
+					if !locales.ExistsByAlpha(l) {
+						return errors.New(fmt.Sprintf("Locale '%s' does not exist.", l))
+					}
+				}
+
+				return nil
+			})),
+			validation.Key("behaviour", validation.By(func(value interface{}) error {
+				v := value.(string)
+				if v == "" {
+					return nil
+				}
+
+				if v != "modifiable" && v != "readonly" {
+					return errors.New("Behaviour can be only 'modifiable' and 'readonly'")
 				}
 
 				return nil

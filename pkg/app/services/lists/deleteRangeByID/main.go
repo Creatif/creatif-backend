@@ -4,7 +4,6 @@ import "C"
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -41,15 +40,13 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (*struct{}, error) {
-	listId, listVal := shared.DetermineID("l", c.model.Name, c.model.ID, c.model.ShortID)
 	sql := fmt.Sprintf(
-		`DELETE FROM %s AS lv USING %s AS l WHERE %s AND l.project_id = ? AND lv.list_id = l.id AND lv.id IN(?)`,
+		`DELETE FROM %s AS lv USING %s AS l WHERE (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.list_id = l.id AND lv.id IN(?)`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
-		listId,
 	)
 
-	res := storage.Gorm().Exec(sql, listVal, c.model.ProjectID, c.model.Items)
+	res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
 	if res.Error != nil {
 		c.logBuilder.Add("deleteRangeByID", res.Error.Error())
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)

@@ -93,16 +93,19 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		countPlaceholders["searchFour"] = c.model.Search
 	}
 
+	returnableFields := ""
+	if len(c.model.Fields) != 0 {
+		returnableFields = strings.Join(c.model.Fields, ",") + ","
+	}
+
 	sql := fmt.Sprintf(`SELECT 
     	lv.id, 
     	lv.index, 
     	lv.short_id, 
     	lv.locale_id,
     	lv.name, 
-    	lv.groups,
     	lv.behaviour, 
-    	lv.metadata, 
-    	lv.value, 
+    	%s
     	lv.created_at, 
     	lv.updated_at 
 			FROM %s AS lv
@@ -112,6 +115,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		%s
 		ORDER BY lv.%s %s
 		OFFSET @offset LIMIT @limit`,
+		returnableFields,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
 		locale,
@@ -120,7 +124,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		behaviour,
 		c.model.OrderBy,
 		c.model.OrderDirection)
-	
+
 	var items []declarations.ListVariable
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {

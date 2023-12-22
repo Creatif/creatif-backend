@@ -5,11 +5,9 @@ import (
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
-	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"gorm.io/gorm"
 	"strings"
 	"time"
 )
@@ -20,6 +18,7 @@ var validUpdateableFields = []string{
 	"groups",
 	"behaviour",
 	"value",
+	"locale",
 }
 
 type ModelValues struct {
@@ -27,27 +26,27 @@ type ModelValues struct {
 	Metadata  []byte
 	Groups    []string
 	Behaviour string
+	Locale    string
 	Value     []byte
 }
 
 type Model struct {
 	Fields    []string
-	Name      string
+	ID        string
 	Values    ModelValues
 	ProjectID string
-	Locale    string
 }
 
-func NewModel(projectId, locale string, fields []string, name, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
+func NewModel(projectId string, fields []string, name, updatingName, behaviour string, groups []string, metadata, value []byte, updatingLocale string) Model {
 	return Model{
 		Fields:    fields,
 		ProjectID: projectId,
-		Name:      name,
-		Locale:    locale,
+		ID:        name,
 		Values: ModelValues{
 			Name:      updatingName,
 			Metadata:  metadata,
 			Groups:    groups,
+			Locale:    updatingLocale,
 			Behaviour: behaviour,
 			Value:     value,
 		},
@@ -56,22 +55,26 @@ func NewModel(projectId, locale string, fields []string, name, updatingName, beh
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID":          a.ProjectID,
-		"locale":             a.Locale,
-		"fieldsValid":        a.Fields,
-		"updatingName":       a.Values.Name,
-		"name":               a.Name,
-		"behaviour":          a.Values.Behaviour,
-		"updatingNameExists": a.Values.Name,
-		"groups":             a.Values.Groups,
+		"projectID":       a.ProjectID,
+		"updatingLocale":  a.Values.Locale,
+		"fieldsValid":     a.Fields,
+		"updatingName":    a.Values.Name,
+		"ID":              a.ID,
+		"behaviour":       a.Values.Behaviour,
+		"groups":          a.Values.Groups,
+		"nameLocaleValid": nil,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("name", validation.When(a.Name != "", validation.RuneLength(1, 200))),
-			validation.Key("updatingName", validation.When(a.Name != "", validation.RuneLength(1, 200))),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+			validation.Key("ID", validation.Required),
+			validation.Key("updatingName", validation.When(a.Values.Name != "", validation.RuneLength(1, 200))),
+			validation.Key("updatingLocale", validation.By(func(value interface{}) error {
+				if !sdk.Includes(a.Fields, "locale") {
+					return nil
+				}
+
 				t := value.(string)
 
 				if !locales.ExistsByAlpha(t) {
@@ -83,12 +86,21 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
 				t := value.([]string)
 
-				if len(t) == 0 || len(t) > 5 {
+				if len(t) == 0 || len(t) > 6 {
 					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
 				}
 
 				if !sdk.ArrEqual(t, validUpdateableFields) {
 					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
+				}
+
+				return nil
+			})),
+			validation.Key("nameLocaleValid", validation.By(func(value interface{}) error {
+				if sdk.Includes(a.Fields, "locale") || sdk.Includes(a.Fields, "name") {
+					if a.Values.Name == "" || a.Values.Locale == "" {
+						return errors.New("If updating either 'name' or 'locale', both name and locale must exist as updating values.")
+					}
 				}
 
 				return nil
@@ -106,28 +118,10 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("updatingNameExists", validation.When(a.Values.Name != "", validation.Required, validation.RuneLength(1, 200)), validation.By(func(value interface{}) error {
-				if !sdk.Includes(a.Fields, "name") {
-					return nil
-				}
-
-				t := value.(string)
-
-				if t == "" {
-					return nil
-				}
-
-				var exists declarations.Variable
-				if err := storage.GetBy((declarations.Variable{}).TableName(), "name", t, &exists, "id"); !errors.Is(err, gorm.ErrRecordNotFound) {
-					return errors.New(fmt.Sprintf("Variable with name '%s' already exists.", t))
-				}
-
-				return nil
-			})),
 			validation.Key("groups", validation.When(len(a.Values.Groups) != 0, validation.Each(validation.RuneLength(1, 100))), validation.By(func(value interface{}) error {
 				groups := value.([]string)
 				if len(groups) > 20 {
-					return errors.New(fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", a.Name))
+					return errors.New(fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", a.ID))
 				}
 
 				return nil
@@ -154,7 +148,7 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.Variable, locale string) View {
+func newView(model declarations.Variable) View {
 	var m interface{} = model.Metadata
 	if len(model.Metadata) == 0 {
 		m = nil
@@ -164,7 +158,9 @@ func newView(model declarations.Variable, locale string) View {
 	if len(model.Value) == 0 {
 		v = nil
 	}
-	
+
+	locale, _ := locales.GetAlphaWithID(model.LocaleID)
+
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,

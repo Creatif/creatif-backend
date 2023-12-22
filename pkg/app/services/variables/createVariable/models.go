@@ -50,8 +50,9 @@ func (a Model) Validate() map[string]string {
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200), validation.By(func(value interface{}) error {
 				name := value.(string)
 
+				localeID, _ := locales.GetIDWithAlpha(a.Locale)
 				var variable declarations.Variable
-				res := storage.Gorm().Where("name = ? AND project_id = ?", name, a.ProjectID).Select("ID").First(&variable)
+				res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ?", name, a.ProjectID, localeID).Select("ID").First(&variable)
 
 				if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 					return nil

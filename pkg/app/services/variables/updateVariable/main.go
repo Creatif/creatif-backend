@@ -8,6 +8,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -27,19 +28,46 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("updateVariable", err.Error())
-		return appErrors.NewApplicationError(err).AddError("updateVariable.Logic", nil)
+	// check if the variable to be updated with id/locale_id exists
+	var existing declarations.Variable
+	res := storage.Gorm().Where("(id = ? OR short_id = ?) AND project_id = ?", c.model.ID, c.model.ID, c.model.ProjectID).Select("id", "name").First(&existing)
+	if res.Error != nil && errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return appErrors.NewValidationError(map[string]string{
+			"notExists": fmt.Sprintf("Variable with ID '%s'.", c.model.ID),
+		})
+	} else if res.Error != nil {
+		return appErrors.NewValidationError(map[string]string{
+			"notExists": fmt.Sprintf("Variable with ID '%s'.", c.model.ID),
+		})
 	}
 
+	// check if variable with name and locale already exists
+	if sdk.Includes(c.model.Fields, "locale") || sdk.Includes(c.model.Fields, "name") {
+		name := c.model.Values.Name
+		updatingLocaleId, _ := locales.GetIDWithAlpha(c.model.Values.Locale)
+		var existing declarations.Variable
+		res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ? AND (id != ? OR short_id != ?)", name, c.model.ProjectID, updatingLocaleId, c.model.ID, c.model.ID).Select("id").First(&existing)
+		if res.Error != nil && !errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return appErrors.NewValidationError(map[string]string{
+				"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' already exists.", c.model.Values.Name, c.model.Values.Locale),
+			})
+		}
+
+		if existing.ID != "" {
+			return appErrors.NewValidationError(map[string]string{
+				"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' already exists.", c.model.Values.Name, c.model.Values.Locale),
+			})
+		}
+	}
+
+	// check that groups number is correct
 	type GroupBehaviourCheck struct {
 		Count     int    `gorm:"column:count"`
 		Behaviour string `gorm:"column:behaviour"`
 	}
 
 	var check GroupBehaviourCheck
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count, behaviour FROM %s WHERE (name = ? OR id = ? OR short_id = ?) AND project_id = ? AND locale_id = ?", (declarations.Variable{}).TableName()), c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, localeID).Scan(&check)
+	res = storage.Gorm().Raw(fmt.Sprintf("SELECT cardinality(groups) AS count, behaviour FROM %s WHERE project_id = ? AND (id = ? OR short_id = ?)", (declarations.Variable{}).TableName()), c.model.ProjectID, c.model.ID, c.model.ID).Scan(&check)
 	if res.Error != nil || res.RowsAffected == 0 {
 		if res.Error != nil {
 			c.logBuilder.Add("updateVariable", res.Error.Error())
@@ -47,19 +75,19 @@ func (c Main) Validate() error {
 			c.logBuilder.Add("updateVariable", "No rows returned in group check")
 		}
 		return appErrors.NewValidationError(map[string]string{
-			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.Name),
+			"groups": fmt.Sprintf("Invalid number of groups for variable with ID '%s'. Maximum number of groups per variable is 20.", c.model.ID),
 		})
 	}
 
 	if check.Count+len(c.model.Values.Groups) > 20 {
 		return appErrors.NewValidationError(map[string]string{
-			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.Name),
+			"groups": fmt.Sprintf("Invalid number of groups for variable with ID '%s'. Maximum number of groups per variable is 20.", c.model.ID),
 		})
 	}
 
 	if check.Behaviour == constants.ReadonlyBehaviour {
 		return appErrors.NewValidationError(map[string]string{
-			"behaviour": fmt.Sprintf("Cannot update a readonly variable '%s'", c.model.Name),
+			"behaviour": fmt.Sprintf("Cannot update a readonly variable with ID '%s'", c.model.ID),
 		})
 	}
 
@@ -81,10 +109,8 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.Variable, error) {
-	localeID, _ := locales.GetIDWithAlpha(c.model.Locale)
-
 	var existing declarations.Variable
-	if res := storage.Gorm().Where(fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ? AND locale_id = ?"), c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, localeID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("(id = ? OR short_id = ?) AND project_id = ?"), c.model.ID, c.model.ID, c.model.ProjectID).First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateVariable", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.Variable{}, appErrors.NewNotFoundError(res.Error).AddError("updateVariable.Logic", nil)
@@ -113,21 +139,28 @@ func (c Main) Logic() (declarations.Variable, error) {
 		if f == "behaviour" {
 			existing.Behaviour = c.model.Values.Behaviour
 		}
+
+		if f == "locale" {
+			updatingLocale, _ := locales.GetIDWithAlpha(c.model.Values.Locale)
+			existing.LocaleID = updatingLocale
+		}
 	}
 
+	fmt.Println(sdk.Replace(c.model.Fields, "locale", "locale_id"))
 	var updated declarations.Variable
 	if res := storage.Gorm().Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
 		{Name: "id"},
 		{Name: "project_id"},
 		{Name: "short_id"},
 		{Name: "name"},
+		{Name: "locale_id"},
 		{Name: "behaviour"},
 		{Name: "metadata"},
 		{Name: "value"},
 		{Name: "groups"},
 		{Name: "created_at"},
 		{Name: "updated_at"},
-	}}).Where("id = ?", existing.ID).Select(c.model.Fields).Updates(existing); res.Error != nil {
+	}}).Where("id = ?", existing.ID).Select(sdk.Replace(c.model.Fields, "locale", "locale_id")).Updates(existing); res.Error != nil {
 		c.logBuilder.Add("updateVariable", res.Error.Error())
 		return declarations.Variable{}, appErrors.NewApplicationError(res.Error).AddError("updateVariable.Logic", nil)
 	}
@@ -154,7 +187,7 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Locale), nil
+	return newView(model), nil
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.Variable] {

@@ -96,8 +96,8 @@ func declarationRoutes(group *echo.Group) {
 	group.PUT("/list/append/:projectID", lists.AppendToListHandler())
 	group.DELETE("/list/:projectID/:name", lists.DeleteListHandler())
 	group.POST("/list/item-id/:projectID", lists.DeleteListItemByIDHandler())
-	group.POST("/list/groups/:projectID", lists.GetListGroupsHandler())
-	group.POST("/list/range/:projectID", lists.DeleteRangeByIDHandler())
+	group.GET("/list/groups/:projectID/:name", lists.GetListGroupsHandler())
+	group.POST("/list/range/:projectID/:name", lists.DeleteRangeByIDHandler())
 	group.GET("/lists/:projectID/:name", lists.PaginateListItemsHandler())
 	group.GET("/list/query-id/:projectID/:name/:itemId", lists.QueryListByIDHandler())
 	group.POST("/lists/:projectID/:name/:itemName", lists.ReplaceListItemHandler())
@@ -114,8 +114,9 @@ func declarationRoutes(group *echo.Group) {
 
 	group.PUT("/variable/:projectID/:locale", variables.CreateVariableHandler())
 	group.POST("/variable/:projectID", variables.UpdateVariableHandler())
-	group.DELETE("/variable/:projectID", variables.DeleteVariableHandler())
+	group.DELETE("/variable/:projectID/:locale/:name", variables.DeleteVariableHandler())
 	group.GET("/variable/:projectID/:name/:locale", variables.GetVariableHandler())
-	group.GET("/variables/:projectID/:locale", variables.PaginateVariablesHandler())
+	group.GET("/variable/groups/:projectID/:name", variables.GetVariableGroupsHandler())
+	group.GET("/variables/:projectID", variables.PaginateVariablesHandler())
 	group.GET("/variable/value/:projectID/:name/:locale", variables.GetValueHandler())
 }

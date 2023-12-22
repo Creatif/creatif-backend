@@ -15,6 +15,7 @@ type PaginateListItems struct {
 	Page           int    `query:"page"`
 	Filters        string `query:"filters"`
 	Behaviour      string `query:"behaviour"`
+	Fields         string `query:"fields"`
 	Groups         string `query:"groups"`
 	Search         string `query:"search"`
 	OrderBy        string `query:"orderBy"`
@@ -23,6 +24,7 @@ type PaginateListItems struct {
 
 	SanitizedGroups  []string
 	SanitizedLocales []string
+	SanitizedFields  []string
 }
 
 func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
@@ -37,6 +39,12 @@ func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
 
 	if model.Groups != "" {
 		model.SanitizedGroups = sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {
+			return p.Sanitize(strings.TrimSpace(value))
+		})
+	}
+
+	if model.Fields != "" {
+		model.SanitizedFields = sdk.Map(strings.Split(model.Fields, ","), func(idx int, value string) string {
 			return p.Sanitize(strings.TrimSpace(value))
 		})
 	}

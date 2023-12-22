@@ -1,4 +1,4 @@
-package getListGroups
+package getVariableGroups
 
 import (
 	"creatif/pkg/app/auth"
@@ -18,13 +18,13 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("getListGroups", "Validating...")
+	c.logBuilder.Add("getVariableGroups", "Validating...")
 
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
-	c.logBuilder.Add("queryListByID", "Validated")
+	c.logBuilder.Add("getVariableGroups", "Validated")
 
 	return nil
 }
@@ -43,12 +43,9 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() ([]LogicModel, error) {
 	sql := fmt.Sprintf(`
-SELECT DISTINCT unnest(ARRAY(
-	SELECT groups FROM %s AS lv 
-    INNER JOIN %s AS l ON l.project_id = ? AND lv.list_id = l.id AND (l.name = ? OR l.id = ? OR l.short_id = ?)
-	)
+SELECT DISTINCT unnest(ARRAY(SELECT groups FROM %s WHERE project_id = ? AND (name = ? OR id = ? OR short_id = ?) AND groups <> '{}')
 ) AS group
-`, (declarations2.ListVariable{}).TableName(), (declarations2.List{}).TableName())
+`, (declarations2.Variable{}).TableName())
 	var model []LogicModel
 	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Scan(&model)
 
