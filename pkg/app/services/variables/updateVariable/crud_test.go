@@ -254,6 +254,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
+		fmt.Println(view.Name, view.ShortID, view.ID)
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -261,7 +262,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			projectId,
 			[]string{"name", "behaviour", "groups"},
 			view.ShortID,
-			"name",
+			view.Name,
 			"modifiable",
 			[]string{"1", "1", "2"},
 			[]byte{},
@@ -273,13 +274,11 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		)
 
 		_, err = handler.Handle()
-		fmt.Println(err)
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 		validationError, ok := err.(appErrors.AppError[map[string]string])
 		gomega.Expect(ok).Should(gomega.Equal(true))
 
 		errs := validationError.Data()
-		fmt.Println(errs)
 		gomega.Expect(errs["exists"]).ShouldNot(gomega.BeEmpty())
 	})
 })

@@ -31,7 +31,7 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return err
+		return appErrors.NewAuthenticationError(err)
 	}
 	return nil
 }

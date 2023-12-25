@@ -34,13 +34,13 @@ func (c Main) Validate() error {
 
 	if res.Error != nil {
 		return appErrors.NewValidationError(map[string]string{
-			"nameExists": fmt.Sprintf("Record with name '%s' already exists", c.model.Name),
+			"exists": fmt.Sprintf("Record with name '%s' already exists", c.model.Name),
 		})
 	}
 
 	if variable.ID != "" {
 		return appErrors.NewValidationError(map[string]string{
-			"nameExists": fmt.Sprintf("Record with name '%s' already exists", c.model.Name),
+			"exists": fmt.Sprintf("Record with name '%s' already exists", c.model.Name),
 		})
 	}
 
@@ -50,7 +50,7 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return err
+		return appErrors.NewAuthenticationError(err)
 	}
 
 	return nil

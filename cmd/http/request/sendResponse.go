@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
@@ -22,6 +23,7 @@ type ErrorResponse[T any] struct {
 func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, logger logger.LogBuilder, callback func(c echo.Context, model interface{}) error, gracefulFail bool) error {
 	model, err := handler.Handle()
 
+	fmt.Println(model, err)
 	if err != nil {
 		validationError, ok := err.(appErrors.AppError[map[string]string])
 		if ok {

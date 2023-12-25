@@ -6,6 +6,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"strings"
@@ -31,7 +32,7 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return err
+		return appErrors.NewAuthenticationError(err)
 	}
 
 	return nil
@@ -41,27 +42,34 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() ([]LogicModel, error) {
+func (c Main) Logic() ([]string, error) {
 	sql := fmt.Sprintf(`
-SELECT DISTINCT unnest(ARRAY(
-	SELECT groups FROM %s AS lv 
+SELECT groups FROM %s AS lv 
     INNER JOIN %s AS l ON l.project_id = ? AND lv.list_id = l.id AND (l.name = ? OR l.id = ? OR l.short_id = ?)
-	)
-) AS group
 `, (declarations2.ListVariable{}).TableName(), (declarations2.List{}).TableName())
-	var model []LogicModel
-	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Scan(&model)
+	var duplicatedModel []LogicModel
+	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Scan(&duplicatedModel)
 
 	if res.Error != nil && res.RowsAffected == 0 {
 		return nil, appErrors.NewNotFoundError(res.Error)
 	} else if res.Error != nil && strings.Contains(res.Error.Error(), "cannot accumulate empty arrays") {
-		return make([]LogicModel, 0), nil
+		return make([]string, 0), nil
 	} else if res.Error != nil {
-		fmt.Println(res.Error.Error())
 		return nil, appErrors.NewApplicationError(res.Error)
 	}
 
-	return model, nil
+	distinctModels := make([]string, 0)
+	for _, v := range duplicatedModel {
+		groups := v.Groups
+
+		for _, g := range groups {
+			if !sdk.Includes(distinctModels, g) {
+				distinctModels = append(distinctModels, g)
+			}
+		}
+	}
+
+	return distinctModels, nil
 }
 
 func (c Main) Handle() ([]string, error) {
@@ -86,7 +94,7 @@ func (c Main) Handle() ([]string, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []string] {
 	logBuilder.Add("queryListByID", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

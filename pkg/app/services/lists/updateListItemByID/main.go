@@ -73,7 +73,7 @@ INNER JOIN %s AS l ON (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_i
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return err
+		return appErrors.NewAuthenticationError(err)
 	}
 
 	return nil

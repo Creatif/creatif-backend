@@ -37,7 +37,7 @@ func NewModel(projectId, locale, name, behaviour string, groups []string, metada
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"name":      a.Name,
+		"exists":    a.Name,
 		"groups":    a.Groups,
 		"behaviour": a.Behaviour,
 		"locale":    a.Locale,
@@ -47,7 +47,7 @@ func (a Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("name", validation.Required, validation.RuneLength(1, 200), validation.By(func(value interface{}) error {
+			validation.Key("exists", validation.Required, validation.RuneLength(1, 200), validation.By(func(value interface{}) error {
 				name := value.(string)
 
 				localeID, _ := locales.GetIDWithAlpha(a.Locale)

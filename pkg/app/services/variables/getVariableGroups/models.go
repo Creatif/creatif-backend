@@ -3,10 +3,11 @@ package getVariableGroups
 import (
 	"creatif/pkg/lib/sdk"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/lib/pq"
 )
 
 type LogicModel struct {
-	Group string
+	Groups pq.StringArray `gorm:"type:text[];not null"`
 }
 
 type Model struct {
@@ -24,13 +25,8 @@ func NewModel(name, projectID string) Model {
 type View struct {
 }
 
-func newView(model []LogicModel) []string {
-	if len(model) == 0 {
-
-	}
-	return sdk.Map(model, func(idx int, value LogicModel) string {
-		return value.Group
-	})
+func newView(model []string) []string {
+	return model
 }
 
 func (a *Model) Validate() map[string]string {

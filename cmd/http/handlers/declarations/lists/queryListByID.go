@@ -2,7 +2,6 @@ package lists
 
 import (
 	"creatif/cmd"
-	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
@@ -20,9 +19,6 @@ func QueryListByIDHandler() func(e echo.Context) error {
 		}
 
 		model = lists.SanitizeQueryListByID(model)
-		if model.Locale == "" {
-			model.Locale = declarations2.DefaultLocale
-		}
 
 		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
