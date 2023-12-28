@@ -46,7 +46,6 @@ func (c Main) Validate() error {
 		name := c.model.Values.Name
 		updatingLocaleId, _ := locales.GetIDWithAlpha(c.model.Values.Locale)
 
-		fmt.Println(c.model.Values.Name, updatingLocaleId, c.model.ID)
 		var existing declarations.Variable
 		res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ? AND id != ?", name, c.model.ProjectID, updatingLocaleId, existing.ID).Select("id").First(&existing)
 		if res.Error != nil && !errors.Is(res.Error, gorm.ErrRecordNotFound) {

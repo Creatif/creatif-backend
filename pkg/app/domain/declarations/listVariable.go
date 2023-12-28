@@ -11,9 +11,9 @@ import (
 )
 
 type ListVariable struct {
-	ID      string    `gorm:"primarykey;type:text;default:gen_ulid()"`
-	ShortID string    `gorm:"uniqueIndex:unique_variable;type:text;not null"`
-	Index   time.Time `gorm:"autoCreateTime"`
+	ID      string  `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ShortID string  `gorm:"uniqueIndex:unique_variable;type:text;not null"`
+	Index   float64 `gorm:"type:float"`
 
 	Name      string         `gorm:"not null"`
 	Behaviour string         `gorm:"not null"`

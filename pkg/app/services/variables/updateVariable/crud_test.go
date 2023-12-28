@@ -7,7 +7,6 @@ import (
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
-	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -254,7 +253,6 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
-		fmt.Println(view.Name, view.ShortID, view.ID)
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())

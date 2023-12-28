@@ -16,6 +16,8 @@ type List struct {
 	ProjectID     string         `gorm:"uniqueIndex:unique_list_name;type:text"`
 	ListVariables []ListVariable `gorm:"foreignKey:ListID;constraint:OnDelete:CASCADE;"`
 
+	Serial int64 `gorm:"default: 0"`
+
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }

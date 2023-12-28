@@ -32,8 +32,6 @@ func AppendToListHandler() func(e echo.Context) error {
 		handler := appendToList.New(appendToList.NewModel(
 			model.ProjectID,
 			model.Name,
-			model.ID,
-			model.ShortID,
 			sdk.Map(model.Variables, func(idx int, value lists.AppendToListVariable) appendToList.Variable {
 				return appendToList.Variable{
 					Name:      value.Name,

@@ -4,13 +4,11 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
-	"fmt"
 	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -44,9 +42,8 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.List, error) {
-	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var list declarations.List
-	if res := storage.Gorm().Where(fmt.Sprintf("%s", id), val).First(&list); res.Error != nil {
+	if res := storage.Gorm().Where("id = ? OR short_id = ? OR name = ?", c.model.Name, c.model.Name, c.model.Name).Select("id", "serial", "project_id", "name", "created_at", "updated_at").First(&list); res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.List{}, appErrors.NewNotFoundError(res.Error).AddError("appendToList.Logic", nil)
 		}
@@ -68,6 +65,7 @@ func (c Main) Logic() (declarations.List, error) {
 	}
 
 	listVariables := make([]declarations.ListVariable, len(c.model.Variables))
+	serial := list.Serial
 	for i := 0; i < len(c.model.Variables); i++ {
 		if c.model.Variables[i].Locale == "" {
 			c.model.Variables[i].Locale = "eng"
@@ -76,11 +74,21 @@ func (c Main) Logic() (declarations.List, error) {
 		localeID, _ := locales.GetIDWithAlpha(c.model.Variables[i].Locale)
 		v := c.model.Variables[i]
 		listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
+		listVariables[i].Index = float64(serial + 1000)
+		serial += 1000
 	}
 
-	if res := storage.Gorm().Create(&listVariables); res.Error != nil {
-		c.logBuilder.Add("appendToList", res.Error.Error())
-		return declarations.List{}, res.Error
+	if err := storage.Transaction(func(tx *gorm.DB) error {
+		if res := tx.Create(&listVariables); res.Error != nil {
+			c.logBuilder.Add("appendToList", res.Error.Error())
+			return res.Error
+		}
+
+		tx.Model(&declarations.List{}).Where("id = ?", list.ID).Update("serial", serial)
+
+		return nil
+	}); err != nil {
+		return declarations.List{}, appErrors.NewApplicationError(err)
 	}
 
 	return list, nil

@@ -21,17 +21,13 @@ type Variable struct {
 
 type Model struct {
 	Name      string
-	ID        string
-	ShortID   string
 	ProjectID string
 	Variables []Variable
 }
 
-func NewModel(projectId, name, id, shortID string, variables []Variable) Model {
+func NewModel(projectId, name string, variables []Variable) Model {
 	return Model{
 		Name:      name,
-		ID:        id,
-		ShortID:   shortID,
 		ProjectID: projectId,
 		Variables: variables,
 	}
@@ -43,28 +39,11 @@ func (a Model) Validate() map[string]string {
 		"projectID":       a.ProjectID,
 		"name":            a.Name,
 		"variableLocales": nil,
-		"id":              a.ID,
-		"idExists":        nil,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
-			validation.Key("id", validation.When(a.ID != "", validation.RuneLength(26, 26))),
-			validation.Key("idExists", validation.By(func(value interface{}) error {
-				name := a.Name
-				shortId := a.ShortID
-				id := a.ID
-
-				if id != "" && len(id) != 26 {
-					return errors.New("ID must have 26 characters")
-				}
-
-				if name == "" && shortId == "" && id == "" {
-					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this list.")
-				}
-				return nil
-			})),
+			validation.Key("name", validation.Required),
 			validation.Key("variableLocales", validation.By(func(value interface{}) error {
 				for _, v := range a.Variables {
 					l := v.Locale
