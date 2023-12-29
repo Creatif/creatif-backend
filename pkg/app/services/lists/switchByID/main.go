@@ -17,7 +17,6 @@ type Main struct {
 	auth       auth.Authentication
 }
 
-// 1. Check if source and destination exist here
 func (c Main) Validate() error {
 	c.logBuilder.Add("switchByID", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
@@ -38,48 +37,38 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-// 1. Get the list item behind the destination sorted by index
-// 2. Update the source item with the new index => [destination-1].index + destination.index / 2
-func (c Main) Logic() (interface{}, error) {
-	/*	source, destination, err := tryUpdates(c.model.ProjectID, c.model.Name, c.model.ID, c.model.ShortID, c.model.Source, c.model.Destination, 0, 10)
-		if err != nil {
-			c.logBuilder.Add("switchByID", err.Error())
-			return LogicResult{}, appErrors.NewDatabaseError(err)
-		}*/
-
+func (c Main) Logic() (float64, error) {
 	var list declarations.List
 	res := storage.Gorm().Raw(fmt.Sprintf("SELECT id FROM %s WHERE project_id = ? AND (id = ? OR name = ? OR short_id = ?)", (declarations.List{}).TableName()), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Scan(&list)
 	if res.Error != nil {
 		c.logBuilder.Add("switchByID", fmt.Sprintf("Update: Invalid query: %s", res.Error.Error()))
 
-		return nil, appErrors.NewApplicationError(res.Error)
+		return 0, appErrors.NewApplicationError(res.Error)
 	}
 
 	if res.RowsAffected == 0 {
 		c.logBuilder.Add("switchByID", fmt.Sprintf("Update: List not found: %s", "Rows affected: 0"))
-		return nil, appErrors.NewNotFoundError(errors.New("Could not find list"))
+		return 0, appErrors.NewNotFoundError(errors.New("Could not find list"))
 	}
 
 	sdVariables, err := getSourceDestinationVariables(c.model.ProjectID, c.model.Name, c.model.Source, c.model.Destination)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	idxRange, err := getHighestLowestIndex(list.ID, c.model.ProjectID)
 	if err != nil && err.Error() == "not_found" {
-		return nil, appErrors.NewNotFoundError(err)
+		return 0, appErrors.NewNotFoundError(err)
 	} else if err != nil {
-		return nil, appErrors.NewApplicationError(err)
+		return 0, appErrors.NewApplicationError(err)
 	}
 
 	if idxRange.Highest == sdVariables.destination.Index {
-		fmt.Println("lowest to highest")
-		return nil, updateWithCustomIndex(idxRange.Highest+1, sdVariables.source.ID, list.ID)
+		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Highest+1, sdVariables.source.ID, list.ID)
 	}
 
 	if idxRange.Lowest == sdVariables.destination.Index {
-		fmt.Println("highest to lowest")
-		return nil, updateWithCustomIndex(idxRange.Lowest-1, sdVariables.source.ID, list.ID)
+		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Lowest-1, sdVariables.source.ID, list.ID)
 	}
 
 	upperIndexOperator := "<"
@@ -90,25 +79,23 @@ func (c Main) Logic() (interface{}, error) {
 	res = storage.Gorm().Raw(fmt.Sprintf(`
 SELECT index 
 FROM declarations.list_variables 
-WHERE list_id = ? AND index %s (SELECT index FROM declarations.list_variables WHERE id = ?) ORDER BY index DESC LIMIT 2`, upperIndexOperator), list.ID, c.model.Destination).Scan(&upperIndexes)
+WHERE list_id = ? AND index %s (SELECT index FROM declarations.list_variables WHERE id = ?) ORDER BY index DESC LIMIT 1`, upperIndexOperator), list.ID, c.model.Destination).Scan(&upperIndexes)
 
 	if res.Error != nil {
-		return nil, appErrors.NewValidationError(map[string]string{
+		return 0, appErrors.NewValidationError(map[string]string{
 			"invalidSourceDestination": "Incomplete declaration list",
 		})
 	}
 
 	if res.RowsAffected == 0 {
-		return nil, appErrors.NewValidationError(map[string]string{
+		return 0, appErrors.NewValidationError(map[string]string{
 			"invalidSourceDestination": "Incomplete declaration list",
 		})
 	}
 
 	var realIndex float64
-	if res.RowsAffected == 1 {
+	if res.RowsAffected != 0 {
 		realIndex = upperIndexes[0]
-	} else {
-		realIndex = upperIndexes[1]
 	}
 
 	res = storage.Gorm().Exec(fmt.Sprintf(`
@@ -121,40 +108,46 @@ SET index = round(((coalesce(?, 1000) + (SELECT index FROM declarations.list_var
 	if res.Error != nil {
 		c.logBuilder.Add("switchByID", fmt.Sprintf("Update: Invalid query: %s", res.Error.Error()))
 
-		return nil, appErrors.NewApplicationError(res.Error)
+		return 0, appErrors.NewApplicationError(res.Error)
 	}
 
 	if res.RowsAffected == 0 {
 		c.logBuilder.Add("switchByID", fmt.Sprintf("Update: Not found: %s", "Rows affected: 0"))
-		return nil, appErrors.NewNotFoundError(errors.New("Could not switch list variables."))
+		return 0, appErrors.NewNotFoundError(errors.New("Could not switch list variables."))
 	}
 
-	return nil, nil
+	var emptyVariableWithIndex declarations.ListVariable
+	res = storage.Gorm().Where("id = ?", c.model.Source).Select("index").First(&emptyVariableWithIndex)
+	if res.Error != nil {
+		return 0, appErrors.NewNotFoundError(errors.New("Could not switch list variables."))
+	}
+
+	return emptyVariableWithIndex.Index, nil
 }
 
-func (c Main) Handle() (interface{}, error) {
+func (c Main) Handle() (float64, error) {
 	if err := c.Validate(); err != nil {
-		return View{}, err
+		return 0, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return View{}, err
+		return 0, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return View{}, err
+		return 0, err
 	}
 
-	_, err := c.Logic()
+	changedIndex, err := c.Logic()
 
 	if err != nil {
-		return View{}, err
+		return 0, err
 	}
 
-	return nil, nil
+	return changedIndex, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, float64, float64] {
 	logBuilder.Add("switchByID", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

@@ -67,22 +67,26 @@ func (c Main) Logic() (declarations.List, error) {
 			return res.Error
 		}
 
+		highestIndex, err := getHighestIndex(list.ID)
+		if err != nil {
+			return err
+		}
+
 		if len(c.model.Variables) > 0 {
-			var serial int64 = 0
 			listVariables := make([]declarations.ListVariable, len(c.model.Variables))
 			for i := 0; i < len(c.model.Variables); i++ {
 				localeID, _ := locales.GetIDWithAlpha(c.model.Variables[i].Locale)
 				v := c.model.Variables[i]
 				listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
-				listVariables[i].Index = float64(serial) + 1000
-				serial += 1000
+				listVariables[i].Index = float64(highestIndex) + 1000
+				highestIndex += 1000
 			}
 
 			if res := tx.Create(&listVariables); res.Error != nil {
 				return res.Error
 			}
 
-			tx.Model(&declarations.List{}).Where("id = ?", list.ID).Update("serial", serial)
+			tx.Model(&declarations.List{}).Where("id = ?", list.ID).Update("serial", highestIndex)
 		}
 
 		return nil

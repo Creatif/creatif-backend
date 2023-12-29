@@ -64,8 +64,12 @@ func (c Main) Logic() (declarations.List, error) {
 		v.Groups = pqGroups
 	}
 
+	highestIndex, err := getHighestIndex(list.ID)
+	if err != nil {
+		return declarations.List{}, err
+	}
+
 	listVariables := make([]declarations.ListVariable, len(c.model.Variables))
-	serial := list.Serial
 	for i := 0; i < len(c.model.Variables); i++ {
 		if c.model.Variables[i].Locale == "" {
 			c.model.Variables[i].Locale = "eng"
@@ -74,8 +78,8 @@ func (c Main) Logic() (declarations.List, error) {
 		localeID, _ := locales.GetIDWithAlpha(c.model.Variables[i].Locale)
 		v := c.model.Variables[i]
 		listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
-		listVariables[i].Index = float64(serial + 1000)
-		serial += 1000
+		listVariables[i].Index = float64(highestIndex + 1000)
+		highestIndex += 1000
 	}
 
 	if err := storage.Transaction(func(tx *gorm.DB) error {
@@ -83,8 +87,6 @@ func (c Main) Logic() (declarations.List, error) {
 			c.logBuilder.Add("appendToList", res.Error.Error())
 			return res.Error
 		}
-
-		tx.Model(&declarations.List{}).Where("id = ?", list.ID).Update("serial", serial)
 
 		return nil
 	}); err != nil {
