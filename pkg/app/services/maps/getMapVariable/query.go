@@ -1,4 +1,4 @@
-package getMap
+package getMapVariable
 
 import (
 	"creatif/pkg/app/domain/declarations"

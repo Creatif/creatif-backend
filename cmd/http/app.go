@@ -86,6 +86,7 @@ func appRoutes(group *echo.Group) {
 
 	group.POST("/auth/api-auth-session", authHandlers.CreateApiAuthSessionHandler())
 	group.POST("/auth/api-check", authHandlers.LoginApiCheckHandler())
+	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
 	group.GET("/auth/api-auth-session/:session", authHandlers.GetApiAuthSession())
 }
 

@@ -76,3 +76,29 @@ func EncryptApiAuthenticationCookie(encryptedUser string) *http.Cookie {
 
 	return cookie
 }
+
+func RemoveApiAuthenticationCookie() *http.Cookie {
+	if os.Getenv("APP_ENV") == "prod" {
+		cookie := new(http.Cookie)
+		cookie.Name = "api_authentication"
+		cookie.HttpOnly = true
+		cookie.Secure = true
+		cookie.SameSite = http.SameSiteStrictMode
+		cookie.Domain = "https://api.creatif.app"
+		cookie.Path = "/api/v1"
+
+		cookie.Value = ""
+		cookie.Expires = time.Unix(0, 0)
+
+		return cookie
+	}
+
+	cookie := new(http.Cookie)
+	cookie.Name = "api_authentication"
+	cookie.Path = "/"
+
+	cookie.Value = ""
+	cookie.Expires = time.Unix(0, 0)
+
+	return cookie
+}

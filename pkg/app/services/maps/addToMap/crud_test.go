@@ -2,7 +2,7 @@ package addToMap
 
 import (
 	"creatif/pkg/app/auth"
-	getMap2 "creatif/pkg/app/services/maps/getMap"
+	getMap2 "creatif/pkg/app/services/maps/getMapVariable"
 	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -13,7 +13,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", m.Name, "", "", VariableModel{
+		handler := New(NewModel(projectId, "eng", m.Name, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,
@@ -46,7 +46,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", "", m.ID, "", VariableModel{
+		handler := New(NewModel(projectId, "eng", m.ID, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,
@@ -79,7 +79,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, "eng", "", m.ID, "", VariableModel{
+		handler := New(NewModel(projectId, "eng", m.ID, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,

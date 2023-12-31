@@ -168,7 +168,7 @@ func (c Main) Logic() (LogicResult, error) {
 		if res.Error != nil {
 			c.logBuilder.Add("updateMapVariable", res.Error.Error())
 		} else {
-			c.logBuilder.Add("getMap", "No rows returned. Returning 404 status.")
+			c.logBuilder.Add("getMapVariable", "No rows returned. Returning 404 status.")
 		}
 
 		return LogicResult{}, appErrors.NewNotFoundError(errors.New("Could not update map")).AddError("updateMapVariable.Logic", nil)

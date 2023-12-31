@@ -1,4 +1,4 @@
-package getMap
+package getMapVariable
 
 import (
 	"creatif/pkg/app/auth"
@@ -18,11 +18,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("getMap", "Validating...")
+	c.logBuilder.Add("getMapVariable", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("getMap", "Validated.")
+	c.logBuilder.Add("getMapVariable", "Validated.")
 	return nil
 }
 
@@ -37,25 +37,25 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (LogicModel, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
-		c.logBuilder.Add("getMap", err.Error())
-		return LogicModel{}, appErrors.NewApplicationError(err).AddError("getMap.Logic", nil)
+		c.logBuilder.Add("getMapVariable", err.Error())
+		return LogicModel{}, appErrors.NewApplicationError(err).AddError("getMapVariable.Logic", nil)
 	}
 
 	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	m, err := queryMap(c.model.ProjectID, id, val, localeID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		c.logBuilder.Add("getMap", err.Error())
-		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
+		c.logBuilder.Add("getMapVariable", err.Error())
+		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMapVariable.Logic", nil)
 	}
 
 	if err != nil {
-		c.logBuilder.Add("getMap", err.Error())
-		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("getMap.Logic", nil)
+		c.logBuilder.Add("getMapVariable", err.Error())
+		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("getMapVariable.Logic", nil)
 	}
 
 	var variables []Variable
 	if err := queryVariables(m.ID, localeID, c.model.Fields, c.model.Groups, &variables); err != nil {
-		c.logBuilder.Add("getMap", err.Error())
+		c.logBuilder.Add("getMapVariable", err.Error())
 		return LogicModel{}, err
 	}
 
@@ -88,6 +88,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
-	logBuilder.Add("getMap", "Created")
+	logBuilder.Add("getMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

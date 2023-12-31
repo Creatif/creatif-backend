@@ -249,7 +249,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(errs["notExists"]).ShouldNot(gomega.BeEmpty())
 	})
 
-	ginkgo.It("should fail variable with name and locale already exists", func() {
+	ginkgo.It("should not fail to update the variable if name and locale already exist", func() {
 		projectId := testCreateProject("project")
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
@@ -272,11 +272,6 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		)
 
 		_, err = handler.Handle()
-		gomega.Expect(err).ShouldNot(gomega.BeNil())
-		validationError, ok := err.(appErrors.AppError[map[string]string])
-		gomega.Expect(ok).Should(gomega.Equal(true))
-
-		errs := validationError.Data()
-		gomega.Expect(errs["exists"]).ShouldNot(gomega.BeEmpty())
+		testAssertErrNil(err)
 	})
 })

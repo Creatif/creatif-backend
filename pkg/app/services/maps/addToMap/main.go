@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -50,9 +49,8 @@ func (c Main) Logic() (interface{}, error) {
 		return nil, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
 
-	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var m declarations.Map
-	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", id), val, c.model.ProjectID, localeID).Select("ID", "locale_id").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND locale_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, localeID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "locale_id").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToMap", res.Error.Error())
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
@@ -94,6 +92,6 @@ func (c Main) Handle() (interface{}, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
-	logBuilder.Add("getMap", "Created")
+	logBuilder.Add("getMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

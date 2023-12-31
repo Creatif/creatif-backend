@@ -1,4 +1,4 @@
-package removeMapEntry
+package removeMapVariable
 
 import (
 	"creatif/pkg/app/auth"
@@ -41,8 +41,8 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (interface{}, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
-		c.logBuilder.Add("removeMapEntry", err.Error())
-		return nil, appErrors.NewApplicationError(err).AddError("removeMapEntry.Logic", nil)
+		c.logBuilder.Add("removeMapVariable", err.Error())
+		return nil, appErrors.NewApplicationError(err).AddError("removeMapVariable.Logic", nil)
 	}
 
 	mapId, mapVal := shared.DetermineID("m", c.model.Name, c.model.MapID, c.model.MapShortID)
@@ -58,13 +58,13 @@ func (c Main) Logic() (interface{}, error) {
 
 	res := storage.Gorm().Exec(sql, c.model.ProjectID, localeID, mapVal, varVal)
 	if res.Error != nil {
-		c.logBuilder.Add("removeMapEntry", res.Error.Error())
-		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapEntry.Logic", nil)
+		c.logBuilder.Add("removeMapVariable", res.Error.Error())
+		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapVariable.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
-		c.logBuilder.Add("removeMapEntry", "No rows returned. Returning 404 status.")
-		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Variable with name '%s' not found.", c.model.VariableName))).AddError("removeMapEntry.Logic", nil)
+		c.logBuilder.Add("removeMapVariable", "No rows returned. Returning 404 status.")
+		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Variable with name '%s' not found.", c.model.VariableName))).AddError("removeMapVariable.Logic", nil)
 	}
 
 	return nil, nil
@@ -93,6 +93,6 @@ func (c Main) Handle() (interface{}, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
-	logBuilder.Add("removeMapEntry", "Created.")
+	logBuilder.Add("removeMapVariable", "Created.")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

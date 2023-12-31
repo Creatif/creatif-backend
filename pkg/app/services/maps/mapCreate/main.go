@@ -23,7 +23,7 @@ func (c Main) Validate() error {
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("getMap", "Validated.")
+	c.logBuilder.Add("getMapVariable", "Validated.")
 	return nil
 }
 

@@ -4,7 +4,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
-	getMap2 "creatif/pkg/app/services/maps/getMap"
+	getMap2 "creatif/pkg/app/services/maps/getMapVariable"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"

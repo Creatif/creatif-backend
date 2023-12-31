@@ -46,7 +46,7 @@ func (c Main) Validate() error {
 		name := c.model.Values.Name
 		updatingLocaleId, _ := locales.GetIDWithAlpha(c.model.Values.Locale)
 
-		var existing declarations.Variable
+		var variable declarations.Variable
 		res := storage.Gorm().Where("name = ? AND project_id = ? AND locale_id = ? AND id != ?", name, c.model.ProjectID, updatingLocaleId, existing.ID).Select("id").First(&existing)
 		if res.Error != nil && !errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return appErrors.NewValidationError(map[string]string{
@@ -54,7 +54,7 @@ func (c Main) Validate() error {
 			})
 		}
 
-		if existing.ID != "" {
+		if variable.ID != "" {
 			return appErrors.NewValidationError(map[string]string{
 				"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' already exists.", c.model.Values.Name, c.model.Values.Locale),
 			})

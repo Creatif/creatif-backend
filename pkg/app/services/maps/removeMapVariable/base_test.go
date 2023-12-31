@@ -1,4 +1,4 @@
-package removeMapEntry
+package removeMapVariable
 
 import (
 	"creatif/pkg/app/auth"

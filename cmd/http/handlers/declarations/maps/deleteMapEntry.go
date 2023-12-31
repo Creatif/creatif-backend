@@ -4,7 +4,7 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/services/maps/removeMapEntry"
+	"creatif/pkg/app/services/maps/removeMapVariable"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -23,8 +23,8 @@ func DeleteMapEntry() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
-		handler := removeMapEntry.New(removeMapEntry.NewModel(model.ProjectID, model.Locale, model.Name, model.MapID, model.MapShortID, model.VariableName, model.VariableID, model.VariableShortID), auth.NewNoopAuthentication(), l)
+		handler := removeMapVariable.New(removeMapVariable.NewModel(model.ProjectID, model.Locale, model.Name, model.MapID, model.MapShortID, model.VariableName, model.VariableID, model.VariableShortID), auth.NewNoopAuthentication(), l)
 
-		return request.SendResponse[removeMapEntry.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[removeMapVariable.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }
