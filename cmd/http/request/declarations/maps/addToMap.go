@@ -6,26 +6,25 @@ import (
 )
 
 type AddToMap struct {
-	Locale    string           `param:"locale"`
 	ProjectID string           `param:"projectID"`
-	Entry     MapVariableModel `json:"entry"`
+	Variable  MapVariableModel `json:"variable"`
 	Name      string           `json:"name"`
 }
 
 func SanitizeAddToMap(model AddToMap) AddToMap {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Locale = p.Sanitize(model.Locale)
 	model.Name = p.Sanitize(model.Name)
 
-	variable := model.Entry
+	variable := model.Variable
 	variable.Name = p.Sanitize(variable.Name)
 	variable.Behaviour = p.Sanitize(variable.Behaviour)
+	variable.Locale = p.Sanitize(variable.Locale)
 	variable.Groups = sdk.Map(variable.Groups, func(idx int, value string) string {
 		return p.Sanitize(value)
 	})
 
-	model.Entry = variable
+	model.Variable = variable
 
 	return model
 }

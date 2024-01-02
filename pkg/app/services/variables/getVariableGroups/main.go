@@ -92,6 +92,6 @@ func (c Main) Handle() ([]string, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []string] {
-	logBuilder.Add("queryListByID", "Created")
+	logBuilder.Add("queryMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

@@ -19,7 +19,7 @@ type PreViewModel struct {
 	State     string
 	UserID    string
 	Variables map[string][]string
-	Maps      map[string][]string
+	Maps      []string
 	Lists     []string
 }
 
@@ -30,7 +30,7 @@ type View struct {
 	UserID string `json:"userID"`
 
 	Variables map[string][]string `json:"variables"`
-	Maps      map[string][]string `json:"maps"`
+	Maps      []string            `json:"maps"`
 	Lists     []string            `json:"lists"`
 }
 

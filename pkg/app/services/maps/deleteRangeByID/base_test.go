@@ -1,4 +1,4 @@
-package getBatchStructures
+package deleteRangeByID
 
 import (
 	"creatif/pkg/app/auth"
@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -36,7 +35,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Combined -> getBatchStructures tests")
+	GinkgoRunSpecs(t, "Declaration Lists -> CRUD tests")
 }
 
 func runLogger() {
@@ -51,7 +50,6 @@ func runLogger() {
 
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
-	runLogger()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
@@ -83,11 +81,31 @@ var _ = GinkgoAfterSuite(func() {
 })
 
 var _ = GinkgoAfterHandler(func() {
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
-	storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
+	res := storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_MAP))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.LIST_VARIABLES_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.USERS_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
+
+func testAssertErrNil(err error) {
+	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testAssertIDValid(id string) {
+	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
+	_, err := ulid.Parse(id)
+	gomega.Expect(err).Should(gomega.BeNil())
+}
 
 func testCreateProject(name string) string {
 	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
@@ -101,28 +119,8 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable2.View {
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, []string{"one", "two", "three"}, b, b), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
-
 func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
-	entries := make([]mapCreate.Entry, 0)
+	entries := make([]mapCreate.VariableModel, 0)
 
 	m := map[string]interface{}{
 		"one":   "one",
@@ -162,16 +160,14 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 				"three",
 			},
 			Value:     v,
+			Locale:    "eng",
 			Behaviour: "modifiable",
 		}
 
-		entries = append(entries, mapCreate.Entry{
-			Type:  "variable",
-			Model: variableModel,
-		})
+		entries = append(entries, variableModel)
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -181,14 +177,4 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
 	return view
-}
-
-func testAssertErrNil(err error) {
-	gomega.Expect(err).Should(gomega.BeNil())
-}
-
-func testAssertIDValid(id string) {
-	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
-	_, err := ulid.Parse(id)
-	gomega.Expect(err).Should(gomega.BeNil())
 }

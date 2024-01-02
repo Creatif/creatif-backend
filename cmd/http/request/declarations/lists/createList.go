@@ -17,7 +17,6 @@ type CreateListVariable struct {
 type CreateList struct {
 	Name         string               `json:"name"`
 	ProjectID    string               `param:"projectID"`
-	Locale       string               `param:"locale"`
 	Variables    []CreateListVariable `json:"variables"`
 	GracefulFail bool                 `json:"gracefulFail"`
 }
@@ -26,7 +25,6 @@ func SanitizeCreateList(model CreateList) CreateList {
 	p := bluemonday.StrictPolicy()
 	model.Name = p.Sanitize(model.Name)
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Locale = p.Sanitize(model.Locale)
 
 	newVariables := make([]CreateListVariable, len(model.Variables))
 	for i, variable := range model.Variables {

@@ -2,7 +2,6 @@ package mapCreate
 
 import (
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
@@ -15,75 +14,66 @@ import (
 type VariableModel struct {
 	Name      string   `json:"name"`
 	Metadata  []byte   `json:"metadata"`
+	Locale    string   `json:"locale"`
 	Groups    []string `json:"groups"`
 	Behaviour string   `json:"behaviour"`
 	Value     []byte   `json:"value"`
 }
 
 type View struct {
-	ID        string              `json:"id"`
-	ProjectID string              `json:"projectID"`
-	ShortID   string              `json:"shortID"`
-	Locale    string              `json:"locale"`
-	Name      string              `json:"name"`
-	Variables []map[string]string `json:"variables"`
+	ID        string         `json:"id"`
+	ProjectID string         `json:"projectId"`
+	ShortID   string         `json:"shortId"`
+	Name      string         `json:"name"`
+	Variables []ViewVariable `json:"variables"`
 }
 
-type Entry struct {
-	Type  string
-	Model interface{}
+type ViewVariable struct {
+	ID      string `json:"id"`
+	Locale  string `json:"locale"`
+	ShortID string `json:"shortId"`
+	Name    string `json:"name"`
 }
 
 type Model struct {
-	Entries   []Entry `json:"entries"`
-	Name      string  `json:"name"`
-	ProjectID string  `json:"projectID"`
-	Locale    string  `json:"locale"`
+	Variables []VariableModel
+	Name      string
+	ProjectID string
+	Locale    string
 }
 
 type LogicResult struct {
 	ID        string
-	Locale    string
 	ShortID   string
 	ProjectID string
-	Variables []map[string]string
+	Variables []ViewVariable
 	Name      string
 }
 
-func NewModel(projectId, locale, name string, entries []Entry) Model {
+func NewModel(projectId, name string, entries []VariableModel) Model {
 	return Model{
 		Name:      name,
 		ProjectID: projectId,
-		Locale:    locale,
-		Entries:   entries,
+		Variables: entries,
 	}
 }
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"projectID":          a.ProjectID,
-		"locale":             a.Locale,
 		"groups":             nil,
 		"name":               a.Name,
 		"uniqueName":         a.Name,
-		"validNum":           a.Entries,
-		"validVariableNames": a.Entries,
-		"behaviourValid":     a.Entries,
+		"validLocales":       nil,
+		"validNum":           a.Variables,
+		"validVariableNames": a.Variables,
+		"behaviourValid":     a.Variables,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' does not exist.", t))
-				}
-
-				return nil
-			})),
 			validation.Key("uniqueName", validation.By(func(value interface{}) error {
 				name := value.(string)
 
@@ -104,12 +94,11 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
+			validation.Key("validLocales", validation.By(func(value interface{}) error {
+				return nil
+			})),
 			validation.Key("validNum", validation.By(func(value interface{}) error {
-				if len(a.Entries) == 0 {
-					return errors.New("Empty entries are not permitted. Maps must have values.")
-				}
-
-				if len(a.Entries) > 1000 {
+				if len(a.Variables) > 1000 {
 					return errors.New("Number of map values cannot be larger than 1000.")
 				}
 
@@ -117,25 +106,24 @@ func (a *Model) Validate() map[string]string {
 			})),
 			validation.Key("validVariableNames", validation.By(func(value interface{}) error {
 				m := make(map[string]int)
-				for _, entry := range a.Entries {
-					if entry.Type == "variable" {
-						o := entry.Model.(VariableModel)
-						m[o.Name] = 0
-					}
+				for _, entry := range a.Variables {
+					m[entry.Name] = 0
 				}
 
-				if len(m) != len(a.Entries) {
+				if len(m) != len(a.Variables) {
 					return errors.New("Some variable/map names are not unique. All variable/map names must be unique.")
 				}
+
 				return nil
 			})),
-			validation.Key("behaviourValid", validation.Required, validation.By(func(value interface{}) error {
+			validation.Key("behaviourValid", validation.By(func(value interface{}) error {
+				if len(a.Variables) == 0 {
+					return nil
+				}
+
 				m := make(map[string]string)
-				for _, entry := range a.Entries {
-					if entry.Type == "variable" {
-						o := entry.Model.(VariableModel)
-						m[o.Name] = o.Behaviour
-					}
+				for _, entry := range a.Variables {
+					m[entry.Name] = entry.Behaviour
 				}
 
 				for key, v := range m {
@@ -147,18 +135,14 @@ func (a *Model) Validate() map[string]string {
 				return nil
 			})),
 			validation.Key("groups", validation.By(func(value interface{}) error {
-				for _, entry := range a.Entries {
-					if entry.Type == "variable" {
-						o := entry.Model.(VariableModel)
+				for _, entry := range a.Variables {
+					if len(entry.Groups) > 20 {
+						return errors.New(fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", entry.Name))
+					}
 
-						if len(o.Groups) > 20 {
-							return errors.New(fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", o.Name))
-						}
-
-						for _, g := range o.Groups {
-							if len(g) > 100 {
-								return errors.New(fmt.Sprintf("Invalid group length for '%s'. Maximum number of characters per groups is 100.", g))
-							}
+					for _, g := range entry.Groups {
+						if len(g) > 100 {
+							return errors.New(fmt.Sprintf("Invalid group length for '%s'. Maximum number of characters per groups is 100.", g))
 						}
 					}
 				}
@@ -176,7 +160,6 @@ func (a *Model) Validate() map[string]string {
 func newView(model LogicResult) View {
 	return View{
 		ID:        model.ID,
-		Locale:    model.Locale,
 		ShortID:   model.ShortID,
 		ProjectID: model.ProjectID,
 		Name:      model.Name,

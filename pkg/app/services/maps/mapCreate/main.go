@@ -23,7 +23,7 @@ func (c Main) Validate() error {
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("getMapVariable", "Validated.")
+	c.logBuilder.Add("getMap", "Validated.")
 	return nil
 }
 
@@ -43,49 +43,45 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicResult, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("mapCreate", err.Error())
-		return LogicResult{}, appErrors.NewApplicationError(err).AddError("mapCreate.Logic", nil)
-	}
-
-	newMap := declarations.NewMap(c.model.ProjectID, localeID, c.model.Name)
-	names := make([]map[string]string, 0)
+	newMap := declarations.NewMap(c.model.ProjectID, c.model.Name)
+	names := make([]ViewVariable, 0)
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&newMap); res.Error != nil {
 			return res.Error
 		}
 
-		domainEntries := make([]declarations.MapVariable, len(c.model.Entries))
-		entries := c.model.Entries
-		for i, entry := range entries {
-			if entry.Type == "variable" {
-				m := entry.Model.(VariableModel)
+		domainEntries := make([]declarations.MapVariable, len(c.model.Variables))
+		variables := c.model.Variables
+		for i, variable := range variables {
+			localeId, _ := locales.GetIDWithAlpha(variable.Locale)
 
-				domainEntries[i] = declarations.NewMapVariable(
-					newMap.ID,
-					localeID,
-					m.Name,
-					m.Behaviour,
-					m.Metadata,
-					m.Groups,
-					m.Value,
-				)
+			domainEntries[i] = declarations.NewMapVariable(
+				newMap.ID,
+				localeId,
+				variable.Name,
+				variable.Behaviour,
+				variable.Metadata,
+				variable.Groups,
+				variable.Value,
+			)
+		}
+
+		if len(domainEntries) != 0 {
+			if res := tx.Create(&domainEntries); res.Error != nil {
+				return res.Error
 			}
-		}
 
-		if res := tx.Create(&domainEntries); res.Error != nil {
-			return res.Error
-		}
+			for _, d := range domainEntries {
+				if d.ID != "" {
+					locale, _ := locales.GetAlphaWithID(d.LocaleID)
 
-		for _, d := range domainEntries {
-			if d.ID != "" {
-				names = append(names, map[string]string{
-					"name":    d.Name,
-					"ID":      d.ID,
-					"shortID": d.ShortID,
-					"type":    "variable",
-				})
+					names = append(names, ViewVariable{
+						ID:      d.ID,
+						Locale:  locale,
+						ShortID: d.ShortID,
+						Name:    d.Name,
+					})
+				}
 			}
 		}
 
@@ -97,7 +93,6 @@ func (c Main) Logic() (LogicResult, error) {
 
 	return LogicResult{
 		ID:        newMap.ID,
-		Locale:    c.model.Locale,
 		ShortID:   newMap.ShortID,
 		ProjectID: newMap.ProjectID,
 		Name:      newMap.Name,

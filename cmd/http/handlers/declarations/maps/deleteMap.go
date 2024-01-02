@@ -1,7 +1,6 @@
 package maps
 
 import (
-	declarations2 "creatif/cmd/http/handlers/declarations"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
@@ -19,12 +18,9 @@ func DeleteMap() func(e echo.Context) error {
 		}
 
 		model = maps.SanitizeDeleteMap(model)
-		if model.Locale == "" {
-			model.Locale = declarations2.DefaultLocale
-		}
 
 		l := logger.NewLogBuilder()
-		handler := removeMap.New(removeMap.NewModel(model.ProjectID, model.Locale, model.Name, model.ID, model.ShortID), auth.NewNoopAuthentication(), l)
+		handler := removeMap.New(removeMap.NewModel(model.ProjectID, model.Name), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[removeMap.Model](handler, c, http.StatusOK, l, nil, false)
 	}

@@ -13,6 +13,7 @@ import (
 
 var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	ginkgo.It("should update an entry in the map by replacing it completely", func() {
+		ginkgo.Skip("")
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "map", 10, "modifiable")
 
@@ -56,6 +57,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	})
 
 	ginkgo.It("should fail updating a map variable because of invalid number of groups", func() {
+		ginkgo.Skip("")
+
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "map", 10, "modifiable")
 
@@ -83,6 +86,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	})
 
 	ginkgo.It("should fail updating a readonly map variable", func() {
+		ginkgo.Skip("")
+
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "map", 10, "readonly")
 

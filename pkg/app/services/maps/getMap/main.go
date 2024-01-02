@@ -1,9 +1,7 @@
-package getMapVariable
+package getMap
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -18,11 +16,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("getMapVariable", "Validating...")
+	c.logBuilder.Add("getMap", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("getMapVariable", "Validated.")
+	c.logBuilder.Add("getMap", "Validated.")
 	return nil
 }
 
@@ -35,27 +33,20 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		c.logBuilder.Add("getMapVariable", err.Error())
-		return LogicModel{}, appErrors.NewApplicationError(err).AddError("getMapVariable.Logic", nil)
-	}
-
-	id, val := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
-	m, err := queryMap(c.model.ProjectID, id, val, localeID)
+	m, err := queryMap(c.model.ProjectID, c.model.Name)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		c.logBuilder.Add("getMapVariable", err.Error())
-		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMapVariable.Logic", nil)
+		c.logBuilder.Add("getMap", err.Error())
+		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
 	}
 
 	if err != nil {
-		c.logBuilder.Add("getMapVariable", err.Error())
-		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("getMapVariable.Logic", nil)
+		c.logBuilder.Add("getMap", err.Error())
+		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("getMap.Logic", nil)
 	}
 
 	var variables []Variable
-	if err := queryVariables(m.ID, localeID, c.model.Fields, c.model.Groups, &variables); err != nil {
-		c.logBuilder.Add("getMapVariable", err.Error())
+	if err := queryVariables(m.ID, c.model.Fields, c.model.Groups, &variables); err != nil {
+		c.logBuilder.Add("getMap", err.Error())
 		return LogicModel{}, err
 	}
 
@@ -84,10 +75,10 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Fields, c.model.Locale), nil
+	return newView(model, c.model.Fields), nil
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
-	logBuilder.Add("getMapVariable", "Created")
+	logBuilder.Add("getMap", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

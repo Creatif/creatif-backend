@@ -12,7 +12,7 @@ import (
 var _ = ginkgo.Describe("Map variable tests", func() {
 	ginkgo.It("should create multiple maps with different name with only variable entries", func() {
 		projectId := testCreateProject("project")
-		entries := make([]Entry, 0)
+		entries := make([]VariableModel, 0)
 
 		m := map[string]interface{}{
 			"one":   "one",
@@ -51,26 +51,23 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 					"two",
 					"three",
 				},
+				Locale:    "eng",
 				Behaviour: "modifiable",
 				Value:     v,
 			}
 
-			entries = append(entries, Entry{
-				Type:  "variable",
-				Model: variableModel,
-			})
+			entries = append(entries, variableModel)
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("mapName"))
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
-		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "otherMapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "otherMapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err = handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -81,7 +78,7 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 
 	ginkgo.It("should fail on the database level when trying to create a map with name that already exists", func() {
 		projectId := testCreateProject("project")
-		entries := make([]Entry, 0)
+		entries := make([]VariableModel, 0)
 
 		m := map[string]interface{}{
 			"one":   "one",
@@ -120,33 +117,30 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 					"two",
 					"three",
 				},
+				Locale:    "eng",
 				Behaviour: "modifiable",
 				Value:     v,
 			}
 
-			entries = append(entries, Entry{
-				Type:  "variable",
-				Model: variableModel,
-			})
+			entries = append(entries, variableModel)
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("mapName"))
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
-		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		_, err = handler.Logic()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})
 
 	ginkgo.It("should fail on the application level when trying to create a map with name that already exists", func() {
 		projectId := testCreateProject("project")
-		entries := make([]Entry, 0)
+		entries := make([]VariableModel, 0)
 
 		m := map[string]interface{}{
 			"one":   "one",
@@ -185,26 +179,23 @@ var _ = ginkgo.Describe("Map variable tests", func() {
 					"two",
 					"three",
 				},
+				Locale:    "eng",
 				Behaviour: "modifiable",
 				Value:     v,
 			}
 
-			entries = append(entries, Entry{
-				Type:  "variable",
-				Model: variableModel,
-			})
+			entries = append(entries, variableModel)
 		}
 
-		handler := New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.Name).Should(gomega.Equal("mapName"))
 		gomega.Expect(view.Variables).Should(gomega.HaveLen(10))
-		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 
-		handler = New(NewModel(projectId, "eng", "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler = New(NewModel(projectId, "mapName", entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})

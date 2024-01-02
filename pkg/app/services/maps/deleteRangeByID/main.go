@@ -1,5 +1,6 @@
-package removeMapVariable
+package deleteRangeByID
 
+import "C"
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
@@ -7,7 +8,6 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
 	"fmt"
 )
 
@@ -18,6 +18,12 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
+	c.logBuilder.Add("deleteRangeByID", "Validating...")
+	if errs := c.model.Validate(); errs != nil {
+		return appErrors.NewValidationError(errs)
+	}
+
+	c.logBuilder.Add("deleteRangeByID", "Validated")
 	return nil
 }
 
@@ -33,28 +39,28 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (interface{}, error) {
+func (c Main) Logic() (*struct{}, error) {
+	fmt.Println(c.model.Name, c.model.Items)
 	sql := fmt.Sprintf(
-		`DELETE FROM %s AS mv USING %s AS m WHERE m.project_id = ? AND mv.map_id = m.id AND (mv.id = ? OR mv.short_id = ?) AND (m.id = ? OR m.short_id = ? OR m.name = ?)`,
+		`DELETE FROM %s AS lv USING %s AS l WHERE (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.map_id = l.id AND lv.id IN(?)`,
 		(declarations.MapVariable{}).TableName(),
 		(declarations.Map{}).TableName(),
 	)
 
-	res := storage.Gorm().Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name, c.model.Name)
+	res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
 	if res.Error != nil {
-		c.logBuilder.Add("removeMapVariable", res.Error.Error())
-		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapVariable.Logic", nil)
+		c.logBuilder.Add("deleteRangeByID", res.Error.Error())
+		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
-		c.logBuilder.Add("removeMapVariable", "No rows returned. Returning 404 status.")
-		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Variable with name '%s' not found.", c.model.VariableName))).AddError("removeMapVariable.Logic", nil)
+		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteRangeByID.Logic", nil)
 	}
 
 	return nil, nil
 }
 
-func (c Main) Handle() (interface{}, error) {
+func (c Main) Handle() (*struct{}, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -76,7 +82,7 @@ func (c Main) Handle() (interface{}, error) {
 	return nil, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
-	logBuilder.Add("removeMapVariable", "Created.")
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
+	logBuilder.Add("deleteRangeByID", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

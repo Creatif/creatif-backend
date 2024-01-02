@@ -1,47 +1,37 @@
-package lists
+package maps
 
 import (
 	"creatif/cmd"
 	"creatif/cmd/http/request"
-	"creatif/cmd/http/request/declarations/lists"
+	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/services/lists/createList"
+	"creatif/pkg/app/services/maps/queryMapVariable"
 	"creatif/pkg/lib/logger"
-	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func CreateListHandler() func(e echo.Context) error {
+func QueryMapVariableHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model lists.CreateList
+		var model maps.QueryMapVariable
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = lists.SanitizeCreateList(model)
+		model = maps.SanitizeQueryMapVariable(model)
 
 		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
 		l := logger.NewLogBuilder()
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
-		handler := createList.New(createList.NewModel(
+		handler := queryMapVariable.New(queryMapVariable.NewModel(
 			model.ProjectID,
 			model.Name,
-			sdk.Map(model.Variables, func(idx int, value lists.CreateListVariable) createList.Variable {
-				return createList.Variable{
-					Name:      value.Name,
-					Metadata:  []byte(value.Metadata),
-					Groups:    value.Groups,
-					Locale:    value.Locale,
-					Behaviour: value.Behaviour,
-					Value:     []byte(value.Value),
-				}
-			}),
+			model.ItemID,
 		), authentication, l)
 
-		return request.SendResponse[createList.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[queryMapVariable.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {
@@ -52,6 +42,6 @@ func CreateListHandler() func(e echo.Context) error {
 			}
 
 			return nil
-		}, model.GracefulFail)
+		}, false)
 	}
 }

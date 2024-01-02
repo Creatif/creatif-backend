@@ -121,7 +121,7 @@ func testCreateProject(name string) string {
 }
 
 func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
-	entries := make([]mapCreate.Entry, 0)
+	entries := make([]mapCreate.VariableModel, 0)
 
 	m := map[string]interface{}{
 		"one":   "one",
@@ -161,16 +161,14 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 				"three",
 			},
 			Value:     v,
+			Locale:    "eng",
 			Behaviour: "modifiable",
 		}
 
-		entries = append(entries, mapCreate.Entry{
-			Type:  "variable",
-			Model: variableModel,
-		})
+		entries = append(entries, variableModel)
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, "eng", name, entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

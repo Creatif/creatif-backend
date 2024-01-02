@@ -18,12 +18,9 @@ func DeleteMapEntry() func(e echo.Context) error {
 		}
 
 		model = maps.SanitizeDeleteMapEntry(model)
-		if model.Locale == "" {
-			model.Locale = "eng"
-		}
 
 		l := logger.NewLogBuilder()
-		handler := removeMapVariable.New(removeMapVariable.NewModel(model.ProjectID, model.Locale, model.Name, model.MapID, model.MapShortID, model.VariableName, model.VariableID, model.VariableShortID), auth.NewNoopAuthentication(), l)
+		handler := removeMapVariable.New(removeMapVariable.NewModel(model.ProjectID, model.Name, model.VariableName), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[removeMapVariable.Model](handler, c, http.StatusOK, l, nil, false)
 	}

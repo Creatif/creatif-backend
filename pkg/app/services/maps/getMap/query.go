@@ -1,4 +1,4 @@
-package getMapVariable
+package getMap
 
 import (
 	"creatif/pkg/app/domain/declarations"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func queryVariables(mapId, localeID string, fields, groups []string, model interface{}) error {
+func queryVariables(mapId string, fields, groups []string, model interface{}) error {
 	resolvedFields := strings.Join(sdk.Map(fields, func(idx int, value string) string {
 		return fmt.Sprintf("n.%s", value)
 	}), ",")
@@ -28,7 +28,7 @@ SELECT
     n.id,
     n.name%s %s
 		FROM %s AS n
-		WHERE n.map_id = ? AND n.locale_id = ?
+		WHERE n.map_id = ?
 %s
 `,
 		delimiter,
@@ -37,16 +37,16 @@ SELECT
 		groupsWhereClause,
 	)
 
-	if res := storage.Gorm().Raw(sql, mapId, localeID).Scan(model); res.Error != nil {
+	if res := storage.Gorm().Raw(sql, mapId).Scan(model); res.Error != nil {
 		return res.Error
 	}
 
 	return nil
 }
 
-func queryMap(projectId, mapId, val, localeID string) (declarations.Map, error) {
+func queryMap(projectId, name string) (declarations.Map, error) {
 	var m declarations.Map
-	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ? AND locale_id = ?", mapId), val, projectId, localeID).First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (name = ? OR id = ? OR short_id = ?)"), projectId, name, name, name).First(&m); res.Error != nil {
 		return declarations.Map{}, res.Error
 	}
 

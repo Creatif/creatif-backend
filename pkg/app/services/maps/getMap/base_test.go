@@ -1,4 +1,4 @@
-package paginateMapVariables
+package getMap
 
 import (
 	"creatif/pkg/app/auth"
@@ -35,7 +35,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Map variable paginateVariables -> pagination tests")
+	GinkgoRunSpecs(t, "Declaration -> GET map tests")
 }
 
 func runLogger() {
@@ -97,29 +97,7 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
-func testAssertErrNil(err error) {
-	gomega.Expect(err).Should(gomega.BeNil())
-}
-
-func testAssertIDValid(id string) {
-	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
-	_, err := ulid.Parse(id)
-	gomega.Expect(err).Should(gomega.BeNil())
-}
-
-func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
-
-	model, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(model.ID)
-
-	gomega.Expect(model.Name).Should(gomega.Equal(name))
-
-	return model.ID
-}
-
-func testCreateMap(projectId, name string, variablesNum int) (mapCreate.View, map[string]int) {
+func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	entries := make([]mapCreate.VariableModel, 0)
 	fragmentedGroups := map[string]int{}
 	fragmentedGroups["one"] = 0
@@ -143,7 +121,16 @@ func testCreateMap(projectId, name string, variablesNum int) (mapCreate.View, ma
 			value = true
 		}
 
-		var groups []string
+		if i%3 == 0 {
+			value = map[string]interface{}{
+				"one":   "one",
+				"two":   []string{"one", "two", "three"},
+				"three": []int{1, 2, 3},
+				"four":  453,
+			}
+		}
+
+		var groups []string = []string{"unfragmented"}
 		if i%2 == 0 {
 			groups = append(groups, "one")
 			fragmentedGroups["one"]++
@@ -167,8 +154,8 @@ func testCreateMap(projectId, name string, variablesNum int) (mapCreate.View, ma
 			Metadata:  b,
 			Groups:    groups,
 			Value:     v,
-			Locale:    "eng",
 			Behaviour: "modifiable",
+			Locale:    "eng",
 		}
 
 		entries = append(entries, variableModel)
@@ -183,5 +170,27 @@ func testCreateMap(projectId, name string, variablesNum int) (mapCreate.View, ma
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
 	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
-	return view, fragmentedGroups
+	return view
+}
+
+func testAssertErrNil(err error) {
+	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testAssertIDValid(id string) {
+	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
+	_, err := ulid.Parse(id)
+	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateProject(name string) string {
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(model.ID)
+
+	gomega.Expect(model.Name).Should(gomega.Equal(name))
+
+	return model.ID
 }

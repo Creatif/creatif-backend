@@ -1,4 +1,4 @@
-package queryListByID
+package queryMapVariable
 
 import (
 	"creatif/pkg/app/auth"
@@ -41,26 +41,26 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (declarations.ListVariable, error) {
+func (c Main) Logic() (declarations.MapVariable, error) {
 	sql := fmt.Sprintf(`
-			SELECT lv.id, lv.name, lv.index, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at, lv.locale_id
+			SELECT lv.id, lv.name, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at, lv.locale_id
 			FROM %s AS lv INNER JOIN %s AS l
-			ON l.project_id = ? AND (l.name = ? OR l.short_id = ? OR l.id = ?) AND lv.list_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
-		(declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
+			ON l.project_id = ? AND (l.name = ? OR l.short_id = ? OR l.id = ?) AND lv.map_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
+		(declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())
 
-	var variable declarations.ListVariable
+	var variable declarations.MapVariable
 	res := storage.Gorm().
 		Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID).
 		Scan(&variable)
 
 	if res.Error != nil {
 		c.logBuilder.Add("queryMapVariable", res.Error.Error())
-		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
+		return declarations.MapVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
 		c.logBuilder.Add("queryMapVariable", "No rows returned. 404 status code.")
-		return declarations.ListVariable{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
+		return declarations.MapVariable{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
 	}
 
 	return variable, nil
@@ -88,7 +88,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.ListVariable] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.MapVariable] {
 	logBuilder.Add("queryMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

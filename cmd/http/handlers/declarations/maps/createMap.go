@@ -1,6 +1,7 @@
 package maps
 
 import (
+	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
@@ -18,30 +19,37 @@ func CreateMapHandler() func(e echo.Context) error {
 		}
 
 		model = maps.SanitizeMapModel(model)
-		if model.Locale == "" {
-			model.Locale = "eng"
-		}
 
-		serviceEntries := make([]mapCreate2.Entry, 0)
-		for _, entry := range model.Entries {
-			m, ok := entry.Model.(maps.MapVariableModel)
-			if ok {
-				serviceEntries = append(serviceEntries, mapCreate2.Entry{
-					Type: entry.Type,
-					Model: mapCreate2.VariableModel{
-						Name:      m.Name,
-						Metadata:  []byte(m.Metadata),
-						Value:     []byte(m.Value),
-						Groups:    m.Groups,
-						Behaviour: m.Behaviour,
-					},
-				})
-			}
+		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
+		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
+
+		serviceEntries := make([]mapCreate2.VariableModel, 0)
+		for _, entry := range model.Variables {
+			serviceEntries = append(serviceEntries, mapCreate2.VariableModel{
+				Name:      entry.Name,
+				Metadata:  []byte(entry.Metadata),
+				Locale:    entry.Locale,
+				Groups:    entry.Groups,
+				Behaviour: entry.Behaviour,
+				Value:     []byte(entry.Value),
+			})
 		}
 
 		l := logger.NewLogBuilder()
-		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Locale, model.Name, serviceEntries), auth.NewNoopAuthentication(), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		handler := mapCreate2.New(mapCreate2.NewModel(model.ProjectID, model.Name, serviceEntries), authentication, l)
 
-		return request.SendResponse[mapCreate2.Model](handler, c, http.StatusCreated, l, nil, false)
+		return request.SendResponse[mapCreate2.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

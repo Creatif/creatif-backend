@@ -1,47 +1,47 @@
-package lists
+package maps
 
 import (
 	"creatif/cmd"
 	"creatif/cmd/http/request"
-	"creatif/cmd/http/request/declarations/lists"
+	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/services/lists/createList"
+	"creatif/pkg/app/services/maps/paginateMapVariables"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func CreateListHandler() func(e echo.Context) error {
+func PaginateMapVariables() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model lists.CreateList
+		var model maps.PaginateMapVariables
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = lists.SanitizeCreateList(model)
+		model = maps.SanitizePaginateListItems(model)
 
 		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
 		l := logger.NewLogBuilder()
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
-		handler := createList.New(createList.NewModel(
+		handler := paginateMapVariables.New(paginateMapVariables.NewModel(
 			model.ProjectID,
-			model.Name,
-			sdk.Map(model.Variables, func(idx int, value lists.CreateListVariable) createList.Variable {
-				return createList.Variable{
-					Name:      value.Name,
-					Metadata:  []byte(value.Metadata),
-					Groups:    value.Groups,
-					Locale:    value.Locale,
-					Behaviour: value.Behaviour,
-					Value:     []byte(value.Value),
-				}
-			}),
+			model.SanitizedLocales,
+			model.ListName,
+			model.OrderBy,
+			model.Search,
+			model.OrderDirection,
+			model.Limit,
+			model.Page,
+			model.SanitizedGroups,
+			sdk.ParseFilters(model.Filters),
+			model.Behaviour,
+			model.SanitizedFields,
 		), authentication, l)
 
-		return request.SendResponse[createList.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[paginateMapVariables.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {
@@ -52,6 +52,6 @@ func CreateListHandler() func(e echo.Context) error {
 			}
 
 			return nil
-		}, model.GracefulFail)
+		}, false)
 	}
 }

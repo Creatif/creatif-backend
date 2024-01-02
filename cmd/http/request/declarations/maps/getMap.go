@@ -8,8 +8,6 @@ import (
 
 type GetMap struct {
 	Name      string `param:"name"`
-	ID        string `json:"id"`
-	ShortID   string `json:"shortID"`
 	Fields    string `query:"fields"`
 	ProjectID string `param:"projectID"`
 	Locale    string `param:"locale"`
@@ -24,8 +22,6 @@ func SanitizeGetMap(model GetMap) GetMap {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Fields = p.Sanitize(model.Fields)
 	model.Locale = p.Sanitize(model.Locale)
-	model.ShortID = p.Sanitize(model.ShortID)
-	model.ID = p.Sanitize(model.ID)
 
 	if model.Groups != "" {
 		newGroups := sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {

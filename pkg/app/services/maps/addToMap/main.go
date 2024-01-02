@@ -9,7 +9,6 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
 	"fmt"
 )
 
@@ -43,14 +42,14 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
-	localeID, err := locales.GetIDWithAlpha(c.model.Locale)
+	localeID, err := locales.GetIDWithAlpha(c.model.Entry.Locale)
 	if err != nil {
 		c.logBuilder.Add("addToMap", err.Error())
 		return nil, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
 
 	var m declarations.Map
-	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND locale_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, localeID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "locale_id").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToMap", res.Error.Error())
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
@@ -59,11 +58,13 @@ func (c Main) Logic() (interface{}, error) {
 		c.model.Entry.Groups = []string{}
 	}
 
-	mapNode := declarations.NewMapVariable(m.ID, m.LocaleID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
+	mapNode := declarations.NewMapVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
 	if res := storage.Gorm().Create(&mapNode); res.Error != nil {
 		c.logBuilder.Add("addToMap", res.Error.Error())
 
-		return nil, appErrors.NewApplicationError(errors.New(fmt.Sprintf("Entry with name '%s' already exists", c.model.Entry.Name))).AddError("addToMap.Logic", nil)
+		return nil, appErrors.NewValidationError(map[string]string{
+			"exists": fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name),
+		})
 	}
 
 	return nil, nil
@@ -92,6 +93,6 @@ func (c Main) Handle() (interface{}, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
-	logBuilder.Add("getMapVariable", "Created")
+	logBuilder.Add("getMap", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

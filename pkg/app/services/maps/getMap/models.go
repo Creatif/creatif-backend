@@ -1,8 +1,7 @@
-package getMapVariable
+package getMap
 
 import (
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	"errors"
@@ -25,23 +24,17 @@ var validFields = []string{
 
 type Model struct {
 	Name      string
-	ID        string
-	ShortID   string
 	Fields    []string
 	ProjectID string
-	Locale    string
 	Groups    []string
 
 	validFields []string
 }
 
-func NewModel(projectId, locale, name, id, shortId string, fields []string, groups []string) Model {
+func NewModel(projectId, name string, fields []string, groups []string) Model {
 	return Model{
 		Name:        name,
-		ID:          id,
-		ShortID:     shortId,
 		ProjectID:   projectId,
-		Locale:      locale,
 		Fields:      fields,
 		Groups:      groups,
 		validFields: validFields,
@@ -70,14 +63,13 @@ type View struct {
 	ID        string                   `json:"id"`
 	Name      string                   `json:"name"`
 	ProjectID string                   `json:"projectID"`
-	Locale    string                   `json:"locale"`
 	Variables []map[string]interface{} `json:"variables"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model LogicModel, returnFields []string, locale string) View {
+func newView(model LogicModel, returnFields []string) View {
 	m := make([]map[string]interface{}, 0)
 
 	for _, n := range model.variables {
@@ -122,7 +114,6 @@ func newView(model LogicModel, returnFields []string, locale string) View {
 	return View{
 		ID:        model.variableMap.ID,
 		ProjectID: model.variableMap.ProjectID,
-		Locale:    locale,
 		Name:      model.variableMap.Name,
 		Variables: m,
 		CreatedAt: model.variableMap.CreatedAt,
@@ -133,10 +124,7 @@ func newView(model LogicModel, returnFields []string, locale string) View {
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"name":        a.Name,
-		"id":          a.ID,
-		"idExists":    nil,
 		"projectID":   a.ProjectID,
-		"locale":      a.Locale,
 		"fieldsValid": a.Fields,
 	}
 
@@ -144,27 +132,7 @@ func (a *Model) Validate() map[string]string {
 		validation.Map(
 			// Name cannot be empty, and the length must be between 5 and 20.
 			validation.Key("name", validation.When(a.Name != "", validation.RuneLength(1, 200))),
-			validation.Key("id", validation.When(a.ID != "", validation.RuneLength(26, 26))),
-			validation.Key("idExists", validation.By(func(value interface{}) error {
-				name := a.Name
-				shortId := a.ShortID
-				id := a.ID
-
-				if name == "" && shortId == "" && id == "" {
-					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this variable.")
-				}
-				return nil
-			})),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
-				t := value.(string)
-
-				if !locales.ExistsByAlpha(t) {
-					return errors.New(fmt.Sprintf("Locale '%s' does not exist.", t))
-				}
-
-				return nil
-			})),
 			validation.Key("fieldsValid", validation.By(func(value interface{}) error {
 				fields := value.([]string)
 				vFields := a.validFields

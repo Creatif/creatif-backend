@@ -13,6 +13,7 @@ type VariableModel struct {
 	Name      string   `json:"name"`
 	Metadata  []byte   `json:"metadata"`
 	Groups    []string `json:"groups"`
+	Locale    string   `json:"locale"`
 	Behaviour string   `json:"behaviour"`
 	Value     []byte   `json:"value"`
 }
@@ -21,14 +22,12 @@ type Model struct {
 	Entry     VariableModel
 	Name      string
 	ProjectID string
-	Locale    string
 }
 
-func NewModel(projectId, locale, name string, entry VariableModel) Model {
+func NewModel(projectId, name string, entry VariableModel) Model {
 	return Model{
 		Name:      name,
 		ProjectID: projectId,
-		Locale:    locale,
 		Entry:     entry,
 	}
 }
@@ -38,13 +37,13 @@ func (a *Model) Validate() map[string]string {
 		"groups":    a.Entry.Groups,
 		"name":      a.Name,
 		"projectID": a.ProjectID,
-		"locale":    a.Locale,
+		"locale":    a.Entry.Locale,
 		"behaviour": a.Entry.Behaviour,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.When(a.Name != "", validation.RuneLength(1, 200))),
+			validation.Key("name", validation.Required),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
 				t := value.(string)

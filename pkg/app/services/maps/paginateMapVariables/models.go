@@ -13,7 +13,6 @@ var validOrderByFields = []string{
 	"created_at",
 	"updated_at",
 	"behaviour",
-	"index",
 }
 
 var validFields = []string{
@@ -27,7 +26,6 @@ var initialReturnFields = []string{
 	"created_at",
 	"updated_at",
 	"behaviour",
-	"index",
 }
 
 type Model struct {

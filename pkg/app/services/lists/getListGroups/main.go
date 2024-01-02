@@ -25,7 +25,7 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
-	c.logBuilder.Add("queryListByID", "Validated")
+	c.logBuilder.Add("queryMapVariable", "Validated")
 
 	return nil
 }
@@ -95,6 +95,6 @@ func (c Main) Handle() ([]string, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []string] {
-	logBuilder.Add("queryListByID", "Created")
+	logBuilder.Add("queryMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

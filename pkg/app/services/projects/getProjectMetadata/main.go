@@ -44,8 +44,7 @@ p.user_id,
 v.name AS variable_name,
 m.name AS map_name,
 l.name AS list_name,
-v.locale_id AS variable_locale,
-m.locale_id AS map_locale
+v.locale_id AS variable_locale
 FROM %s AS p
 LEFT JOIN %s AS v ON p.id = ? AND p.user_id = ? AND v.project_id = p.id AND v.project_id = ?
 LEFT JOIN %s AS m ON m.project_id = p.id AND m.project_id = ?
@@ -73,7 +72,7 @@ WHERE p.id = ? AND p.user_id = ?
 		State:     logicModels[0].State,
 		UserID:    logicModels[0].UserID,
 		Variables: make(map[string][]string),
-		Maps:      make(map[string][]string),
+		Maps:      make([]string, 0),
 		Lists:     make([]string, 0),
 	}
 
@@ -83,14 +82,9 @@ WHERE p.id = ? AND p.user_id = ?
 
 	for _, v := range logicModels {
 		variableLocale, _ := locales.GetAlphaWithID(v.VariableLocale)
-		mapLocale, _ := locales.GetAlphaWithID(v.MapLocale)
 
 		if _, ok := preViewModel.Variables[v.VariableLocale]; !ok && variableLocale != "" {
 			preViewModel.Variables[variableLocale] = make([]string, 0)
-		}
-
-		if _, ok := preViewModel.Maps[mapLocale]; !ok && mapLocale != "" {
-			preViewModel.Maps[mapLocale] = make([]string, 0)
 		}
 
 		if v.VariableName != "" {
@@ -98,7 +92,7 @@ WHERE p.id = ? AND p.user_id = ?
 		}
 
 		if v.Map != "" {
-			preViewModel.Maps[mapLocale] = append(preViewModel.Maps[mapLocale], v.Map)
+			preViewModel.Maps = append(preViewModel.Maps, v.Map)
 		}
 
 		if v.List != "" {
@@ -108,14 +102,6 @@ WHERE p.id = ? AND p.user_id = ?
 
 	if len(preViewModel.Variables) == 0 {
 		preViewModel.Variables = nil
-	}
-
-	if len(preViewModel.Maps) == 0 {
-		preViewModel.Maps = nil
-	}
-
-	if len(preViewModel.Lists) == 0 {
-		preViewModel.Lists = nil
 	}
 
 	return preViewModel, nil

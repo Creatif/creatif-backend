@@ -128,7 +128,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateMapVariables", res.Error.Error())
-		return sdk.LogicView[declarations.MapVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
+		return sdk.LogicView[declarations.MapVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("Maps.Paginate.Logic", nil)
 	}
 
 	countSql := fmt.Sprintf(`

@@ -1,6 +1,7 @@
 package maps
 
 import (
+	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
@@ -18,19 +19,32 @@ func AddToMapHandler() func(e echo.Context) error {
 		}
 
 		model = maps.SanitizeAddToMap(model)
-		if model.Locale == "" {
-			model.Locale = "eng"
-		}
+
+		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
+		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
 		l := logger.NewLogBuilder()
-		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Locale, model.Name, addToMap2.VariableModel{
-			Name:      model.Entry.Name,
-			Metadata:  []byte(model.Entry.Metadata),
-			Groups:    model.Entry.Groups,
-			Behaviour: model.Entry.Behaviour,
-			Value:     []byte(model.Entry.Value),
-		}), auth.NewNoopAuthentication(), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Name, addToMap2.VariableModel{
+			Name:      model.Variable.Name,
+			Metadata:  []byte(model.Variable.Metadata),
+			Locale:    model.Variable.Locale,
+			Groups:    model.Variable.Groups,
+			Behaviour: model.Variable.Behaviour,
+			Value:     []byte(model.Variable.Value),
+		}), authentication, l)
 
-		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l, nil, false)
+		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

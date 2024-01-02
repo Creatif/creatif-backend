@@ -4,7 +4,6 @@ import (
 	"creatif/cmd"
 	authHandlers "creatif/cmd/http/handlers/app/auth"
 	appHandlers "creatif/cmd/http/handlers/app/project"
-	"creatif/cmd/http/handlers/declarations/combined"
 	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
@@ -91,9 +90,7 @@ func appRoutes(group *echo.Group) {
 }
 
 func declarationRoutes(group *echo.Group) {
-	group.POST("/structures/:projectID/:locale", combined.GetBatchedStructuresHandler())
-
-	group.PUT("/list/:projectID/:locale", lists.CreateListHandler())
+	group.PUT("/list/:projectID", lists.CreateListHandler())
 	group.PUT("/list/append/:projectID", lists.AppendToListHandler())
 	group.DELETE("/list/:projectID/:name", lists.DeleteListHandler())
 	group.POST("/list/item-id/:projectID", lists.DeleteListItemByIDHandler())
@@ -106,11 +103,14 @@ func declarationRoutes(group *echo.Group) {
 	group.POST("/list/update/:projectID/:name", lists.UpdateListHandler())
 	group.POST("/list/update-item-by-id/:projectID/:name/:itemID", lists.UpdateListItemByIDHandler())
 
-	group.POST("/map/add/:projectID/:locale", maps.AddToMapHandler())
+	group.PUT("/map/add/:projectID/:locale", maps.AddToMapHandler())
 	group.POST("/map/update/:projectID/:locale", maps.UpdateMapVariableHandler())
-	group.DELETE("/map/entry/:projectID/:name/:entryName/:locale", maps.DeleteMapEntry())
+	group.DELETE("/map/entry/:projectID/:name/:variableName", maps.DeleteMapEntry())
 	group.DELETE("/map/:projectID/:name/:locale", maps.DeleteMap())
-	group.PUT("/map/:projectID/:locale", maps.CreateMapHandler())
+	group.GET("/map/query-id/:projectID/:name/:itemId", maps.QueryMapVariableHandler())
+	group.PUT("/map/:projectID", maps.CreateMapHandler())
+	group.POST("/map/range/:projectID/:name", maps.DeleteRange())
+	group.GET("/maps/:projectID/:name", maps.PaginateMapVariables())
 	group.GET("/map/:projectID/:name/:locale", maps.GetMapHandler())
 
 	group.PUT("/variable/:projectID/:locale", variables.CreateVariableHandler())
