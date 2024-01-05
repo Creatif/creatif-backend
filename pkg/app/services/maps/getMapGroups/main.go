@@ -1,4 +1,4 @@
-package getListGroups
+package getMapGroups
 
 import (
 	"creatif/pkg/app/auth"
@@ -25,7 +25,7 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
-	c.logBuilder.Add("queryMapVariable", "Validated")
+	c.logBuilder.Add("getMapGroups", "Validated")
 
 	return nil
 }
@@ -45,8 +45,8 @@ func (c Main) Authorize() error {
 func (c Main) Logic() ([]string, error) {
 	sql := fmt.Sprintf(`
 SELECT groups FROM %s AS lv 
-    INNER JOIN %s AS l ON l.project_id = ? AND lv.list_id = l.id AND (l.name = ? OR l.id = ? OR l.short_id = ?)
-`, (declarations2.ListVariable{}).TableName(), (declarations2.List{}).TableName())
+    INNER JOIN %s AS l ON l.project_id = ? AND lv.map_id = l.id AND (l.name = ? OR l.id = ? OR l.short_id = ?)
+`, (declarations2.MapVariable{}).TableName(), (declarations2.Map{}).TableName())
 	var duplicatedModel []LogicModel
 	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Scan(&duplicatedModel)
 
@@ -95,6 +95,6 @@ func (c Main) Handle() ([]string, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []string] {
-	logBuilder.Add("queryMapVariable", "Created")
+	logBuilder.Add("getMapGroups", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

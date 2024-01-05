@@ -31,7 +31,11 @@ func (c Main) Validate() error {
 			return appErrors.NewValidationError(map[string]string{
 				"email": fmt.Sprintf("Invalid email"),
 			})
+		} else if res.Error != nil {
+			c.logBuilder.Add("emailCheckError", res.Error.Error())
 		}
+
+		fmt.Println(res.Error)
 	}
 
 	c.logBuilder.Add("registerEmail", "Validated.")
