@@ -12,7 +12,7 @@ import (
 
 type MapVariable struct {
 	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
-	ShortID string `gorm:"uniqueIndex:unique_variable;type:text;not null"`
+	ShortID string `gorm:"uniqueIndex:unique_map_variable;type:text;not null"`
 
 	Name      string         `gorm:"uniqueIndex:unique_map_variable;not null"`
 	Behaviour string         `gorm:"not null"`
@@ -21,7 +21,7 @@ type MapVariable struct {
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
 	MapID    string `gorm:"uniqueIndex:unique_map_variable;type:text"`
-	LocaleID string `gorm:"uniqueIndex:unique_map_variable;type:text"`
+	LocaleID string `gorm:"type:text"`
 	Map      Map    `gorm:"foreignKey:MapID"`
 
 	CreatedAt time.Time `gorm:"<-:create;index"`

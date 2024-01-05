@@ -3,46 +3,39 @@ package maps
 import (
 	"creatif/pkg/lib/sdk"
 	"github.com/microcosm-cc/bluemonday"
+	"strings"
 )
 
 type UpdateMapVariable struct {
-	ProjectID       string           `param:"projectID"`
-	Locale          string           `param:"locale"`
-	MapName         string           `param:"mapName"`
-	ID              string           `json:"id"`
-	ShortID         string           `json:"shortID"`
-	VariableID      string           `json:"variableID"`
-	VariableShortID string           `json:"variableShortID"`
-	VariableName    string           `param:"variableName"`
-	Fields          []string         `json:"fields"`
-	Entry           MapVariableModel `json:"variable"`
+	ProjectID string           `param:"projectID"`
+	Name      string           `param:"name"`
+	ItemID    string           `param:"itemId"`
+	Fields    string           `query:"fields"`
+	Variable  MapVariableModel `json:"variable"`
 
-	SanitizedFields []string
+	ResolvedFields []string
 }
 
 func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.MapName = p.Sanitize(model.MapName)
-	model.VariableName = p.Sanitize(model.VariableName)
-	model.ShortID = p.Sanitize(model.ShortID)
-	model.ID = p.Sanitize(model.ID)
-	model.VariableID = p.Sanitize(model.VariableID)
-	model.VariableShortID = p.Sanitize(model.VariableShortID)
-	model.Locale = p.Sanitize(model.Locale)
+	model.Name = p.Sanitize(model.Name)
+	model.ItemID = p.Sanitize(model.ItemID)
 
-	model.SanitizedFields = sdk.Map(model.Fields, func(idx int, value string) string {
-		return p.Sanitize(value)
+	model.ResolvedFields = sdk.Map(strings.Split(model.Fields, "|"), func(idx int, value string) string {
+		trimmed := strings.Trim(value, " ")
+		return p.Sanitize(trimmed)
 	})
 
-	variable := model.Entry
+	variable := model.Variable
 	variable.Name = p.Sanitize(variable.Name)
+	variable.Locale = p.Sanitize(variable.Locale)
 	variable.Behaviour = p.Sanitize(variable.Behaviour)
 	variable.Groups = sdk.Map(variable.Groups, func(idx int, value string) string {
 		return p.Sanitize(value)
 	})
 
-	model.Entry = variable
+	model.Variable = variable
 
 	return model
 }

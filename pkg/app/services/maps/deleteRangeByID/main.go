@@ -40,7 +40,6 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (*struct{}, error) {
-	fmt.Println(c.model.Name, c.model.Items)
 	sql := fmt.Sprintf(
 		`DELETE FROM %s AS lv USING %s AS l WHERE (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.map_id = l.id AND lv.id IN(?)`,
 		(declarations.MapVariable{}).TableName(),

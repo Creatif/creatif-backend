@@ -2,7 +2,6 @@ package addToMap
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
@@ -24,14 +23,36 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 	c.logBuilder.Add("addToMap", "Validated.")
+
+	entryLocaleId, _ := locales.GetIDWithAlpha(c.model.Entry.Locale)
+
+	sql := fmt.Sprintf(`
+SELECT mv.id FROM %s AS mv 
+INNER JOIN %s AS m ON 
+(m.id = ? OR m.name = ? OR m.short_id = ?) AND m.project_id = ? AND 
+mv.map_id = m.id AND mv.name = ? AND mv.locale_id = ?
+`, (declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())
+
+	var entry declarations.MapVariable
+	res := storage.Gorm().Raw(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Entry.Name, entryLocaleId).Scan(&entry)
+	if res.Error != nil {
+		return appErrors.NewValidationError(map[string]string{
+			"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' for map with ID '%s' already exists.", c.model.Entry.Name, c.model.Entry.Locale, c.model.Name),
+		})
+	}
+
+	if res.RowsAffected != 0 {
+		return appErrors.NewValidationError(map[string]string{
+			"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' for map with ID '%s' already exists.", c.model.Entry.Name, c.model.Entry.Locale, c.model.Name),
+		})
+	}
+
 	return nil
 }
 
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return appErrors.NewAuthenticationError(err)
 	}
 
 	return nil
