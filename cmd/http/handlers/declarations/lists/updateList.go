@@ -24,8 +24,6 @@ func UpdateListHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Fields,
 			model.Name,
-			model.ID,
-			model.ShortID,
 			model.Values.Name,
 		), auth.NewNoopAuthentication(), l)
 
