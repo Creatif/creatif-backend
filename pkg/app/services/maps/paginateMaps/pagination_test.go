@@ -1,4 +1,4 @@
-package paginateLists
+package paginateMaps
 
 import (
 	"creatif/pkg/app/auth"
@@ -8,11 +8,11 @@ import (
 	"github.com/onsi/gomega"
 )
 
-var _ = ginkgo.Describe("Lists pagination tests", func() {
-	ginkgo.It("should paginate through lists", func() {
+var _ = ginkgo.Describe("Maps pagination tests", func() {
+	ginkgo.It("should paginate through maps", func() {
 		projectId := testCreateProject("project")
 		for i := 0; i < 100; i++ {
-			testCreateListAndReturnNameAndID(projectId, fmt.Sprintf("name-%d", i), 10)
+			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
 		}
 
 		handler := New(NewModel(projectId, "created_at", "", "desc", 10, 1), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
@@ -23,10 +23,10 @@ var _ = ginkgo.Describe("Lists pagination tests", func() {
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
 	})
 
-	ginkgo.It("should get an empty result from the end of the lists listing", func() {
+	ginkgo.It("should get an empty result from the end of the maps listing", func() {
 		projectId := testCreateProject("project")
 		for i := 0; i < 100; i++ {
-			testCreateListAndReturnNameAndID(projectId, fmt.Sprintf("name-%d", i), 10)
+			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
 		}
 
 		handler := New(NewModel(projectId, "created_at", "", "desc", 10, 50), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
@@ -37,10 +37,10 @@ var _ = ginkgo.Describe("Lists pagination tests", func() {
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
 	})
 
-	ginkgo.It("should return lists search by name with regex", func() {
+	ginkgo.It("should return maps search by name with regex", func() {
 		projectId := testCreateProject("project")
 		for i := 0; i < 100; i++ {
-			testCreateListAndReturnNameAndID(projectId, fmt.Sprintf("name-%d", i), 10)
+			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
 		}
 
 		handler := New(NewModel(projectId, "created_at", "1", "desc", 10, 1), auth.NewTestingAuthentication(false), logger.NewLogBuilder())

@@ -1,13 +1,14 @@
-package paginateLists
+package paginateMaps
 
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
-	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
+	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -34,7 +35,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Lists pagination -> CRUD tests")
+	GinkgoRunSpecs(t, "Maps pagination -> CRUD tests")
 }
 
 func runLogger() {
@@ -118,39 +119,40 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (string, string) {
-	variables := make([]createList2.Variable, varNum)
-	for i := 0; i < varNum; i++ {
-		variables[i] = createList2.Variable{
-			Name:      fmt.Sprintf("one-%d", i),
-			Metadata:  nil,
-			Locale:    "eng",
-			Groups:    []string{"one", "two", "three"},
-			Behaviour: "readonly",
-			Value:     nil,
-		}
-	}
-
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
-
-	list, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(list.ID)
-
-	gomega.Expect(list.Name).Should(gomega.Equal(name))
-
-	return list.Name, list.ID
-}
-
-func testCreateListWithFragmentedGroups(projectId, name string, varNum int) (string, string, map[string]int) {
-	variables := make([]createList2.Variable, varNum)
+func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
+	entries := make([]mapCreate.VariableModel, 0)
 	fragmentedGroups := map[string]int{}
 	fragmentedGroups["one"] = 0
 	fragmentedGroups["two"] = 0
 	fragmentedGroups["three"] = 0
 
-	for i := 0; i < varNum; i++ {
-		var groups []string
+	m := map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+	}
+
+	b, err := json.Marshal(m)
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	for i := 0; i < variablesNum; i++ {
+		var value interface{}
+		value = "my value"
+		if i%2 == 0 {
+			value = true
+		}
+
+		if i%3 == 0 {
+			value = map[string]interface{}{
+				"one":   "one",
+				"two":   []string{"one", "two", "three"},
+				"three": []int{1, 2, 3},
+				"four":  453,
+			}
+		}
+
+		var groups []string = []string{"unfragmented"}
 		if i%2 == 0 {
 			groups = append(groups, "one")
 			fragmentedGroups["one"]++
@@ -166,23 +168,29 @@ func testCreateListWithFragmentedGroups(projectId, name string, varNum int) (str
 			fragmentedGroups["three"]++
 		}
 
-		variables[i] = createList2.Variable{
-			Name:      fmt.Sprintf("one-%d", i),
-			Metadata:  nil,
+		v, err := json.Marshal(value)
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		variableModel := mapCreate.VariableModel{
+			Name:      fmt.Sprintf("name-%d", i),
+			Metadata:  b,
 			Groups:    groups,
+			Value:     v,
+			Behaviour: "modifiable",
 			Locale:    "eng",
-			Behaviour: "readonly",
-			Value:     nil,
 		}
+
+		entries = append(entries, variableModel)
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
-	list, err := handler.Handle()
+	view, err := handler.Handle()
 	testAssertErrNil(err)
-	testAssertIDValid(list.ID)
+	testAssertIDValid(view.ID)
 
-	gomega.Expect(list.Name).Should(gomega.Equal(name))
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
+	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
-	return list.Name, list.ID, fragmentedGroups
+	return view
 }
