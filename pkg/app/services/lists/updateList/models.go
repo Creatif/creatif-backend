@@ -29,13 +29,11 @@ type Model struct {
 	ProjectID string
 }
 
-func NewModel(projectId string, fields []string, name, id, shortID, updatingName string) Model {
+func NewModel(projectId string, fields []string, name, updatingName string) Model {
 	return Model{
 		Fields:    fields,
 		ProjectID: projectId,
 		Name:      name,
-		ID:        id,
-		ShortID:   shortID,
 		Values: ModelValues{
 			Name: updatingName,
 		},
@@ -46,30 +44,13 @@ func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"fieldsValid":        a.Fields,
 		"name":               a.Name,
-		"id":                 a.ID,
-		"idExists":           nil,
 		"projectID":          a.ProjectID,
 		"updatingNameExists": a.Values.Name,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.When(a.Name != "", validation.RuneLength(1, 200))),
-			validation.Key("id", validation.When(a.ID != "", validation.RuneLength(26, 26))),
-			validation.Key("idExists", validation.By(func(value interface{}) error {
-				name := a.Name
-				shortId := a.ShortID
-				id := a.ID
-
-				if id != "" && len(id) != 26 {
-					return errors.New("ID must have 26 characters")
-				}
-
-				if name == "" && shortId == "" && id == "" {
-					return errors.New("At least one of 'id', 'name' or 'shortID' must be supplied in order to identify this list.")
-				}
-				return nil
-			})),
+			validation.Key("name", validation.Required),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
 				t := value.([]string)

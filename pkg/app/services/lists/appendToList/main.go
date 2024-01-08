@@ -3,13 +3,10 @@ package appendToList
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
-	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -42,44 +39,16 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.List, error) {
-	var list declarations.List
-	if res := storage.Gorm().Where("id = ? OR short_id = ? OR name = ?", c.model.Name, c.model.Name, c.model.Name).Select("id", "serial", "project_id", "name", "created_at", "updated_at").First(&list); res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return declarations.List{}, appErrors.NewNotFoundError(res.Error).AddError("appendToList.Logic", nil)
-		}
-
-		return declarations.List{}, appErrors.NewDatabaseError(res.Error).AddError("appendToList.Logic", nil)
-	}
-
-	for _, v := range c.model.Variables {
-		pqGroups := pq.StringArray{}
-		if v.Groups == nil {
-			v.Groups = pq.StringArray{}
-		}
-
-		for _, k := range v.Groups {
-			pqGroups = append(pqGroups, k)
-		}
-
-		v.Groups = pqGroups
-	}
-
-	highestIndex, err := getHighestIndex(list.ID)
+	list, err := getList(c.model.Name)
 	if err != nil {
 		return declarations.List{}, err
 	}
 
-	listVariables := make([]declarations.ListVariable, len(c.model.Variables))
-	for i := 0; i < len(c.model.Variables); i++ {
-		if c.model.Variables[i].Locale == "" {
-			c.model.Variables[i].Locale = "eng"
-		}
+	assignDefaultGroupsToVariables(c.model.Variables)
 
-		localeID, _ := locales.GetIDWithAlpha(c.model.Variables[i].Locale)
-		v := c.model.Variables[i]
-		listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
-		listVariables[i].Index = float64(highestIndex + 1000)
-		highestIndex += 1000
+	listVariables, err := createListVariables(list.ID, c.model.Variables)
+	if err != nil {
+		return declarations.List{}, err
 	}
 
 	if err := storage.Transaction(func(tx *gorm.DB) error {

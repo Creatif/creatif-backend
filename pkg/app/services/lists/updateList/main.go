@@ -2,9 +2,7 @@ package updateList
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -32,10 +30,8 @@ func (c Main) Validate() error {
 }
 
 func (c Main) Authenticate() error {
-	// user check by project id should be gotten here, with authentication cookie
-	var project app.Project
-	if err := storage.Get((app.Project{}).TableName(), c.model.ProjectID, &project); err != nil {
-		return appErrors.NewAuthenticationError(err).AddError("createVariable.Authenticate", nil)
+	if err := c.auth.Authenticate(); err != nil {
+		return appErrors.NewAuthenticationError(err)
 	}
 
 	return nil
@@ -46,9 +42,8 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.List, error) {
-	listId, listVal := shared.DetermineID("", c.model.Name, c.model.ID, c.model.ShortID)
 	var existing declarations.List
-	if res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ?", listId), listVal, c.model.ProjectID).First(&existing); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ?"), c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID).First(&existing); res.Error != nil {
 		c.logBuilder.Add("updateList", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
@@ -73,7 +68,7 @@ func (c Main) Logic() (declarations.List, error) {
 		{Name: "created_at"},
 		{Name: "updated_at"},
 	}}).Where("id = ?", existing.ID).Select(c.model.Fields).Updates(existing); res.Error != nil {
-		c.logBuilder.Add("replaceListItem", res.Error.Error())
+		c.logBuilder.Add("updateList", res.Error.Error())
 		return declarations.List{}, appErrors.NewApplicationError(res.Error).AddError("updateList.Logic", nil)
 	}
 

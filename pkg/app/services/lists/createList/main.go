@@ -8,8 +8,6 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -25,23 +23,8 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
-	var variable declarations.List
-	res := storage.Gorm().Where("name = ? AND project_id = ?", c.model.Name, c.model.ProjectID).Select("ID").First(&variable)
-
-	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-		return nil
-	}
-
-	if res.Error != nil {
-		return appErrors.NewValidationError(map[string]string{
-			"exists": fmt.Sprintf("Record with name '%s' already exists", c.model.Name),
-		})
-	}
-
-	if variable.ID != "" {
-		return appErrors.NewValidationError(map[string]string{
-			"exists": fmt.Sprintf("Record with name '%s' already exists", c.model.Name),
-		})
+	if err := validateListWithNameExists(c.model.Name, c.model.ProjectID); err != nil {
+		return err
 	}
 
 	c.logBuilder.Add("createList", "Validated")
