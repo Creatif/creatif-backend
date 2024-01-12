@@ -23,8 +23,6 @@ var _ = ginkgo.Describe("Declaration map variable tests", func() {
 	})
 
 	ginkgo.It("should switch two equal map variables indexes concurrently", func() {
-		ginkgo.Skip("")
-
 		projectId := testCreateProject("project")
 		ids := testCreateMap(projectId, "list", 10)
 
@@ -47,8 +45,6 @@ var _ = ginkgo.Describe("Declaration map variable tests", func() {
 	})
 
 	ginkgo.It("should switch two random map variables indexes concurrently", func() {
-		ginkgo.Skip("")
-
 		projectId := testCreateProject("project")
 		ids := testCreateMap(projectId, "list", 10)
 

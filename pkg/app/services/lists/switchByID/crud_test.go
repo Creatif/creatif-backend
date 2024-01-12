@@ -23,8 +23,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 	})
 
 	ginkgo.It("should switch two equal list variables indexes concurrently", func() {
-		ginkgo.Skip("")
-
 		projectId := testCreateProject("project")
 		ids := testCreateListAndReturnIdsAndIndexes(projectId, "list", 10)
 
@@ -47,8 +45,6 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 	})
 
 	ginkgo.It("should switch two random list variables indexes concurrently", func() {
-		ginkgo.Skip("")
-
 		projectId := testCreateProject("project")
 		ids := testCreateListAndReturnIdsAndIndexes(projectId, "list", 10)
 
