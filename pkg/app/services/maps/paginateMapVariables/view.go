@@ -15,6 +15,7 @@ type LogicModel struct {
 type View struct {
 	ID        string      `json:"id"`
 	ShortID   string      `json:"shortId"`
+	Index     float64     `json:"index"`
 	Locale    string      `json:"locale"`
 	Name      string      `json:"name"`
 	Groups    []string    `json:"groups"`
@@ -39,6 +40,7 @@ func newView(models []declarations.MapVariable) ([]View, error) {
 			Name:      value.Name,
 			Locale:    locale,
 			ShortID:   value.ShortID,
+			Index:     value.Index,
 			Groups:    value.Groups,
 			Value:     value.Value,
 			Behaviour: value.Behaviour,

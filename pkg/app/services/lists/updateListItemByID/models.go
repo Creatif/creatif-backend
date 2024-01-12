@@ -105,7 +105,11 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("locale", validation.Required, validation.By(func(value interface{}) error {
+			validation.Key("locale", validation.By(func(value interface{}) error {
+				if !sdk.Includes(a.Fields, "locale") {
+					return nil
+				}
+
 				t := value.(string)
 
 				if !sdk.Includes(a.Fields, "locale") {

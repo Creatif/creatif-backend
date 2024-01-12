@@ -11,8 +11,9 @@ import (
 )
 
 type MapVariable struct {
-	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
-	ShortID string `gorm:"uniqueIndex:unique_map_variable;type:text;not null"`
+	ID      string  `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ShortID string  `gorm:"uniqueIndex:unique_map_variable;type:text;not null"`
+	Index   float64 `gorm:"type:float"`
 
 	Name      string         `gorm:"uniqueIndex:unique_map_variable;not null"`
 	Behaviour string         `gorm:"not null"`

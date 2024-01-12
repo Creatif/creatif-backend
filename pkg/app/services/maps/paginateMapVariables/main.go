@@ -50,7 +50,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 	countPlaceholders["name"] = c.model.MapName
 
 	if c.model.OrderBy == "" {
-		c.model.OrderBy = "created_at"
+		c.model.OrderBy = "index"
 	}
 
 	var behaviour string
@@ -102,6 +102,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
     	lv.id, 
     	lv.short_id, 
     	lv.locale_id,
+    	lv.index,
     	lv.name, 
     	lv.behaviour, 
     	%s
