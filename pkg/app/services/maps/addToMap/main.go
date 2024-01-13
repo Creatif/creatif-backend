@@ -62,17 +62,17 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (interface{}, error) {
+func (c Main) Logic() (declarations.MapVariable, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Entry.Locale)
 	if err != nil {
 		c.logBuilder.Add("addToMap", err.Error())
-		return nil, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
+		return declarations.MapVariable{}, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
 
 	var m declarations.Map
 	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToMap", res.Error.Error())
-		return nil, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
+		return declarations.MapVariable{}, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
 
 	if c.model.Entry.Groups == nil {
@@ -83,12 +83,12 @@ func (c Main) Logic() (interface{}, error) {
 	if res := storage.Gorm().Create(&mapNode); res.Error != nil {
 		c.logBuilder.Add("addToMap", res.Error.Error())
 
-		return nil, appErrors.NewValidationError(map[string]string{
+		return declarations.MapVariable{}, appErrors.NewValidationError(map[string]string{
 			"exists": fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name),
 		})
 	}
 
-	return nil, nil
+	return mapNode, nil
 }
 
 func (c Main) Handle() (interface{}, error) {
@@ -113,7 +113,7 @@ func (c Main) Handle() (interface{}, error) {
 	return nil, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, declarations.MapVariable] {
 	logBuilder.Add("getMap", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

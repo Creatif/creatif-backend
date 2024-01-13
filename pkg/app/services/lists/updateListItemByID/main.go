@@ -64,7 +64,7 @@ INNER JOIN %s AS l ON (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_i
 
 	if check.Behaviour == constants.ReadonlyBehaviour {
 		return appErrors.NewValidationError(map[string]string{
-			"behaviour": fmt.Sprintf("Cannot update a readonly list item with ID '%s'", c.model.ItemID),
+			"behaviourReadonly": fmt.Sprintf("List item with ID '%s' is readonly and cannot be updated.", c.model.ItemID),
 		})
 	}
 

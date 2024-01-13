@@ -88,7 +88,7 @@ func (c Main) Validate() error {
 
 	if check.Behaviour == constants.ReadonlyBehaviour {
 		return appErrors.NewValidationError(map[string]string{
-			"behaviour": fmt.Sprintf("Cannot update a readonly variable with ID '%s'", c.model.ID),
+			"behaviourReadonly": fmt.Sprintf("List item with ID '%s' is readonly and cannot be updated.", c.model.ID),
 		})
 	}
 

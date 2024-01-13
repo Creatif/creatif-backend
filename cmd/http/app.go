@@ -100,7 +100,7 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/lists/:projectID/:name", lists.PaginateListsHandler())
 	group.GET("/list/query-id/:projectID/:name/:itemId", lists.QueryListByIDHandler())
 	group.POST("/lists/:projectID/:name/:itemName", lists.ReplaceListItemHandler())
-	group.POST("/lists/rearrange/:projectID/:name/:source/:destination", lists.SwitchByIDHandler())
+	group.POST("/list/rearrange/:projectID/:name/:source/:destination", lists.SwitchByIDHandler())
 	group.POST("/list/update/:projectID/:name", lists.UpdateListHandler())
 	group.POST("/list/update-item-by-id/:projectID/:name/:itemID", lists.UpdateListItemByIDHandler())
 
@@ -110,7 +110,7 @@ func declarationRoutes(group *echo.Group) {
 	group.DELETE("/map/:projectID/:name/:locale", maps.DeleteMap())
 	group.GET("/map/query-id/:projectID/:name/:itemId", maps.QueryMapVariableHandler())
 	group.PUT("/map/:projectID", maps.CreateMapHandler())
-	group.POST("/maps/rearrange/:projectID/:name/:source/:destination", maps.SwitchByIDHandler())
+	group.POST("/map/rearrange/:projectID/:name/:source/:destination", maps.SwitchByIDHandler())
 	group.GET("/map/groups/:projectID/:name", maps.GetMapGroupsHandler())
 	group.POST("/map/range/:projectID/:name", maps.DeleteRange())
 	group.GET("/maps/items/:projectID/:name", maps.PaginateMapVariables())

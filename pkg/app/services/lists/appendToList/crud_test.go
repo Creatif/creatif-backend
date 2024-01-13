@@ -27,10 +27,14 @@ var _ = ginkgo.Describe("Declaration list append tests", func() {
 
 		handler := New(NewModel(projectId, listName, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
-		list, err := handler.Handle()
+		vars, err := handler.Handle()
 		testAssertErrNil(err)
-		testAssertIDValid(list.ID)
 
-		gomega.Expect(list.Name).Should(gomega.Equal(listName))
+		for _, v := range vars {
+			testAssertIDValid(v.ID)
+		}
+
+		gomega.Expect(len(vars)).Should(gomega.Equal(5))
+
 	})
 })

@@ -73,21 +73,48 @@ func (a Model) Validate() map[string]string {
 }
 
 type View struct {
-	ID        string `json:"id"`
-	ProjectID string `json:"projectID"`
-	Name      string `json:"name"`
+	ID      string
+	ShortID string
+	Index   float64
 
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	Name      string
+	Behaviour string
+	Groups    []string
+	Metadata  interface{}
+	Value     interface{}
+
+	LocaleID string
+	ListID   string
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
-func newView(model declarations.List) View {
-	return View{
-		ID:        model.ID,
-		ProjectID: model.ProjectID,
-		Name:      model.Name,
+func newView(model []declarations.ListVariable) []View {
+	return sdk.Map(model, func(idx int, value declarations.ListVariable) View {
+		var m interface{} = value.Metadata
+		if len(value.Metadata) == 0 {
+			m = nil
+		}
 
-		CreatedAt: model.CreatedAt,
-		UpdatedAt: model.UpdatedAt,
-	}
+		var v interface{} = value.Value
+		if len(value.Value) == 0 {
+			v = nil
+		}
+
+		return View{
+			ID:        value.ID,
+			ShortID:   value.ShortID,
+			Index:     value.Index,
+			Name:      value.Name,
+			Behaviour: value.Behaviour,
+			Groups:    value.Groups,
+			Metadata:  m,
+			Value:     v,
+			LocaleID:  value.LocaleID,
+			ListID:    value.ListID,
+			CreatedAt: value.CreatedAt,
+			UpdatedAt: value.UpdatedAt,
+		}
+	})
 }

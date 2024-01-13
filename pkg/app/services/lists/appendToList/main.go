@@ -38,17 +38,17 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (declarations.List, error) {
+func (c Main) Logic() ([]declarations.ListVariable, error) {
 	list, err := getList(c.model.Name)
 	if err != nil {
-		return declarations.List{}, err
+		return []declarations.ListVariable{}, err
 	}
 
 	assignDefaultGroupsToVariables(c.model.Variables)
 
 	listVariables, err := createListVariables(list.ID, c.model.Variables)
 	if err != nil {
-		return declarations.List{}, err
+		return []declarations.ListVariable{}, err
 	}
 
 	if err := storage.Transaction(func(tx *gorm.DB) error {
@@ -59,35 +59,35 @@ func (c Main) Logic() (declarations.List, error) {
 
 		return nil
 	}); err != nil {
-		return declarations.List{}, appErrors.NewApplicationError(err)
+		return []declarations.ListVariable{}, appErrors.NewApplicationError(err)
 	}
 
-	return list, nil
+	return listVariables, nil
 }
 
-func (c Main) Handle() (View, error) {
+func (c Main) Handle() ([]View, error) {
 	if err := c.Validate(); err != nil {
-		return View{}, err
+		return []View{}, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return View{}, err
+		return []View{}, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return View{}, err
+		return []View{}, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return View{}, err
+		return []View{}, err
 	}
 
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, []declarations.ListVariable] {
 	logBuilder.Add("appendToList", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

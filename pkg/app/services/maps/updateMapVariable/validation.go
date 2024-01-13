@@ -51,7 +51,7 @@ INNER JOIN %s AS m ON (m.name = ? OR m.id = ? OR m.short_id = ?) AND m.project_i
 
 	if check.Behaviour == constants.ReadonlyBehaviour {
 		return appErrors.NewValidationError(map[string]string{
-			"behaviour": fmt.Sprintf("Cannot update a readonly map variable '%s'", variableName),
+			"behaviourReadonly": fmt.Sprintf("Map item with ID '%s' is readonly and cannot be updated.", variableName),
 		})
 	}
 
