@@ -192,6 +192,6 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(ok).Should(gomega.Equal(true))
 
 		errs := validationError.Data()
-		gomega.Expect(errs["behaviour"]).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(errs["behaviourReadonly"]).ShouldNot(gomega.BeEmpty())
 	})
 })

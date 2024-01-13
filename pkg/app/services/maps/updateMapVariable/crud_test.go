@@ -101,7 +101,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(ok).Should(gomega.Equal(true))
 
 		errs := validationError.Data()
-		gomega.Expect(errs["behaviour"]).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(errs["behaviourReadonly"]).ShouldNot(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should fail updating a name map variable if it exists", func() {
