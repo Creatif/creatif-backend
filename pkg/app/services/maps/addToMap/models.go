@@ -2,6 +2,7 @@ package addToMap
 
 import (
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
@@ -19,26 +20,29 @@ type VariableModel struct {
 }
 
 type Model struct {
-	Entry     VariableModel
-	Name      string
-	ProjectID string
+	Entry      VariableModel
+	Name       string
+	ProjectID  string
+	References []shared.Reference
 }
 
-func NewModel(projectId, name string, entry VariableModel) Model {
+func NewModel(projectId, name string, entry VariableModel, references []shared.Reference) Model {
 	return Model{
-		Name:      name,
-		ProjectID: projectId,
-		Entry:     entry,
+		Name:       name,
+		ProjectID:  projectId,
+		Entry:      entry,
+		References: references,
 	}
 }
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"groups":    a.Entry.Groups,
-		"name":      a.Name,
-		"projectID": a.ProjectID,
-		"locale":    a.Entry.Locale,
-		"behaviour": a.Entry.Behaviour,
+		"groups":          a.Entry.Groups,
+		"name":            a.Name,
+		"projectID":       a.ProjectID,
+		"locale":          a.Entry.Locale,
+		"behaviour":       a.Entry.Behaviour,
+		"referencesValid": nil,
 	}
 
 	if err := validation.Validate(v,
@@ -69,6 +73,26 @@ func (a *Model) Validate() map[string]string {
 					}
 
 					return nil
+				}
+
+				return nil
+			})),
+			validation.Key("referencesValid", validation.By(func(value interface{}) error {
+				if len(a.References) > 0 {
+					names := make([]string, len(a.References))
+					for _, r := range a.References {
+						if r.StructureType != "map" && r.StructureType != "list" && r.StructureType != "variable" {
+							return errors.New("Invalid reference structure type. Structure can can be one of: map, variable or list")
+						}
+
+						name := fmt.Sprintf("%s_%s_%s", r.StructureName, r.StructureType, r.VariableID)
+						if sdk.Includes(names, name) {
+							return errors.New(fmt.Sprintf("Invalid reference. Duplicate reference are not possible. Structure name: %s; Structure type: %s; VariableID: %s", r.StructureName, r.StructureType, r.VariableID))
+						}
+
+						names = append(names, name)
+					}
+
 				}
 
 				return nil

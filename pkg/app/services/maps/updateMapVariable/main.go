@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -110,20 +111,32 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 	}
 
 	var updated declarations.MapVariable
-	if res := storage.Gorm().Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
-		{Name: "id"},
-		{Name: "name"},
-		{Name: "behaviour"},
-		{Name: "metadata"},
-		{Name: "locale_id"},
-		{Name: "value"},
-		{Name: "groups"},
-		{Name: "created_at"},
-		{Name: "updated_at"},
-	}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
-		c.logBuilder.Add("updateMapVariable", res.Error.Error())
+	if err := storage.Transaction(func(tx *gorm.DB) error {
+		if res := tx.Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
+			{Name: "id"},
+			{Name: "name"},
+			{Name: "behaviour"},
+			{Name: "metadata"},
+			{Name: "locale_id"},
+			{Name: "value"},
+			{Name: "groups"},
+			{Name: "created_at"},
+			{Name: "updated_at"},
+		}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
+			c.logBuilder.Add("updateMapVariable", res.Error.Error())
 
-		return declarations.MapVariable{}, appErrors.NewApplicationError(res.Error).AddError("updateMapVariable.Logic", nil)
+			return res.Error
+		}
+
+		if len(c.model.References) > 0 {
+			if err := shared.UpdateReferences(c.model.References, m.ID, tx); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return declarations.MapVariable{}, appErrors.NewApplicationError(err).AddError("updateMapVariable.Logic", nil)
 	}
 
 	return updated, nil

@@ -32,10 +32,7 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 		handler := deleteListItemByID.New(deleteListItemByID.NewModel(
 			model.ProjectID,
 			model.Name,
-			model.ID,
-			model.ShortID,
 			model.ItemID,
-			model.ShortID,
 		), a, l)
 
 		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {

@@ -34,8 +34,6 @@ func (c Main) Validate() error {
 		} else if res.Error != nil {
 			c.logBuilder.Add("emailCheckError", res.Error.Error())
 		}
-
-		fmt.Println(res.Error)
 	}
 
 	c.logBuilder.Add("registerEmail", "Validated.")

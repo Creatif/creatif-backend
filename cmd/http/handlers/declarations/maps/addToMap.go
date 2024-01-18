@@ -6,7 +6,9 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	addToMap2 "creatif/pkg/app/services/maps/addToMap"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -32,7 +34,13 @@ func AddToMapHandler() func(e echo.Context) error {
 			Groups:    model.Variable.Groups,
 			Behaviour: model.Variable.Behaviour,
 			Value:     []byte(model.Variable.Value),
-		}), authentication, l)
+		}, sdk.Map(model.References, func(idx int, value maps.Reference) shared.Reference {
+			return shared.Reference{
+				StructureName: value.StructureName,
+				StructureType: value.StructureType,
+				VariableID:    value.VariableID,
+			}
+		})), authentication, l)
 
 		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {

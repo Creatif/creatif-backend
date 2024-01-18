@@ -3,13 +3,10 @@ package lists
 import "github.com/microcosm-cc/bluemonday"
 
 type DeleteListItemByID struct {
-	Name        string `json:"name"`
-	ID          string `json:"id"`
-	ShortID     string `json:"shortID"`
-	ItemID      string `json:"itemID"`
-	ItemShortID string `json:"itemShortID"`
-	ProjectID   string `param:"projectID"`
-	Locale      string `param:"locale"`
+	Name      string `json:"name"`
+	ItemID    string `json:"itemID"`
+	ProjectID string `param:"projectID"`
+	Locale    string `param:"locale"`
 }
 
 func SanitizeDeleteListItemByID(model DeleteListItemByID) DeleteListItemByID {
@@ -18,8 +15,6 @@ func SanitizeDeleteListItemByID(model DeleteListItemByID) DeleteListItemByID {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Locale = p.Sanitize(model.Locale)
 	model.ItemID = p.Sanitize(model.ItemID)
-	model.ItemShortID = p.Sanitize(model.ItemShortID)
-	model.ShortID = p.Sanitize(model.ShortID)
 
 	return model
 }

@@ -115,7 +115,7 @@ func declarationRoutes(group *echo.Group) {
 	group.POST("/map/range/:projectID/:name", maps.DeleteRange())
 	group.GET("/maps/items/:projectID/:name", maps.PaginateMapVariables())
 	group.GET("/maps/:projectID/:name", maps.PaginateMapsHandler())
-	group.GET("/map/:projectID/:name/:locale", maps.GetMapHandler())
+	group.GET("/map/:projectID/:name", maps.GetMapHandler())
 
 	group.PUT("/variable/:projectID/:locale", variables.CreateVariableHandler())
 	group.POST("/variable/:projectID", variables.UpdateVariableHandler())

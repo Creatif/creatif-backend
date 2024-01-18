@@ -3,12 +3,13 @@ package removeMapVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
 	"fmt"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -34,21 +35,30 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (interface{}, error) {
-	sql := fmt.Sprintf(
-		`DELETE FROM %s AS mv USING %s AS m WHERE m.project_id = ? AND mv.map_id = m.id AND (mv.id = ? OR mv.short_id = ?) AND (m.id = ? OR m.short_id = ? OR m.name = ?)`,
-		(declarations.MapVariable{}).TableName(),
-		(declarations.Map{}).TableName(),
-	)
+	if err := storage.Transaction(func(tx *gorm.DB) error {
+		sql := fmt.Sprintf(
+			`DELETE FROM %s AS mv USING %s AS m WHERE m.project_id = ? AND mv.map_id = m.id AND (mv.id = ? OR mv.short_id = ?) AND (m.id = ? OR m.short_id = ? OR m.name = ?)`,
+			(declarations.MapVariable{}).TableName(),
+			(declarations.Map{}).TableName(),
+		)
 
-	res := storage.Gorm().Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name, c.model.Name)
-	if res.Error != nil {
-		c.logBuilder.Add("removeMapVariable", res.Error.Error())
-		return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMapVariable.Logic", nil)
-	}
+		res := storage.Gorm().Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name, c.model.Name)
+		if res.Error != nil {
+			c.logBuilder.Add("removeMapVariable", res.Error.Error())
+			return res.Error
+		}
 
-	if res.RowsAffected == 0 {
-		c.logBuilder.Add("removeMapVariable", "No rows returned. Returning 404 status.")
-		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Variable with name '%s' not found.", c.model.VariableName))).AddError("removeMapVariable.Logic", nil)
+		if res.RowsAffected == 0 {
+			c.logBuilder.Add("removeMapVariable", "No rows returned. Returning 404 status.")
+			return res.Error
+		}
+
+		shared.RemoveAsParent("map", c.model.VariableName)
+		shared.RemoveAsChild("map", c.model.VariableName)
+
+		return nil
+	}); err != nil {
+		return nil, appErrors.NewNotFoundError(err).AddError("removeMapVariable.Logic", nil)
 	}
 
 	return nil, nil

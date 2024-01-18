@@ -3,9 +3,12 @@ package removeMapVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -96,6 +99,8 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.USERS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
 func testAssertErrNil(err error) {
@@ -176,6 +181,29 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
 	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
+
+	return view
+}
+
+func testAddToMap(projectId, name string, references []shared.Reference) declarations.MapVariable {
+	variableModel := addToMap.VariableModel{
+		Name:     fmt.Sprintf("new add variable"),
+		Metadata: nil,
+		Groups: []string{
+			"one",
+			"two",
+			"three",
+		},
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToMap.NewModel(projectId, name, variableModel, references)
+	handler := addToMap.New(model, auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+
+	view, err := handler.Logic()
+	gomega.Expect(err).Should(gomega.BeNil())
 
 	return view
 }

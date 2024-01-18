@@ -1,6 +1,7 @@
 package maps
 
 import (
+	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
@@ -8,7 +9,6 @@ import (
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strings"
 )
 
 func GetMapHandler() func(e echo.Context) error {
@@ -19,21 +19,25 @@ func GetMapHandler() func(e echo.Context) error {
 		}
 
 		model = maps.SanitizeGetMap(model)
-		if model.Locale == "" {
-			model.Locale = "eng"
-		}
 
-		newFields := make([]string, 0)
-		if strings.Trim(model.Fields, " ") != "" {
-			fields := strings.Split(strings.Trim(model.Fields, " "), ",")
-			for _, f := range fields {
-				newFields = append(newFields, strings.Trim(f, " "))
-			}
-		}
+		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
+		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
 		l := logger.NewLogBuilder()
-		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Name, newFields, model.SanitizedGroups), auth.NewNoopAuthentication(), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Name), authentication, l)
 
-		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

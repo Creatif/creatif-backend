@@ -3,7 +3,6 @@ package deleteListItemByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -41,17 +40,13 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (*struct{}, error) {
-	listId, listVal := shared.DetermineID("l", c.model.Name, c.model.ID, c.model.ShortID)
-	listVarId, listVarVal := shared.DetermineID("lv", "", c.model.ItemID, c.model.ItemShortID)
 	sql := fmt.Sprintf(
-		`DELETE FROM %s AS lv USING %s AS l WHERE %s AND l.project_id = ? AND lv.list_id = l.id AND %s`,
+		`DELETE FROM %s AS lv USING %s AS l WHERE (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.list_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
-		listId,
-		listVarId,
 	)
 
-	res := storage.Gorm().Exec(sql, listVal, c.model.ProjectID, listVarVal)
+	res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.ItemID, c.model.ItemID)
 	if res.Error != nil {
 		c.logBuilder.Add("deleteListItemByID", res.Error.Error())
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteListItemByID.Logic", nil)

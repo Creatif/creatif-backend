@@ -2,6 +2,7 @@ package getMap
 
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -32,28 +33,19 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (LogicModel, error) {
+func (c Main) Logic() (declarations.Map, error) {
 	m, err := queryMap(c.model.ProjectID, c.model.Name)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		c.logBuilder.Add("getMap", err.Error())
-		return LogicModel{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
+		return declarations.Map{}, appErrors.NewNotFoundError(err).AddError("getMap.Logic", nil)
 	}
 
 	if err != nil {
 		c.logBuilder.Add("getMap", err.Error())
-		return LogicModel{}, appErrors.NewDatabaseError(err).AddError("getMap.Logic", nil)
+		return declarations.Map{}, appErrors.NewDatabaseError(err).AddError("getMap.Logic", nil)
 	}
 
-	var variables []Variable
-	if err := queryVariables(m.ID, c.model.Fields, c.model.Groups, &variables); err != nil {
-		c.logBuilder.Add("getMap", err.Error())
-		return LogicModel{}, err
-	}
-
-	return LogicModel{
-		variableMap: m,
-		variables:   variables,
-	}, nil
+	return m, nil
 }
 
 func (c Main) Handle() (View, error) {
@@ -75,10 +67,10 @@ func (c Main) Handle() (View, error) {
 		return View{}, err
 	}
 
-	return newView(model, c.model.Fields), nil
+	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.Map] {
 	logBuilder.Add("getMap", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

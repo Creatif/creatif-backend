@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
 )
 
 var _ = ginkgo.Describe("GET map tests", func() {
@@ -12,73 +11,10 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, view.ID, []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(mapVariablesView.ID)
-		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(10))
-	})
-
-	ginkgo.It("should getVariable names only (default) representation of map of variables by id", func() {
-		projectId := testCreateProject("project")
-		view := testCreateMap(projectId, "mapName", 10)
-
-		handler := New(NewModel(projectId, view.ShortID, []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
-
-		mapVariablesView, err := handler.Handle()
-		testAssertErrNil(err)
-		testAssertIDValid(mapVariablesView.ID)
-		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(10))
-	})
-
-	ginkgo.It("should getVariable names only (default) representation of map of variables by shortId", func() {
-		projectId := testCreateProject("project")
-		view := testCreateMap(projectId, "mapName", 10)
-
-		handler := New(NewModel(projectId, view.Name, []string{}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
-
-		mapVariablesView, err := handler.Handle()
-		testAssertErrNil(err)
-		testAssertIDValid(mapVariablesView.ID)
-		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(10))
-	})
-
-	ginkgo.It("should get specific fields from a map variable", func() {
-		projectId := testCreateProject("project")
-		view := testCreateMap(projectId, "mapName", 10)
-
-		handler := New(NewModel(projectId, view.Name, []string{"groups", "value"}, []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
-
-		mapVariablesView, err := handler.Handle()
-		testAssertErrNil(err)
-		testAssertIDValid(mapVariablesView.ID)
-		gomega.Expect(mapVariablesView.Variables).Should(gomega.HaveLen(10))
-
-		for _, n := range mapVariablesView.Variables {
-			gomega.Expect(n["id"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(n["name"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(n["value"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(n["groups"]).ShouldNot(gomega.BeEmpty())
-		}
-	})
-
-	ginkgo.It("should get map variables of a specific group", func() {
-		projectId := testCreateProject("project")
-		view := testCreateMap(projectId, "mapName", 100)
-
-		handler := New(NewModel(projectId, view.Name, []string{"groups", "value"}, []string{"one"}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
-
-		mapVariablesView, err := handler.Handle()
-		testAssertErrNil(err)
-		testAssertIDValid(mapVariablesView.ID)
-		gomega.Expect(len(mapVariablesView.Variables)).Should(gomega.Equal(50))
-
-		for _, n := range mapVariablesView.Variables {
-			gomega.Expect(n["id"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(n["name"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(n["value"]).ShouldNot(gomega.BeEmpty())
-			gomega.Expect(n["groups"]).ShouldNot(gomega.BeEmpty())
-		}
 	})
 })

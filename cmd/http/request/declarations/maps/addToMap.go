@@ -6,9 +6,16 @@ import (
 )
 
 type AddToMap struct {
-	ProjectID string           `param:"projectID"`
-	Variable  MapVariableModel `json:"variable"`
-	Name      string           `json:"name"`
+	ProjectID  string           `param:"projectID"`
+	Variable   MapVariableModel `json:"variable"`
+	Name       string           `json:"name"`
+	References []Reference      `json:"references"`
+}
+
+type Reference struct {
+	StructureName string `json:"structureName"`
+	StructureType string `json:"structureType"`
+	VariableID    string `json:"variableId"`
 }
 
 func SanitizeAddToMap(model AddToMap) AddToMap {
@@ -25,6 +32,14 @@ func SanitizeAddToMap(model AddToMap) AddToMap {
 	})
 
 	model.Variable = variable
+
+	model.References = sdk.Map(model.References, func(idx int, value Reference) Reference {
+		return Reference{
+			StructureName: p.Sanitize(value.StructureName),
+			StructureType: p.Sanitize(value.StructureType),
+			VariableID:    p.Sanitize(value.VariableID),
+		}
+	})
 
 	return model
 }

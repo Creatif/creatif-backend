@@ -7,13 +7,21 @@ import (
 )
 
 type UpdateMapVariable struct {
-	ProjectID string           `param:"projectID"`
-	Name      string           `param:"name"`
-	ItemID    string           `param:"itemId"`
-	Fields    string           `query:"fields"`
-	Variable  MapVariableModel `json:"variable"`
+	ProjectID  string            `param:"projectID"`
+	Name       string            `param:"name"`
+	ItemID     string            `param:"itemId"`
+	Fields     string            `query:"fields"`
+	Variable   MapVariableModel  `json:"variable"`
+	References []UpdateReference `json:"reference"`
 
 	ResolvedFields []string
+}
+
+type UpdateReference struct {
+	ID            string
+	StructureName string
+	StructureType string
+	VariableID    string
 }
 
 func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
@@ -36,6 +44,17 @@ func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
 	})
 
 	model.Variable = variable
+
+	if len(model.References) != 0 {
+		model.References = sdk.Map(model.References, func(idx int, value UpdateReference) UpdateReference {
+			return UpdateReference{
+				ID:            p.Sanitize(value.ID),
+				StructureName: p.Sanitize(value.StructureName),
+				StructureType: p.Sanitize(value.StructureType),
+				VariableID:    p.Sanitize(value.VariableID),
+			}
+		})
+	}
 
 	return model
 }

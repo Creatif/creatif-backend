@@ -3,6 +3,7 @@ package updateMapVariable
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
@@ -59,15 +60,17 @@ type Model struct {
 	MapName      string
 	VariableName string
 	ProjectID    string
+	References   []shared.UpdateReference
 }
 
-func NewModel(projectId, mapName, variableName string, fields []string, values VariableModel) Model {
+func NewModel(projectId, mapName, variableName string, fields []string, values VariableModel, reference []shared.UpdateReference) Model {
 	return Model{
 		MapName:      mapName,
 		Fields:       fields,
 		ProjectID:    projectId,
 		Values:       values,
 		VariableName: variableName,
+		References:   reference,
 	}
 }
 

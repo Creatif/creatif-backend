@@ -4,11 +4,14 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
+	"errors"
 	"fmt"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -70,7 +73,7 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 	}
 
 	var m declarations.Map
-	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "short_id").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToMap", res.Error.Error())
 		return declarations.MapVariable{}, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
@@ -80,11 +83,26 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 	}
 
 	mapNode := declarations.NewMapVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
-	if res := storage.Gorm().Create(&mapNode); res.Error != nil {
-		c.logBuilder.Add("addToMap", res.Error.Error())
+	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
+		if res := tx.Create(&mapNode); res.Error != nil {
+			c.logBuilder.Add("addToMap", res.Error.Error())
 
+			return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
+		}
+
+		if len(c.model.References) > 0 {
+			references, err := shared.CreateDeclarationReferences(c.model.References, mapNode.ID, mapNode.ShortID)
+			if err != nil {
+				return err
+			}
+
+			tx.Create(&references)
+		}
+
+		return nil
+	}); transactionError != nil {
 		return declarations.MapVariable{}, appErrors.NewValidationError(map[string]string{
-			"exists": fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name),
+			"exists": err.Error(),
 		})
 	}
 

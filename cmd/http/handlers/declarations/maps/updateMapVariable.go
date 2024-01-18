@@ -5,8 +5,9 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	updateMapVariable2 "creatif/pkg/app/services/maps/updateMapVariable"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
-	"fmt"
+	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -20,8 +21,18 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 		model.Fields = c.QueryParam("fields")
 
 		model = maps.SanitizeUpdateMapVariable(model)
+		references := make([]shared.UpdateReference, 0)
+		if len(model.References) > 0 {
+			references = sdk.Map(model.References, func(idx int, value maps.UpdateReference) shared.UpdateReference {
+				return shared.UpdateReference{
+					ID:            value.ID,
+					StructureName: value.StructureName,
+					StructureType: value.StructureType,
+					VariableID:    value.VariableID,
+				}
+			})
+		}
 
-		fmt.Println(model.ResolvedFields)
 		l := logger.NewLogBuilder()
 		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Name, model.ItemID, model.ResolvedFields, updateMapVariable2.VariableModel{
 			Name:      model.Variable.Name,
@@ -30,7 +41,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Groups:    model.Variable.Groups,
 			Behaviour: model.Variable.Behaviour,
 			Value:     []byte(model.Variable.Value),
-		}), auth.NewNoopAuthentication(), l)
+		}, references), auth.NewNoopAuthentication(), l)
 
 		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l, nil, false)
 	}
