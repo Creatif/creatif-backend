@@ -2,6 +2,7 @@ package updateMapVariable
 
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
@@ -15,6 +16,14 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	ginkgo.It("should update an entry in the map by replacing it completely", func() {
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "map", 10, "modifiable")
+		referenceMap := testCreateMap(projectId, "referenceMap", 10, "modifiable")
+		addToMapView := testAddToMap(projectId, "map", []shared.Reference{
+			{
+				StructureName: referenceMap.Name,
+				StructureType: "map",
+				VariableID:    referenceMap.Variables[0].ID,
+			},
+		})
 
 		b, err := json.Marshal("this is metadata")
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -28,7 +37,14 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{"updated1", "updated2", "updated3"},
 			Behaviour: "readonly",
 			Value:     v,
-		}, nil), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}, []shared.UpdateReference{
+			{
+				ID:            addToMapView.References[0].ID,
+				StructureName: "referenceMap",
+				StructureType: "map",
+				VariableID:    referenceMap.Variables[1].ID,
+			},
+		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		view, err := handler.Handle()
 

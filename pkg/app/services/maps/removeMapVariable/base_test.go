@@ -3,7 +3,6 @@ package removeMapVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
@@ -185,7 +184,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	return view
 }
 
-func testAddToMap(projectId, name string, references []shared.Reference) declarations.MapVariable {
+func testAddToMap(projectId, name string, references []shared.Reference) addToMap.LogicModel {
 	variableModel := addToMap.VariableModel{
 		Name:     fmt.Sprintf("new add variable"),
 		Metadata: nil,

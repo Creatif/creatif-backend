@@ -65,17 +65,17 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (declarations.MapVariable, error) {
+func (c Main) Logic() (LogicModel, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Entry.Locale)
 	if err != nil {
 		c.logBuilder.Add("addToMap", err.Error())
-		return declarations.MapVariable{}, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
+		return LogicModel{}, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
 
 	var m declarations.Map
 	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "short_id").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToMap", res.Error.Error())
-		return declarations.MapVariable{}, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
+		return LogicModel{}, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
 
 	if c.model.Entry.Groups == nil {
@@ -83,6 +83,7 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 	}
 
 	mapNode := declarations.NewMapVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
+	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&mapNode); res.Error != nil {
 			c.logBuilder.Add("addToMap", res.Error.Error())
@@ -97,41 +98,46 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 			}
 
 			tx.Create(&references)
+
+			refs = references
 		}
 
 		return nil
 	}); transactionError != nil {
-		return declarations.MapVariable{}, appErrors.NewValidationError(map[string]string{
+		return LogicModel{}, appErrors.NewValidationError(map[string]string{
 			"exists": err.Error(),
 		})
 	}
 
-	return mapNode, nil
+	return LogicModel{
+		Variable:   mapNode,
+		References: refs,
+	}, nil
 }
 
-func (c Main) Handle() (interface{}, error) {
+func (c Main) Handle() (View, error) {
 	if err := c.Validate(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
-	_, err := c.Logic()
+	model, err := c.Logic()
 
 	if err != nil {
-		return nil, err
+		return View{}, err
 	}
 
-	return nil, nil
+	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, declarations.MapVariable] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
 	logBuilder.Add("getMap", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

@@ -49,7 +49,7 @@ func UpdateReferences(refs []UpdateReference, structureId string, tx *gorm.DB) e
 			return errors.New(fmt.Sprintf("Reference with ID '%s' not found. Structure name: %s; Structure type: %s. Underlying error: %s", r.VariableID, r.StructureName, r.StructureType, err.Error()))
 		}
 
-		res := storage.Gorm().Exec(fmt.Sprintf("UPDATE %s SET parent_type = ?, parent_id = ?, parent_short_id = ? WHERE id = ?", (declarations.Reference{}).TableName()), r.StructureType, r.ID, pr.ParentShortID)
+		res := storage.Gorm().Exec(fmt.Sprintf("UPDATE %s SET parent_type = ?, parent_id = ?, parent_short_id = ? WHERE id = ?", (declarations.Reference{}).TableName()), r.StructureType, pr.ID, pr.ParentShortID, r.ID)
 
 		if res.Error != nil {
 			return res.Error

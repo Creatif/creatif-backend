@@ -130,6 +130,7 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 
 		if len(c.model.References) > 0 {
 			if err := shared.UpdateReferences(c.model.References, m.ID, tx); err != nil {
+				fmt.Println(err)
 				return err
 			}
 		}

@@ -1,6 +1,7 @@
 package addToMap
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/constants"
@@ -24,6 +25,11 @@ type Model struct {
 	Name       string
 	ProjectID  string
 	References []shared.Reference
+}
+
+type LogicModel struct {
+	Variable declarations.MapVariable
+	References []declarations.Reference
 }
 
 func NewModel(projectId, name string, entry VariableModel, references []shared.Reference) Model {
