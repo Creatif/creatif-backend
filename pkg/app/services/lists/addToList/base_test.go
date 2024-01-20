@@ -1,4 +1,4 @@
-package updateListItemByID
+package addToList
 
 import (
 	"creatif/pkg/app/auth"
@@ -49,6 +49,7 @@ func runLogger() {
 
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
+	runLogger()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
@@ -96,6 +97,8 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
 func testAssertErrNil(err error) {
@@ -120,20 +123,15 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateList(projectId, name string, varNum int, addGroups bool, behaviour string) string {
+func testCreateList(projectId, name string, varNum int) createList2.View {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
-		var groups []string = nil
-		if addGroups {
-			groups = []string{"one", "two", "three"}
-		}
-
 		variables[i] = createList2.Variable{
 			Name:      fmt.Sprintf("one-%d", i),
 			Metadata:  nil,
-			Groups:    groups,
+			Groups:    nil,
 			Locale:    "eng",
-			Behaviour: behaviour,
+			Behaviour: "readonly",
 			Value:     nil,
 		}
 	}
@@ -146,5 +144,5 @@ func testCreateList(projectId, name string, varNum int, addGroups bool, behaviou
 
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
-	return list.Name
+	return list
 }

@@ -1,4 +1,4 @@
-package addToMap
+package addToList
 
 import (
 	"creatif/pkg/app/auth"
@@ -33,10 +33,10 @@ func (c Main) Validate() error {
 SELECT mv.id FROM %s AS mv 
 INNER JOIN %s AS m ON 
 (m.id = ? OR m.name = ? OR m.short_id = ?) AND m.project_id = ? AND 
-mv.map_id = m.id AND mv.name = ? AND mv.locale_id = ?
-`, (declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())
+mv.list_id = m.id AND mv.name = ? AND mv.locale_id = ?
+`, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
 
-	var entry declarations.MapVariable
+	var entry declarations.ListVariable
 	res := storage.Gorm().Raw(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Entry.Name, entryLocaleId).Scan(&entry)
 	if res.Error != nil {
 		return appErrors.NewValidationError(map[string]string{
@@ -72,7 +72,7 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewApplicationError(err).AddError("addToList.Logic", nil)
 	}
 
-	var m declarations.Map
+	var m declarations.List
 	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "short_id").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToList", res.Error.Error())
 		return LogicModel{}, appErrors.NewNotFoundError(res.Error).AddError("addToList.Logic", nil)
@@ -82,7 +82,7 @@ func (c Main) Logic() (LogicModel, error) {
 		c.model.Entry.Groups = []string{}
 	}
 
-	variable := declarations.NewMapVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
+	variable := declarations.NewListVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&variable); res.Error != nil {
