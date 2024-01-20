@@ -6,6 +6,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
+	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -19,9 +20,22 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		referenceMap := testCreateMap(projectId, "referenceMap", 10, "modifiable")
 		addToMapView := testAddToMap(projectId, "map", []shared.Reference{
 			{
+				Name:          "myName",
 				StructureName: referenceMap.Name,
 				StructureType: "map",
 				VariableID:    referenceMap.Variables[0].ID,
+			},
+			{
+				Name:          "another",
+				StructureName: referenceMap.Name,
+				StructureType: "map",
+				VariableID:    referenceMap.Variables[4].ID,
+			},
+			{
+				Name:          "three",
+				StructureName: referenceMap.Name,
+				StructureType: "map",
+				VariableID:    referenceMap.Variables[5].ID,
 			},
 		})
 
@@ -31,7 +45,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, m.Name, m.Variables[0].ID, []string{"metadata", "groups", "behaviour", "value", "name"}, VariableModel{
+		handler := New(NewModel(projectId, m.Name, addToMapView.Variable.ID, []string{"metadata", "groups", "behaviour", "value", "name"}, VariableModel{
 			Name:      "new name",
 			Metadata:  b,
 			Groups:    []string{"updated1", "updated2", "updated3"},
@@ -39,10 +53,16 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Value:     v,
 		}, []shared.UpdateReference{
 			{
-				ID:            addToMapView.References[0].ID,
+				Name:          addToMapView.References[0].Name,
 				StructureName: "referenceMap",
 				StructureType: "map",
-				VariableID:    referenceMap.Variables[1].ID,
+				VariableID:    referenceMap.Variables[0].ID,
+			},
+			{
+				Name:          "new entry",
+				StructureName: "referenceMap",
+				StructureType: "map",
+				VariableID:    referenceMap.Variables[3].ID,
 			},
 		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
@@ -64,6 +84,11 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(sdk.Includes(view.Groups, "updated1")).Should(gomega.Equal(true))
 		gomega.Expect(sdk.Includes(view.Groups, "updated2")).Should(gomega.Equal(true))
 		gomega.Expect(sdk.Includes(view.Groups, "updated3")).Should(gomega.Equal(true))
+
+		var count int
+		res := storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		testAssertErrNil(res.Error)
+		gomega.Expect(count).Should(gomega.Equal(2))
 	})
 
 	ginkgo.It("should fail updating a map variable because of invalid number of groups", func() {

@@ -30,12 +30,12 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 			},
 		})
 
-		handler := New(NewModel(projectId, "mapName", addToMapVariable.Variable.ShortID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "mapName", addToMapVariable.Variable.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		res := storage.Gorm().Where("map_id = ? AND short_id = ?", view.ID, addToMapVariable.Variable.ShortID).First(&declarations.MapVariable{})
+		res := storage.Gorm().Where("map_id = ? AND id = ?", view.ID, addToMapVariable.Variable.ID).First(&declarations.MapVariable{})
 		gomega.Expect(errors.Is(res.Error, gorm.ErrRecordNotFound)).Should(gomega.BeTrue())
 
 		var count int

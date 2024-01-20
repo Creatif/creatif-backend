@@ -36,6 +36,7 @@ func AddToMapHandler() func(e echo.Context) error {
 			Value:     []byte(model.Variable.Value),
 		}, sdk.Map(model.References, func(idx int, value maps.Reference) shared.Reference {
 			return shared.Reference{
+				Name:          value.Name,
 				StructureName: value.StructureName,
 				StructureType: value.StructureType,
 				VariableID:    value.VariableID,

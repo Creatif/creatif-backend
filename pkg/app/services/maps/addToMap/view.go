@@ -10,15 +10,15 @@ import (
 type ReferenceView struct {
 	ID string `json:"id"`
 
+	Name string `json:"name"`
+
 	ParentType string `json:"parentType"`
 	ChildType  string `json:"childType"`
 
 	// must be structure type item
-	ParentID      string `json:"parentId"`
-	ParentShortID string `json:"parentShortId"`
+	ParentID string `json:"parentId"`
 	// must be entire structure
-	ChildID      string `json:"childId"`
-	ChildShortID string `json:"childShortId"`
+	ChildID string `json:"childId"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -44,6 +44,16 @@ type View struct {
 }
 
 func newView(model LogicModel) View {
+	var m interface{} = model.Variable.Metadata
+	if len(model.Variable.Metadata) == 0 {
+		m = nil
+	}
+
+	var v interface{} = model.Variable.Value
+	if len(model.Variable.Value) == 0 {
+		v = nil
+	}
+
 	return View{
 		ID:        model.Variable.ID,
 		ShortID:   model.Variable.ShortID,
@@ -51,22 +61,21 @@ func newView(model LogicModel) View {
 		Name:      model.Variable.Name,
 		Behaviour: model.Variable.Behaviour,
 		Groups:    model.Variable.Groups,
-		Metadata:  model.Variable.Metadata,
-		Value:     model.Variable.Value,
+		Metadata:  m,
+		Value:     v,
 		Locale:    model.Variable.LocaleID,
 		CreatedAt: model.Variable.CreatedAt,
 		UpdatedAt: model.Variable.UpdatedAt,
 		References: sdk.Map(model.References, func(idx int, value declarations.Reference) ReferenceView {
 			return ReferenceView{
-				ID:            value.ID,
-				ParentType:    value.ParentType,
-				ChildType:     value.ChildType,
-				ParentID:      value.ParentID,
-				ParentShortID: value.ParentShortID,
-				ChildID:       value.ChildID,
-				ChildShortID:  value.ChildShortID,
-				CreatedAt:     value.CreatedAt,
-				UpdatedAt:     value.UpdatedAt,
+				ID:         value.ID,
+				Name:       value.Name,
+				ParentType: value.ParentType,
+				ChildType:  value.ChildType,
+				ParentID:   value.ParentID,
+				ChildID:    value.ChildID,
+				CreatedAt:  value.CreatedAt,
+				UpdatedAt:  value.UpdatedAt,
 			}
 		}),
 	}

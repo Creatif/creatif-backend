@@ -41,7 +41,7 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (declarations.MapVariable, error) {
+func (c Main) Logic() (LogicModel, error) {
 	sql := fmt.Sprintf(`
 			SELECT lv.id, lv.name, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at, lv.locale_id
 			FROM %s AS lv INNER JOIN %s AS l
@@ -55,15 +55,32 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 
 	if res.Error != nil {
 		c.logBuilder.Add("queryMapVariable", res.Error.Error())
-		return declarations.MapVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
+		return LogicModel{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
 		c.logBuilder.Add("queryMapVariable", "No rows returned. 404 status code.")
-		return declarations.MapVariable{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
+		return LogicModel{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
 	}
 
-	return variable, nil
+	sql = fmt.Sprintf(`
+	SELECT id, parent_type, parent_id, name, child_id FROM %s WHERE child_id = ?
+`, (declarations.Reference{}).TableName())
+
+	var references []declarations.Reference
+	res = storage.Gorm().
+		Raw(sql, variable.ID).
+		Scan(&references)
+
+	if res.Error != nil {
+		c.logBuilder.Add("queryMapVariable", res.Error.Error())
+		return LogicModel{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
+	}
+
+	return LogicModel{
+		Variable:  variable,
+		Reference: references,
+	}, nil
 }
 
 func (c Main) Handle() (View, error) {
@@ -88,7 +105,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.MapVariable] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
 	logBuilder.Add("queryMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

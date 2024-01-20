@@ -23,33 +23,56 @@ func NewModel(projectId, name, itemID string) Model {
 	}
 }
 
+type LogicModel struct {
+	Variable  declarations.MapVariable
+	Reference []declarations.Reference
+}
+
+type ReferenceView struct {
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	StructureID   string `json:"structureId"`
+	OwnerID       string `json:"ownerId"`
+	StructureType string `json:"structureType"`
+}
+
 type View struct {
-	ID        string         `json:"id"`
-	Locale    string         `json:"locale"`
-	ShortID   string         `json:"shortId"`
-	Name      string         `json:"name"`
-	Behaviour string         `json:"behaviour"`
-	Groups    pq.StringArray `json:"groups"`
-	Metadata  interface{}    `json:"metadata"`
-	Value     interface{}    `json:"value"`
+	ID         string          `json:"id"`
+	Locale     string          `json:"locale"`
+	ShortID    string          `json:"shortId"`
+	Name       string          `json:"name"`
+	Behaviour  string          `json:"behaviour"`
+	Groups     pq.StringArray  `json:"groups"`
+	Metadata   interface{}     `json:"metadata"`
+	Value      interface{}     `json:"value"`
+	References []ReferenceView `json:"references"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.MapVariable) View {
-	alpha, _ := locales.GetAlphaWithID(model.LocaleID)
+func newView(model LogicModel) View {
+	alpha, _ := locales.GetAlphaWithID(model.Variable.LocaleID)
 	return View{
-		ID:        model.ID,
+		ID:        model.Variable.ID,
 		Locale:    alpha,
-		ShortID:   model.ShortID,
-		Name:      model.Name,
-		Behaviour: model.Behaviour,
-		Groups:    model.Groups,
-		Metadata:  model.Metadata,
-		Value:     model.Value,
-		CreatedAt: model.CreatedAt,
-		UpdatedAt: model.UpdatedAt,
+		ShortID:   model.Variable.ShortID,
+		Name:      model.Variable.Name,
+		Behaviour: model.Variable.Behaviour,
+		Groups:    model.Variable.Groups,
+		Metadata:  model.Variable.Metadata,
+		Value:     model.Variable.Value,
+		CreatedAt: model.Variable.CreatedAt,
+		UpdatedAt: model.Variable.UpdatedAt,
+		References: sdk.Map(model.Reference, func(idx int, value declarations.Reference) ReferenceView {
+			return ReferenceView{
+				ID:            value.ID,
+				Name:          value.Name,
+				StructureID:   value.ParentID,
+				OwnerID:       value.ChildID,
+				StructureType: value.ParentType,
+			}
+		}),
 	}
 }
 

@@ -13,6 +13,7 @@ type AddToMap struct {
 }
 
 type Reference struct {
+	Name          string `json:"name"`
 	StructureName string `json:"structureName"`
 	StructureType string `json:"structureType"`
 	VariableID    string `json:"variableId"`
@@ -35,6 +36,7 @@ func SanitizeAddToMap(model AddToMap) AddToMap {
 
 	model.References = sdk.Map(model.References, func(idx int, value Reference) Reference {
 		return Reference{
+			Name:          p.Sanitize(value.Name),
 			StructureName: p.Sanitize(value.StructureName),
 			StructureType: p.Sanitize(value.StructureType),
 			VariableID:    p.Sanitize(value.VariableID),

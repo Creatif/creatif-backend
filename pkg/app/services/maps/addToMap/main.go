@@ -82,17 +82,17 @@ func (c Main) Logic() (LogicModel, error) {
 		c.model.Entry.Groups = []string{}
 	}
 
-	mapNode := declarations.NewMapVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
+	variable := declarations.NewMapVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
-		if res := tx.Create(&mapNode); res.Error != nil {
+		if res := tx.Create(&variable); res.Error != nil {
 			c.logBuilder.Add("addToMap", res.Error.Error())
 
 			return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
 		}
 
 		if len(c.model.References) > 0 {
-			references, err := shared.CreateDeclarationReferences(c.model.References, mapNode.ID, mapNode.ShortID)
+			references, err := shared.CreateDeclarationReferences(c.model.References, variable.ID)
 			if err != nil {
 				return err
 			}
@@ -105,12 +105,12 @@ func (c Main) Logic() (LogicModel, error) {
 		return nil
 	}); transactionError != nil {
 		return LogicModel{}, appErrors.NewValidationError(map[string]string{
-			"exists": err.Error(),
+			"exists": transactionError.Error(),
 		})
 	}
 
 	return LogicModel{
-		Variable:   mapNode,
+		Variable:   variable,
 		References: refs,
 	}, nil
 }
@@ -138,6 +138,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
-	logBuilder.Add("getMap", "Created")
+	logBuilder.Add("addToMap", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

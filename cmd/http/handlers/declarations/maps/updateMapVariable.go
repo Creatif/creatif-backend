@@ -25,7 +25,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 		if len(model.References) > 0 {
 			references = sdk.Map(model.References, func(idx int, value maps.UpdateReference) shared.UpdateReference {
 				return shared.UpdateReference{
-					ID:            value.ID,
+					Name:          value.Name,
 					StructureName: value.StructureName,
 					StructureType: value.StructureType,
 					VariableID:    value.VariableID,

@@ -89,6 +89,7 @@ func (a *Model) Validate() map[string]string {
 		"behaviour":    a.Values.Behaviour,
 		"projectID":    a.ProjectID,
 		"locale":       a.Values.Locale,
+		"references":   nil,
 	}
 
 	if err := validation.Validate(v,
@@ -145,6 +146,31 @@ func (a *Model) Validate() map[string]string {
 
 				if !locales.ExistsByAlpha(t) {
 					return errors.New(fmt.Sprintf("Locale '%s' does not exist.", t))
+				}
+
+				return nil
+			})),
+			validation.Key("references", validation.By(func(value interface{}) error {
+				if len(a.References) == 0 {
+					return nil
+				}
+
+				for _, ref := range a.References {
+					if ref.StructureType != "map" && ref.StructureType != "list" && ref.StructureType != "variable" {
+						return errors.New("Invalid reference. StructureType is invalid.")
+					}
+
+					if ref.Name == "" {
+						return errors.New("Invalid reference. Name cannot be blank.")
+					}
+
+					if ref.VariableID == "" {
+						return errors.New("Invalid reference. VariableID cannot be blank.")
+					}
+
+					if ref.StructureName == "" {
+						return errors.New("Invalid reference. StructureName cannot be blank.")
+					}
 				}
 
 				return nil

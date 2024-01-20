@@ -28,7 +28,7 @@ type Model struct {
 }
 
 type LogicModel struct {
-	Variable declarations.MapVariable
+	Variable   declarations.MapVariable
 	References []declarations.Reference
 }
 
@@ -84,6 +84,10 @@ func (a *Model) Validate() map[string]string {
 				return nil
 			})),
 			validation.Key("referencesValid", validation.By(func(value interface{}) error {
+				if len(a.References) > 100 {
+					return errors.New("Invalid reference number. Maximum number of references is 100.")
+				}
+
 				if len(a.References) > 0 {
 					names := make([]string, len(a.References))
 					for _, r := range a.References {
@@ -91,12 +95,19 @@ func (a *Model) Validate() map[string]string {
 							return errors.New("Invalid reference structure type. Structure can can be one of: map, variable or list")
 						}
 
-						name := fmt.Sprintf("%s_%s_%s", r.StructureName, r.StructureType, r.VariableID)
-						if sdk.Includes(names, name) {
+						if r.Name == "" {
+							return errors.New("Invalid reference. Name cannot be blank")
+						}
+
+						if r.StructureName == "" {
+							return errors.New("Invalid reference. StructureName cannot be blank")
+						}
+
+						if sdk.Includes(names, r.Name) {
 							return errors.New(fmt.Sprintf("Invalid reference. Duplicate reference are not possible. Structure name: %s; Structure type: %s; VariableID: %s", r.StructureName, r.StructureType, r.VariableID))
 						}
 
-						names = append(names, name)
+						names = append(names, r.Name)
 					}
 
 				}

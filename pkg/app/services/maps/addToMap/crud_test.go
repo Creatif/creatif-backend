@@ -25,16 +25,19 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Value:     nil,
 		}, []shared.Reference{
 			{
+				Name:          "first",
 				StructureName: reference.Name,
 				StructureType: "map",
 				VariableID:    reference.Variables[0].ID,
 			},
 			{
+				Name:          "second",
 				StructureName: reference.Name,
 				StructureType: "map",
 				VariableID:    reference.Variables[1].ID,
 			},
 			{
+				Name:          "third",
 				StructureName: reference.Name,
 				StructureType: "map",
 				VariableID:    reference.Variables[2].ID,
@@ -70,16 +73,19 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Value:     nil,
 		}, []shared.Reference{
 			{
+				Name:          "first",
 				StructureName: reference.Name,
 				StructureType: "map",
 				VariableID:    reference.Variables[0].ID,
 			},
 			{
+				Name:          "second",
 				StructureName: reference.Name,
 				StructureType: "map",
 				VariableID:    reference.Variables[0].ID,
 			},
 			{
+				Name:          "first",
 				StructureName: reference.Name,
 				StructureType: "map",
 				VariableID:    reference.Variables[2].ID,
