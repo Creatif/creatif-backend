@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -73,7 +72,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var m declarations.List
-	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "short_id").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "short_id", "name").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToList", res.Error.Error())
 		return LogicModel{}, appErrors.NewNotFoundError(res.Error).AddError("addToList.Logic", nil)
 	}
@@ -89,17 +88,6 @@ func (c Main) Logic() (LogicModel, error) {
 			c.logBuilder.Add("addToList", res.Error.Error())
 
 			return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
-		}
-
-		if len(c.model.References) > 0 {
-			references, err := shared.CreateDeclarationReferences(c.model.References, variable.ID)
-			if err != nil {
-				return err
-			}
-
-			tx.Create(&references)
-
-			refs = references
 		}
 
 		return nil

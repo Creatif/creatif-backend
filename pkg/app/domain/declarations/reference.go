@@ -13,6 +13,9 @@ type Reference struct {
 	ParentType string `gorm:"type:text"`
 	ChildType  string `gorm:"type:text"`
 
+	ParentStructureID string `gorm:"type:text"`
+	ChildStructureID  string `gorm:"type:text"`
+
 	// must be structure type item
 	ParentID string `gorm:"type:text"`
 	// must be entire structure
@@ -22,13 +25,15 @@ type Reference struct {
 	UpdatedAt time.Time `gorm:"<-:update"`
 }
 
-func NewReference(name, parentType, childType, parentId, childId string) Reference {
+func NewReference(name, parentType, childType, parentId, childId, structureParentId, structureChildId string) Reference {
 	return Reference{
-		Name:       name,
-		ParentType: parentType,
-		ChildType:  childType,
-		ParentID:   parentId,
-		ChildID:    childId,
+		Name:              name,
+		ParentType:        parentType,
+		ParentStructureID: structureParentId,
+		ChildStructureID:  structureChildId,
+		ChildType:         childType,
+		ParentID:          parentId,
+		ChildID:           childId,
 	}
 }
 

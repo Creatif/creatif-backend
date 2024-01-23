@@ -50,11 +50,6 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
-
-		var count int
-		res = storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
-		testAssertErrNil(res.Error)
-		gomega.Expect(count).Should(gomega.Equal(3))
 	})
 
 	ginkgo.It("should fail to add an entry because of a duplicate", func() {

@@ -63,18 +63,9 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
 	}
 
-	sql = fmt.Sprintf(`
-	SELECT id, parent_type, parent_id, name, child_id FROM %s WHERE child_id = ?
-`, (declarations.Reference{}).TableName())
-
-	var references []declarations.Reference
-	res = storage.Gorm().
-		Raw(sql, variable.ID).
-		Scan(&references)
-
-	if res.Error != nil {
-		c.logBuilder.Add("queryMapVariable", res.Error.Error())
-		return LogicModel{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
+	references, err := queryReferences(variable.ID)
+	if err != nil {
+		return LogicModel{}, err
 	}
 
 	return LogicModel{

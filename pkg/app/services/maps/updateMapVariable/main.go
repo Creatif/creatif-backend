@@ -58,7 +58,7 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 		c.model.MapName,
 		c.model.MapName,
 		c.model.ProjectID).
-		Select("id").First(&m); res.Error != nil {
+		Select("id", "name").First(&m); res.Error != nil {
 		c.logBuilder.Add("updateMapVariable", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {

@@ -28,7 +28,7 @@ type ParentReference struct {
 	ID            string `gorm:"column:id"`
 }
 
-func CreateDeclarationReferences(refs []Reference, ownerId string) ([]declarations.Reference, error) {
+func CreateDeclarationReferences(refs []Reference, ownerId, childStructureId string) ([]declarations.Reference, error) {
 	references := make([]declarations.Reference, 0)
 	for _, r := range refs {
 		pr, err := getParentReference(r.StructureName, r.StructureType, r.VariableID, ownerId)
@@ -36,14 +36,14 @@ func CreateDeclarationReferences(refs []Reference, ownerId string) ([]declaratio
 			return nil, errors.New(fmt.Sprintf("Reference with ID '%s' not found. Structure name: %s; Structure type: %s. Underlying error: %s", r.VariableID, r.StructureName, r.StructureType, err.Error()))
 		}
 
-		ref := declarations.NewReference(r.Name, r.StructureType, "map", pr.ID, ownerId)
+		ref := declarations.NewReference(r.Name, r.StructureType, "map", pr.ID, ownerId, pr.StructureID, childStructureId)
 		references = append(references, ref)
 	}
 
 	return references, nil
 }
 
-func UpdateReferences(refs []UpdateReference, structureId string, ownerId string, tx *gorm.DB) error {
+func UpdateReferences(refs []UpdateReference, structureId, ownerId string, tx *gorm.DB) error {
 	// if there are not refs sent, clear the refs since user might not have frontend validation enabled
 	if len(refs) == 0 {
 		if err := deleteAllRefsByChild(ownerId, tx); err != nil {
@@ -94,7 +94,7 @@ func UpdateReferences(refs []UpdateReference, structureId string, ownerId string
 				return errors.New(fmt.Sprintf("Reference with ID '%s' not found. Structure name: %s; Structure type: %s. Underlying error: %s", incomingRef.VariableID, incomingRef.StructureName, incomingRef.StructureType, err.Error()))
 			}
 
-			ref := declarations.NewReference(incomingRef.Name, incomingRef.StructureType, "map", pr.ID, ownerId)
+			ref := declarations.NewReference(incomingRef.Name, incomingRef.StructureType, "map", pr.ID, ownerId, structureId, "")
 			tx.Create(&ref)
 		}
 	}
@@ -139,7 +139,7 @@ func RemoveAsChild(structureType, childId string) error {
 
 func getParentReference(structureName, structureType, variableId, structureId string) (ParentReference, error) {
 	if structureType == "list" {
-		sql := fmt.Sprintf(`SELECT lv.id AS id, lv.short_id as parent_short_id, l.id AS structure_id FROM declarations.list_variables AS lv INNER JOIN declarations.lists AS l ON l.id = lv.list_id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND lv.id = ?`)
+		sql := fmt.Sprintf(`SELECT lv.id AS id, l.id AS structure_id FROM declarations.list_variables AS lv INNER JOIN declarations.lists AS l ON l.id = lv.list_id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND lv.id = ?`)
 
 		var pr ParentReference
 		if res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr); res.Error != nil {
@@ -154,7 +154,7 @@ func getParentReference(structureName, structureType, variableId, structureId st
 	}
 
 	if structureType == "map" {
-		sql := fmt.Sprintf(`SELECT lv.id AS id, lv.short_id as parent_short_id, l.id AS structure_id FROM declarations.map_variables AS lv INNER JOIN declarations.maps AS l ON l.id = lv.map_id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND lv.id = ?`)
+		sql := fmt.Sprintf(`SELECT lv.id AS id, l.id AS structure_id FROM declarations.map_variables AS lv INNER JOIN declarations.maps AS l ON l.id = lv.map_id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND lv.id = ?`)
 
 		var pr ParentReference
 		if res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr); res.Error != nil {
@@ -187,7 +187,7 @@ func getRefsByChild(childId string, tx *gorm.DB) ([]declarations.Reference, erro
 	sql := fmt.Sprintf(`SELECT * FROM %s WHERE child_id = ?`, (declarations.Reference{}).TableName())
 
 	var refs []declarations.Reference
-	res := storage.Gorm().Raw(sql, childId).Scan(&refs)
+	res := tx.Raw(sql, childId).Scan(&refs)
 
 	if res.Error != nil {
 		return refs, res.Error

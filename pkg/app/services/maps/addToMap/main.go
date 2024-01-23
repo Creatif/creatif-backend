@@ -73,7 +73,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var m declarations.Map
-	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "short_id").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "name").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToList", res.Error.Error())
 		return LogicModel{}, appErrors.NewNotFoundError(res.Error).AddError("addToList.Logic", nil)
 	}
@@ -92,7 +92,7 @@ func (c Main) Logic() (LogicModel, error) {
 		}
 
 		if len(c.model.References) > 0 {
-			references, err := shared.CreateDeclarationReferences(c.model.References, variable.ID)
+			references, err := shared.CreateDeclarationReferences(c.model.References, variable.ID, m.ID)
 			if err != nil {
 				return err
 			}

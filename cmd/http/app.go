@@ -91,6 +91,7 @@ func appRoutes(group *echo.Group) {
 
 func declarationRoutes(group *echo.Group) {
 	group.PUT("/list/:projectID", lists.CreateListHandler())
+	group.PUT("/list/add/:projectID", lists.AddToListHandler())
 	group.PUT("/list/append/:projectID", lists.AppendToListHandler())
 	group.DELETE("/list/:projectID/:name", lists.DeleteListHandler())
 	group.POST("/list/item-id/:projectID", lists.DeleteListItemByIDHandler())

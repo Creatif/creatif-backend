@@ -25,26 +25,33 @@ func NewModel(projectId, name, itemID string) Model {
 
 type LogicModel struct {
 	Variable  declarations.MapVariable
-	Reference []declarations.Reference
+	Reference []QueryReference
 }
 
 type ReferenceView struct {
-	ID            string `json:"id"`
-	Name          string `json:"name"`
-	StructureID   string `json:"structureId"`
-	OwnerID       string `json:"ownerId"`
-	StructureType string `json:"structureType"`
+	ID                string `json:"id"`
+	ParentType        string `json:"parentType"`
+	ChildType         string `json:"childType"`
+	ParentID          string `json:"parentId"`
+	ChildID           string `json:"childId"`
+	ChildStructureID  string `json:"childStructureId"`
+	ParentStructureID string `json:"parentStructureId"`
+	StructureName     string `json:"structureName"`
 }
 
 type View struct {
-	ID         string          `json:"id"`
-	Locale     string          `json:"locale"`
-	ShortID    string          `json:"shortId"`
-	Name       string          `json:"name"`
-	Behaviour  string          `json:"behaviour"`
-	Groups     pq.StringArray  `json:"groups"`
-	Metadata   interface{}     `json:"metadata"`
-	Value      interface{}     `json:"value"`
+	ID        string         `json:"id"`
+	Locale    string         `json:"locale"`
+	ShortID   string         `json:"shortId"`
+	Name      string         `json:"name"`
+	Behaviour string         `json:"behaviour"`
+	Groups    pq.StringArray `json:"groups"`
+	Metadata  interface{}    `json:"metadata"`
+	Value     interface{}    `json:"value"`
+
+	Children []ReferenceView `json:"children"`
+	ParentTo []ReferenceView `json:"parentTo"`
+
 	References []ReferenceView `json:"references"`
 
 	CreatedAt time.Time `json:"createdAt"`
@@ -64,13 +71,16 @@ func newView(model LogicModel) View {
 		Value:     model.Variable.Value,
 		CreatedAt: model.Variable.CreatedAt,
 		UpdatedAt: model.Variable.UpdatedAt,
-		References: sdk.Map(model.Reference, func(idx int, value declarations.Reference) ReferenceView {
+		References: sdk.Map(model.Reference, func(idx int, value QueryReference) ReferenceView {
 			return ReferenceView{
-				ID:            value.ID,
-				Name:          value.Name,
-				StructureID:   value.ParentID,
-				OwnerID:       value.ChildID,
-				StructureType: value.ParentType,
+				ID:                value.ID,
+				ParentStructureID: value.ParentStructureID,
+				ChildStructureID:  value.ChildStructureID,
+				ParentID:          value.ParentID,
+				ChildID:           value.ChildID,
+				ParentType:        value.ParentType,
+				ChildType:         value.ChildType,
+				StructureName:     value.StructureName,
 			}
 		}),
 	}
