@@ -4,8 +4,10 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -186,4 +188,27 @@ func testCreateMap(projectId, name string, variablesNum int) (mapCreate.View, ma
 	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
 	return view, fragmentedGroups
+}
+
+func testAddToMap(projectId, name string, references []shared.Reference) addToMap.LogicModel {
+	variableModel := addToMap.VariableModel{
+		Name:     fmt.Sprintf("new add variable"),
+		Metadata: nil,
+		Groups: []string{
+			"one",
+			"two",
+			"three",
+		},
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToMap.NewModel(projectId, name, variableModel, references)
+	handler := addToMap.New(model, auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+
+	view, err := handler.Logic()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return view
 }

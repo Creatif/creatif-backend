@@ -43,12 +43,11 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 	placeholders := make(map[string]interface{})
 	placeholders["projectID"] = c.model.ProjectID
 	placeholders["offset"] = offset
-	placeholders["name"] = c.model.MapName
 	placeholders["limit"] = c.model.Limit
+	placeholders["parentReference"] = c.model.ParentID
 
 	countPlaceholders := make(map[string]interface{})
 	countPlaceholders["projectID"] = c.model.ProjectID
-	countPlaceholders["name"] = c.model.MapName
 
 	if c.model.OrderBy == "" {
 		c.model.OrderBy = "index"
@@ -99,6 +98,18 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 		returnableFields = strings.Join(c.model.Fields, ",") + ","
 	}
 
+	tabels := []string{
+		(declarations.MapVariable{}).TableName(),
+		(declarations.Map{}).TableName(),
+	}
+
+	if c.model.StructureType == "list" {
+		tabels = []string{
+			(declarations.MapVariable{}).TableName(),
+			(declarations.Map{}).TableName(),
+		}
+	}
+
 	sql := fmt.Sprintf(`SELECT 
     	lv.id, 
     	lv.short_id, 
@@ -107,18 +118,20 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
     	lv.name, 
     	lv.behaviour, 
     	%s
-    	lv.created_at, 
-    	lv.updated_at 
-			FROM %s AS lv
+    	lv.created_at,
+    	lv.updated_at
+			FROM %s AS r
+			INNER JOIN %s AS lv
 			INNER JOIN %s AS l
-		ON l.project_id = @projectID AND l.id = lv.map_id %s %s
+		ON l.project_id = @projectID AND l.id = lv.map_id AND r.parent_id = lv.id AND r.parent_id = @parentReference %s %s
 		%s
 		%s
 		ORDER BY lv.%s %s
 		OFFSET @offset LIMIT @limit`,
 		returnableFields,
-		(declarations.MapVariable{}).TableName(),
-		(declarations.Map{}).TableName(),
+		(declarations.Reference{}).TableName(),
+		tabels[0],
+		tabels[1],
 		locale,
 		search,
 		groupsWhereClause,
@@ -133,32 +146,8 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 		return sdk.LogicView[declarations.MapVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("Maps.Paginate.Logic", nil)
 	}
 
-	countSql := fmt.Sprintf(`
-    	SELECT 
-    	    count(lv.id) AS count
-		FROM %s AS lv
-		INNER JOIN %s AS l
-		ON l.project_id = @projectID AND (l.name = @name OR l.id = @name OR l.short_id = @name) AND l.id = lv.map_id %s %s
-    	%s
-    	%s
-	`,
-		(declarations.MapVariable{}).TableName(),
-		(declarations.Map{}).TableName(),
-		locale,
-		search,
-		behaviour,
-		groupsWhereClause,
-	)
-
-	var count int64
-	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
-	if res.Error != nil {
-		c.logBuilder.Add("paginateMapVariables", res.Error.Error())
-		return sdk.LogicView[declarations.MapVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("paginateMapVariable.Logic", nil)
-	}
-
 	return sdk.LogicView[declarations.MapVariable]{
-		Total: count,
+		Total: 0,
 		Data:  items,
 	}, nil
 }
