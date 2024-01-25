@@ -7,7 +7,8 @@ import (
 )
 
 type Reference struct {
-	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID        string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ProjectID string `gorm:"index"`
 
 	Name       string `gorm:"type:text"`
 	ParentType string `gorm:"type:text"`
@@ -25,11 +26,12 @@ type Reference struct {
 	UpdatedAt time.Time `gorm:"<-:update"`
 }
 
-func NewReference(name, parentType, childType, parentId, childId, structureParentId, structureChildId string) Reference {
+func NewReference(name, parentType, childType, parentId, childId, structureParentId, structureChildId, projectId string) Reference {
 	return Reference{
 		Name:              name,
 		ParentType:        parentType,
 		ParentStructureID: structureParentId,
+		ProjectID:         projectId,
 		ChildStructureID:  structureChildId,
 		ChildType:         childType,
 		ParentID:          parentId,

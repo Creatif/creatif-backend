@@ -63,7 +63,7 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
 	}
 
-	references, err := queryReferences(variable.ID)
+	references, err := queryReferences(variable.ID, c.model.ProjectID)
 	if err != nil {
 		return LogicModel{}, err
 	}

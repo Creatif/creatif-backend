@@ -28,7 +28,7 @@ type ParentReference struct {
 	ID            string `gorm:"column:id"`
 }
 
-func CreateDeclarationReferences(refs []Reference, ownerId, childStructureId string) ([]declarations.Reference, error) {
+func CreateDeclarationReferences(refs []Reference, ownerId, childStructureId, projectId string) ([]declarations.Reference, error) {
 	references := make([]declarations.Reference, 0)
 	for _, r := range refs {
 		pr, err := getParentReference(r.StructureName, r.StructureType, r.VariableID, ownerId)
@@ -36,14 +36,14 @@ func CreateDeclarationReferences(refs []Reference, ownerId, childStructureId str
 			return nil, errors.New(fmt.Sprintf("Reference with ID '%s' not found. Structure name: %s; Structure type: %s. Underlying error: %s", r.VariableID, r.StructureName, r.StructureType, err.Error()))
 		}
 
-		ref := declarations.NewReference(r.Name, r.StructureType, "map", pr.ID, ownerId, pr.StructureID, childStructureId)
+		ref := declarations.NewReference(r.Name, r.StructureType, "map", pr.ID, ownerId, pr.StructureID, childStructureId, projectId)
 		references = append(references, ref)
 	}
 
 	return references, nil
 }
 
-func UpdateReferences(refs []UpdateReference, structureId, ownerId string, tx *gorm.DB) error {
+func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId string, tx *gorm.DB) error {
 	// if there are not refs sent, clear the refs since user might not have frontend validation enabled
 	if len(refs) == 0 {
 		if err := deleteAllRefsByChild(ownerId, tx); err != nil {
@@ -94,7 +94,7 @@ func UpdateReferences(refs []UpdateReference, structureId, ownerId string, tx *g
 				return errors.New(fmt.Sprintf("Reference with ID '%s' not found. Structure name: %s; Structure type: %s. Underlying error: %s", incomingRef.VariableID, incomingRef.StructureName, incomingRef.StructureType, err.Error()))
 			}
 
-			ref := declarations.NewReference(incomingRef.Name, incomingRef.StructureType, "map", pr.ID, ownerId, structureId, "")
+			ref := declarations.NewReference(incomingRef.Name, incomingRef.StructureType, "map", pr.ID, ownerId, structureId, "", projectId)
 			tx.Create(&ref)
 		}
 	}

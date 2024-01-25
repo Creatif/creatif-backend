@@ -128,7 +128,7 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 			return res.Error
 		}
 
-		if err := shared.UpdateReferences(c.model.References, m.ID, updated.ID, tx); err != nil {
+		if err := shared.UpdateReferences(c.model.References, m.ID, updated.ID, c.model.ProjectID, tx); err != nil {
 			return err
 		}
 
