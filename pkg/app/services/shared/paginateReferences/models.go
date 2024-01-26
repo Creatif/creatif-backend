@@ -29,9 +29,14 @@ var initialReturnFields = []string{
 }
 
 type Model struct {
-	ProjectID string
-	MapName   string
-	Locales   []string
+	ProjectID         string
+	ParentID          string
+	ChildID           string
+	RelationshipType  string
+	StructureType     string
+	ParentStructureID string
+	ChildStructureID  string
+	Locales           []string
 
 	Limit          int
 	Page           int
@@ -44,20 +49,25 @@ type Model struct {
 	Fields         []string
 }
 
-func NewModel(projectId string, locales []string, mapName, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string, behaviour string, fields []string) Model {
+func NewModel(projectId, parentId, childId, parentStructureId, childStructureId, relationshipType, structureType string, locales []string, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string, behaviour string, fields []string) Model {
 	return Model{
-		ProjectID:      projectId,
-		Locales:        locales,
-		Search:         search,
-		MapName:        mapName,
-		OrderBy:        orderBy,
-		Page:           page,
-		Filters:        filters,
-		Behaviour:      behaviour,
-		OrderDirection: direction,
-		Limit:          limit,
-		Groups:         groups,
-		Fields:         fields,
+		ProjectID:         projectId,
+		Locales:           locales,
+		Search:            search,
+		ParentID:          parentId,
+		ParentStructureID: parentStructureId,
+		ChildStructureID:  childStructureId,
+		ChildID:           childId,
+		RelationshipType:  relationshipType,
+		StructureType:     structureType,
+		OrderBy:           orderBy,
+		Page:              page,
+		Filters:           filters,
+		Behaviour:         behaviour,
+		OrderDirection:    direction,
+		Limit:             limit,
+		Groups:            groups,
+		Fields:            fields,
 	}
 }
 

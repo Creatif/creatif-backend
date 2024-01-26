@@ -7,6 +7,7 @@ import (
 	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
+	"creatif/cmd/http/handlers/declarations/references"
 	"creatif/cmd/http/handlers/declarations/variables"
 	"creatif/cmd/server"
 	"creatif/pkg/lib/cache"
@@ -125,4 +126,6 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/variable/groups/:projectID/:name", variables.GetVariableGroupsHandler())
 	group.GET("/variables/:projectID", variables.PaginateVariablesHandler())
 	group.GET("/variable/value/:projectID/:name/:locale", variables.GetValueHandler())
+
+	group.GET("/references/:projectID/:parentID/:childID/:structureType/:relationshipType/:childStructureId/:parentStructureId", references.PaginateReferencesHandler())
 }

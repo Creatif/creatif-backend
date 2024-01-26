@@ -49,9 +49,6 @@ type View struct {
 	Metadata  interface{}    `json:"metadata"`
 	Value     interface{}    `json:"value"`
 
-	Children []ReferenceView `json:"children"`
-	ParentTo []ReferenceView `json:"parentTo"`
-
 	References []ReferenceView `json:"references"`
 
 	CreatedAt time.Time `json:"createdAt"`
