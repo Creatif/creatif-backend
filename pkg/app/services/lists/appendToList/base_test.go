@@ -121,7 +121,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateList(projectId, name string, varNum int) string {
+func testCreateList(projectId, name string, varNum int) createList2.View {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
 		variables[i] = createList2.Variable{
@@ -142,5 +142,5 @@ func testCreateList(projectId, name string, varNum int) string {
 
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
-	return list.Name
+	return list
 }

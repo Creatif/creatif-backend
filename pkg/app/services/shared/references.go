@@ -149,9 +149,6 @@ func getParentReference(structureName, structureType, variableId, structureId st
 			})
 		}
 
-		fmt.Println(pr)
-		fmt.Println(structureId)
-
 		if pr.StructureID == structureId {
 			return ParentReference{}, appErrors.NewValidationError(map[string]string{
 				"referenceInvalid": "Invalid reference. A reference cannot be a parent to itself.",

@@ -36,10 +36,9 @@ func (c Main) Validate() error {
 	res := storage.Gorm().Raw(fmt.Sprintf(`
 SELECT cardinality(lv.groups) AS count, behaviour
 FROM %s AS lv 
-INNER JOIN %s AS l ON (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND l.id = lv.list_id AND (lv.id = ? OR lv.short_id = ?)`,
+INNER JOIN %s AS l ON (l.id = ? OR l.short_id = ?) AND l.project_id = ? AND l.id = lv.list_id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName()),
-		c.model.ListName,
 		c.model.ListName,
 		c.model.ListName,
 		c.model.ProjectID,
@@ -86,8 +85,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.ListVariable, error) {
 	var list declarations.List
 	if res := storage.Gorm().Where(
-		fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ?"),
-		c.model.ListName,
+		fmt.Sprintf("(id = ? OR short_id = ?) AND project_id = ?"),
 		c.model.ListName,
 		c.model.ListName,
 		c.model.ProjectID).

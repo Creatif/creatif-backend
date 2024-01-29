@@ -41,12 +41,12 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (*struct{}, error) {
 	sql := fmt.Sprintf(
-		`DELETE FROM %s AS lv USING %s AS l WHERE (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.list_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
+		`DELETE FROM %s AS lv USING %s AS l WHERE (l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.list_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
 	)
 
-	res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.ItemID, c.model.ItemID)
+	res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.ProjectID, c.model.ItemID, c.model.ItemID)
 	if res.Error != nil {
 		c.logBuilder.Add("deleteListItemByID", res.Error.Error())
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteListItemByID.Logic", nil)

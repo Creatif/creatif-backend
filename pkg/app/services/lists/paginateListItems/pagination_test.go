@@ -11,10 +11,10 @@ import (
 var _ = ginkgo.Describe("List items pagination tests", func() {
 	ginkgo.It("should paginate through list variables", func() {
 		projectId := testCreateProject("project")
-		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
+		_, listID := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, listName, "created_at", "", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -24,9 +24,9 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 
 	ginkgo.It("should get an empty result from the end of the list variables listing", func() {
 		projectId := testCreateProject("project")
-		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
+		_, listID := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, []string{}, listName, "created_at", "", "desc", 10, 50, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, listID, "created_at", "", "desc", 10, 50, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -36,10 +36,10 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 
 	ginkgo.It("should return empty result for group that does not exist", func() {
 		projectId := testCreateProject("project")
-		listName, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
+		_, listID := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, listName, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -49,9 +49,9 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 
 	ginkgo.It("should return the exact number of items by group", func() {
 		projectId := testCreateProject("project")
-		listName, _, groups := testCreateListWithFragmentedGroups(projectId, "name", 100)
+		_, listID, groups := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, []string{}, listName, "created_at", "", "desc", 50, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, listID, "created_at", "", "desc", 50, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -61,9 +61,9 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 
 	ginkgo.It("should return items search by name with regex", func() {
 		projectId := testCreateProject("project")
-		listName, _, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
+		_, listID, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, []string{}, listName, "created_at", "1", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, listID, "created_at", "1", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -73,10 +73,10 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 
 	ginkgo.It("should return items search by name with regex with groups", func() {
 		projectId := testCreateProject("project")
-		listName, _, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
+		_, listID, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, listName, "created_at", "1", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "1", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

@@ -53,7 +53,6 @@ func (c Main) Logic() (interface{}, error) {
 			return res.Error
 		}
 
-		fmt.Println(c.model.VariableName)
 		shared.RemoveAsParent(c.model.VariableName)
 		shared.RemoveAsChild(c.model.VariableName)
 

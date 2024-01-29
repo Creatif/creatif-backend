@@ -26,7 +26,7 @@ func getHighestIndex(listId string) (float64, error) {
 
 func getList(name string) (declarations.List, error) {
 	var list declarations.List
-	if res := storage.Gorm().Where("id = ? OR short_id = ? OR name = ?", name, name, name).Select("id", "serial", "project_id", "name", "created_at", "updated_at").First(&list); res.Error != nil {
+	if res := storage.Gorm().Where("id = ? OR short_id = ?", name, name).Select("id", "serial", "project_id", "name", "created_at", "updated_at").First(&list); res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.List{}, appErrors.NewNotFoundError(res.Error).AddError("appendToList.Logic", nil)
 		}

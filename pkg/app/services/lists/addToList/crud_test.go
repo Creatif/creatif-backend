@@ -20,7 +20,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		res := storage.Gorm().Where("list_id = ?", reference.ID).Find(&listVariables)
 		testAssertErrNil(res.Error)
 
-		handler := New(NewModel(projectId, m.Name, VariableModel{
+		handler := New(NewModel(projectId, m.ID, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,
@@ -61,7 +61,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		res := storage.Gorm().Where("list_id = ?", reference.ID).Find(&listVariables)
 		testAssertErrNil(res.Error)
 
-		handler := New(NewModel(projectId, m.Name, VariableModel{
+		handler := New(NewModel(projectId, m.ShortID, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,
@@ -97,7 +97,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		projectId := testCreateProject("project")
 		m := testCreateList(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, m.ID, VariableModel{
+		handler := New(NewModel(projectId, m.ShortID, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,
