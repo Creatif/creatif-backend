@@ -37,12 +37,12 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (interface{}, error) {
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		sql := fmt.Sprintf(
-			`DELETE FROM %s AS mv USING %s AS m WHERE m.project_id = ? AND mv.map_id = m.id AND (mv.id = ? OR mv.short_id = ?) AND (m.id = ? OR m.short_id = ? OR m.name = ?)`,
+			`DELETE FROM %s AS mv USING %s AS m WHERE m.project_id = ? AND mv.map_id = m.id AND (mv.id = ? OR mv.short_id = ?) AND (m.id = ? OR m.short_id = ?)`,
 			(declarations.MapVariable{}).TableName(),
 			(declarations.Map{}).TableName(),
 		)
 
-		res := storage.Gorm().Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name, c.model.Name)
+		res := storage.Gorm().Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name)
 		if res.Error != nil {
 			c.logBuilder.Add("removeMapVariable", res.Error.Error())
 			return res.Error
@@ -53,8 +53,9 @@ func (c Main) Logic() (interface{}, error) {
 			return res.Error
 		}
 
-		shared.RemoveAsParent("map", c.model.VariableName)
-		shared.RemoveAsChild("map", c.model.VariableName)
+		fmt.Println(c.model.VariableName)
+		shared.RemoveAsParent(c.model.VariableName)
+		shared.RemoveAsChild(c.model.VariableName)
 
 		return nil
 	}); err != nil {

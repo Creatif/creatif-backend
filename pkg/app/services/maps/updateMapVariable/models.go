@@ -157,7 +157,7 @@ func (a *Model) Validate() map[string]string {
 
 				for _, ref := range a.References {
 					if ref.StructureType != "map" && ref.StructureType != "list" && ref.StructureType != "variable" {
-						return errors.New("Invalid reference. StructureType is invalid.")
+						return errors.New(fmt.Sprintf("Invalid reference. StructureType is invalid. %s given for one of the structure types", ref.StructureType))
 					}
 
 					if ref.Name == "" {

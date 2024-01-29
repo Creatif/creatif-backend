@@ -73,18 +73,47 @@ func NewModel(projectId, parentId, childId, parentStructureId, childStructureId,
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID":   a.ProjectID,
-		"orderBy":     a.OrderBy,
-		"page":        a.Page,
-		"validFields": a.Fields,
-		"limit":       a.Limit,
-		"behaviour":   a.Behaviour,
-		"direction":   a.OrderDirection,
+		"projectID":         a.ProjectID,
+		"parentID":          a.ParentID,
+		"childID":           a.ChildID,
+		"childStructureID":  a.ChildStructureID,
+		"parentStructureID": a.ParentStructureID,
+		"relationshipType":  a.RelationshipType,
+		"structureType":     a.StructureType,
+		"orderBy":           a.OrderBy,
+		"page":              a.Page,
+		"validFields":       a.Fields,
+		"limit":             a.Limit,
+		"behaviour":         a.Behaviour,
+		"direction":         a.OrderDirection,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("parentID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("childID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("childStructureID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("parentStructureID", validation.Required, validation.RuneLength(26, 26)),
+
+			validation.Key("relationshipType", validation.Required, validation.By(func(value interface{}) error {
+				s := value.(string)
+				if s != "parent" && s != "child" {
+					return errors.New("Invalid relationshipType. It can be only 'parent' or 'child'.")
+				}
+
+				return nil
+			})),
+
+			validation.Key("structureType", validation.Required, validation.By(func(value interface{}) error {
+				s := value.(string)
+				if s != "map" && s != "list" && s != "variable" {
+					return errors.New("Invalid structureType. It can be only 'map', 'list' or 'variable'.")
+				}
+
+				return nil
+			})),
+
 			validation.Key("orderBy", validation.By(func(value interface{}) error {
 				t := value.(string)
 

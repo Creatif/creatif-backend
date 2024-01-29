@@ -37,7 +37,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
-	placeholders := createPlaceholdersFromModel(c.model)
+	placeholders, countPlaceholders := createPlaceholdersFromModel(c.model)
 	tables := getWorkingTables(c.model.StructureType)
 	orderBy, direction := createFields(c.model)
 	sql := createSql(c.model, tables, orderBy, direction, c.model.RelationshipType)
@@ -49,8 +49,17 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 		return sdk.LogicView[declarations.MapVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("Maps.Paginate.Logic", nil)
 	}
 
+	countSql := createCountSql(c.model, tables, c.model.RelationshipType)
+
+	var count int64
+	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
+	if res.Error != nil {
+		c.logBuilder.Add("paginateMapVariables", res.Error.Error())
+		return sdk.LogicView[declarations.MapVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("paginateMapVariable.Logic", nil)
+	}
+
 	return sdk.LogicView[declarations.MapVariable]{
-		Total: 0,
+		Total: count,
 		Data:  items,
 	}, nil
 }

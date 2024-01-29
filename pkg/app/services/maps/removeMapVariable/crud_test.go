@@ -17,7 +17,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 		referenceView := testCreateMap(projectId, "referenceMap", 10)
-		addToMapVariable := testAddToMap(projectId, view.Name, []shared.Reference{
+		addToMapVariable := testAddToMap(projectId, view.ID, []shared.Reference{
 			{
 				StructureName: referenceView.Name,
 				StructureType: "map",
@@ -30,7 +30,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 			},
 		})
 
-		handler := New(NewModel(projectId, "mapName", addToMapVariable.Variable.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ID, addToMapVariable.Variable.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -65,7 +65,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		shortId := variables[0].ShortID
-		handler := New(NewModel(projectId, view.Name, shortId), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ID, shortId), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

@@ -53,8 +53,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.MapVariable, error) {
 	var m declarations.Map
 	if res := storage.Gorm().Where(
-		fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ?"),
-		c.model.MapName,
+		fmt.Sprintf("(id = ? OR short_id = ?) AND project_id = ?"),
 		c.model.MapName,
 		c.model.MapName,
 		c.model.ProjectID).

@@ -2,6 +2,7 @@ package shared
 
 import (
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -28,15 +29,15 @@ type ParentReference struct {
 	ID            string `gorm:"column:id"`
 }
 
-func CreateDeclarationReferences(refs []Reference, ownerId, childStructureId, projectId string) ([]declarations.Reference, error) {
+func CreateDeclarationReferences(refs []Reference, structureId, childId, projectId string) ([]declarations.Reference, error) {
 	references := make([]declarations.Reference, 0)
 	for _, r := range refs {
-		pr, err := getParentReference(r.StructureName, r.StructureType, r.VariableID, ownerId)
+		pr, err := getParentReference(r.StructureName, r.StructureType, r.VariableID, structureId)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Reference with ID '%s' not found. Structure name: %s; Structure type: %s. Underlying error: %s", r.VariableID, r.StructureName, r.StructureType, err.Error()))
+			return nil, err
 		}
 
-		ref := declarations.NewReference(r.Name, r.StructureType, "map", pr.ID, ownerId, pr.StructureID, childStructureId, projectId)
+		ref := declarations.NewReference(r.Name, r.StructureType, "map", pr.ID, childId, pr.StructureID, structureId, projectId)
 		references = append(references, ref)
 	}
 
@@ -71,7 +72,7 @@ func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId st
 			if updatableRef.Name == incomingRef.Name {
 				pr, err := getParentReference(incomingRef.StructureName, incomingRef.StructureType, incomingRef.VariableID, structureId)
 				if err != nil {
-					return errors.New(fmt.Sprintf("Reference with ID '%s' not found. Structure name: %s; Structure type: %s. Underlying error: %s", incomingRef.VariableID, incomingRef.StructureName, incomingRef.StructureType, err.Error()))
+					return err
 				}
 
 				res := tx.Exec(fmt.Sprintf("UPDATE %s SET parent_type = ?, parent_id = ? WHERE child_id = ? AND name = ?", (declarations.Reference{}).TableName()), incomingRef.StructureType, pr.ID, ownerId, incomingRef.Name)
@@ -91,7 +92,7 @@ func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId st
 		if !updatePerformed {
 			pr, err := getParentReference(incomingRef.StructureName, incomingRef.StructureType, incomingRef.VariableID, ownerId)
 			if err != nil {
-				return errors.New(fmt.Sprintf("Reference with ID '%s' not found. Structure name: %s; Structure type: %s. Underlying error: %s", incomingRef.VariableID, incomingRef.StructureName, incomingRef.StructureType, err.Error()))
+				return err
 			}
 
 			ref := declarations.NewReference(incomingRef.Name, incomingRef.StructureType, "map", pr.ID, ownerId, structureId, "", projectId)
@@ -125,14 +126,14 @@ func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId st
 	return nil
 }
 
-func RemoveAsParent(structureType, parentId string) error {
-	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_type = ? AND (parent_id = ?)", (declarations.Reference{}).TableName()), structureType, parentId)
+func RemoveAsParent(parentId string) error {
+	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_id = ?", (declarations.Reference{}).TableName()), parentId)
 
 	return res.Error
 }
 
-func RemoveAsChild(structureType, childId string) error {
-	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE child_type = ? AND (child_id = ?)", (declarations.Reference{}).TableName()), structureType, childId)
+func RemoveAsChild(childId string) error {
+	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE child_id = ?", (declarations.Reference{}).TableName()), childId)
 
 	return res.Error
 }
@@ -143,11 +144,18 @@ func getParentReference(structureName, structureType, variableId, structureId st
 
 		var pr ParentReference
 		if res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr); res.Error != nil {
-			return ParentReference{}, res.Error
+			return ParentReference{}, appErrors.NewValidationError(map[string]string{
+				"referenceInvalid": res.Error.Error(),
+			})
 		}
 
+		fmt.Println(pr)
+		fmt.Println(structureId)
+
 		if pr.StructureID == structureId {
-			return ParentReference{}, errors.New("Invalid parent reference. A reference can not have itself as the parent")
+			return ParentReference{}, appErrors.NewValidationError(map[string]string{
+				"referenceInvalid": "Invalid reference. A reference cannot be a parent to itself.",
+			})
 		}
 
 		return pr, nil
@@ -158,11 +166,15 @@ func getParentReference(structureName, structureType, variableId, structureId st
 
 		var pr ParentReference
 		if res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr); res.Error != nil {
-			return ParentReference{}, res.Error
+			return ParentReference{}, appErrors.NewValidationError(map[string]string{
+				"referenceInvalid": res.Error.Error(),
+			})
 		}
 
 		if pr.StructureID == structureId {
-			return ParentReference{}, errors.New("Invalid parent reference. A reference can not have itself as the parent")
+			return ParentReference{}, appErrors.NewValidationError(map[string]string{
+				"referenceInvalid": "Invalid reference. A reference cannot be a parent to itself.",
+			})
 		}
 
 		return pr, nil

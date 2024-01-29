@@ -73,7 +73,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var m declarations.Map
-	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR name = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Select("ID", "name").First(&m); res.Error != nil {
+	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name).Select("ID", "name").First(&m); res.Error != nil {
 		c.logBuilder.Add("addToList", res.Error.Error())
 		return LogicModel{}, appErrors.NewNotFoundError(res.Error).AddError("addToList.Logic", nil)
 	}
@@ -92,7 +92,7 @@ func (c Main) Logic() (LogicModel, error) {
 		}
 
 		if len(c.model.References) > 0 {
-			references, err := shared.CreateDeclarationReferences(c.model.References, variable.ID, m.ID, c.model.ProjectID)
+			references, err := shared.CreateDeclarationReferences(c.model.References, m.ID, variable.ID, c.model.ProjectID)
 			if err != nil {
 				return err
 			}
@@ -104,9 +104,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 		return nil
 	}); transactionError != nil {
-		return LogicModel{}, appErrors.NewValidationError(map[string]string{
-			"exists": transactionError.Error(),
-		})
+		return LogicModel{}, transactionError
 	}
 
 	return LogicModel{

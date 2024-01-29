@@ -30,6 +30,7 @@ type LogicModel struct {
 
 type ReferenceView struct {
 	ID                string `json:"id"`
+	Name              string `json:"name"`
 	ParentType        string `json:"parentType"`
 	ChildType         string `json:"childType"`
 	ParentID          string `json:"parentId"`
@@ -71,6 +72,7 @@ func newView(model LogicModel) View {
 		References: sdk.Map(model.Reference, func(idx int, value QueryReference) ReferenceView {
 			return ReferenceView{
 				ID:                value.ID,
+				Name:              value.Name,
 				ParentStructureID: value.ParentStructureID,
 				ChildStructureID:  value.ChildStructureID,
 				ParentID:          value.ParentID,

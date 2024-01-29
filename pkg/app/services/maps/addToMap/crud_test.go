@@ -11,12 +11,12 @@ import (
 )
 
 var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
-	ginkgo.It("should add an entry to the map by name", func() {
+	ginkgo.It("should add an entry to the map by name with references", func() {
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "mapName", 10)
 		reference := testCreateMap(projectId, "referenceMap", 10)
 
-		handler := New(NewModel(projectId, m.Name, VariableModel{
+		handler := New(NewModel(projectId, m.ID, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,
