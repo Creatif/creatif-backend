@@ -34,15 +34,15 @@ func (c Main) Logic() (PreViewModel, error) {
 	if err != nil {
 		return PreViewModel{}, err
 	}
-	
+
 	preViewModel := PreViewModel{
 		ID:        logicModels[0].ID,
 		Name:      logicModels[0].Name,
 		State:     logicModels[0].State,
 		UserID:    logicModels[0].UserID,
-		Variables: make(map[string][]string),
-		Maps:      make([]string, 0),
-		Lists:     make([]string, 0),
+		Variables: make(map[string][]PreViewStructure),
+		Maps:      make([]PreViewStructure, 0),
+		Lists:     make([]PreViewStructure, 0),
 	}
 
 	if len(logicModels) == 1 && logicModels[0].VariableName == "" && logicModels[0].Map == "" && logicModels[0].List == "" {
@@ -53,19 +53,31 @@ func (c Main) Logic() (PreViewModel, error) {
 		variableLocale, _ := locales.GetAlphaWithID(v.VariableLocale)
 
 		if _, ok := preViewModel.Variables[v.VariableLocale]; !ok && variableLocale != "" {
-			preViewModel.Variables[variableLocale] = make([]string, 0)
+			preViewModel.Variables[variableLocale] = make([]PreViewStructure, 0)
 		}
 
 		if v.VariableName != "" {
-			preViewModel.Variables[variableLocale] = append(preViewModel.Variables[variableLocale], v.VariableName)
+			preViewModel.Variables[variableLocale] = append(preViewModel.Variables[variableLocale], PreViewStructure{
+				Name:    v.VariableName,
+				ID:      v.VariableID,
+				ShortID: v.VariableShortID,
+			})
 		}
 
 		if v.Map != "" {
-			preViewModel.Maps = append(preViewModel.Maps, v.Map)
+			preViewModel.Maps = append(preViewModel.Maps, PreViewStructure{
+				Name:    v.Map,
+				ID:      v.MapID,
+				ShortID: v.MapShortID,
+			})
 		}
 
 		if v.List != "" {
-			preViewModel.Lists = append(preViewModel.Lists, v.List)
+			preViewModel.Lists = append(preViewModel.Lists, PreViewStructure{
+				Name:    v.List,
+				ID:      v.ListID,
+				ShortID: v.ListShortID,
+			})
 		}
 	}
 
