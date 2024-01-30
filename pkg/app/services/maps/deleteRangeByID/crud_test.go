@@ -23,7 +23,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, mapView.Name, ids), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapView.Name, ids), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -46,7 +46,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, mapView.ID, ids), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapView.ID, ids), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -69,7 +69,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, mapView.ShortID, ids), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapView.ShortID, ids), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

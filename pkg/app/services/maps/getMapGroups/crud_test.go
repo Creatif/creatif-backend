@@ -13,7 +13,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		view := testCreateMap(projectId, "list", 5)
 
 		l := logger.NewLogBuilder()
-		handler := New(NewModel(view.Name, projectId), auth.NewTestingAuthentication(true), l)
+		handler := New(NewModel(view.Name, projectId), auth.NewTestingAuthentication(true, ""), l)
 		groups, err := handler.Handle()
 		testAssertErrNil(err)
 

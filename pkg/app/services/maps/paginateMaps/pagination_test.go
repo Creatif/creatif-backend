@@ -15,7 +15,7 @@ var _ = ginkgo.Describe("Maps pagination tests", func() {
 			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
 		}
 
-		handler := New(NewModel(projectId, "created_at", "", "desc", 10, 1), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "created_at", "", "desc", 10, 1), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -29,7 +29,7 @@ var _ = ginkgo.Describe("Maps pagination tests", func() {
 			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
 		}
 
-		handler := New(NewModel(projectId, "created_at", "", "desc", 10, 50), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "created_at", "", "desc", 10, 50), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -43,7 +43,7 @@ var _ = ginkgo.Describe("Maps pagination tests", func() {
 			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
 		}
 
-		handler := New(NewModel(projectId, "created_at", "1", "desc", 10, 1), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "created_at", "1", "desc", 10, 1), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

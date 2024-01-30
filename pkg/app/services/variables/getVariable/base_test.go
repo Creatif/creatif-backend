@@ -110,7 +110,7 @@ func testCreateDeclarationVariable(projectId, name, behaviour string, groups []s
 	b, err := json.Marshal(m)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -148,7 +148,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)

@@ -115,7 +115,7 @@ func testCreateUser() app.User {
 }
 
 func testCreateProject(name string) string {
-	handler := New(NewModel(name), auth.NewTestingAuthentication(true), logger.NewLogBuilder())
+	handler := New(NewModel(name), auth.NewTestingAuthentication(true, ""), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)

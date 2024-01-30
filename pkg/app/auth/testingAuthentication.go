@@ -14,6 +14,7 @@ var testSessionUser AuthenticatedUser
 
 type testingAuthentication struct {
 	shouldCreateUser bool
+	projectId        string
 }
 
 func (a *testingAuthentication) Authenticate() error {
@@ -27,9 +28,10 @@ func (a *testingAuthentication) User() AuthenticatedUser {
 		if res.Error != nil {
 			ginkgo.Fail(res.Error.Error())
 		}
-		
+
 		testSessionUser = AuthenticatedUser{
 			ID:        user.ID,
+			ProjectID: a.projectId,
 			Name:      user.Name,
 			LastName:  user.LastName,
 			Email:     user.Email,
@@ -53,6 +55,6 @@ func (a *testingAuthentication) ShouldRefresh() bool {
 	return false
 }
 
-func NewTestingAuthentication(shouldCreateUser bool) Authentication {
-	return &testingAuthentication{shouldCreateUser: shouldCreateUser}
+func NewTestingAuthentication(shouldCreateUser bool, projectId string) Authentication {
+	return &testingAuthentication{shouldCreateUser: shouldCreateUser, projectId: projectId}
 }

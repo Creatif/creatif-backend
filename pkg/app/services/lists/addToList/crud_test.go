@@ -46,7 +46,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 				StructureType: "map",
 				VariableID:    listVariables[2].ID,
 			},
-		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -87,7 +87,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 				StructureType: "map",
 				VariableID:    listVariables[2].ID,
 			},
-		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
@@ -104,7 +104,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}, []shared.Reference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -121,7 +121,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}, []shared.Reference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

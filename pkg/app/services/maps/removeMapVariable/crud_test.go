@@ -30,7 +30,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 			},
 		})
 
-		handler := New(NewModel(projectId, view.ID, addToMapVariable.Variable.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ID, addToMapVariable.Variable.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -50,7 +50,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		variableName := variables[0].ID
-		handler := New(NewModel(projectId, view.ShortID, variableName), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ShortID, variableName), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -65,7 +65,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 
 		variables := view.Variables
 		shortId := variables[0].ShortID
-		handler := New(NewModel(projectId, view.ID, shortId), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ID, shortId), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

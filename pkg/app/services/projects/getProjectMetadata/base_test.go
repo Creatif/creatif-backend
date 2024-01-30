@@ -3,9 +3,14 @@ package getProjectMetadata
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	createList2 "creatif/pkg/app/services/lists/createList"
+	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/maps/mapCreate"
 	"creatif/pkg/app/services/projects/createProject"
+	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
+	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -60,6 +65,8 @@ var _ = ginkgo.BeforeSuite(func() {
 
 	err := storage2.Connect(dsn)
 
+	gomega.Expect(locales.Store()).Should(gomega.BeNil())
+
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -106,7 +113,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name), auth.NewTestingAuthentication(true), logger.NewLogBuilder())
+	handler := createProject.New(createProject.NewModel(name), auth.NewTestingAuthentication(true, ""), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -115,4 +122,120 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
+}
+
+func testCreateList(projectId, name string, varNum int) createList2.View {
+	variables := make([]createList2.Variable, varNum)
+	for i := 0; i < varNum; i++ {
+		variables[i] = createList2.Variable{
+			Name:      fmt.Sprintf("one-%d", i),
+			Metadata:  nil,
+			Groups:    nil,
+			Locale:    "eng",
+			Behaviour: "readonly",
+			Value:     nil,
+		}
+	}
+
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	list, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
+
+	return list
+}
+
+func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
+	entries := make([]mapCreate.VariableModel, 0)
+	fragmentedGroups := map[string]int{}
+	fragmentedGroups["one"] = 0
+	fragmentedGroups["two"] = 0
+	fragmentedGroups["three"] = 0
+
+	m := map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+	}
+
+	b, err := json.Marshal(m)
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	for i := 0; i < variablesNum; i++ {
+		var value interface{}
+		value = "my value"
+		if i%2 == 0 {
+			value = true
+		}
+
+		if i%3 == 0 {
+			value = map[string]interface{}{
+				"one":   "one",
+				"two":   []string{"one", "two", "three"},
+				"three": []int{1, 2, 3},
+				"four":  453,
+			}
+		}
+
+		var groups []string = []string{"unfragmented"}
+		if i%2 == 0 {
+			groups = append(groups, "one")
+			fragmentedGroups["one"]++
+		}
+
+		if i%3 == 0 {
+			groups = append(groups, "two")
+			fragmentedGroups["two"]++
+		}
+
+		if i%5 == 0 {
+			groups = append(groups, "three")
+			fragmentedGroups["three"]++
+		}
+
+		v, err := json.Marshal(value)
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		variableModel := mapCreate.VariableModel{
+			Name:      fmt.Sprintf("name-%d", i),
+			Metadata:  b,
+			Groups:    groups,
+			Value:     v,
+			Behaviour: "modifiable",
+			Locale:    "eng",
+		}
+
+		entries = append(entries, variableModel)
+	}
+
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
+	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
+
+	return view
+}
+
+func testCreateDetailedVariable(projectId, locale, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
+	b, _ := json.Marshal(map[string]interface{}{
+		"one":  1,
+		"two":  "three",
+		"four": "six",
+	})
+
+	handler := createVariable2.New(createVariable2.NewModel(projectId, locale, name, behaviour, groups, metadata, b), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	return view
 }

@@ -42,12 +42,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 				StructureType: "map",
 				VariableID:    reference.Variables[2].ID,
 			},
-		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		maps, err := getMapHandler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(maps.ID)
@@ -90,7 +90,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 				StructureType: "map",
 				VariableID:    reference.Variables[2].ID,
 			},
-		}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
@@ -107,12 +107,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}, []shared.Reference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		maps, err := getMapHandler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(maps.ID)
@@ -130,12 +130,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		}, []shared.Reference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.ShortID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.ShortID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		maps, err := getMapHandler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(maps.ID)

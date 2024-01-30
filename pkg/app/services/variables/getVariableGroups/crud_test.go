@@ -13,7 +13,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		variable := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
 		l := logger.NewLogBuilder()
-		handler := New(NewModel(variable.Name, projectId), auth.NewTestingAuthentication(true), l)
+		handler := New(NewModel(variable.Name, projectId), auth.NewTestingAuthentication(true, ""), l)
 		groups, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -25,7 +25,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		variable := testCreateDetailedVariable(projectId, "variable", "modifiable", []string{"one", "two", "three"}, nil)
 
 		l := logger.NewLogBuilder()
-		handler := New(NewModel(variable.Name, projectId), auth.NewTestingAuthentication(true), l)
+		handler := New(NewModel(variable.Name, projectId), auth.NewTestingAuthentication(true, ""), l)
 		groups, err := handler.Handle()
 		testAssertErrNil(err)
 

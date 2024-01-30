@@ -109,7 +109,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -133,7 +133,7 @@ func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (strin
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)
@@ -178,7 +178,7 @@ func testCreateListWithFragmentedGroups(projectId, name string, varNum int) (str
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

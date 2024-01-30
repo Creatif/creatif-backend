@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Declaration maps variable tests", func() {
 
 		selectedVariable := mapView.Variables[3]
 
-		handler := New(NewModel(projectId, mapView.ID, selectedVariable.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapView.ID, selectedVariable.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)

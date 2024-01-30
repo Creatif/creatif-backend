@@ -11,7 +11,7 @@ var _ = ginkgo.Describe("GET map tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
-		handler := New(NewModel(projectId, view.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		mapVariablesView, err := handler.Handle()
 		testAssertErrNil(err)

@@ -97,8 +97,6 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
-	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
 func testAssertErrNil(err error) {
@@ -112,7 +110,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -136,7 +134,7 @@ func testCreateList(projectId, name string, varNum int) createList2.View {
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

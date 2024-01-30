@@ -20,7 +20,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, []string{"name", "behaviour"}, view.ShortID, "newName", "readonly", []string{}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{"name", "behaviour"}, view.ShortID, "newName", "readonly", []string{}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -47,7 +47,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, []string{"name", "groups", "value"}, view.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{"name", "groups", "value"}, view.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -76,7 +76,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, []string{"name", "behaviour", "groups"}, view.ShortID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{"name", "behaviour", "groups"}, view.ShortID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -115,7 +115,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			"readonly",
 			[]string{"1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"},
 			[]byte{}, v, "eng"),
-			auth.NewTestingAuthentication(false),
+			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder(),
 		)
 
@@ -143,7 +143,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			"readonly",
 			[]string{"1", "1", "2"},
 			[]byte{}, v, "eng"),
-			auth.NewTestingAuthentication(false),
+			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder(),
 		)
 
@@ -174,7 +174,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			v,
 			"",
 		),
-			auth.NewTestingAuthentication(false),
+			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder(),
 		)
 
@@ -205,7 +205,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			v,
 			"eng",
 		),
-			auth.NewTestingAuthentication(false),
+			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder(),
 		)
 
@@ -236,7 +236,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			v,
 			"eng",
 		),
-			auth.NewTestingAuthentication(false),
+			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder(),
 		)
 
@@ -267,7 +267,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			v,
 			"eng",
 		),
-			auth.NewTestingAuthentication(false),
+			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder(),
 		)
 

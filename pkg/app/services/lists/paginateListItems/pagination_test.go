@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		_, listID := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -26,7 +26,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		_, listID := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, []string{}, listID, "created_at", "", "desc", 10, 50, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, listID, "created_at", "", "desc", 10, 50, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -39,7 +39,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		_, listID := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -51,7 +51,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		_, listID, groups := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, []string{}, listID, "created_at", "", "desc", 50, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, listID, "created_at", "", "desc", 50, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -63,7 +63,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		projectId := testCreateProject("project")
 		_, listID, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, []string{}, listID, "created_at", "1", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, listID, "created_at", "1", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -76,7 +76,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		_, listID, _ := testCreateListWithFragmentedGroups(projectId, "name", 100)
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "1", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, listID, "created_at", "1", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

@@ -16,7 +16,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) variable tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(projectId, view.Name, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.Name, "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -30,7 +30,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) variable tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(projectId, view.ID, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ID, "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -44,7 +44,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) variable tests", func() {
 		projectId := testCreateProject("project")
 		view := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
-		handler := New(NewModel(projectId, view.ShortID, "eng"), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ShortID, "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
