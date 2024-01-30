@@ -1,7 +1,6 @@
 package getProjectMetadata
 
 import (
-	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -9,22 +8,19 @@ import (
 
 var _ = ginkgo.Describe("Get project metadata tests", func() {
 	ginkgo.It("Should get the project metadata from various structures", func() {
-		projectID := testCreateProject("project")
+		authentication := testCreateProject("project")
 
 		for i := 0; i < 10; i++ {
-			testCreateMap(projectID, fmt.Sprintf("%d-name", i), 10)
-			testCreateList(projectID, fmt.Sprintf("%d-name", i), 10)
+			testCreateMap(authentication, fmt.Sprintf("%d-name", i), 10)
+			testCreateList(authentication, fmt.Sprintf("%d-name", i), 10)
 
 			for _, locale := range []string{"aar", "abk", "eng"} {
-				testCreateDetailedVariable(projectID, locale, fmt.Sprintf("%d-name", i), "modifiable", []string{}, nil)
+				testCreateDetailedVariable(authentication, locale, fmt.Sprintf("%d-name", i), "modifiable", []string{}, nil)
 			}
 		}
 
-		a := auth.NewTestingAuthentication(true, projectID)
-		handler := New(a, logger.NewLogBuilder())
-		model, err := handler.Handle()
+		handler := New(authentication, logger.NewLogBuilder())
+		_, err := handler.Handle()
 		testAssertErrNil(err)
-
-		fmt.Println(model)
 	})
 })

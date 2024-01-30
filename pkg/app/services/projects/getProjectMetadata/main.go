@@ -6,7 +6,6 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
-	"fmt"
 )
 
 type Main struct {
@@ -31,7 +30,6 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (PreViewModel, error) {
-	fmt.Println("projectid: ", c.auth.User().ProjectID, "userid: ", c.auth.User().ID)
 	logicModels, err := getVariablesMetadata(c.auth.User().ProjectID, c.auth.User().ID)
 	if err != nil {
 		return PreViewModel{}, err

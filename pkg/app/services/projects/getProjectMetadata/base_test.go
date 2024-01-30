@@ -19,6 +19,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 func loadEnv() {
@@ -112,19 +113,33 @@ func testAssertIDValid(id string) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }
 
-func testCreateProject(name string) string {
-	handler := createProject.New(createProject.NewModel(name), auth.NewTestingAuthentication(true, ""), logger.NewLogBuilder())
+func testCreateProject(name string) auth.Authentication {
+	a := auth.NewTestingAuthentication(true, "")
+
+	handler := createProject.New(createProject.NewModel(name), a, logger.NewLogBuilder())
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
 	testAssertIDValid(model.ID)
 
+	f := auth.NewFrontendTestingAuthentication(auth.AuthenticatedUser{
+		ID:        a.User().ID,
+		Name:      a.User().Name,
+		LastName:  a.User().LastName,
+		Email:     a.User().Email,
+		Refresh:   a.User().Refresh,
+		ProjectID: model.ID,
+		ApiKey:    "",
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+	})
+
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
-	return model.ID
+	return f
 }
 
-func testCreateList(projectId, name string, varNum int) createList2.View {
+func testCreateList(authentication auth.Authentication, name string, varNum int) createList2.View {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
 		variables[i] = createList2.Variable{
@@ -137,7 +152,7 @@ func testCreateList(projectId, name string, varNum int) createList2.View {
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(authentication.User().ProjectID, name, variables), authentication, logger.NewLogBuilder())
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)
@@ -148,7 +163,7 @@ func testCreateList(projectId, name string, varNum int) createList2.View {
 	return list
 }
 
-func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
+func testCreateMap(authentication auth.Authentication, name string, variablesNum int) mapCreate.View {
 	entries := make([]mapCreate.VariableModel, 0)
 	fragmentedGroups := map[string]int{}
 	fragmentedGroups["one"] = 0
@@ -212,7 +227,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 		entries = append(entries, variableModel)
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(authentication.User().ProjectID, name, entries), authentication, logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -224,14 +239,14 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	return view
 }
 
-func testCreateDetailedVariable(projectId, locale, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
+func testCreateDetailedVariable(authentication auth.Authentication, locale, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
 	b, _ := json.Marshal(map[string]interface{}{
 		"one":  1,
 		"two":  "three",
 		"four": "six",
 	})
 
-	handler := createVariable2.New(createVariable2.NewModel(projectId, locale, name, behaviour, groups, metadata, b), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createVariable2.New(createVariable2.NewModel(authentication.User().ProjectID, locale, name, behaviour, groups, metadata, b), authentication, logger.NewLogBuilder())
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
