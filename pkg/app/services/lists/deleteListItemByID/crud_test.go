@@ -12,13 +12,13 @@ import (
 var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 	ginkgo.It("should delete a list item by list name and item ID", func() {
 		projectId := testCreateProject("project")
-		listName, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
+		_, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
 		var listItem declarations2.ListVariable
 		res := storage.Gorm().Where("list_id = ?", listId).Select("ID").First(&listItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, listName, listItem.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, listId, listItem.ID), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

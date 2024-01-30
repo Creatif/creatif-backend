@@ -110,7 +110,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	lv.updated_at 
 			FROM %s AS lv
 			INNER JOIN %s AS l
-		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id %s %s
+		ON l.project_id = @projectID AND (l.id = @name OR l.short_id = @name) AND l.id = lv.list_id %s %s
 		%s
 		%s
 		ORDER BY lv.%s %s
@@ -137,7 +137,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	    count(lv.id) AS count
 		FROM %s AS lv
 		INNER JOIN %s AS l
-		ON l.project_id = @projectID AND l.name = @name AND l.id = lv.list_id %s %s
+		ON l.project_id = @projectID AND (l.short_id = @name OR l.id = @name) AND l.id = lv.list_id %s %s
     	%s
     	%s
 	`,

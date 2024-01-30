@@ -9,6 +9,7 @@ import (
 
 type QueryReference struct {
 	ID                string
+	Name              string
 	ParentType        string
 	ChildType         string
 	ParentID          string

@@ -2,14 +2,10 @@ package getProjectMetadata
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
-	"creatif/pkg/lib/storage"
-	"fmt"
 )
 
 type Main struct {
@@ -34,38 +30,11 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (PreViewModel, error) {
-	var logicModels []LogicModel
-	res := storage.Gorm().Raw(fmt.Sprintf(`
-SELECT 
-p.id,
-p.name,
-p.state,
-p.user_id,
-v.name AS variable_name,
-m.name AS map_name,
-l.name AS list_name,
-v.locale_id AS variable_locale
-FROM %s AS p
-LEFT JOIN %s AS v ON p.id = ? AND p.user_id = ? AND v.project_id = p.id AND v.project_id = ?
-LEFT JOIN %s AS m ON m.project_id = p.id AND m.project_id = ?
-LEFT JOIN %s AS l ON l.project_id = p.id AND l.project_id = ?
-WHERE p.id = ? AND p.user_id = ?
-`,
-		(app.Project{}).TableName(),
-		(declarations.Variable{}).TableName(),
-		(declarations.Map{}).TableName(),
-		(declarations.List{}).TableName(),
-	),
-		c.auth.User().ProjectID, c.auth.User().ID, c.auth.User().ProjectID,
-		c.auth.User().ProjectID,
-		c.auth.User().ProjectID,
-		c.auth.User().ProjectID, c.auth.User().ID,
-	).Scan(&logicModels)
-
-	if res.Error != nil {
-		return PreViewModel{}, appErrors.NewNotFoundError(res.Error)
+	logicModels, err := getVariablesMetadata(c.auth.User().ProjectID, c.auth.User().ID)
+	if err != nil {
+		return PreViewModel{}, err
 	}
-
+	
 	preViewModel := PreViewModel{
 		ID:        logicModels[0].ID,
 		Name:      logicModels[0].Name,

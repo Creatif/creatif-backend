@@ -11,7 +11,7 @@ import (
 var _ = ginkgo.Describe("Declaration list append tests", func() {
 	ginkgo.It("should append to a list", func() {
 		projectId := testCreateProject("project")
-		listName := testCreateList(projectId, "list", 5)
+		list := testCreateList(projectId, "list", 5)
 
 		variables := make([]Variable, 5)
 		for i := 0; i < 5; i++ {
@@ -25,7 +25,7 @@ var _ = ginkgo.Describe("Declaration list append tests", func() {
 			}
 		}
 
-		handler := New(NewModel(projectId, listName, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, list.ShortID, variables), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		vars, err := handler.Handle()
 		testAssertErrNil(err)
@@ -35,6 +35,5 @@ var _ = ginkgo.Describe("Declaration list append tests", func() {
 		}
 
 		gomega.Expect(len(vars)).Should(gomega.Equal(5))
-
 	})
 })

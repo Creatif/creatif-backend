@@ -15,12 +15,12 @@ import (
 var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	ginkgo.It("should update the name of the list item variable", func() {
 		projectId := testCreateProject("project")
-		testCreateList(projectId, "name", 100, false, "modifiable")
+		view := testCreateList(projectId, "name", 100, false, "modifiable")
 
 		var singleItem declarations.ListVariable
 		res := storage.Gorm().Raw(
-			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
-			"name",
+			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.id = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
+			view.ID,
 			projectId,
 		).Scan(&singleItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
@@ -29,7 +29,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour"}, "name", singleItem.ID, "newName", "readonly", []string{}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour"}, view.ID, singleItem.ID, "newName", "readonly", []string{}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -48,12 +48,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should update the groups of the declaration variable", func() {
 		projectId := testCreateProject("project")
-		listName := testCreateList(projectId, "name", 100, false, "modifiable")
+		view := testCreateList(projectId, "name", 100, false, "modifiable")
 
 		var singleItem declarations.ListVariable
 		res := storage.Gorm().Raw(
-			fmt.Sprintf("SELECT lv.short_id AS short_id, lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
-			listName,
+			fmt.Sprintf("SELECT lv.short_id AS short_id, lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.short_id = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
+			view.ShortID,
 			projectId,
 		).Scan(&singleItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
@@ -62,7 +62,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, "name", singleItem.ShortID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ShortID, singleItem.ShortID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -84,12 +84,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should update the behaviour of the declaration variable", func() {
 		projectId := testCreateProject("project")
-		listName := testCreateList(projectId, "name", 100, false, "modifiable")
+		view := testCreateList(projectId, "name", 100, false, "modifiable")
 
 		var singleItem declarations.ListVariable
 		res := storage.Gorm().Raw(
-			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
-			listName,
+			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.id = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
+			view.ID,
 			projectId,
 		).Scan(&singleItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
@@ -97,7 +97,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour", "groups"}, "name", singleItem.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "behaviour", "groups"}, view.ShortID, singleItem.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v), auth.NewTestingAuthentication(false), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -121,12 +121,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should fail updating list variable because max number of groups", func() {
 		projectId := testCreateProject("project")
-		listName := testCreateList(projectId, "name", 100, true, "modifiable")
+		view := testCreateList(projectId, "name", 100, true, "modifiable")
 
 		var singleItem declarations.ListVariable
 		res := storage.Gorm().Raw(
-			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
-			listName,
+			fmt.Sprintf("SELECT lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.id = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
+			view.ID,
 			projectId,
 		).Scan(&singleItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
@@ -138,7 +138,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			projectId,
 			"eng",
 			[]string{"name", "behaviour", "groups"},
-			"name",
+			view.ID,
 			singleItem.ID,
 			"newName",
 			"readonly",
@@ -159,12 +159,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should fail updating list variable because of invalid behaviour", func() {
 		projectId := testCreateProject("project")
-		listName := testCreateList(projectId, "name", 100, true, "readonly")
+		view := testCreateList(projectId, "name", 100, true, "readonly")
 
 		var singleItem declarations.ListVariable
 		res := storage.Gorm().Raw(
-			fmt.Sprintf("SELECT lv.short_id, lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.name = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
-			listName,
+			fmt.Sprintf("SELECT lv.short_id, lv.id AS id FROM %s AS lv INNER JOIN %s AS l ON lv.list_id = l.id AND l.id = ? AND l.project_id = ?", (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName()),
+			view.ID,
 			projectId,
 		).Scan(&singleItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
@@ -176,7 +176,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			projectId,
 			"eng",
 			[]string{"name", "behaviour", "groups"},
-			"name",
+			view.ID,
 			singleItem.ShortID,
 			"newName",
 			"readonly",

@@ -45,12 +45,12 @@ func (c Main) Logic() (LogicModel, error) {
 	sql := fmt.Sprintf(`
 			SELECT lv.id, lv.name, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at, lv.locale_id
 			FROM %s AS lv INNER JOIN %s AS l
-			ON l.project_id = ? AND (l.name = ? OR l.short_id = ? OR l.id = ?) AND lv.map_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
+			ON l.project_id = ? AND (l.short_id = ? OR l.id = ?) AND lv.map_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())
 
 	var variable declarations.MapVariable
 	res := storage.Gorm().
-		Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID).
+		Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID).
 		Scan(&variable)
 
 	if res.Error != nil {

@@ -31,12 +31,12 @@ func (c Main) Validate() error {
 	sql := fmt.Sprintf(`
 SELECT mv.id FROM %s AS mv 
 INNER JOIN %s AS m ON 
-(m.id = ? OR m.name = ? OR m.short_id = ?) AND m.project_id = ? AND 
+(m.id = ? OR m.short_id = ?) AND m.project_id = ? AND 
 mv.list_id = m.id AND mv.name = ? AND mv.locale_id = ?
 `, (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
 
 	var entry declarations.ListVariable
-	res := storage.Gorm().Raw(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Entry.Name, entryLocaleId).Scan(&entry)
+	res := storage.Gorm().Raw(sql, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Entry.Name, entryLocaleId).Scan(&entry)
 	if res.Error != nil {
 		return appErrors.NewValidationError(map[string]string{
 			"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' for map with ID '%s' already exists.", c.model.Entry.Name, c.model.Entry.Locale, c.model.Name),

@@ -11,11 +11,11 @@ import (
 func getGroups(name, projectId string) ([]LogicModel, error) {
 	sql := fmt.Sprintf(`
 SELECT groups FROM %s AS lv 
-    INNER JOIN %s AS l ON l.project_id = ? AND lv.list_id = l.id AND (l.name = ? OR l.id = ? OR l.short_id = ?)
+    INNER JOIN %s AS l ON l.project_id = ? AND lv.list_id = l.id AND (l.id = ? OR l.short_id = ?)
 `, (declarations2.ListVariable{}).TableName(), (declarations2.List{}).TableName())
 
 	var duplicatedModel []LogicModel
-	res := storage.Gorm().Raw(sql, projectId, name, name, name).Scan(&duplicatedModel)
+	res := storage.Gorm().Raw(sql, projectId, name, name).Scan(&duplicatedModel)
 
 	if res.Error != nil && res.RowsAffected == 0 {
 		return nil, appErrors.NewNotFoundError(res.Error)

@@ -29,12 +29,14 @@ var initialReturnFields = []string{
 }
 
 type Model struct {
-	ProjectID     string
-	ParentID      string
-	ChildID       string
-	StructureType string
-
-	Locales []string
+	ProjectID         string
+	ParentID          string
+	ChildID           string
+	RelationshipType  string
+	StructureType     string
+	ParentStructureID string
+	ChildStructureID  string
+	Locales           []string
 
 	Limit          int
 	Page           int
@@ -47,39 +49,71 @@ type Model struct {
 	Fields         []string
 }
 
-func NewModel(projectId, parentId, childId, structureType string, locales []string, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string, behaviour string, fields []string) Model {
+func NewModel(projectId, parentId, childId, parentStructureId, childStructureId, relationshipType, structureType string, locales []string, orderBy, search, direction string, limit, page int, groups []string, filters map[string]string, behaviour string, fields []string) Model {
 	return Model{
-		ProjectID:      projectId,
-		Locales:        locales,
-		Search:         search,
-		ParentID:       parentId,
-		ChildID:        childId,
-		StructureType:  structureType,
-		OrderBy:        orderBy,
-		Page:           page,
-		Filters:        filters,
-		Behaviour:      behaviour,
-		OrderDirection: direction,
-		Limit:          limit,
-		Groups:         groups,
-		Fields:         fields,
+		ProjectID:         projectId,
+		Locales:           locales,
+		Search:            search,
+		ParentID:          parentId,
+		ParentStructureID: parentStructureId,
+		ChildStructureID:  childStructureId,
+		ChildID:           childId,
+		RelationshipType:  relationshipType,
+		StructureType:     structureType,
+		OrderBy:           orderBy,
+		Page:              page,
+		Filters:           filters,
+		Behaviour:         behaviour,
+		OrderDirection:    direction,
+		Limit:             limit,
+		Groups:            groups,
+		Fields:            fields,
 	}
 }
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID":   a.ProjectID,
-		"orderBy":     a.OrderBy,
-		"page":        a.Page,
-		"validFields": a.Fields,
-		"limit":       a.Limit,
-		"behaviour":   a.Behaviour,
-		"direction":   a.OrderDirection,
+		"projectID":         a.ProjectID,
+		"parentID":          a.ParentID,
+		"childID":           a.ChildID,
+		"childStructureID":  a.ChildStructureID,
+		"parentStructureID": a.ParentStructureID,
+		"relationshipType":  a.RelationshipType,
+		"structureType":     a.StructureType,
+		"orderBy":           a.OrderBy,
+		"page":              a.Page,
+		"validFields":       a.Fields,
+		"limit":             a.Limit,
+		"behaviour":         a.Behaviour,
+		"direction":         a.OrderDirection,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("parentID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("childID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("childStructureID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("parentStructureID", validation.Required, validation.RuneLength(26, 26)),
+
+			validation.Key("relationshipType", validation.Required, validation.By(func(value interface{}) error {
+				s := value.(string)
+				if s != "parent" && s != "child" {
+					return errors.New("Invalid relationshipType. It can be only 'parent' or 'child'.")
+				}
+
+				return nil
+			})),
+
+			validation.Key("structureType", validation.Required, validation.By(func(value interface{}) error {
+				s := value.(string)
+				if s != "map" && s != "list" && s != "variable" {
+					return errors.New("Invalid structureType. It can be only 'map', 'list' or 'variable'.")
+				}
+
+				return nil
+			})),
+
 			validation.Key("orderBy", validation.By(func(value interface{}) error {
 				t := value.(string)
 

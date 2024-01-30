@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		projectId := testCreateProject("project")
 		m := testCreateMap(projectId, "map", 10, "modifiable")
 		referenceMap := testCreateMap(projectId, "referenceMap", 10, "modifiable")
-		addToMapView := testAddToMap(projectId, "map", []shared.Reference{
+		addToMapView := testAddToMap(projectId, m.ID, []shared.Reference{
 			{
 				Name:          "myName",
 				StructureName: referenceMap.Name,
@@ -45,7 +45,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, m.Name, addToMapView.Variable.ID, []string{"metadata", "groups", "behaviour", "value", "name"}, VariableModel{
+		handler := New(NewModel(projectId, m.ShortID, addToMapView.Variable.ID, []string{"metadata", "groups", "behaviour", "value", "name"}, VariableModel{
 			Name:      "new name",
 			Metadata:  b,
 			Groups:    []string{"updated1", "updated2", "updated3"},
@@ -101,7 +101,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, m.Name, m.Variables[5].ShortID, []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
+		handler := New(NewModel(projectId, m.ID, m.Variables[5].ShortID, []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
 			Name:      "new name",
 			Metadata:  b,
 			Groups:    []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"},
@@ -128,7 +128,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, m.Name, m.Variables[5].ID, []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
+		handler := New(NewModel(projectId, m.ShortID, m.Variables[5].ID, []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
 			Name:      m.Variables[6].ID,
 			Metadata:  b,
 			Groups:    []string{"1", "2", "3", "4", "5"},
@@ -155,7 +155,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		v, err := json.Marshal("this is value")
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, m.Name, m.Variables[5].ID, []string{"metadata", "groups", "behaviour", "value", "name"}, VariableModel{
+		handler := New(NewModel(projectId, m.ID, m.Variables[5].ID, []string{"metadata", "groups", "behaviour", "value", "name"}, VariableModel{
 			Name:      "name-0",
 			Metadata:  b,
 			Groups:    []string{"1", "2", "3", "4", "5"},
