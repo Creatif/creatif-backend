@@ -4,11 +4,13 @@ import "C"
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -40,20 +42,33 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (*struct{}, error) {
-	sql := fmt.Sprintf(
-		`DELETE FROM %s AS lv USING %s AS l WHERE (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.map_id = l.id AND lv.id IN(?)`,
-		(declarations.MapVariable{}).TableName(),
-		(declarations.Map{}).TableName(),
-	)
+	if transactionErr := storage.Transaction(func(tx *gorm.DB) error {
+		sql := fmt.Sprintf(
+			`DELETE FROM %s AS lv USING %s AS l WHERE (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.map_id = l.id AND lv.id IN(?)`,
+			(declarations.MapVariable{}).TableName(),
+			(declarations.Map{}).TableName(),
+		)
 
-	res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
-	if res.Error != nil {
-		c.logBuilder.Add("deleteRangeByID", res.Error.Error())
-		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
-	}
+		res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
+		if res.Error != nil {
+			c.logBuilder.Add("deleteRangeByID", res.Error.Error())
+			return appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
+		}
 
-	if res.RowsAffected == 0 {
-		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteRangeByID.Logic", nil)
+		if res.RowsAffected == 0 {
+			return appErrors.NewNotFoundError(res.Error).AddError("deleteRangeByID.Logic", nil)
+		}
+
+		if err := shared.RemoveManyAsParent(c.model.Items); err != nil {
+			return err
+		}
+		if err := shared.RemoveManyAsChild(c.model.Items); err != nil {
+			return err
+		}
+
+		return nil
+	}); transactionErr != nil {
+		return nil, appErrors.NewApplicationError(transactionErr)
 	}
 
 	return nil, nil

@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
@@ -142,20 +143,30 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 	}
 
 	var updated declarations.ListVariable
-	if res := storage.Gorm().Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
-		{Name: "id"},
-		{Name: "name"},
-		{Name: "behaviour"},
-		{Name: "metadata"},
-		{Name: "locale_id"},
-		{Name: "value"},
-		{Name: "groups"},
-		{Name: "created_at"},
-		{Name: "updated_at"},
-	}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
-		c.logBuilder.Add("updateListItemByID", res.Error.Error())
+	if transactionErr := storage.Transaction(func(tx *gorm.DB) error {
+		if res := tx.Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
+			{Name: "id"},
+			{Name: "name"},
+			{Name: "behaviour"},
+			{Name: "metadata"},
+			{Name: "locale_id"},
+			{Name: "value"},
+			{Name: "groups"},
+			{Name: "created_at"},
+			{Name: "updated_at"},
+		}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
+			c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
-		return declarations.ListVariable{}, appErrors.NewApplicationError(res.Error).AddError("updateListItemByID.Logic", nil)
+			return appErrors.NewApplicationError(res.Error).AddError("updateListItemByID.Logic", nil)
+		}
+
+		if err := shared.UpdateReferences(c.model.References, list.ID, updated.ID, c.model.ProjectID, tx); err != nil {
+			return err
+		}
+
+		return nil
+	}); transactionErr != nil {
+		return declarations.ListVariable{}, appErrors.NewApplicationError(transactionErr)
 	}
 
 	return updated, nil

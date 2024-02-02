@@ -3,6 +3,7 @@ package updateListItemByID
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
@@ -31,19 +32,21 @@ type ModelValues struct {
 }
 
 type Model struct {
-	Fields    []string
-	ListName  string
-	ItemID    string
-	Values    ModelValues
-	ProjectID string
+	Fields     []string
+	ListName   string
+	ItemID     string
+	Values     ModelValues
+	ProjectID  string
+	References []shared.UpdateReference
 }
 
-func NewModel(projectId, locale string, fields []string, listName, itemId, updatingName, behaviour string, groups []string, metadata, value []byte) Model {
+func NewModel(projectId, locale string, fields []string, listName, itemId, updatingName, behaviour string, groups []string, metadata, value []byte, references []shared.UpdateReference) Model {
 	return Model{
-		Fields:    fields,
-		ProjectID: projectId,
-		ListName:  listName,
-		ItemID:    itemId,
+		Fields:     fields,
+		ProjectID:  projectId,
+		ListName:   listName,
+		ItemID:     itemId,
+		References: references,
 		Values: ModelValues{
 			Name:      updatingName,
 			Metadata:  metadata,

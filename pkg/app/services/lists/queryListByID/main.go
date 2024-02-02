@@ -41,7 +41,7 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (declarations.ListVariable, error) {
+func (c Main) Logic() (LogicModel, error) {
 	sql := fmt.Sprintf(`
 			SELECT lv.id, lv.name, lv.index, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at, lv.locale_id
 			FROM %s AS lv INNER JOIN %s AS l
@@ -55,15 +55,23 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 
 	if res.Error != nil {
 		c.logBuilder.Add("queryMapVariable", res.Error.Error())
-		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
+		return LogicModel{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
 		c.logBuilder.Add("queryMapVariable", "No rows returned. 404 status code.")
-		return declarations.ListVariable{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
+		return LogicModel{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
 	}
 
-	return variable, nil
+	references, err := queryReferences(variable.ID, c.model.ProjectID)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
+	return LogicModel{
+		Variable:  variable,
+		Reference: references,
+	}, nil
 }
 
 func (c Main) Handle() (View, error) {
@@ -88,7 +96,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.ListVariable] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
 	logBuilder.Add("queryMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

@@ -3,6 +3,7 @@ package deleteListItemByID
 import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
@@ -12,13 +13,29 @@ import (
 var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 	ginkgo.It("should delete a list item by list name and item ID", func() {
 		projectId := testCreateProject("project")
-		_, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
+		_, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 99)
+		referenceListName, referenceListId, _ := testCreateListAndReturnNameAndID(projectId, "referenceName", 100)
 
-		var listItem declarations2.ListVariable
-		res := storage.Gorm().Where("list_id = ?", listId).Select("ID").First(&listItem)
-		gomega.Expect(res.Error).Should(gomega.BeNil())
+		var referenceListItems []declarations2.ListVariable
+		res := storage.Gorm().Where("list_id = ?", referenceListId).Select("id").Find(&referenceListItems)
+		testAssertErrNil(res.Error)
 
-		handler := New(NewModel(projectId, listId, listItem.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		addToListVariable := testAddToList(projectId, listId, []shared.Reference{
+			{
+				Name:          "first",
+				StructureName: referenceListName,
+				StructureType: "list",
+				VariableID:    referenceListItems[0].ID,
+			},
+			{
+				Name:          "second",
+				StructureName: referenceListName,
+				StructureType: "list",
+				VariableID:    referenceListItems[1].ID,
+			},
+		})
+
+		handler := New(NewModel(projectId, listId, addToListVariable.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -27,6 +44,11 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		res = storage.Gorm().Where("list_id = ?", listId).Select("ID").Find(&listItems)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(len(listItems)).Should(gomega.Equal(99))
+
+		var count int
+		res = storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		testAssertErrNil(res.Error)
+		gomega.Expect(count).Should(gomega.Equal(0))
 	})
 
 	ginkgo.It("should delete a list item by list shortID and item name", func() {

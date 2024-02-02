@@ -53,8 +53,12 @@ func (c Main) Logic() (interface{}, error) {
 			return res.Error
 		}
 
-		shared.RemoveAsParent(c.model.VariableName)
-		shared.RemoveAsChild(c.model.VariableName)
+		if err := shared.RemoveAsParent(c.model.VariableName); err != nil {
+			return err
+		}
+		if err := shared.RemoveAsChild(c.model.VariableName); err != nil {
+			return err
+		}
 
 		return nil
 	}); err != nil {

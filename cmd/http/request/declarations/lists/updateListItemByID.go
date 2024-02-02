@@ -16,13 +16,21 @@ type UpdateListItemByIDValues struct {
 }
 
 type UpdateListItemByID struct {
-	Name      string                   `param:"name"`
-	ItemID    string                   `param:"itemID"`
-	Values    UpdateListItemByIDValues `json:"values"`
-	ProjectID string                   `param:"projectID"`
-	Fields    string                   `query:"fields"`
+	Name       string                   `param:"name"`
+	ItemID     string                   `param:"itemID"`
+	Values     UpdateListItemByIDValues `json:"values"`
+	ProjectID  string                   `param:"projectID"`
+	Fields     string                   `query:"fields"`
+	References []UpdateReference        `json:"references"`
 
 	ResolvedFields []string
+}
+
+type UpdateReference struct {
+	Name          string `json:"name"`
+	StructureName string `json:"structureName"`
+	StructureType string `json:"structureType"`
+	VariableID    string `json:"variableId"`
 }
 
 func SanitizeUpdateListItemByID(model UpdateListItemByID) UpdateListItemByID {
@@ -47,6 +55,17 @@ func SanitizeUpdateListItemByID(model UpdateListItemByID) UpdateListItemByID {
 		}),
 		Metadata: model.Values.Metadata,
 		Value:    model.Values.Value,
+	}
+
+	if len(model.References) != 0 {
+		model.References = sdk.Map(model.References, func(idx int, value UpdateReference) UpdateReference {
+			return UpdateReference{
+				Name:          p.Sanitize(value.Name),
+				StructureName: p.Sanitize(value.StructureName),
+				StructureType: p.Sanitize(value.StructureType),
+				VariableID:    p.Sanitize(value.VariableID),
+			}
+		})
 	}
 
 	return model

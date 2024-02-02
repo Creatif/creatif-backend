@@ -31,19 +31,19 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			{
 				Name:          "first",
 				StructureName: reference.Name,
-				StructureType: "map",
+				StructureType: "list",
 				VariableID:    listVariables[0].ID,
 			},
 			{
 				Name:          "second",
 				StructureName: reference.Name,
-				StructureType: "map",
+				StructureType: "list",
 				VariableID:    listVariables[1].ID,
 			},
 			{
 				Name:          "third",
 				StructureName: reference.Name,
-				StructureType: "map",
+				StructureType: "list",
 				VariableID:    listVariables[2].ID,
 			},
 		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -77,19 +77,19 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			{
 				Name:          "first",
 				StructureName: reference.Name,
-				StructureType: "map",
+				StructureType: "list",
 				VariableID:    listVariables[0].ID,
 			},
 			{
 				Name:          "second",
 				StructureName: reference.Name,
-				StructureType: "map",
+				StructureType: "list",
 				VariableID:    listVariables[0].ID,
 			},
 			{
 				Name:          "first",
 				StructureName: reference.Name,
-				StructureType: "map",
+				StructureType: "list",
 				VariableID:    listVariables[2].ID,
 			},
 		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())

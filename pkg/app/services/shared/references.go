@@ -132,6 +132,18 @@ func RemoveAsParent(parentId string) error {
 	return res.Error
 }
 
+func RemoveManyAsParent(parentIds []string) error {
+	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_id IN(?)", (declarations.Reference{}).TableName()), parentIds)
+
+	return res.Error
+}
+
+func RemoveManyAsChild(childIds []string) error {
+	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE child_id IN(?)", (declarations.Reference{}).TableName()), childIds)
+
+	return res.Error
+}
+
 func RemoveAsChild(childId string) error {
 	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE child_id = ?", (declarations.Reference{}).TableName()), childId)
 
@@ -143,7 +155,9 @@ func getParentReference(structureName, structureType, variableId, structureId st
 		sql := fmt.Sprintf(`SELECT lv.id AS id, l.id AS structure_id FROM declarations.list_variables AS lv INNER JOIN declarations.lists AS l ON l.id = lv.list_id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND lv.id = ?`)
 
 		var pr ParentReference
-		if res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr); res.Error != nil {
+		res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr)
+
+		if res.Error != nil {
 			return ParentReference{}, appErrors.NewValidationError(map[string]string{
 				"referenceInvalid": res.Error.Error(),
 			})
@@ -152,6 +166,12 @@ func getParentReference(structureName, structureType, variableId, structureId st
 		if pr.StructureID == structureId {
 			return ParentReference{}, appErrors.NewValidationError(map[string]string{
 				"referenceInvalid": "Invalid reference. A reference cannot be a parent to itself.",
+			})
+		}
+
+		if res.RowsAffected == 0 {
+			return ParentReference{}, appErrors.NewValidationError(map[string]string{
+				"referenceInvalid": "Invalid reference. Parent reference not found.",
 			})
 		}
 
@@ -162,7 +182,9 @@ func getParentReference(structureName, structureType, variableId, structureId st
 		sql := fmt.Sprintf(`SELECT lv.id AS id, l.id AS structure_id FROM declarations.map_variables AS lv INNER JOIN declarations.maps AS l ON l.id = lv.map_id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND lv.id = ?`)
 
 		var pr ParentReference
-		if res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr); res.Error != nil {
+		res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr)
+
+		if res.Error != nil {
 			return ParentReference{}, appErrors.NewValidationError(map[string]string{
 				"referenceInvalid": res.Error.Error(),
 			})
@@ -174,14 +196,30 @@ func getParentReference(structureName, structureType, variableId, structureId st
 			})
 		}
 
+		if res.RowsAffected == 0 {
+			return ParentReference{}, appErrors.NewValidationError(map[string]string{
+				"referenceInvalid": "Invalid reference. Parent reference not found.",
+			})
+		}
+
 		return pr, nil
 	}
 
 	sql := fmt.Sprintf(`SELECT id FROM declarations.variables WHERE id = ?`)
 
 	var pr ParentReference
-	if res := storage.Gorm().Raw(sql, variableId).Scan(&pr); res.Error != nil {
-		return pr, res.Error
+	res := storage.Gorm().Raw(sql, variableId).Scan(&pr)
+
+	if res.Error != nil {
+		return ParentReference{}, appErrors.NewValidationError(map[string]string{
+			"referenceInvalid": res.Error.Error(),
+		})
+	}
+
+	if res.RowsAffected == 0 {
+		return ParentReference{}, appErrors.NewValidationError(map[string]string{
+			"referenceInvalid": "Invalid reference. Parent reference not found.",
+		})
 	}
 
 	return pr, nil

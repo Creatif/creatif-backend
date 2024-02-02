@@ -3,9 +3,11 @@ package deleteRangeByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/lists/addToList"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -142,4 +144,27 @@ func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (strin
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
 	return list.Name, list.ID, list.ShortID
+}
+
+func testAddToList(projectId, name, variableName string, references []shared.Reference) addToList.View {
+	variableModel := addToList.VariableModel{
+		Name:     variableName,
+		Metadata: nil,
+		Groups: []string{
+			"one",
+			"two",
+			"three",
+		},
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToList.NewModel(projectId, name, variableModel, references)
+	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	view, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return view
 }
