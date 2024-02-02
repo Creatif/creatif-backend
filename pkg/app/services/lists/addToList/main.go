@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -83,18 +84,33 @@ func (c Main) Logic() (LogicModel, error) {
 
 	variable := declarations.NewListVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
 	var refs []declarations.Reference
-	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
-		if res := tx.Create(&variable); res.Error != nil {
-			c.logBuilder.Add("addToList", res.Error.Error())
+	if err := storage.Transaction(func(tx *gorm.DB) error {
+		if transactionError := storage.Transaction(func(tx *gorm.DB) error {
+			if res := tx.Create(&variable); res.Error != nil {
+				c.logBuilder.Add("addToList", res.Error.Error())
 
-			return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
+				return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
+			}
+
+			if len(c.model.References) > 0 {
+				references, err := shared.CreateDeclarationReferences(c.model.References, m.ID, variable.ID, c.model.ProjectID)
+				if err != nil {
+					return err
+				}
+
+				tx.Create(&references)
+
+				refs = references
+			}
+
+			return nil
+		}); transactionError != nil {
+			return transactionError
 		}
 
 		return nil
-	}); transactionError != nil {
-		return LogicModel{}, appErrors.NewValidationError(map[string]string{
-			"exists": transactionError.Error(),
-		})
+	}); err != nil {
+
 	}
 
 	return LogicModel{

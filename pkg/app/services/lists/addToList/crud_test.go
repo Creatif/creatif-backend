@@ -50,9 +50,14 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
+
+		var count int
+		res = storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		testAssertErrNil(res.Error)
+		gomega.Expect(count).Should(gomega.Equal(3))
 	})
 
-	ginkgo.It("should fail to add an entry because of a duplicate", func() {
+	ginkgo.It("should fail to add an entry because of a duplicate reference", func() {
 		projectId := testCreateProject("project")
 		m := testCreateList(projectId, "mapName", 10)
 		reference := testCreateList(projectId, "referenceMap", 10)
@@ -93,7 +98,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
 	})
 
-	ginkgo.It("should add an entry to the map by id", func() {
+	ginkgo.It("should add an entry to a list by id", func() {
 		projectId := testCreateProject("project")
 		m := testCreateList(projectId, "mapName", 10)
 
@@ -110,7 +115,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		testAssertErrNil(err)
 	})
 
-	ginkgo.It("should add an entry to the map by shortID", func() {
+	ginkgo.It("should add an entry to a list by shortID", func() {
 		projectId := testCreateProject("project")
 		m := testCreateList(projectId, "mapName", 10)
 
