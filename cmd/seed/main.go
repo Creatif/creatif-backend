@@ -16,7 +16,7 @@ import (
 )
 
 const apiKey = "$2a$10$aUlSZKvCLkbA65wWB5tme.a6nQDwJRzJrjm.DAlpD9/m4hjcrgf/u"
-const projectId = "01HNTK9B2MWFFJ44NXXT27BKM8"
+const projectId = "01HNW0XHNQGRAYPE6VTHEC78GC"
 
 func main() {
 	loadEnv()
@@ -69,7 +69,7 @@ func seed() {
 	for i := 0; i < 10; i++ {
 		m.Add(1)
 		go func() {
-			for a := 0; a < 100000; a++ {
+			for a := 0; a < 1000; a++ {
 				languageId := englishId
 				if a%2 == 0 {
 					languageId = frenchId

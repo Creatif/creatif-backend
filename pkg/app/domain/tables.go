@@ -8,6 +8,7 @@ const (
 	MAP_VARIABLES        = "map_variables"
 	VARIABLE_MAP         = "maps"
 	LIST_TABLE           = "lists"
+	GROUPS_TABLE         = "groups"
 	REFERENCE_TABLES     = "references"
 	LIST_VARIABLES_TABLE = "list_variables"
 )
