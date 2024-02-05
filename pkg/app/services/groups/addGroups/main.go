@@ -47,12 +47,14 @@ func (c Main) Logic() ([]app.Group, error) {
 			return res.Error
 		}
 
-		for i, g := range c.model.Groups {
-			groups[i] = app.NewGroup(c.model.ProjectID, g)
-		}
+		if len(c.model.Groups) > 0 {
+			for i, g := range c.model.Groups {
+				groups[i] = app.NewGroup(c.model.ProjectID, g)
+			}
 
-		if res := tx.Create(&groups); res.Error != nil {
-			return res.Error
+			if res := tx.Create(&groups); res.Error != nil {
+				return res.Error
+			}
 		}
 
 		return nil

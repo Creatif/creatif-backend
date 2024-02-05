@@ -78,7 +78,7 @@ func appRoutes(group *echo.Group) {
 	group.GET("/project-metadata", appHandlers.GetProjectMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
 	group.GET("/project/:id", appHandlers.GetProjectHandler())
-	group.POST("/groups/:projectId", groups.AddGroupsHandler())
+	group.PUT("/groups/:projectId", groups.AddGroupsHandler())
 	group.GET("/groups/:projectId", groups.GetGroupsHandler())
 
 	group.PUT("/auth/register/email", authHandlers.CreateRegisterEmailHandler())

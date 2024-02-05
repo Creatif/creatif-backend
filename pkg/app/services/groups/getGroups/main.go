@@ -17,11 +17,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("addToList", "Validating...")
+	c.logBuilder.Add("getGroups", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("addToList", "Validated.")
+	c.logBuilder.Add("getGroups", "Validated.")
 
 	return nil
 }
@@ -70,6 +70,6 @@ func (c Main) Handle() ([]string, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []app.Group] {
-	logBuilder.Add("addToList", "Created")
+	logBuilder.Add("getGroups", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }
