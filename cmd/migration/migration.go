@@ -61,7 +61,7 @@ func runMigrations() {
 		log.Fatalln(err)
 	}
 
-	if err := storage2.Gorm().AutoMigrate(declarations.Group{}); err != nil {
+	if err := storage2.Gorm().AutoMigrate(app.Group{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)
 	}
@@ -81,6 +81,11 @@ func runMigrations() {
 	}
 
 	if err := storage2.Gorm().AutoMigrate(app.Project{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(app.Group{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)
 	}

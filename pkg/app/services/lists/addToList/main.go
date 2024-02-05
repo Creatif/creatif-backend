@@ -40,13 +40,13 @@ mv.list_id = m.id AND mv.name = ? AND mv.locale_id = ?
 	res := storage.Gorm().Raw(sql, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Entry.Name, entryLocaleId).Scan(&entry)
 	if res.Error != nil {
 		return appErrors.NewValidationError(map[string]string{
-			"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' for map with ID '%s' already exists.", c.model.Entry.Name, c.model.Entry.Locale, c.model.Name),
+			"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' for list with ID '%s' already exists.", c.model.Entry.Name, c.model.Entry.Locale, c.model.Name),
 		})
 	}
 
 	if res.RowsAffected != 0 {
 		return appErrors.NewValidationError(map[string]string{
-			"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' for map with ID '%s' already exists.", c.model.Entry.Name, c.model.Entry.Locale, c.model.Name),
+			"exists": fmt.Sprintf("Variable with name '%s' and locale '%s' for list with ID '%s' already exists.", c.model.Entry.Name, c.model.Entry.Locale, c.model.Name),
 		})
 	}
 

@@ -1,14 +1,12 @@
-package getVariableGroups
+package addGroups
 
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -35,7 +33,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
+	GinkgoRunSpecs(t, "Groups -> CRUD tests")
 }
 
 func runLogger() {
@@ -101,26 +99,6 @@ var _ = GinkgoAfterHandler(func() {
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
-
-func testCreateDetailedVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
-	b, _ := json.Marshal(map[string]interface{}{
-		"one":  1,
-		"two":  "three",
-		"four": "six",
-	})
-
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
-
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable2.View {
-	return testCreateDetailedVariable(projectId, name, behaviour, []string{}, []byte{})
-}
 
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())

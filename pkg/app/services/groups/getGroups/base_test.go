@@ -1,14 +1,13 @@
-package getVariableGroups
+package getGroups
 
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -35,7 +34,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
+	GinkgoRunSpecs(t, "Groups -> CRUD tests")
 }
 
 func runLogger() {
@@ -102,26 +101,6 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
-func testCreateDetailedVariable(projectId, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
-	b, _ := json.Marshal(map[string]interface{}{
-		"one":  1,
-		"two":  "three",
-		"four": "six",
-	})
-
-	handler := createVariable2.New(createVariable2.NewModel(projectId, "eng", name, behaviour, groups, metadata, b), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	return view
-}
-
-func testCreateDeclarationVariable(projectId, name, behaviour string) createVariable2.View {
-	return testCreateDetailedVariable(projectId, name, behaviour, []string{}, []byte{})
-}
-
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }
@@ -142,4 +121,19 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
+}
+
+func testCreateGroups(projectId string, numOfGroups int) []string {
+	groups := make([]string, numOfGroups)
+	for i := 0; i < numOfGroups; i++ {
+		groups[i] = fmt.Sprintf("groups-%d", i)
+	}
+
+	l := logger.NewLogBuilder()
+
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId), l)
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+
+	return model
 }
