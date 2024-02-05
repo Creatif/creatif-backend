@@ -3,6 +3,7 @@ package main
 import (
 	"creatif/cmd"
 	authHandlers "creatif/cmd/http/handlers/app/auth"
+	"creatif/cmd/http/handlers/app/groups"
 	appHandlers "creatif/cmd/http/handlers/app/project"
 	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
@@ -77,6 +78,8 @@ func appRoutes(group *echo.Group) {
 	group.GET("/project-metadata", appHandlers.GetProjectMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
 	group.GET("/project/:id", appHandlers.GetProjectHandler())
+	group.POST("/groups/:projectId", groups.AddGroupsHandler())
+	group.GET("/groups/:projectId", groups.GetGroupsHandler())
 
 	group.PUT("/auth/register/email", authHandlers.CreateRegisterEmailHandler())
 	group.POST("/auth/login/email", authHandlers.CreateLoginEmailHandler())
