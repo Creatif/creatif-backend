@@ -88,11 +88,11 @@ func (c Main) Logic() (LogicModel, error) {
 		if res := tx.Create(&variable); res.Error != nil {
 			c.logBuilder.Add("addToList", res.Error.Error())
 
-			return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
+			return errors.New(fmt.Sprintf("List item with name '%s' already exists.", c.model.Entry.Name))
 		}
 
 		if len(c.model.References) > 0 {
-			references, err := shared.CreateDeclarationReferences(c.model.References, m.ID, variable.ID, c.model.ProjectID)
+			references, err := shared.CreateDeclarationReferences(c.model.References, m.ID, variable.ID, "list", c.model.ProjectID)
 			if err != nil {
 				return err
 			}

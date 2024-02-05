@@ -1,4 +1,4 @@
-package queryListByID
+package shared
 
 import (
 	"creatif/pkg/app/domain/declarations"
@@ -19,7 +19,7 @@ type QueryReference struct {
 	StructureName     string
 }
 
-func queryReferences(id, projectId string) ([]QueryReference, error) {
+func QueryReferences(id, projectId string) ([]QueryReference, error) {
 	var parents []QueryReference
 	if err := queryParentReferences(id, projectId, &parents); err != nil {
 		return nil, err
@@ -36,15 +36,16 @@ func queryReferences(id, projectId string) ([]QueryReference, error) {
 func queryParentReferences(id, projectId string, references *[]QueryReference) error {
 	sql := fmt.Sprintf(`
 	SELECT DISTINCT ON (structure_name) id, parent_type, child_type, parent_id, name, child_id, child_structure_id, parent_structure_id,
-	CASE
-  		WHEN (parent_type = 'map') THEN (SELECT name FROM declarations.maps WHERE id = child_structure_id AND project_id = ?)
-  		WHEN (parent_type = 'list') THEN (SELECT name FROM declarations.lists WHERE id = child_structure_id AND project_id = ?)
- 	END AS structure_name
+	COALESCE(
+  		(SELECT name FROM declarations.maps WHERE id = child_structure_id AND project_id = ?),
+  		(SELECT name FROM declarations.lists WHERE id = child_structure_id AND project_id = ?),
+  		(SELECT name FROM declarations.variables WHERE id = child_structure_id AND project_id = ?)
+ 	)AS structure_name
 	FROM %s WHERE parent_id = ? AND project_id = ?
 `, (declarations.Reference{}).TableName())
 
 	res := storage.Gorm().
-		Raw(sql, projectId, projectId, id, projectId).
+		Raw(sql, projectId, projectId, projectId, id, projectId).
 		Scan(references)
 
 	if res.Error != nil {
@@ -57,16 +58,17 @@ func queryParentReferences(id, projectId string, references *[]QueryReference) e
 func queryChildReferences(id, projectId string, references *[]QueryReference) error {
 	sql := fmt.Sprintf(`
 	SELECT DISTINCT ON (structure_name) id, parent_type, child_type, parent_id, name, child_id, parent_structure_id, child_structure_id,
-	CASE
-  		WHEN (parent_type = 'map') THEN (SELECT name FROM declarations.maps WHERE id = parent_structure_id AND project_id = ?)
-  		WHEN (parent_type = 'list') THEN (SELECT name FROM declarations.lists WHERE id = parent_structure_id AND project_id = ?)
- 	END AS structure_name	                                                                                        
+	COALESCE(
+  		(SELECT name FROM declarations.maps WHERE id = parent_structure_id AND project_id = ?),
+  		(SELECT name FROM declarations.lists WHERE id = parent_structure_id AND project_id = ?),
+  		(SELECT name FROM declarations.variables WHERE id = parent_structure_id AND project_id = ?)
+ 	) AS structure_name	                                                                                        
 	FROM %s                                                                                     
 	WHERE child_id = ? AND project_id = ?
 `, (declarations.Reference{}).TableName())
 
 	res := storage.Gorm().
-		Raw(sql, projectId, projectId, id, projectId).
+		Raw(sql, projectId, projectId, projectId, id, projectId).
 		Scan(references)
 
 	if res.Error != nil {

@@ -14,13 +14,13 @@ type Reference struct {
 	ParentType string `gorm:"type:text"`
 	ChildType  string `gorm:"type:text"`
 
-	ParentStructureID string `gorm:"type:text"`
-	ChildStructureID  string `gorm:"type:text"`
+	ParentStructureID string `gorm:"index;type:text"`
+	ChildStructureID  string `gorm:"index;type:text"`
 
 	// must be structure type item
-	ParentID string `gorm:"type:text"`
+	ParentID string `gorm:"index;type:text"`
 	// must be entire structure
-	ChildID string `gorm:"type:text"`
+	ChildID string `gorm:"index;type:text"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time `gorm:"<-:update"`

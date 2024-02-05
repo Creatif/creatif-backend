@@ -3,6 +3,7 @@ package queryListByID
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/sdk"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/lib/pq"
@@ -17,7 +18,19 @@ type Model struct {
 
 type LogicModel struct {
 	Variable  declarations.ListVariable
-	Reference []QueryReference
+	Reference []shared.QueryReference
+}
+
+type QueryReference struct {
+	ID                string
+	Name              string
+	ParentType        string
+	ChildType         string
+	ParentID          string
+	ChildID           string
+	ChildStructureID  string
+	ParentStructureID string
+	StructureName     string
 }
 
 func NewModel(projectId, name, itemID string) Model {
@@ -69,7 +82,7 @@ func newView(model LogicModel) View {
 		Value:     model.Variable.Value,
 		CreatedAt: model.Variable.CreatedAt,
 		UpdatedAt: model.Variable.UpdatedAt,
-		References: sdk.Map(model.Reference, func(idx int, value QueryReference) ReferenceView {
+		References: sdk.Map(model.Reference, func(idx int, value shared.QueryReference) ReferenceView {
 			return ReferenceView{
 				ID:                value.ID,
 				Name:              value.Name,

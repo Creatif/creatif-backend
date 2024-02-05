@@ -92,7 +92,7 @@ func (c Main) Logic() (LogicModel, error) {
 		}
 
 		if len(c.model.References) > 0 {
-			references, err := shared.CreateDeclarationReferences(c.model.References, m.ID, variable.ID, c.model.ProjectID)
+			references, err := shared.CreateDeclarationReferences(c.model.References, m.ID, variable.ID, "map", c.model.ProjectID)
 			if err != nil {
 				return err
 			}

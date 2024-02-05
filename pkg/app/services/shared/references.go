@@ -29,7 +29,7 @@ type ParentReference struct {
 	ID            string `gorm:"column:id"`
 }
 
-func CreateDeclarationReferences(refs []Reference, structureId, childId, projectId string) ([]declarations.Reference, error) {
+func CreateDeclarationReferences(refs []Reference, structureId, childId, childType, projectId string) ([]declarations.Reference, error) {
 	references := make([]declarations.Reference, 0)
 	for _, r := range refs {
 		pr, err := getParentReference(r.StructureName, r.StructureType, r.VariableID, structureId)
@@ -37,7 +37,7 @@ func CreateDeclarationReferences(refs []Reference, structureId, childId, project
 			return nil, err
 		}
 
-		ref := declarations.NewReference(r.Name, r.StructureType, "map", pr.ID, childId, pr.StructureID, structureId, projectId)
+		ref := declarations.NewReference(r.Name, r.StructureType, childType, pr.ID, childId, pr.StructureID, structureId, projectId)
 		references = append(references, ref)
 	}
 

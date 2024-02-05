@@ -14,8 +14,8 @@ func getWorkingTables(structureType string) [2]string {
 
 	if structureType == "list" {
 		tables = [2]string{
-			(declarations.List{}).TableName(),
 			(declarations.ListVariable{}).TableName(),
+			(declarations.List{}).TableName(),
 		}
 	}
 

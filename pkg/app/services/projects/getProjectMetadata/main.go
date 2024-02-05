@@ -6,6 +6,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 )
 
 type Main struct {
@@ -65,6 +66,13 @@ func (c Main) Logic() (PreViewModel, error) {
 		}
 
 		if v.Map != "" {
+			// if an entry exists, skip
+			for _, l := range preViewModel.Lists {
+				if l.Name == v.Map {
+					continue
+				}
+			}
+
 			preViewModel.Maps = append(preViewModel.Maps, PreViewStructure{
 				Name:    v.Map,
 				ID:      v.MapID,
@@ -73,11 +81,15 @@ func (c Main) Logic() (PreViewModel, error) {
 		}
 
 		if v.List != "" {
-			preViewModel.Lists = append(preViewModel.Lists, PreViewStructure{
-				Name:    v.List,
-				ID:      v.ListID,
-				ShortID: v.ListShortID,
-			})
+			if !sdk.IncludesFn(preViewModel.Lists, func(item PreViewStructure) bool {
+				return item.Name == v.List
+			}) {
+				preViewModel.Lists = append(preViewModel.Lists, PreViewStructure{
+					Name:    v.List,
+					ID:      v.ListID,
+					ShortID: v.ListShortID,
+				})
+			}
 		}
 	}
 

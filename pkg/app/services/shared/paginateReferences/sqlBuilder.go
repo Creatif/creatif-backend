@@ -37,10 +37,10 @@ func createSql(model Model, tables [2]string, orderBy, direction, relationshipTy
 	}
 
 	relationshipSql := make(map[string]string)
-	if relationshipType == "parent" {
+	if relationshipType == "child" {
 		relationshipSql["innerJoinOne"] = "r.child_id = lv.id AND r.parent_id = @parentReference AND"
 		relationshipSql["innerJoinTwo"] = "AND l.id = @childStructureID AND r.child_structure_id = l.id"
-	} else if relationshipType == "child" {
+	} else if relationshipType == "parent" {
 		relationshipSql["innerJoinOne"] = "r.parent_id = lv.id AND r.parent_id = @parentReference AND r.child_id = @childReference AND"
 		relationshipSql["innerJoinTwo"] = "AND l.id = @parentStructureID AND r.parent_structure_id = l.id"
 	}
@@ -53,8 +53,8 @@ func createSql(model Model, tables [2]string, orderBy, direction, relationshipTy
     	lv.name, 
     	lv.behaviour,
     	%s
-    	lv.created_at, 
-    	lv.updated_at 
+    	lv.created_at,
+    	lv.updated_at
 			FROM %s AS r
 			INNER JOIN %s AS lv ON %s r.project_id = @projectID
 			INNER JOIN %s AS l ON l.project_id = @projectID %s 

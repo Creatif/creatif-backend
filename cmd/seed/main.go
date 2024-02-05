@@ -1,67 +1,134 @@
 package main
 
 import (
-	"creatif/pkg/app/declarations/createVariable"
-	storage2 "creatif/pkg/lib/storage"
+	"creatif/pkg/app/auth"
+	addToMap2 "creatif/pkg/app/services/maps/addToMap"
+	"creatif/pkg/app/services/maps/mapCreate"
+	"creatif/pkg/app/services/shared"
+	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
-	"github.com/joho/godotenv"
+	"github.com/google/uuid"
 	"log"
-	"os"
+	"sync"
 )
+
+const apiKey = "$2a$10$aUlSZKvCLkbA65wWB5tme.a6nQDwJRzJrjm.DAlpD9/m4hjcrgf/u"
+const projectId = "01HNTK9B2MWFFJ44NXXT27BKM8"
 
 func main() {
 	loadEnv()
-	db()
+	runDb()
+	runLogger()
 
-	createDeclarationVariablesWithoutValue(1000)
-}
-
-func createDeclarationVariablesWithoutValue(num int) {
-	for i := 0; i < num; i++ {
-		b, _ := json.Marshal(map[string]interface{}{
-			"one":   "one",
-			"two":   []string{"group1", "group2", "group3"},
-			"three": []int{1, 2, 3, 4},
-			"four":  4,
-		})
-
-		handler := createVariable.New(createVariable.NewModel(
-			fmt.Sprintf("name-%d", i),
-			"modifiable",
-			[]string{"one", "two", "three"},
-			b,
-			b,
-		))
-
-		_, err := handler.Handle()
+	if err := releaseAllLocks(); err != nil {
+		sqlDB, err := storage.SQLDB()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalln("Unable to get storage.SQLDB()", err)
+		}
+
+		if err := sqlDB.Close(); err != nil {
+			log.Fatalln("Unable to disconnect from the database", err)
 		}
 	}
-}
 
-func loadEnv() {
-	err := godotenv.Load(".env")
+	if err := loadLocales(); err != nil {
+		sqlDB, err := storage.SQLDB()
+		if err != nil {
+			log.Fatalln("Unable to get storage.SQLDB()", err)
+		}
 
-	if err != nil {
-		log.Fatal(err)
+		if err := sqlDB.Close(); err != nil {
+			log.Fatalln("Unable to disconnect from the database", err)
+		}
 	}
+
+	seed()
 }
 
-func db() {
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
-		os.Getenv("DATABASE_HOST"),
-		os.Getenv("DATABASE_USER"),
-		os.Getenv("DATABASE_PASSWORD"),
-		os.Getenv("DATABASE_NAME"),
-		os.Getenv("DATABASE_PORT"),
-	)
+func seed() {
+	structureNames := []string{
+		"Languages",
+		"Decks",
+	}
 
-	err := storage2.Connect(dsn)
+	fmt.Println("Creating structures...")
+	structures := make([]mapCreate.View, len(structureNames))
+	for i, s := range structureNames {
+		structures[i] = createMap(s)
+	}
+	fmt.Println("Structures finished!")
 
+	englishId := addToMap(structures[0].ID, "English", []shared.Reference{})
+	frenchId := addToMap(structures[0].ID, "French", []shared.Reference{})
+
+	fmt.Println("Creating languages...")
+	m := &sync.WaitGroup{}
+	for i := 0; i < 10; i++ {
+		m.Add(1)
+		go func() {
+			for a := 0; a < 100000; a++ {
+				languageId := englishId
+				if a%2 == 0 {
+					languageId = frenchId
+				}
+				addToMap(structures[1].ID, uuid.NewString(), []shared.Reference{
+					{
+						Name:          "language",
+						StructureType: "map",
+						StructureName: "Languages",
+						VariableID:    languageId,
+					},
+				})
+			}
+
+			m.Done()
+		}()
+	}
+	m.Wait()
+}
+
+func createMap(name string) mapCreate.View {
+	l := logger.NewLogBuilder()
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, []mapCreate.VariableModel{}), auth.NewNoopAuthentication(), l)
+	m, err := handler.Handle()
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	return m
+}
+
+func addToMap(structureId, variableName string, references []shared.Reference) string {
+	l := logger.NewLogBuilder()
+	value := map[string]interface{}{
+		"name": variableName,
+	}
+
+	v, err := json.Marshal(value)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	handler := addToMap2.New(addToMap2.NewModel(projectId, structureId, addToMap2.VariableModel{
+		Name:      variableName,
+		Metadata:  nil,
+		Locale:    "eng",
+		Groups:    []string{variableName, "default"},
+		Behaviour: "modifiable",
+		Value:     v,
+	}, references), auth.NewNoopAuthentication(), l)
+
+	entry, err := handler.Handle()
+	if err != nil {
+		validationError, ok := err.(appErrors.AppError[map[string]string])
+		if ok {
+			log.Fatalln(validationError.Data())
+		}
+		log.Fatalln(err)
+	}
+
+	return entry.ID
 }
