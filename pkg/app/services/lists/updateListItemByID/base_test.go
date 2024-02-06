@@ -3,6 +3,7 @@ package updateListItemByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
@@ -120,6 +121,13 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
+}
+
+func testCreateGroups(projectId string, groups []string) {
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	_, err := handler.Handle()
+	testAssertErrNil(err)
 }
 
 func testCreateList(projectId, name string, varNum int, addGroups bool, behaviour string) createList2.View {

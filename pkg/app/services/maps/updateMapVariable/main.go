@@ -27,8 +27,12 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
-	if err := validateGroups(c.model.MapName, c.model.ProjectID, c.model.VariableName, c.model.Values.Groups, c.logBuilder); err != nil {
-		return err
+	if len(c.model.Values.Groups) > 0 {
+		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Values.Groups); err != nil {
+			return appErrors.NewValidationError(map[string]string{
+				"exists": err.Error(),
+			})
+		}
 	}
 
 	if sdk.Includes(c.model.Fields, "name") {

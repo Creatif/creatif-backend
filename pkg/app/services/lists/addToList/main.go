@@ -28,9 +28,9 @@ func (c Main) Validate() error {
 	c.logBuilder.Add("addToList", "Validated.")
 
 	if len(c.model.Entry.Groups) > 0 {
-		if err := validateGroupsExist(c.model.ProjectID, c.model.Entry.Groups); err != nil {
+		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Entry.Groups); err != nil {
 			return appErrors.NewValidationError(map[string]string{
-				"exists": err.Error(),
+				"groupExists": err.Error(),
 			})
 		}
 	}

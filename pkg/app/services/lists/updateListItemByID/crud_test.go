@@ -16,6 +16,7 @@ import (
 var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	ginkgo.It("should update the name of the list item variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		view := testCreateList(projectId, "name", 100, false, "modifiable")
 
 		var singleItem declarations.ListVariable
@@ -61,6 +62,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should update the groups of the declaration variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"first", "second", "third", "one", "two", "three"})
 		view := testCreateList(projectId, "name", 100, false, "modifiable")
 
 		var singleItem declarations.ListVariable
@@ -97,6 +99,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should update the behaviour of the declaration variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateList(projectId, "name", 100, false, "modifiable")
 
 		var singleItem declarations.ListVariable
@@ -144,8 +147,9 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(checkModel.Behaviour).Should(gomega.Equal("readonly"))
 	})
 
-	ginkgo.It("should fail updating list variable because max number of groups", func() {
+	ginkgo.It("should fail updating list variable because of non existing groups", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		view := testCreateList(projectId, "name", 100, true, "modifiable")
 
 		var singleItem declarations.ListVariable
@@ -182,11 +186,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(ok).Should(gomega.Equal(true))
 
 		errs := validationError.Data()
-		gomega.Expect(errs["groups"]).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(errs["groupsExist"]).ShouldNot(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should fail updating list variable because of invalid behaviour", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		view := testCreateList(projectId, "name", 100, true, "readonly")
 
 		var singleItem declarations.ListVariable

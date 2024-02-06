@@ -29,9 +29,9 @@ func (c Main) Validate() error {
 	}
 
 	if len(c.model.Values.Groups) > 0 {
-		if err := validateGroupsExist(c.model.ProjectID, c.model.Values.Groups); err != nil {
+		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Values.Groups); err != nil {
 			return appErrors.NewValidationError(map[string]string{
-				"exists": err.Error(),
+				"groupsExists": err.Error(),
 			})
 		}
 	}

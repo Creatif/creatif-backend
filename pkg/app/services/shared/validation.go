@@ -1,0 +1,21 @@
+package shared
+
+import (
+	"creatif/pkg/app/domain/app"
+	"creatif/pkg/lib/storage"
+	"errors"
+	"fmt"
+)
+
+func ValidateGroupsExist(projectId string, groups []string) error {
+	var count int
+	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT count(id) FROM %s WHERE project_id = ? AND name IN(?)", (app.Group{}).TableName()), projectId, groups).Scan(&count); res.Error != nil {
+		return res.Error
+	}
+
+	if count != len(groups) {
+		return errors.New("Invalid groups. Some of the groups provided do not exist")
+	}
+
+	return nil
+}

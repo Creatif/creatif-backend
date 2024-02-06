@@ -16,6 +16,7 @@ import (
 var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 	ginkgo.It("should delete a range of list items by name", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId)
 		listName, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 15)
 		referenceListName, referenceListId, _ := testCreateListAndReturnNameAndID(projectId, "referenceList", 10)
 
@@ -69,6 +70,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 
 	ginkgo.It("should delete a range of list items by ID", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId)
 		_, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 15)
 
 		var listItems []declarations2.ListVariable
@@ -92,6 +94,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 
 	ginkgo.It("should delete a range of list items by shortID", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId)
 		_, listId, shortID := testCreateListAndReturnNameAndID(projectId, "name", 15)
 
 		var listItems []declarations2.ListVariable

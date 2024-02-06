@@ -3,6 +3,7 @@ package deleteRangeByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/lists/addToList"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
@@ -122,6 +123,13 @@ func testCreateProject(name string) string {
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
 
 	return model.ID
+}
+
+func testCreateGroups(projectId string) {
+	handler := addGroups.New(addGroups.NewModel(projectId, []string{"one", "two", "three"}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	_, err := handler.Handle()
+	testAssertErrNil(err)
 }
 
 func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (string, string, string) {
