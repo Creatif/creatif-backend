@@ -28,6 +28,14 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
+	if len(c.model.Values.Groups) > 0 {
+		if err := validateGroupsExist(c.model.ProjectID, c.model.Values.Groups); err != nil {
+			return appErrors.NewValidationError(map[string]string{
+				"exists": err.Error(),
+			})
+		}
+	}
+
 	type GroupBehaviourCheck struct {
 		Count     int    `gorm:"column:count"`
 		Behaviour string `gorm:"column:behaviour"`
