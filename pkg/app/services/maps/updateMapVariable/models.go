@@ -127,12 +127,8 @@ func (a *Model) Validate() map[string]string {
 					return nil
 				}
 
-				if a.Values.Groups != nil {
-					if len(a.Values.Groups) > 20 {
-						return errors.New("Maximum number of groups is 20.")
-					}
-
-					return nil
+				if a.Values.Groups != nil && len(a.Values.Groups) > 20 {
+					return errors.New("Maximum number of groups is 20.")
 				}
 
 				return nil

@@ -10,6 +10,7 @@ import (
 var _ = ginkgo.Describe("GET value of declaration variable", func() {
 	ginkgo.It("should return a variable value by name", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		createdVariable := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
 		handler := New(NewModel(projectId, "", "", createdVariable.Name, "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -21,6 +22,7 @@ var _ = ginkgo.Describe("GET value of declaration variable", func() {
 
 	ginkgo.It("should return a variable value by id", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		createdVariable := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
 		handler := New(NewModel(projectId, createdVariable.ID, "", "", "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -32,6 +34,7 @@ var _ = ginkgo.Describe("GET value of declaration variable", func() {
 
 	ginkgo.It("should return a variable value by shortId", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		createdVariable := testCreateDeclarationVariable(projectId, "variable", "modifiable")
 
 		handler := New(NewModel(projectId, "", createdVariable.ShortID, "", "eng"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())

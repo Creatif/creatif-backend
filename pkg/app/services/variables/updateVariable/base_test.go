@@ -3,6 +3,7 @@ package updateVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	createVariable2 "creatif/pkg/app/services/variables/createVariable"
@@ -128,6 +129,13 @@ func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) c
 
 func testAssertErrNil(err error) {
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateGroups(projectId string, groups []string) {
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	_, err := handler.Handle()
+	testAssertErrNil(err)
 }
 
 func testAssertIDValid(id string) {

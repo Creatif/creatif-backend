@@ -15,13 +15,13 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("getMapGroups", "Validating...")
+	c.logBuilder.Add("getListGroups", "Validating...")
 
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
-	c.logBuilder.Add("queryMapVariable", "Validated")
+	c.logBuilder.Add("getListGroups", "Validated")
 
 	return nil
 }
@@ -39,7 +39,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() ([]string, error) {
-	duplicatedModels, err := getGroups(c.model.Name, c.model.ProjectID)
+	duplicatedModels, err := getGroups(c.model.Name, c.model.ItemID, c.model.ProjectID)
 	if err != nil {
 		return []string{}, err
 	}
@@ -81,6 +81,6 @@ func (c Main) Handle() ([]string, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []string] {
-	logBuilder.Add("queryMapVariable", "Created")
+	logBuilder.Add("getListGroups", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

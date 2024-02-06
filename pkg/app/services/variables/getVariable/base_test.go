@@ -3,6 +3,7 @@ package getVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	createVariable2 "creatif/pkg/app/services/variables/createVariable"
@@ -119,6 +120,13 @@ func testCreateDeclarationVariable(projectId, name, behaviour string, groups []s
 	testAssertIDValid(view.ID)
 
 	return view
+}
+
+func testCreateGroups(projectId string, groups []string) {
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	_, err := handler.Handle()
+	testAssertErrNil(err)
 }
 
 func testCreateBasicDeclarationTextVariable(projectId, name, behaviour string) createVariable2.View {

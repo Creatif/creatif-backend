@@ -27,6 +27,7 @@ func GetMapGroupsHandler() func(e echo.Context) error {
 		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
 		handler := getMapGroups.New(getMapGroups.NewModel(
 			model.Name,
+			model.ItemID,
 			model.ProjectID,
 		), a, l)
 

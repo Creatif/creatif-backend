@@ -3,6 +3,7 @@ package createVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/lib/logger"
@@ -78,6 +79,13 @@ var _ = GinkgoAfterSuite(func() {
 		ginkgo.Fail(fmt.Sprintf("Could not close database connection: %s", err))
 	}
 })
+
+func testCreateGroups(projectId string, groups []string) {
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	_, err := handler.Handle()
+	testAssertErrNil(err)
+}
 
 var _ = GinkgoAfterHandler(func() {
 	res := storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))

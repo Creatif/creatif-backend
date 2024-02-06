@@ -12,12 +12,14 @@ type LogicModel struct {
 
 type Model struct {
 	Name      string
+	ItemID    string
 	ProjectID string
 }
 
-func NewModel(name, projectID string) Model {
+func NewModel(name, itemId, projectID string) Model {
 	return Model{
 		Name:      name,
+		ItemID:    itemId,
 		ProjectID: projectID,
 	}
 }
@@ -32,12 +34,14 @@ func newView(model []string) []string {
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"id":        a.Name,
+		"itemId":    a.ItemID,
 		"projectID": a.ProjectID,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("id", validation.Required),
+			validation.Key("itemId", validation.Required),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 		),
 	); err != nil {

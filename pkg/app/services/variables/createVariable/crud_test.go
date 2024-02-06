@@ -12,6 +12,7 @@ import (
 var _ = ginkgo.Describe("Declaration variable tests", func() {
 	ginkgo.It("should create a text declaration variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
@@ -36,6 +37,8 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 
 	ginkgo.It("should create a boolean declaration variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
+
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
@@ -60,6 +63,8 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 
 	ginkgo.It("should fail on database to create a variable with the same name on a same project", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
+
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,
@@ -90,6 +95,8 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 
 	ginkgo.It("should create variables with equal name on different projects when skipping validation", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
+
 		name, _ := sdk.NewULID()
 		b, _ := json.Marshal(map[string]interface{}{
 			"one":  1,

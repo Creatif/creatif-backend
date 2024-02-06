@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -24,6 +25,14 @@ func (c Main) Validate() error {
 	c.logBuilder.Add("createVariable", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
+	}
+
+	if len(c.model.Groups) > 0 {
+		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Groups); err != nil {
+			return appErrors.NewValidationError(map[string]string{
+				"groupsExist": err.Error(),
+			})
+		}
 	}
 
 	return nil

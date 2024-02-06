@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func validateGroups(mapName, projectId, variableName string, groups []string, logBuilder logger.LogBuilder) error {
+func validateGroupsNumAndBehaviour(mapName, projectId, variableName string, groups []string, logBuilder logger.LogBuilder) error {
 	type GroupBehaviourCheck struct {
 		Count     int    `gorm:"column:count"`
 		Behaviour string `gorm:"column:behaviour"`

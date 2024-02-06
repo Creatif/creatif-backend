@@ -3,6 +3,7 @@ package paginateVariables
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	createVariable2 "creatif/pkg/app/services/variables/createVariable"
@@ -166,6 +167,13 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
+}
+
+func testCreateGroups(projectId string, groups []string) {
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	_, err := handler.Handle()
+	testAssertErrNil(err)
 }
 
 func testCreateProject(name string) string {

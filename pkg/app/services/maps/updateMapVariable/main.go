@@ -30,13 +30,17 @@ func (c Main) Validate() error {
 	if len(c.model.Values.Groups) > 0 {
 		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Values.Groups); err != nil {
 			return appErrors.NewValidationError(map[string]string{
-				"exists": err.Error(),
+				"groupsExist": err.Error(),
 			})
 		}
 	}
 
 	if sdk.Includes(c.model.Fields, "name") {
 		return validateUniqueName(c.model.MapName, c.model.VariableName, c.model.Values.Name, c.model.ProjectID)
+	}
+
+	if err := validateGroupsNumAndBehaviour(c.model.MapName, c.model.ProjectID, c.model.VariableName, c.model.Values.Groups, c.logBuilder); err != nil {
+		return err
 	}
 
 	return nil

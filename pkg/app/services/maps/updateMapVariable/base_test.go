@@ -3,6 +3,7 @@ package updateMapVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
@@ -183,6 +184,13 @@ func testCreateMap(projectId, name string, variablesNum int, behaviour string) m
 	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
 	return view
+}
+
+func testCreateGroups(projectId string, groups []string) {
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	_, err := handler.Handle()
+	testAssertErrNil(err)
 }
 
 func testAddToMap(projectId, name string, references []shared.Reference) addToMap.LogicModel {

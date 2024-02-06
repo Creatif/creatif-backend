@@ -10,6 +10,7 @@ import (
 var _ = ginkgo.Describe("Declaration variable tests", func() {
 	ginkgo.It("should return a text variable with value with name", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		name := "variable"
 		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 
@@ -36,6 +37,8 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 
 	ginkgo.It("should return a text variable with value with id", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
+
 		name := "variable"
 		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 
@@ -62,6 +65,8 @@ var _ = ginkgo.Describe("Declaration variable tests", func() {
 
 	ginkgo.It("should return a text variable with value with shortID", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
+
 		name := "variable"
 		createdVariable := testCreateBasicDeclarationTextVariable(projectId, name, "modifiable")
 

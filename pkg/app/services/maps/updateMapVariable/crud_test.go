@@ -16,6 +16,7 @@ import (
 var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	ginkgo.It("should update an entry in the map by replacing it completely", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "four", "five"})
 		m := testCreateMap(projectId, "map", 10, "modifiable")
 		referenceMap := testCreateMap(projectId, "referenceMap", 10, "modifiable")
 		addToMapView := testAddToMap(projectId, m.ID, []shared.Reference{
@@ -48,7 +49,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		handler := New(NewModel(projectId, m.ShortID, addToMapView.Variable.ID, []string{"metadata", "groups", "behaviour", "value", "name"}, VariableModel{
 			Name:      "new name",
 			Metadata:  b,
-			Groups:    []string{"updated1", "updated2", "updated3"},
+			Groups:    []string{"four", "five"},
 			Behaviour: "readonly",
 			Value:     v,
 		}, []shared.UpdateReference{
@@ -81,9 +82,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(metadata).Should(gomega.Equal("this is metadata"))
 		gomega.Expect(value).Should(gomega.Equal("this is value"))
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("readonly"))
-		gomega.Expect(sdk.Includes(view.Groups, "updated1")).Should(gomega.Equal(true))
-		gomega.Expect(sdk.Includes(view.Groups, "updated2")).Should(gomega.Equal(true))
-		gomega.Expect(sdk.Includes(view.Groups, "updated3")).Should(gomega.Equal(true))
+		gomega.Expect(sdk.Includes(view.Groups, "four")).Should(gomega.Equal(true))
+		gomega.Expect(sdk.Includes(view.Groups, "five")).Should(gomega.Equal(true))
 
 		var count int
 		res := storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
@@ -93,6 +93,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 
 	ginkgo.It("should fail updating a map variable because of invalid number of groups", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		m := testCreateMap(projectId, "map", 10, "modifiable")
 
 		b, err := json.Marshal("this is metadata")
@@ -115,11 +116,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(ok).Should(gomega.Equal(true))
 
 		errs := validationError.Data()
-		gomega.Expect(errs["groups"]).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(errs["groupsExist"]).ShouldNot(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should fail updating a readonly map variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		m := testCreateMap(projectId, "map", 10, "readonly")
 
 		b, err := json.Marshal("this is metadata")
@@ -131,7 +133,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		handler := New(NewModel(projectId, m.ShortID, m.Variables[5].ID, []string{"metadata", "groups", "behaviour", "value"}, VariableModel{
 			Name:      m.Variables[6].ID,
 			Metadata:  b,
-			Groups:    []string{"1", "2", "3", "4", "5"},
+			Groups:    []string{"one", "two"},
 			Behaviour: "readonly",
 			Value:     v,
 		}, nil), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -147,6 +149,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 
 	ginkgo.It("should fail updating a name map variable if it exists", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		m := testCreateMap(projectId, "map", 10, "modifiable")
 
 		b, err := json.Marshal("this is metadata")
@@ -158,7 +161,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		handler := New(NewModel(projectId, m.ID, m.Variables[5].ID, []string{"metadata", "groups", "behaviour", "value", "name"}, VariableModel{
 			Name:      "name-0",
 			Metadata:  b,
-			Groups:    []string{"1", "2", "3", "4", "5"},
+			Groups:    []string{"one"},
 			Behaviour: "modifiable",
 			Value:     v,
 		}, nil), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())

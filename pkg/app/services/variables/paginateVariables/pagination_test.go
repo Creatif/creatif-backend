@@ -11,6 +11,7 @@ import (
 var _ = ginkgo.Describe("Variable pagination tests", func() {
 	ginkgo.It("should paginate through variables", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		for i := 0; i < 100; i++ {
 			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("one-%d", i), "modifiable")
 		}
@@ -25,6 +26,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 
 	ginkgo.It("should get an empty result from the end of the variables listing", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		for i := 0; i < 100; i++ {
 			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("one-%d", i), "modifiable")
 		}
@@ -39,6 +41,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 
 	ginkgo.It("should return empty result for group that does not exist", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		for i := 0; i < 100; i++ {
 			testCreateBasicDeclarationTextVariable(projectId, fmt.Sprintf("one-%d", i), "modifiable")
 		}
@@ -53,6 +56,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 
 	ginkgo.It("should return the exact number of items by group", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		testCreateVariablesWithFragmentedGroups(projectId, "modifiable", 100)
 
 		handler := New(NewModel(projectId, []string{}, "created_at", "", "desc", 75, 1, []string{"one"}, "", nil), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -65,6 +69,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 
 	ginkgo.It("should return variables search by name without groups", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		testCreateVariablesWithFragmentedGroups(projectId, "modifiable", 100)
 
 		handler := New(NewModel(projectId, []string{}, "created_at", "1", "desc", 10, 1, []string{}, "", nil), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -77,6 +82,7 @@ var _ = ginkgo.Describe("Variable pagination tests", func() {
 
 	ginkgo.It("should return variables search by name with groups", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		testCreateVariablesWithFragmentedGroups(projectId, "modifiable", 100)
 
 		handler := New(NewModel(projectId, []string{}, "created_at", "1", "desc", 10, 1, []string{"one"}, "", nil), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())

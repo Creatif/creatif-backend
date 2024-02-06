@@ -7,6 +7,7 @@ import (
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
+	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -14,6 +15,7 @@ import (
 var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 	ginkgo.It("should update the name of the declaration variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three"})
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
 		m := "text value"
@@ -42,6 +44,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should update the groups of the declaration variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
 		m := "text value"
@@ -71,6 +74,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should update the behaviour of the declaration variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
 		m := "text value"
@@ -102,6 +106,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should fail updating groups if the total number of groups is > 20", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
 		m := "text value"
@@ -113,7 +118,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			view.ID,
 			"newName",
 			"readonly",
-			[]string{"1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"},
+			[]string{"1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21"},
 			[]byte{}, v, "eng"),
 			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder(),
@@ -124,12 +129,14 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		validationError, ok := err.(appErrors.AppError[map[string]string])
 		gomega.Expect(ok).Should(gomega.Equal(true))
 
+		fmt.Println(validationError.Data())
 		errs := validationError.Data()
 		gomega.Expect(errs["groups"]).ShouldNot(gomega.BeEmpty())
 	})
 
 	ginkgo.It("should fail updating readonly variable", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "readonly")
 
 		m := "text value"
@@ -141,7 +148,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			view.ShortID,
 			"newName",
 			"readonly",
-			[]string{"1", "1", "2"},
+			[]string{"one", "two"},
 			[]byte{}, v, "eng"),
 			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder(),
@@ -158,6 +165,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should fail update if locale does not exist", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "readonly")
 
 		m := "text value"
@@ -169,7 +177,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			view.ID,
 			"newName",
 			"readonly",
-			[]string{"1", "1", "2"},
+			[]string{"one"},
 			[]byte{},
 			v,
 			"",
@@ -189,6 +197,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should fail updating name if name does not exist", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "readonly")
 
 		m := "text value"
@@ -200,7 +209,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			view.ShortID,
 			"",
 			"readonly",
-			[]string{"1", "1", "2"},
+			[]string{"one"},
 			[]byte{},
 			v,
 			"eng",
@@ -220,6 +229,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should fail variable update id does not exist", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		testCreateBasicDeclarationTextVariable(projectId, "name", "readonly")
 
 		m := "text value"
@@ -231,7 +241,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			"not exists",
 			"name",
 			"readonly",
-			[]string{"1", "1", "2"},
+			[]string{"one"},
 			[]byte{},
 			v,
 			"eng",
@@ -251,6 +261,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should not fail to update the variable if name and locale already exist", func() {
 		projectId := testCreateProject("project")
+		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateBasicDeclarationTextVariable(projectId, "name", "modifiable")
 
 		m := "text value"
@@ -262,7 +273,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			view.ShortID,
 			view.Name,
 			"modifiable",
-			[]string{"1", "1", "2"},
+			[]string{"one"},
 			[]byte{},
 			v,
 			"eng",

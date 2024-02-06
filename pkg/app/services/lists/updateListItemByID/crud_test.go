@@ -213,7 +213,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			singleItem.ShortID,
 			"newName",
 			"readonly",
-			[]string{"1", "2", "3", "4"},
+			[]string{"one", "two"},
 			[]byte{},
 			v,
 			[]shared.UpdateReference{},

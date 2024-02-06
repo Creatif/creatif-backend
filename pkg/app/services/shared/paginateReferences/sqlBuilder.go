@@ -102,10 +102,10 @@ func createCountSql(model Model, tables [2]string, relationshipType string) stri
 	}
 
 	relationshipSql := make(map[string]string)
-	if relationshipType == "parent" {
+	if relationshipType == "child" {
 		relationshipSql["innerJoinOne"] = "r.child_id = lv.id AND r.parent_id = @parentReference AND"
 		relationshipSql["innerJoinTwo"] = "AND l.id = @childStructureID AND r.child_structure_id = l.id"
-	} else if relationshipType == "child" {
+	} else if relationshipType == "parent" {
 		relationshipSql["innerJoinOne"] = "r.parent_id = lv.id AND r.parent_id = @parentReference AND r.child_id = @childReference AND"
 		relationshipSql["innerJoinTwo"] = "AND l.id = @parentStructureID AND r.parent_structure_id = l.id"
 	}

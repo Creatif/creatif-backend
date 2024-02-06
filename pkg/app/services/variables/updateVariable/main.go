@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
@@ -26,6 +27,14 @@ func (c Main) Validate() error {
 	c.logBuilder.Add("updateVariable", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
+	}
+
+	if len(c.model.Values.Groups) > 0 {
+		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Values.Groups); err != nil {
+			return appErrors.NewValidationError(map[string]string{
+				"groupsExist": err.Error(),
+			})
+		}
 	}
 
 	// check if the variable to be updated with id/locale_id exists

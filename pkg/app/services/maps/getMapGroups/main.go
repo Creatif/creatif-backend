@@ -45,10 +45,10 @@ func (c Main) Authorize() error {
 func (c Main) Logic() ([]string, error) {
 	sql := fmt.Sprintf(`
 SELECT groups FROM %s AS lv 
-    INNER JOIN %s AS l ON l.project_id = ? AND lv.map_id = l.id AND (l.name = ? OR l.id = ? OR l.short_id = ?)
+    INNER JOIN %s AS l ON l.project_id = ? AND lv.map_id = l.id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND (lv.id = ? OR lv.short_id = ?)
 `, (declarations2.MapVariable{}).TableName(), (declarations2.Map{}).TableName())
 	var duplicatedModel []LogicModel
-	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Scan(&duplicatedModel)
+	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID).Scan(&duplicatedModel)
 
 	if res.Error != nil && res.RowsAffected == 0 {
 		return nil, appErrors.NewNotFoundError(res.Error)
