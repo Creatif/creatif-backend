@@ -19,7 +19,7 @@ import (
 )
 
 const apiKey = "$2a$10$aUlSZKvCLkbA65wWB5tme.a6nQDwJRzJrjm.DAlpD9/m4hjcrgf/u"
-const projectId = "01HP000KWQWMW0HW6WTN12WZ3Z"
+const projectId = "01HP1WMTEXYV1CHYVET7Q2W2B5"
 
 func main() {
 	loadEnv()

@@ -2,7 +2,6 @@ package shared
 
 import (
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -158,21 +157,15 @@ func getParentReference(structureName, structureType, variableId, structureId st
 		res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr)
 
 		if res.Error != nil {
-			return ParentReference{}, appErrors.NewValidationError(map[string]string{
-				"referenceInvalid": res.Error.Error(),
-			})
+			return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", res.Error.Error()))
 		}
 
 		if pr.StructureID == structureId {
-			return ParentReference{}, appErrors.NewValidationError(map[string]string{
-				"referenceInvalid": "Invalid reference. A reference cannot be a parent to itself.",
-			})
+			return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", "Invalid reference. A reference cannot be a parent to itself."))
 		}
 
 		if res.RowsAffected == 0 {
-			return ParentReference{}, appErrors.NewValidationError(map[string]string{
-				"referenceInvalid": "Invalid reference. Parent reference not found.",
-			})
+			return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", "Invalid reference. Parent reference not found"))
 		}
 
 		return pr, nil
@@ -185,21 +178,15 @@ func getParentReference(structureName, structureType, variableId, structureId st
 		res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr)
 
 		if res.Error != nil {
-			return ParentReference{}, appErrors.NewValidationError(map[string]string{
-				"referenceInvalid": res.Error.Error(),
-			})
+			return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", res.Error.Error()))
 		}
 
 		if pr.StructureID == structureId {
-			return ParentReference{}, appErrors.NewValidationError(map[string]string{
-				"referenceInvalid": "Invalid reference. A reference cannot be a parent to itself.",
-			})
+			return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", "Invalid reference. A reference cannot be a parent to itself."))
 		}
 
 		if res.RowsAffected == 0 {
-			return ParentReference{}, appErrors.NewValidationError(map[string]string{
-				"referenceInvalid": "Invalid reference. Parent reference not found.",
-			})
+			return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", "Invalid reference. Parent reference not found"))
 		}
 
 		return pr, nil
@@ -211,15 +198,11 @@ func getParentReference(structureName, structureType, variableId, structureId st
 	res := storage.Gorm().Raw(sql, variableId).Scan(&pr)
 
 	if res.Error != nil {
-		return ParentReference{}, appErrors.NewValidationError(map[string]string{
-			"referenceInvalid": res.Error.Error(),
-		})
+		return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", res.Error.Error()))
 	}
 
 	if res.RowsAffected == 0 {
-		return ParentReference{}, appErrors.NewValidationError(map[string]string{
-			"referenceInvalid": "Invalid reference. Parent reference not found.",
-		})
+		return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", "Invalid reference. Parent reference not found"))
 	}
 
 	return pr, nil

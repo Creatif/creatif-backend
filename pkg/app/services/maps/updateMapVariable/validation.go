@@ -43,10 +43,12 @@ INNER JOIN %s AS m ON (m.name = ? OR m.id = ? OR m.short_id = ?) AND m.project_i
 		})
 	}
 
-	if check.Count+len(groups) > 20 {
-		return appErrors.NewValidationError(map[string]string{
-			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", variableName),
-		})
+	if len(groups) > 0 {
+		if check.Count+len(groups) > 20 {
+			return appErrors.NewValidationError(map[string]string{
+				"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", variableName),
+			})
+		}
 	}
 
 	if check.Behaviour == constants.ReadonlyBehaviour {

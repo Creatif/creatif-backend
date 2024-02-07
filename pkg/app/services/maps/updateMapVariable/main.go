@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"strings"
 )
 
 type Main struct {
@@ -36,11 +37,15 @@ func (c Main) Validate() error {
 	}
 
 	if sdk.Includes(c.model.Fields, "name") {
-		return validateUniqueName(c.model.MapName, c.model.VariableName, c.model.Values.Name, c.model.ProjectID)
+		if err := validateUniqueName(c.model.MapName, c.model.VariableName, c.model.Values.Name, c.model.ProjectID); err != nil {
+			return err
+		}
 	}
 
-	if err := validateGroupsNumAndBehaviour(c.model.MapName, c.model.ProjectID, c.model.VariableName, c.model.Values.Groups, c.logBuilder); err != nil {
-		return err
+	if sdk.Includes(c.model.Fields, "groups") {
+		if err := validateGroupsNumAndBehaviour(c.model.MapName, c.model.ProjectID, c.model.VariableName, c.model.Values.Groups, c.logBuilder); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -103,7 +108,7 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 			existing.Value = c.model.Values.Value
 		}
 
-		if f == "groups" {
+		if f == "groups" && c.model.Values.Groups != nil {
 			existing.Groups = c.model.Values.Groups
 		}
 
@@ -141,6 +146,14 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 
 		return nil
 	}); err != nil {
+		errString := err.Error()
+		splt := strings.Split(errString, ":")
+		if len(splt) == 2 {
+			return declarations.MapVariable{}, appErrors.NewValidationError(map[string]string{
+				splt[0]: splt[1],
+			})
+		}
+		
 		return declarations.MapVariable{}, appErrors.NewApplicationError(err).AddError("updateMapVariable.Logic", nil)
 	}
 
