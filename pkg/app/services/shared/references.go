@@ -31,7 +31,7 @@ type ParentReference struct {
 func CreateDeclarationReferences(refs []Reference, structureId, childId, childType, projectId string) ([]declarations.Reference, error) {
 	references := make([]declarations.Reference, 0)
 	for _, r := range refs {
-		pr, err := getParentReference(r.StructureName, r.StructureType, r.VariableID, structureId)
+		pr, err := getParentReference(r.StructureType, r.VariableID, structureId)
 		if err != nil {
 			return nil, err
 		}
@@ -65,11 +65,12 @@ func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId st
 	// update
 	for _, incomingRef := range refs {
 		updatePerformed := false
+		fmt.Println(incomingRef.VariableID)
 
 		// to update
 		for _, updatableRef := range updateableReferences {
 			if updatableRef.Name == incomingRef.Name {
-				pr, err := getParentReference(incomingRef.StructureName, incomingRef.StructureType, incomingRef.VariableID, structureId)
+				pr, err := getParentReference(incomingRef.StructureType, incomingRef.VariableID, structureId)
 				if err != nil {
 					return err
 				}
@@ -89,7 +90,7 @@ func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId st
 
 		// create
 		if !updatePerformed {
-			pr, err := getParentReference(incomingRef.StructureName, incomingRef.StructureType, incomingRef.VariableID, ownerId)
+			pr, err := getParentReference(incomingRef.StructureType, incomingRef.VariableID, ownerId)
 			if err != nil {
 				return err
 			}
@@ -149,12 +150,12 @@ func RemoveAsChild(childId string) error {
 	return res.Error
 }
 
-func getParentReference(structureName, structureType, variableId, structureId string) (ParentReference, error) {
+func getParentReference(structureType, variableId, structureId string) (ParentReference, error) {
 	if structureType == "list" {
-		sql := fmt.Sprintf(`SELECT lv.id AS id, l.id AS structure_id FROM declarations.list_variables AS lv INNER JOIN declarations.lists AS l ON l.id = lv.list_id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND lv.id = ?`)
+		sql := fmt.Sprintf(`SELECT lv.id AS id, lv.list_id AS structure_id FROM declarations.list_variables AS lv WHERE lv.id = ?`)
 
 		var pr ParentReference
-		res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr)
+		res := storage.Gorm().Raw(sql, variableId).Scan(&pr)
 
 		if res.Error != nil {
 			return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", res.Error.Error()))
@@ -172,10 +173,10 @@ func getParentReference(structureName, structureType, variableId, structureId st
 	}
 
 	if structureType == "map" {
-		sql := fmt.Sprintf(`SELECT lv.id AS id, l.id AS structure_id FROM declarations.map_variables AS lv INNER JOIN declarations.maps AS l ON l.id = lv.map_id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND lv.id = ?`)
+		sql := fmt.Sprintf(`SELECT lv.id AS id, lv.map_id AS structure_id FROM declarations.map_variables AS lv WHERE lv.id = ?`)
 
 		var pr ParentReference
-		res := storage.Gorm().Raw(sql, structureName, structureName, structureName, variableId).Scan(&pr)
+		res := storage.Gorm().Raw(sql, variableId).Scan(&pr)
 
 		if res.Error != nil {
 			return ParentReference{}, errors.New(fmt.Sprintf("referenceInvalid:%s", res.Error.Error()))
