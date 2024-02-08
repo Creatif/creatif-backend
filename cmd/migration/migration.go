@@ -32,7 +32,7 @@ func closeConnection() {
 func runMigrations() {
 	sqlDb := createSchemas()
 
-	if _, err := sqlDb.Exec("ALTER DATABASE api SET search_path TO declarations;"); err != nil {
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO declarations;"); err != nil {
 		log.Fatalln(err)
 	}
 
@@ -76,7 +76,7 @@ func runMigrations() {
 		log.Fatalln(err)
 	}
 
-	if _, err := sqlDb.Exec("ALTER DATABASE api SET search_path TO app;"); err != nil {
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app;"); err != nil {
 		log.Fatalln(err)
 	}
 
