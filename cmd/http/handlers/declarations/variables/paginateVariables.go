@@ -23,6 +23,7 @@ func PaginateVariablesHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := paginateVariables2.New(paginateVariables2.NewModel(
 			model.ProjectID,
+			model.Name,
 			model.SanitizedLocales,
 			model.OrderBy,
 			model.Search,

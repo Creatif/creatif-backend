@@ -69,6 +69,10 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, err
 	}
 
+	for _, r := range references {
+		fmt.Println(r.ChildStructureID, "hild")
+	}
+
 	return LogicModel{
 		Variable:  variable,
 		Reference: references,

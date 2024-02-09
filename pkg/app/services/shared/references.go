@@ -30,6 +30,7 @@ type ParentReference struct {
 
 func CreateDeclarationReferences(refs []Reference, structureId, childId, childType, projectId string) ([]declarations.Reference, error) {
 	references := make([]declarations.Reference, 0)
+
 	for _, r := range refs {
 		pr, err := getParentReference(r.StructureType, r.VariableID, structureId)
 		if err != nil {
@@ -43,16 +44,7 @@ func CreateDeclarationReferences(refs []Reference, structureId, childId, childTy
 	return references, nil
 }
 
-func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId string, tx *gorm.DB) error {
-	// if there are not refs sent, clear the refs since user might not have frontend validation enabled
-	if len(refs) == 0 {
-		if err := deleteAllRefsByChild(ownerId, tx); err != nil {
-			return err
-		}
-
-		return nil
-	}
-
+func UpdateReferences(refs []UpdateReference, childStructureId, ownerId, projectId string, tx *gorm.DB) error {
 	updateableReferences, err := getRefsByChild(ownerId, tx)
 	if err != nil {
 		return err
@@ -65,12 +57,10 @@ func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId st
 	// update
 	for _, incomingRef := range refs {
 		updatePerformed := false
-		fmt.Println(incomingRef.VariableID)
-
 		// to update
 		for _, updatableRef := range updateableReferences {
 			if updatableRef.Name == incomingRef.Name {
-				pr, err := getParentReference(incomingRef.StructureType, incomingRef.VariableID, structureId)
+				pr, err := getParentReference(incomingRef.StructureType, incomingRef.VariableID, childStructureId)
 				if err != nil {
 					return err
 				}
@@ -95,7 +85,7 @@ func UpdateReferences(refs []UpdateReference, structureId, ownerId, projectId st
 				return err
 			}
 
-			ref := declarations.NewReference(incomingRef.Name, incomingRef.StructureType, "map", pr.ID, ownerId, structureId, "", projectId)
+			ref := declarations.NewReference(incomingRef.Name, incomingRef.StructureType, "map", pr.ID, ownerId, pr.StructureID, childStructureId, projectId)
 			tx.Create(&ref)
 		}
 	}
@@ -130,6 +120,22 @@ func RemoveAsParent(parentId string) error {
 	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_id = ?", (declarations.Reference{}).TableName()), parentId)
 
 	return res.Error
+}
+
+func IsParent(variableId string) error {
+	var id string
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT id FROM %s WHERE parent_id = ?", (declarations.Reference{}).TableName()), variableId).Scan(&id)
+	id = id
+
+	if res.Error != nil {
+		return res.Error
+	}
+
+	if res.RowsAffected != 0 {
+		return errors.New("is_parent")
+	}
+
+	return nil
 }
 
 func RemoveManyAsParent(parentIds []string) error {

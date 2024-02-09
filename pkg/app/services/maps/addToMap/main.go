@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type Main struct {
@@ -112,7 +113,15 @@ func (c Main) Logic() (LogicModel, error) {
 
 		return nil
 	}); transactionError != nil {
-		return LogicModel{}, transactionError
+		errString := transactionError.Error()
+		splt := strings.Split(errString, ":")
+		if len(splt) == 2 {
+			return LogicModel{}, appErrors.NewValidationError(map[string]string{
+				splt[0]: splt[1],
+			})
+		}
+
+		return LogicModel{}, appErrors.NewApplicationError(transactionError)
 	}
 
 	return LogicModel{

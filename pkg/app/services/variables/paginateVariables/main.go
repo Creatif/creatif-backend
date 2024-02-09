@@ -45,11 +45,13 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 	placeholders := make(map[string]interface{})
 	placeholders["projectID"] = c.model.ProjectID
 	placeholders["offset"] = offset
+	placeholders["name"] = c.model.Name
 	placeholders["limit"] = c.model.Limit
 
 	countPlaceholders := make(map[string]interface{})
 	countPlaceholders["projectID"] = c.model.ProjectID
 	countPlaceholders["behaviour"] = c.model.Behaviour
+	countPlaceholders["name"] = c.model.Name
 
 	if c.model.OrderBy == "" {
 		c.model.OrderBy = "created_at"
@@ -99,7 +101,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.Variable], error) {
 	sql := fmt.Sprintf(`
 SELECT id, short_id, locale_id, groups, name, behaviour, metadata, value, created_at, updated_at
 FROM %s
-WHERE project_id = @projectID %s
+WHERE project_id = @projectID AND name = @name %s
 %s
 %s
 %s
@@ -118,7 +120,7 @@ OFFSET @offset LIMIT @limit
 	countSql := fmt.Sprintf(`
 SELECT count(v.id) AS count
 FROM %s AS v
-WHERE v.project_id = @projectID %s
+WHERE v.project_id = @projectID AND name = @name %s
 %s %s %s
 `, (declarations.Variable{}).TableName(), search, groupsWhereClause, behaviour, locale)
 	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)

@@ -127,7 +127,7 @@ func declarationRoutes(group *echo.Group) {
 	group.DELETE("/variable/:projectID/:locale/:name", variables.DeleteVariableHandler())
 	group.GET("/variable/:projectID/:name/:locale", variables.GetVariableHandler())
 	group.GET("/variable/groups/:projectID/:name", variables.GetVariableGroupsHandler())
-	group.GET("/variables/:projectID", variables.PaginateVariablesHandler())
+	group.GET("/variables/:name/:projectID", variables.PaginateVariablesHandler())
 	group.GET("/variable/value/:projectID/:name/:locale", variables.GetValueHandler())
 
 	group.GET("/references/:projectID/:parentID/:childID/:structureType/:relationshipType/:childStructureId/:parentStructureId", references.PaginateReferencesHandler())

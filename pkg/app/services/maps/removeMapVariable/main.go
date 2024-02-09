@@ -27,6 +27,13 @@ func (c Main) Authenticate() error {
 		return appErrors.NewAuthenticationError(err)
 	}
 
+	err := shared.IsParent(c.model.VariableName)
+	if err != nil {
+		return appErrors.NewValidationError(map[string]string{
+			"isParent": "This variable is a parent and cannot be deleted",
+		})
+	}
+
 	return nil
 }
 

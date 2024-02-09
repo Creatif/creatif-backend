@@ -24,6 +24,10 @@ func CreateVariableHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
+		if model.Behaviour == "" {
+			model.Behaviour = declarations2.DefaultBehaviour
+		}
+
 		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
 		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 

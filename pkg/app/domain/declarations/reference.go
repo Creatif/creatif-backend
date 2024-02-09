@@ -26,13 +26,13 @@ type Reference struct {
 	UpdatedAt time.Time `gorm:"<-:update"`
 }
 
-func NewReference(name, parentType, childType, parentId, childId, structureParentId, structureChildId, projectId string) Reference {
+func NewReference(name, parentType, childType, parentId, childId, parentStructureId, childStructureId, projectId string) Reference {
 	return Reference{
 		Name:              name,
 		ParentType:        parentType,
-		ParentStructureID: structureParentId,
+		ParentStructureID: parentStructureId,
 		ProjectID:         projectId,
-		ChildStructureID:  structureChildId,
+		ChildStructureID:  childStructureId,
 		ChildType:         childType,
 		ParentID:          parentId,
 		ChildID:           childId,

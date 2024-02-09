@@ -109,9 +109,9 @@ func (a Model) Validate() map[string]string {
 
 type View struct {
 	ID        string      `json:"id"`
-	ProjectID string      `json:"projectID"`
+	ProjectID string      `json:"projectId"`
 	Locale    string      `json:"locale"`
-	ShortID   string      `json:"shortID"`
+	ShortID   string      `json:"shortId"`
 	Name      string      `json:"name"`
 	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`

@@ -25,6 +25,13 @@ func (c Main) Validate() error {
 		return appErrors.NewValidationError(errs)
 	}
 
+	err := shared.IsParent(c.model.ItemID)
+	if err != nil {
+		return appErrors.NewValidationError(map[string]string{
+			"isParent": "This variable is a parent and cannot be deleted",
+		})
+	}
+	
 	c.logBuilder.Add("deleteListItemByID", "Validated")
 	return nil
 }
@@ -62,7 +69,6 @@ func (c Main) Logic() (*struct{}, error) {
 		if err := shared.RemoveAsParent(c.model.ItemID); err != nil {
 			return err
 		}
-		
 		if err := shared.RemoveAsChild(c.model.ItemID); err != nil {
 			return err
 		}

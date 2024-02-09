@@ -18,6 +18,7 @@ var validOrderByFields []string = []string{
 
 type Model struct {
 	ProjectID string
+	Name      string
 	Locales   []string
 
 	Limit          int
@@ -30,9 +31,10 @@ type Model struct {
 	Groups         []string
 }
 
-func NewModel(projectId string, locales []string, orderBy, search, direction string, limit, page int, groups []string, behaviour string, filters map[string]string) Model {
+func NewModel(projectId, name string, locales []string, orderBy, search, direction string, limit, page int, groups []string, behaviour string, filters map[string]string) Model {
 	return Model{
 		ProjectID:      projectId,
+		Name:           name,
 		Locales:        locales,
 		Search:         search,
 		OrderBy:        orderBy,
@@ -48,6 +50,7 @@ func NewModel(projectId string, locales []string, orderBy, search, direction str
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"projectId": a.ProjectID,
+		"name":      a.Name,
 		"locales":   a.Locales,
 		"orderBy":   a.OrderBy,
 		"behaviour": a.Behaviour,
@@ -59,6 +62,7 @@ func (a *Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectId", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("name", validation.Required),
 			validation.Key("locales", validation.By(func(value interface{}) error {
 				t := value.([]string)
 

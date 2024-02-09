@@ -2,7 +2,6 @@ package getProjectMetadata
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -41,7 +40,7 @@ func (c Main) Logic() (PreViewModel, error) {
 		Name:      logicModels[0].Name,
 		State:     logicModels[0].State,
 		UserID:    logicModels[0].UserID,
-		Variables: make(map[string][]PreViewStructure),
+		Variables: make([]PreViewStructure, 0),
 		Maps:      make([]PreViewStructure, 0),
 		Lists:     make([]PreViewStructure, 0),
 	}
@@ -51,14 +50,15 @@ func (c Main) Logic() (PreViewModel, error) {
 	}
 
 	for _, v := range logicModels {
-		variableLocale, _ := locales.GetAlphaWithID(v.VariableLocale)
-
-		if _, ok := preViewModel.Variables[v.VariableLocale]; !ok && variableLocale != "" {
-			preViewModel.Variables[variableLocale] = make([]PreViewStructure, 0)
-		}
-
 		if v.VariableName != "" {
-			preViewModel.Variables[variableLocale] = append(preViewModel.Variables[variableLocale], PreViewStructure{
+			// if an entry exists, skip
+			for _, l := range preViewModel.Variables {
+				if l.Name == v.VariableName {
+					continue
+				}
+			}
+
+			preViewModel.Variables = append(preViewModel.Variables, PreViewStructure{
 				Name:    v.VariableName,
 				ID:      v.VariableID,
 				ShortID: v.VariableShortID,

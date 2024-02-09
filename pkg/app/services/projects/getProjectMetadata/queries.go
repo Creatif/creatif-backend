@@ -24,8 +24,7 @@ m.id AS map_id,
 m.short_id AS map_short_id,
 l.name AS list_name,
 l.id AS list_id,
-l.short_id AS list_short_id,
-v.locale_id AS variable_locale
+l.short_id AS list_short_id
 FROM %s AS p
 LEFT JOIN %s AS v ON p.id = ? AND p.user_id = ? AND v.project_id = p.id AND v.project_id = ?
 LEFT JOIN %s AS m ON m.project_id = p.id AND m.project_id = ?
