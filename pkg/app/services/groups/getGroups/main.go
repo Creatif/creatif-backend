@@ -2,7 +2,7 @@ package getGroups
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/app"
+	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -38,10 +38,10 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() ([]app.Group, error) {
-	var groups []app.Group
-	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT name FROM %s WHERE project_id = ?", (app.Group{}).TableName()), c.model.ProjectID).Scan(&groups); res.Error != nil {
-		return []app.Group{}, appErrors.NewApplicationError(res.Error)
+func (c Main) Logic() ([]declarations.Group, error) {
+	var groups []declarations.Group
+	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT name FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID).Scan(&groups); res.Error != nil {
+		return []declarations.Group{}, appErrors.NewApplicationError(res.Error)
 	}
 
 	return groups, nil
@@ -69,7 +69,7 @@ func (c Main) Handle() ([]string, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []app.Group] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []declarations.Group] {
 	logBuilder.Add("getGroups", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

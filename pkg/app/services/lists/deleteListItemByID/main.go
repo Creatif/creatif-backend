@@ -31,7 +31,7 @@ func (c Main) Validate() error {
 			"isParent": "This variable is a parent and cannot be deleted",
 		})
 	}
-	
+
 	c.logBuilder.Add("deleteListItemByID", "Validated")
 	return nil
 }

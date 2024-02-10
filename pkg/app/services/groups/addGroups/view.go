@@ -1,12 +1,12 @@
 package addGroups
 
 import (
-	"creatif/pkg/app/domain/app"
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
 )
 
-func newView(model []app.Group) []string {
-	return sdk.Map(model, func(idx int, value app.Group) string {
+func newView(model []declarations.Group) []string {
+	return sdk.Map(model, func(idx int, value declarations.Group) string {
 		return value.Name
 	})
 }

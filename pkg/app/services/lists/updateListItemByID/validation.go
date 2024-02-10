@@ -1,15 +1,15 @@
 package updateListItemByID
 
 import (
-	"creatif/pkg/app/domain/app"
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
 )
 
 func validateGroupsExist(projectId string, groups []string) error {
-	g := make([]app.Group, 0)
-	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT count(id) FROM %s WHERE project_id = ? AND name IN(?)", (app.Group{}).TableName()), projectId, groups).Scan(&g); res.Error != nil {
+	g := make([]declarations.Group, 0)
+	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT count(id) FROM %s WHERE project_id = ? AND name IN(?)", (declarations.Group{}).TableName()), projectId, groups).Scan(&g); res.Error != nil {
 		return res.Error
 	}
 

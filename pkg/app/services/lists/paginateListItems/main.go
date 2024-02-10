@@ -76,7 +76,11 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 
 	var groupsWhereClause string
 	if len(c.model.Groups) != 0 {
-		groupsWhereClause = fmt.Sprintf("WHERE '{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "lv.groups")
+		groups := sdk.Map(c.model.Groups, func(idx int, value string) string {
+			return fmt.Sprintf("\"%s\"", value)
+		})
+
+		groupsWhereClause = fmt.Sprintf("WHERE '{%s}'::text[] && %s", strings.Join(groups, ","), "lv.groups")
 	}
 
 	var search string
