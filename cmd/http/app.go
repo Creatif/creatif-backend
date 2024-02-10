@@ -9,7 +9,6 @@ import (
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
 	"creatif/cmd/http/handlers/declarations/references"
-	"creatif/cmd/http/handlers/declarations/variables"
 	"creatif/cmd/server"
 	"creatif/pkg/lib/cache"
 	"creatif/pkg/lib/storage"
@@ -121,14 +120,6 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/maps/items/:projectID/:name", maps.PaginateMapVariables())
 	group.GET("/maps/:projectID/:name", maps.PaginateMapsHandler())
 	group.GET("/map/:projectID/:name", maps.GetMapHandler())
-
-	group.PUT("/variable/:projectID/:locale", variables.CreateVariableHandler())
-	group.POST("/variable/:projectID", variables.UpdateVariableHandler())
-	group.DELETE("/variable/:projectID/:locale/:name", variables.DeleteVariableHandler())
-	group.GET("/variable/:projectID/:name/:locale", variables.GetVariableHandler())
-	group.GET("/variable/groups/:projectID/:name", variables.GetVariableGroupsHandler())
-	group.GET("/variables/:name/:projectID", variables.PaginateVariablesHandler())
-	group.GET("/variable/value/:projectID/:name/:locale", variables.GetValueHandler())
 
 	group.GET("/references/:projectID/:parentID/:childID/:structureType/:relationshipType/:childStructureId/:parentStructureId", references.PaginateReferencesHandler())
 }

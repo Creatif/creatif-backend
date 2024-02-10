@@ -13,10 +13,6 @@ var _ = ginkgo.Describe("Get project metadata tests", func() {
 		for i := 0; i < 10; i++ {
 			testCreateMap(authentication, fmt.Sprintf("%d-name", i), 10)
 			testCreateList(authentication, fmt.Sprintf("%d-name", i), 10)
-
-			for _, locale := range []string{"aar", "abk", "eng"} {
-				testCreateDetailedVariable(authentication, locale, fmt.Sprintf("%d-name", i), "modifiable", []string{}, nil)
-			}
 		}
 
 		handler := New(authentication, logger.NewLogBuilder())

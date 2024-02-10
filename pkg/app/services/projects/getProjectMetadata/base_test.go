@@ -7,7 +7,6 @@ import (
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/mapCreate"
 	"creatif/pkg/app/services/projects/createProject"
-	createVariable2 "creatif/pkg/app/services/variables/createVariable"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -85,9 +84,7 @@ var _ = GinkgoAfterSuite(func() {
 })
 
 var _ = GinkgoAfterHandler(func() {
-	res := storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))
-	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
+	res := storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
@@ -239,22 +236,6 @@ func testCreateMap(authentication auth.Authentication, name string, variablesNum
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
 	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
-
-	return view
-}
-
-func testCreateDetailedVariable(authentication auth.Authentication, locale, name, behaviour string, groups []string, metadata []byte) createVariable2.View {
-	b, _ := json.Marshal(map[string]interface{}{
-		"one":  1,
-		"two":  "three",
-		"four": "six",
-	})
-
-	handler := createVariable2.New(createVariable2.NewModel(authentication.User().ProjectID, locale, name, behaviour, groups, metadata, b), authentication, logger.NewLogBuilder())
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
 
 	return view
 }

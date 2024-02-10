@@ -80,7 +80,6 @@ SELECT
     state,
     created_at,
     updated_at,
-    (SELECT count(v.id) FROM declarations.variables AS v WHERE v.project_id = p.id) AS variable_num,
     (SELECT count(v.id) FROM declarations.maps AS v WHERE v.project_id = p.id) AS maps_num,
     (SELECT count(v.id) FROM declarations.lists AS v WHERE v.project_id = p.id) AS lists_num
 FROM %s AS p

@@ -46,11 +46,6 @@ func runMigrations() {
 		log.Fatalln(err)
 	}
 
-	if err := storage2.Gorm().AutoMigrate(declarations.Variable{}); err != nil {
-		closeConnection()
-		log.Fatalln(err)
-	}
-
 	if err := storage2.Gorm().AutoMigrate(declarations.Map{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)

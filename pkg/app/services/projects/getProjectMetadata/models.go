@@ -3,21 +3,18 @@ package getProjectMetadata
 import "creatif/pkg/lib/sdk"
 
 type LogicModel struct {
-	ID              string
-	Name            string
-	State           string
-	UserID          string `gorm:"column:user_id"`
-	Map             string `gorm:"column:map_name"`
-	MapID           string `gorm:"column:map_id"`
-	MapShortID      string `gorm:"column:map_short_id"`
-	List            string `gorm:"column:list_name"`
-	ListID          string `gorm:"column:list_id"`
-	ListShortID     string `gorm:"column:list_short_id"`
-	VariableName    string `gorm:"column:variable_name"`
-	VariableID      string `gorm:"column:variable_id"`
-	VariableShortID string `gorm:"column:variable_short_id"`
-	MapLocale       string `gorm:"column:map_locale"`
-	ListLocale      string `gorm:"column:list_locale"`
+	ID          string
+	Name        string
+	State       string
+	UserID      string `gorm:"column:user_id"`
+	Map         string `gorm:"column:map_name"`
+	MapID       string `gorm:"column:map_id"`
+	MapShortID  string `gorm:"column:map_short_id"`
+	List        string `gorm:"column:list_name"`
+	ListID      string `gorm:"column:list_id"`
+	ListShortID string `gorm:"column:list_short_id"`
+	MapLocale   string `gorm:"column:map_locale"`
+	ListLocale  string `gorm:"column:list_locale"`
 }
 
 type StructureView struct {
@@ -33,13 +30,12 @@ type PreViewStructure struct {
 }
 
 type PreViewModel struct {
-	ID        string
-	Name      string
-	State     string
-	UserID    string
-	Variables []PreViewStructure
-	Maps      []PreViewStructure
-	Lists     []PreViewStructure
+	ID     string
+	Name   string
+	State  string
+	UserID string
+	Maps   []PreViewStructure
+	Lists  []PreViewStructure
 }
 
 type ViewVariable struct {
@@ -55,9 +51,8 @@ type View struct {
 	UserID     string          `json:"userID"`
 	Structures []StructureView `json:"structures"`
 
-	Variables []StructureView `json:"variables"`
-	Maps      []StructureView `json:"maps"`
-	Lists     []StructureView `json:"lists"`
+	Maps  []StructureView `json:"maps"`
+	Lists []StructureView `json:"lists"`
 }
 
 func newView(model PreViewModel) View {
@@ -67,13 +62,6 @@ func newView(model PreViewModel) View {
 		Name:       model.Name,
 		State:      model.State,
 		UserID:     model.UserID,
-		Variables: sdk.Map(model.Variables, func(idx int, value PreViewStructure) StructureView {
-			return StructureView{
-				Name:    value.Name,
-				ID:      value.ID,
-				ShortID: value.ShortID,
-			}
-		}),
 		Maps: sdk.Map(model.Maps, func(idx int, value PreViewStructure) StructureView {
 			return StructureView{
 				Name:    value.Name,

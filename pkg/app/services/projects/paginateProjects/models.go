@@ -29,11 +29,10 @@ type QueryModel struct {
 	Name  string `gorm:"index"`
 	State string
 
-	VariableNum int       `gorm:"column:variable_num"`
-	MapsNum     int       `gorm:"column:maps_num"`
-	ListsNum    int       `gorm:"column:lists_num"`
-	CreatedAt   time.Time `gorm:"<-:create"`
-	UpdatedAt   time.Time
+	MapsNum   int       `gorm:"column:maps_num"`
+	ListsNum  int       `gorm:"column:lists_num"`
+	CreatedAt time.Time `gorm:"<-:create"`
+	UpdatedAt time.Time
 }
 
 func NewModel(orderBy, search, direction string, limit, page int) Model {

@@ -80,9 +80,7 @@ var _ = GinkgoAfterSuite(func() {
 })
 
 var _ = GinkgoAfterHandler(func() {
-	res := storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLES_TABLE))
-	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
+	res := storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.PROJECT_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.MAP_VARIABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())

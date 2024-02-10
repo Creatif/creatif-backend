@@ -19,9 +19,8 @@ type Project struct {
 
 	State string `gorm:"default: 'draft'"`
 
-	Variables []declarations.Variable `gorm:"foreignKey:ProjectID;references:ID"`
-	Maps      []declarations.Map      `gorm:"foreignKey:ProjectID;references:ID"`
-	Lists     []declarations.List     `gorm:"foreignKey:ProjectID;references:ID"`
+	Maps  []declarations.Map  `gorm:"foreignKey:ProjectID;references:ID"`
+	Lists []declarations.List `gorm:"foreignKey:ProjectID;references:ID"`
 
 	UserID string `gorm:"type:text CHECK(length(id)=26);not null"`
 

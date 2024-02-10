@@ -13,8 +13,6 @@ type Locale struct {
 	Name  string
 	Alpha string `gorm:"unique"`
 
-	Variables []Variable `gorm:"foreignKey:LocaleID"`
-
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }

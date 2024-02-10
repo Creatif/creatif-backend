@@ -36,35 +36,19 @@ func (c Main) Logic() (PreViewModel, error) {
 	}
 
 	preViewModel := PreViewModel{
-		ID:        logicModels[0].ID,
-		Name:      logicModels[0].Name,
-		State:     logicModels[0].State,
-		UserID:    logicModels[0].UserID,
-		Variables: make([]PreViewStructure, 0),
-		Maps:      make([]PreViewStructure, 0),
-		Lists:     make([]PreViewStructure, 0),
+		ID:     logicModels[0].ID,
+		Name:   logicModels[0].Name,
+		State:  logicModels[0].State,
+		UserID: logicModels[0].UserID,
+		Maps:   make([]PreViewStructure, 0),
+		Lists:  make([]PreViewStructure, 0),
 	}
 
-	if len(logicModels) == 1 && logicModels[0].VariableName == "" && logicModels[0].Map == "" && logicModels[0].List == "" {
+	if len(logicModels) == 1 && logicModels[0].Map == "" && logicModels[0].List == "" {
 		return preViewModel, nil
 	}
 
 	for _, v := range logicModels {
-		if v.VariableName != "" {
-			// if an entry exists, skip
-			for _, l := range preViewModel.Variables {
-				if l.Name == v.VariableName {
-					continue
-				}
-			}
-
-			preViewModel.Variables = append(preViewModel.Variables, PreViewStructure{
-				Name:    v.VariableName,
-				ID:      v.VariableID,
-				ShortID: v.VariableShortID,
-			})
-		}
-
 		if v.Map != "" {
 			// if an entry exists, skip
 			for _, l := range preViewModel.Lists {
@@ -91,10 +75,6 @@ func (c Main) Logic() (PreViewModel, error) {
 				})
 			}
 		}
-	}
-
-	if len(preViewModel.Variables) == 0 {
-		preViewModel.Variables = nil
 	}
 
 	return preViewModel, nil
