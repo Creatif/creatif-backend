@@ -112,7 +112,9 @@ func (c Main) Logic() (LogicModel, error) {
 				groups[i] = declarations.NewVariableGroup(g, variable.ID, c.model.Entry.Groups)
 			}
 
-			tx.Create(&groups)
+			if res := tx.Create(&groups); res.Error != nil {
+				return res.Error
+			}
 		}
 
 		if len(c.model.References) > 0 {
@@ -121,7 +123,9 @@ func (c Main) Logic() (LogicModel, error) {
 				return err
 			}
 
-			tx.Create(&references)
+			if res := tx.Create(&references); res.Error != nil {
+				return res.Error
+			}
 
 			refs = references
 		}

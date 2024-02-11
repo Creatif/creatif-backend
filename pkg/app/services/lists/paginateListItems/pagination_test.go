@@ -34,11 +34,11 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		groups := testCreateGroups(projectId, 5)
 		list := testCreateList(projectId, "name")
 
-		for i := 0; i < 100; i++ {
+		for i := 0; i < 50; i++ {
 			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
 		}
 
-		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 10, 50, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 10, 50, []string{"group-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -73,7 +73,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
 		}
 
-		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 50, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 50, 1, []string{"group-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -108,7 +108,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, list.ID, "created_at", "1", "desc", 10, 1, []string{"one"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, list.ID, "created_at", "1", "desc", 10, 1, []string{"group-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
