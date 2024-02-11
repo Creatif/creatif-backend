@@ -28,9 +28,16 @@ func (c Main) Validate() error {
 	c.logBuilder.Add("addToList", "Validated.")
 
 	if len(c.model.Entry.Groups) > 0 {
-		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Entry.Groups); err != nil {
+		count, err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Entry.Groups)
+		if err != nil {
 			return appErrors.NewValidationError(map[string]string{
-				"groupExists": err.Error(),
+				"groupsExist": err.Error(),
+			})
+		}
+
+		if count+len(c.model.Entry.Groups) > 20 {
+			return appErrors.NewValidationError(map[string]string{
+				"maximumGroups": fmt.Sprintf("You are trying to add %d more groups but you already have %d assigned to this item. Maximum number of groups per item is 20", len(c.model.Entry.Groups), count),
 			})
 		}
 	}
@@ -90,13 +97,22 @@ func (c Main) Logic() (LogicModel, error) {
 		c.model.Entry.Groups = []string{}
 	}
 
-	variable := declarations.NewListVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Groups, c.model.Entry.Value)
+	variable := declarations.NewListVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Value)
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&variable); res.Error != nil {
 			c.logBuilder.Add("addToList", res.Error.Error())
 
 			return errors.New(fmt.Sprintf("List item with name '%s' already exists.", c.model.Entry.Name))
+		}
+
+		if len(c.model.Entry.Groups) > 0 {
+			groups := make([]declarations.VariableGroup, len(c.model.Entry.Groups))
+			for i, g := range c.model.Entry.Groups {
+				groups[i] = declarations.NewVariableGroup(g, variable.ID, c.model.Entry.Groups)
+			}
+
+			tx.Create(&groups)
 		}
 
 		if len(c.model.References) > 0 {
@@ -118,6 +134,7 @@ func (c Main) Logic() (LogicModel, error) {
 	return LogicModel{
 		Variable:   variable,
 		References: refs,
+		Groups:     c.model.Entry.Groups,
 	}, nil
 }
 

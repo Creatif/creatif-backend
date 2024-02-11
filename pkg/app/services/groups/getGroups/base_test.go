@@ -95,9 +95,9 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
@@ -123,7 +123,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
+func testCreateGroups(projectId string, numOfGroups int) []string {
 	groups := make([]string, numOfGroups)
 	for i := 0; i < numOfGroups; i++ {
 		groups[i] = fmt.Sprintf("groups-%d", i)

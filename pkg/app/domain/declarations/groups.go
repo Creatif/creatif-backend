@@ -7,12 +7,10 @@ import (
 )
 
 type Group struct {
-	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	Name      string `gorm:"primarykey;type:text"`
+	ProjectID string `gorm:"index;type:text"`
 
-	Name      string `gorm:"uniqueIndex:group_name;not null"`
-	ProjectID string `gorm:"uniqueIndex:group_name;type:text"`
-
-	VariableGroups []VariableGroup `gorm:"foreignKey:GroupID;references:ID;constraint:OnDelete:CASCADE;"`
+	VariableGroups []VariableGroup `gorm:"foreignKey:GroupID;references:Name;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time `gorm:"<-:update"`
@@ -26,5 +24,5 @@ func NewGroup(projectId, name string) Group {
 }
 
 func (Group) TableName() string {
-	return fmt.Sprintf("%s.%s", "app", domain.GROUPS_TABLE)
+	return fmt.Sprintf("%s.%s", "declarations", domain.GROUPS_TABLE)
 }

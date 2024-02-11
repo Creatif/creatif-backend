@@ -1,4 +1,4 @@
-package paginateMapVariables
+package queryListByID
 
 import (
 	"github.com/lib/pq"

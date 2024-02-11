@@ -1,10 +1,13 @@
-package paginateMapVariables
+package queryMapVariable
 
 import (
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"time"
 )
+
+type Group struct {
+}
 
 type QueryVariable struct {
 	ID      string  `gorm:"primarykey;type:text;default:gen_ulid()"`

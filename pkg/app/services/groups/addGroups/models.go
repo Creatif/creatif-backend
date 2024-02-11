@@ -36,6 +36,8 @@ func (a *Model) Validate() map[string]string {
 					return nil
 				}
 
+				// add unique group check
+
 				return nil
 			})),
 		),

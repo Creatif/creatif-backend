@@ -50,7 +50,7 @@ func (c Main) Logic() (*struct{}, error) {
 			(declarations.List{}).TableName(),
 		)
 
-		res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
+		res := tx.Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
 		if res.Error != nil {
 			c.logBuilder.Add("deleteRangeByID", res.Error.Error())
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
@@ -60,10 +60,15 @@ func (c Main) Logic() (*struct{}, error) {
 			return appErrors.NewNotFoundError(res.Error).AddError("deleteRangeByID.Logic", nil)
 		}
 
-		if err := shared.RemoveManyAsParent(c.model.Items); err != nil {
+		deleteGroupsSql := fmt.Sprintf("DELETE FROM %s WHERE variable_id IN(?)", (declarations.VariableGroup{}).TableName())
+		if res := tx.Exec(deleteGroupsSql, c.model.Items); res.Error != nil {
+			return res.Error
+		}
+
+		if err := shared.RemoveManyAsParent(c.model.Items, tx); err != nil {
 			return err
 		}
-		if err := shared.RemoveManyAsChild(c.model.Items); err != nil {
+		if err := shared.RemoveManyAsChild(c.model.Items, tx); err != nil {
 			return err
 		}
 

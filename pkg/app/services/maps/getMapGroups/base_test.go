@@ -3,12 +3,14 @@ package getMapGroups
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -96,9 +98,9 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
@@ -124,69 +126,43 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
-	entries := make([]mapCreate.VariableModel, 0)
-	fragmentedGroups := map[string]int{}
-	fragmentedGroups["one"] = 0
-	fragmentedGroups["two"] = 0
-	fragmentedGroups["three"] = 0
-
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
+func testAddToMap(projectId, name string, references []shared.Reference, groups []string) addToMap.LogicModel {
+	variableModel := addToMap.VariableModel{
+		Name:      fmt.Sprintf("new add variable"),
+		Metadata:  nil,
+		Groups:    groups,
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
 	}
 
-	b, err := json.Marshal(m)
+	model := addToMap.NewModel(projectId, name, variableModel, references)
+	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	view, err := handler.Logic()
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	for i := 0; i < variablesNum; i++ {
-		var value interface{}
-		value = "my value"
-		if i%2 == 0 {
-			value = true
-		}
+	return view
+}
 
-		if i%3 == 0 {
-			value = map[string]interface{}{
-				"one":   "one",
-				"two":   []string{"one", "two", "three"},
-				"three": []int{1, 2, 3},
-				"four":  453,
-			}
-		}
-
-		var groups []string = []string{"unfragmented"}
-		if i%2 == 0 {
-			groups = append(groups, "one")
-			fragmentedGroups["one"]++
-		}
-
-		if i%3 == 0 {
-			groups = append(groups, "two")
-			fragmentedGroups["two"]++
-		}
-
-		if i%5 == 0 {
-			groups = append(groups, "three")
-			fragmentedGroups["three"]++
-		}
-
-		v, err := json.Marshal(value)
-		gomega.Expect(err).Should(gomega.BeNil())
-
-		variableModel := mapCreate.VariableModel{
-			Name:      fmt.Sprintf("name-%d", i),
-			Metadata:  b,
-			Groups:    groups,
-			Value:     v,
-			Behaviour: "modifiable",
-			Locale:    "eng",
-		}
-
-		entries = append(entries, variableModel)
+func testCreateGroups(projectId string, numOfGroups int) []string {
+	groups := make([]string, numOfGroups)
+	for i := 0; i < numOfGroups; i++ {
+		groups[i] = fmt.Sprintf("groups-%d", i)
 	}
+
+	l := logger.NewLogBuilder()
+
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId), l)
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+	gomega.Expect(len(model)).Should(gomega.Equal(5))
+
+	return model
+}
+
+func testCreateMap(projectId, name string) mapCreate.View {
+	entries := make([]mapCreate.VariableModel, 0)
 
 	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
@@ -195,7 +171,6 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
 	return view
 }

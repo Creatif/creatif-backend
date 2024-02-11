@@ -2,26 +2,24 @@ package getMapGroups
 
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
-	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
 
-var _ = ginkgo.Describe("Declaration list variable tests", func() {
-	ginkgo.It("should get all distinct groups from a list", func() {
+var _ = ginkgo.Describe("Declaration maps variable tests", func() {
+	ginkgo.It("should get all distinct groups from a map", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
-		view := testCreateMap(projectId, "list", 5)
-
-		var itemId string
-		res := storage.Gorm().Raw("SELECT id FROM declarations.map_variables WHERE map_id = ? LIMIT 1", view.ID).Scan(&itemId)
-		testAssertErrNil(res.Error)
+		groups := testCreateGroups(projectId, 5)
+		view := testCreateMap(projectId, "map")
+		variable := testAddToMap(projectId, view.ID, []shared.Reference{}, groups)
 
 		l := logger.NewLogBuilder()
-		handler := New(NewModel(view.Name, itemId, projectId), auth.NewTestingAuthentication(true, ""), l)
-		groups, err := handler.Handle()
+		handler := New(NewModel(view.Name, variable.Variable.ID, projectId), auth.NewTestingAuthentication(true, ""), l)
+		fetchedGroups, err := handler.Handle()
 		testAssertErrNil(err)
 
-		gomega.Expect(len(groups)).To(gomega.Equal(4))
+		gomega.Expect(len(fetchedGroups)).To(gomega.Equal(5))
 	})
 })

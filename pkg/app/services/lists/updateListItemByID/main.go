@@ -9,11 +9,13 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"strings"
 )
 
 type Main struct {
@@ -29,9 +31,16 @@ func (c Main) Validate() error {
 	}
 
 	if len(c.model.Values.Groups) > 0 {
-		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Values.Groups); err != nil {
+		count, err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Values.Groups)
+		if err != nil {
 			return appErrors.NewValidationError(map[string]string{
 				"groupsExist": err.Error(),
+			})
+		}
+
+		if count+len(c.model.Values.Groups) > 20 {
+			return appErrors.NewValidationError(map[string]string{
+				"maximumGroups": fmt.Sprintf("You are trying to add %d more groups but you already have %d assigned to this item. Maximum number of groups per item is 20", len(c.model.Values.Groups), count),
 			})
 		}
 	}
@@ -91,7 +100,7 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (declarations.ListVariable, error) {
+func (c Main) Logic() (LogicResult, error) {
 	var list declarations.List
 	if res := storage.Gorm().Where(
 		fmt.Sprintf("(id = ? OR short_id = ?) AND project_id = ?"),
@@ -102,10 +111,10 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByID.Logic", nil)
+			return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByID.Logic", nil)
 		}
 
-		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByID.Logic", nil)
+		return LogicResult{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByID.Logic", nil)
 	}
 
 	var existing declarations.ListVariable
@@ -117,10 +126,10 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return declarations.ListVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByID.Logic", nil)
+			return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByID.Logic", nil)
 		}
 
-		return declarations.ListVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByID.Logic", nil)
+		return LogicResult{}, appErrors.NewDatabaseError(res.Error).AddError("updateListItemByID.Logic", nil)
 	}
 
 	for _, f := range c.model.Fields {
@@ -134,10 +143,6 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 
 		if f == "value" {
 			existing.Value = c.model.Values.Value
-		}
-
-		if f == "groups" {
-			existing.Groups = c.model.Values.Groups
 		}
 
 		if f == "behaviour" {
@@ -159,7 +164,6 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 			{Name: "metadata"},
 			{Name: "locale_id"},
 			{Name: "value"},
-			{Name: "groups"},
 			{Name: "created_at"},
 			{Name: "updated_at"},
 		}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
@@ -168,16 +172,46 @@ func (c Main) Logic() (declarations.ListVariable, error) {
 			return appErrors.NewApplicationError(res.Error).AddError("updateListItemByID.Logic", nil)
 		}
 
+		if sdk.Includes(c.model.Fields, "groups") {
+			if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE variable_id = ?", (declarations.VariableGroup{}).TableName()), c.model.ItemID); res.Error != nil {
+				return res.Error
+			}
+
+			variablesGroups := make([]declarations.VariableGroup, 0)
+			for _, g := range c.model.Values.Groups {
+				variablesGroups = append(variablesGroups, declarations.NewVariableGroup(g, c.model.ItemID, c.model.Values.Groups))
+			}
+
+			tx.Create(&variablesGroups)
+		}
+
 		if err := shared.UpdateReferences(c.model.References, list.ID, updated.ID, c.model.ProjectID, tx); err != nil {
 			return err
 		}
 
 		return nil
 	}); transactionErr != nil {
-		return declarations.ListVariable{}, appErrors.NewApplicationError(transactionErr)
+		errString := transactionErr.Error()
+		splt := strings.Split(errString, ":")
+		if len(splt) == 2 {
+			return LogicResult{}, appErrors.NewValidationError(map[string]string{
+				splt[0]: splt[1],
+			})
+		}
+
+		return LogicResult{}, appErrors.NewApplicationError(transactionErr).AddError("updateMapVariable.Logic", nil)
 	}
 
-	return updated, nil
+	groups := make([]string, 0)
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.name AND vg.variable_id = ?", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.ItemID).Scan(&groups)
+	if res.Error != nil {
+		return LogicResult{}, appErrors.NewDatabaseError(res.Error)
+	}
+
+	return LogicResult{
+		Variable: updated,
+		Groups:   groups,
+	}, nil
 }
 
 func (c Main) Handle() (View, error) {
@@ -202,7 +236,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.ListVariable] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
 	logBuilder.Add("updateListItemByID", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

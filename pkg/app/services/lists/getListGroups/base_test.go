@@ -3,9 +3,12 @@ package getListGroups
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
+	"creatif/pkg/app/services/lists/addToList"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
+	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -95,9 +98,9 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
@@ -123,19 +126,23 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateList(projectId, name string, varNum int) createList2.View {
-	variables := make([]createList2.Variable, varNum)
-	for i := 0; i < varNum; i++ {
-		variables[i] = createList2.Variable{
-			Name:      fmt.Sprintf("one-%d", i),
-			Metadata:  nil,
-			Groups:    []string{"one", "two", "three"},
-			Locale:    "eng",
-			Behaviour: "readonly",
-			Value:     nil,
-		}
+func testCreateGroups(projectId string, numOfGroups int) []string {
+	groups := make([]string, numOfGroups)
+	for i := 0; i < numOfGroups; i++ {
+		groups[i] = fmt.Sprintf("groups-%d", i)
 	}
 
+	l := logger.NewLogBuilder()
+
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId), l)
+	model, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return model
+}
+
+func testCreateList(projectId, name string) createList2.View {
+	variables := make([]createList2.Variable, 0)
 	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(true, ""), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
@@ -145,4 +152,23 @@ func testCreateList(projectId, name string, varNum int) createList2.View {
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
 	return list
+}
+
+func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) addToList.View {
+	variableModel := addToList.VariableModel{
+		Name:      variableName,
+		Metadata:  nil,
+		Groups:    groups,
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToList.NewModel(projectId, name, variableModel, references)
+	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	view, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return view
 }

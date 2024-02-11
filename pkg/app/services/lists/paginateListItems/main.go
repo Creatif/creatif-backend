@@ -44,10 +44,12 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	placeholders["offset"] = offset
 	placeholders["name"] = c.model.ListName
 	placeholders["limit"] = c.model.Limit
+	placeholders["groups"] = c.model.Groups
 
 	countPlaceholders := make(map[string]interface{})
 	countPlaceholders["projectID"] = c.model.ProjectID
 	countPlaceholders["name"] = c.model.ListName
+	countPlaceholders["groups"] = c.model.Groups
 
 	if c.model.OrderBy == "" {
 		c.model.OrderBy = "index"
@@ -76,11 +78,8 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 
 	var groupsWhereClause string
 	if len(c.model.Groups) != 0 {
-		groups := sdk.Map(c.model.Groups, func(idx int, value string) string {
-			return fmt.Sprintf("\"%s\"", value)
-		})
-
-		groupsWhereClause = fmt.Sprintf("WHERE '{%s}'::text[] && %s", strings.Join(groups, ","), "lv.groups")
+		searchForGroups := strings.Join(c.model.Groups, ",")
+		groupsWhereClause = fmt.Sprintf("INNER JOIN LATERAL (SELECT g.variable_id, g.group_id, g.groups FROM %s AS g WHERE lv.id = g.variable_id ORDER BY g.variable_id LIMIT 1) AS g ON '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), searchForGroups)
 	}
 
 	var search string
@@ -98,8 +97,15 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	}
 
 	returnableFields := ""
+	groupsSubquery := ""
 	if len(c.model.Fields) != 0 {
-		returnableFields = strings.Join(c.model.Fields, ",") + ","
+		if sdk.Includes(c.model.Fields, "groups") {
+			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.name AND vg.variable_id = lv.id)) AS groups")
+		}
+
+		returnableFields = strings.Join(sdk.Filter(c.model.Fields, func(idx int, value string) bool {
+			return value != "groups"
+		}), ",") + ","
 	}
 
 	sql := fmt.Sprintf(`SELECT 
@@ -110,6 +116,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
     	lv.name, 
     	lv.behaviour, 
     	%s
+    	%s
     	lv.created_at, 
     	lv.updated_at 
 			FROM %s AS lv
@@ -119,6 +126,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		%s
 		ORDER BY lv.%s %s
 		OFFSET @offset LIMIT @limit`,
+		groupsSubquery,
 		returnableFields,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),

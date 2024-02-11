@@ -29,9 +29,16 @@ func (c Main) Validate() error {
 	}
 
 	if len(c.model.Values.Groups) > 0 {
-		if err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Values.Groups); err != nil {
+		count, err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Values.Groups)
+		if err != nil {
 			return appErrors.NewValidationError(map[string]string{
 				"groupsExist": err.Error(),
+			})
+		}
+
+		if count+len(c.model.Values.Groups) > 20 {
+			return appErrors.NewValidationError(map[string]string{
+				"maximumGroups": fmt.Sprintf("You are trying to add %d more groups but you already have %d assigned to this item. Maximum number of groups per item is 20", len(c.model.Values.Groups), count),
 			})
 		}
 	}
@@ -42,8 +49,8 @@ func (c Main) Validate() error {
 		}
 	}
 
-	if sdk.Includes(c.model.Fields, "groups") {
-		if err := validateGroupsNumAndBehaviour(c.model.MapName, c.model.ProjectID, c.model.VariableName, c.model.Values.Groups, c.logBuilder); err != nil {
+	if sdk.Includes(c.model.Fields, "behaviour") {
+		if err := validateBehaviour(c.model.MapName, c.model.ProjectID, c.model.VariableName, c.model.Values.Groups, c.logBuilder); err != nil {
 			return err
 		}
 	}
@@ -63,7 +70,7 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (declarations.MapVariable, error) {
+func (c Main) Logic() (LogicResult, error) {
 	var m declarations.Map
 	if res := storage.Gorm().Where(
 		fmt.Sprintf("(id = ? OR short_id = ?) AND project_id = ?"),
@@ -74,10 +81,10 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 		c.logBuilder.Add("updateMapVariable", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return declarations.MapVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
+			return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
 		}
 
-		return declarations.MapVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateMapVariable.Logic", nil)
+		return LogicResult{}, appErrors.NewDatabaseError(res.Error).AddError("updateMapVariable.Logic", nil)
 	}
 
 	var existing declarations.MapVariable
@@ -89,10 +96,10 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 		c.logBuilder.Add("updateMapVariable", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return declarations.MapVariable{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
+			return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
 		}
 
-		return declarations.MapVariable{}, appErrors.NewDatabaseError(res.Error).AddError("updateMapVariable.Logic", nil)
+		return LogicResult{}, appErrors.NewDatabaseError(res.Error).AddError("updateMapVariable.Logic", nil)
 	}
 
 	for _, f := range c.model.Fields {
@@ -106,10 +113,6 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 
 		if f == "value" {
 			existing.Value = c.model.Values.Value
-		}
-
-		if f == "groups" && c.model.Values.Groups != nil {
-			existing.Groups = c.model.Values.Groups
 		}
 
 		if f == "behaviour" {
@@ -131,13 +134,25 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 			{Name: "metadata"},
 			{Name: "locale_id"},
 			{Name: "value"},
-			{Name: "groups"},
 			{Name: "created_at"},
 			{Name: "updated_at"},
 		}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
 			c.logBuilder.Add("updateMapVariable", res.Error.Error())
 
 			return res.Error
+		}
+
+		if sdk.Includes(c.model.Fields, "groups") {
+			if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE variable_id = ?", (declarations.VariableGroup{}).TableName()), c.model.VariableName); res.Error != nil {
+				return res.Error
+			}
+
+			variablesGroups := make([]declarations.VariableGroup, 0)
+			for _, g := range c.model.Values.Groups {
+				variablesGroups = append(variablesGroups, declarations.NewVariableGroup(g, c.model.VariableName, c.model.Values.Groups))
+			}
+
+			tx.Create(&variablesGroups)
 		}
 
 		if err := shared.UpdateReferences(c.model.References, m.ID, updated.ID, c.model.ProjectID, tx); err != nil {
@@ -149,15 +164,24 @@ func (c Main) Logic() (declarations.MapVariable, error) {
 		errString := err.Error()
 		splt := strings.Split(errString, ":")
 		if len(splt) == 2 {
-			return declarations.MapVariable{}, appErrors.NewValidationError(map[string]string{
+			return LogicResult{}, appErrors.NewValidationError(map[string]string{
 				splt[0]: splt[1],
 			})
 		}
-		
-		return declarations.MapVariable{}, appErrors.NewApplicationError(err).AddError("updateMapVariable.Logic", nil)
+
+		return LogicResult{}, appErrors.NewApplicationError(err).AddError("updateMapVariable.Logic", nil)
 	}
 
-	return updated, nil
+	groups := make([]string, 0)
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.name AND vg.variable_id = ?", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.VariableName).Scan(&groups)
+	if res.Error != nil {
+		return LogicResult{}, appErrors.NewDatabaseError(res.Error)
+	}
+
+	return LogicResult{
+		Variable: updated,
+		Groups:   groups,
+	}, nil
 }
 
 func (c Main) Handle() (View, error) {
@@ -182,7 +206,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.MapVariable] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
 	logBuilder.Add("updateMapVariable", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

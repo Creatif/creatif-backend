@@ -1,7 +1,6 @@
 package queryListByID
 
 import (
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/sdk"
@@ -17,7 +16,7 @@ type Model struct {
 }
 
 type LogicModel struct {
-	Variable  declarations.ListVariable
+	Variable  QueryVariable
 	Reference []shared.QueryReference
 }
 
@@ -77,8 +76,8 @@ func newView(model LogicModel) View {
 		ShortID:   model.Variable.ShortID,
 		Name:      model.Variable.Name,
 		Behaviour: model.Variable.Behaviour,
-		Groups:    model.Variable.Groups,
 		Metadata:  model.Variable.Metadata,
+		Groups:    model.Variable.Groups,
 		Value:     model.Variable.Value,
 		CreatedAt: model.Variable.CreatedAt,
 		UpdatedAt: model.Variable.UpdatedAt,

@@ -2,10 +2,12 @@ package getListGroups
 
 import (
 	"creatif/pkg/app/auth"
+	declarations2 "creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
-	"creatif/pkg/lib/sdk"
+	"creatif/pkg/lib/storage"
+	"fmt"
 )
 
 type Main struct {
@@ -38,24 +40,19 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() ([]string, error) {
-	duplicatedModels, err := getGroups(c.model.Name, c.model.ItemID, c.model.ProjectID)
-	if err != nil {
-		return []string{}, err
+func (c Main) Logic() ([]declarations2.Group, error) {
+	sql := fmt.Sprintf(`
+	SELECT g.name FROM %s AS g
+	INNER JOIN %s AS vg ON g.name = vg.group_id AND vg.variable_id = ? AND g.project_id = ?
+`, (declarations2.Group{}).TableName(), (declarations2.VariableGroup{}).TableName())
+
+	var groups []declarations2.Group
+	res := storage.Gorm().Raw(sql, c.model.ItemID, c.model.ProjectID).Scan(&groups)
+	if res.Error != nil {
+		return []declarations2.Group{}, appErrors.NewApplicationError(res.Error)
 	}
 
-	distinctModels := make([]string, 0)
-	for _, v := range duplicatedModels {
-		groups := v.Groups
-
-		for _, g := range groups {
-			if !sdk.Includes(distinctModels, g) {
-				distinctModels = append(distinctModels, g)
-			}
-		}
-	}
-
-	return distinctModels, nil
+	return groups, nil
 }
 
 func (c Main) Handle() ([]string, error) {
@@ -80,7 +77,7 @@ func (c Main) Handle() ([]string, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []string] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []declarations2.Group] {
 	logBuilder.Add("getListGroups", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

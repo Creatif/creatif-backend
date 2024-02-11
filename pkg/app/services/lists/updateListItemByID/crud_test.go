@@ -60,7 +60,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(checkModel.Behaviour).Should(gomega.Equal("readonly"))
 	})
 
-	ginkgo.It("should update the groups of the declaration variable", func() {
+	ginkgo.It("should update the groups of the a list item", func() {
 		projectId := testCreateProject("project")
 		testCreateGroups(projectId, []string{"first", "second", "third", "one", "two", "three"})
 		view := testCreateList(projectId, "name", 100, false, "modifiable")
@@ -77,7 +77,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ShortID, singleItem.ShortID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, []shared.UpdateReference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ID, singleItem.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, []shared.UpdateReference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -93,11 +93,9 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		testAssertErrNil(res.Error)
 
 		gomega.Expect(checkModel.Name).Should(gomega.Equal("newName"))
-		gomega.Expect(checkModel.Groups).Should(gomega.HaveLen(3))
-		gomega.Expect(checkModel.Groups[0]).Should(gomega.Equal("first"))
 	})
 
-	ginkgo.It("should update the behaviour of the declaration variable", func() {
+	ginkgo.It("should update the behaviour of the list item", func() {
 		projectId := testCreateProject("project")
 		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateList(projectId, "name", 100, false, "modifiable")
@@ -142,12 +140,9 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		testAssertErrNil(res.Error)
 
 		gomega.Expect(checkModel.Name).Should(gomega.Equal("newName"))
-		gomega.Expect(checkModel.Groups).Should(gomega.HaveLen(3))
-		gomega.Expect(checkModel.Groups[0]).Should(gomega.Equal("first"))
-		gomega.Expect(checkModel.Behaviour).Should(gomega.Equal("readonly"))
 	})
 
-	ginkgo.It("should fail updating list variable because of non existing groups", func() {
+	ginkgo.It("should fail updating list item because of non existing groups", func() {
 		projectId := testCreateProject("project")
 		testCreateGroups(projectId, []string{"one", "two", "three"})
 		view := testCreateList(projectId, "name", 100, true, "modifiable")

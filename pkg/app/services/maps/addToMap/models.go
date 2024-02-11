@@ -30,6 +30,7 @@ type Model struct {
 type LogicModel struct {
 	Variable   declarations.MapVariable
 	References []declarations.Reference
+	Groups     []string
 }
 
 func NewModel(projectId, name string, entry VariableModel, references []shared.Reference) Model {

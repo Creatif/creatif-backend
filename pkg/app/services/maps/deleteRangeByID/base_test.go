@@ -3,6 +3,7 @@ package deleteRangeByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
@@ -97,9 +98,9 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
@@ -185,15 +186,26 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	return view
 }
 
-func testAddToMap(projectId, name string, references []shared.Reference) addToMap.LogicModel {
+func testCreateGroups(projectId string, numOfGroups int) []string {
+	groups := make([]string, numOfGroups)
+	for i := 0; i < numOfGroups; i++ {
+		groups[i] = fmt.Sprintf("groups-%d", i)
+	}
+
+	l := logger.NewLogBuilder()
+
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId), l)
+	model, err := handler.Handle()
+	testAssertErrNil(err)
+
+	return model
+}
+
+func testAddToMap(projectId, name string, references []shared.Reference, groups []string) addToMap.LogicModel {
 	variableModel := addToMap.VariableModel{
-		Name:     fmt.Sprintf("new add variable"),
-		Metadata: nil,
-		Groups: []string{
-			"one",
-			"two",
-			"three",
-		},
+		Name:      fmt.Sprintf("new add variable"),
+		Metadata:  nil,
+		Groups:    groups,
 		Value:     nil,
 		Locale:    "eng",
 		Behaviour: "modifiable",

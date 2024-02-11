@@ -49,7 +49,7 @@ func (c Main) Logic() (interface{}, error) {
 			(declarations.Map{}).TableName(),
 		)
 
-		res := storage.Gorm().Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name)
+		res := tx.Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name)
 		if res.Error != nil {
 			c.logBuilder.Add("removeMapVariable", res.Error.Error())
 			return res.Error
@@ -60,10 +60,14 @@ func (c Main) Logic() (interface{}, error) {
 			return res.Error
 		}
 
-		if err := shared.RemoveAsParent(c.model.VariableName); err != nil {
+		if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE variable_id = ?", (declarations.VariableGroup{}).TableName()), c.model.VariableName); res.Error != nil {
+			return res.Error
+		}
+
+		if err := shared.RemoveAsParent(c.model.VariableName, tx); err != nil {
 			return err
 		}
-		if err := shared.RemoveAsChild(c.model.VariableName); err != nil {
+		if err := shared.RemoveAsChild(c.model.VariableName, tx); err != nil {
 			return err
 		}
 

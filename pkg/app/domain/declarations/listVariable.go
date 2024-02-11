@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/storage"
 	"fmt"
-	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
@@ -17,7 +16,6 @@ type ListVariable struct {
 
 	Name      string         `gorm:"not null"`
 	Behaviour string         `gorm:"not null"`
-	Groups    pq.StringArray `gorm:"type:text[];not null"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
@@ -29,17 +27,13 @@ type ListVariable struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
-func NewListVariable(listId, localeID, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) ListVariable {
-	if groups == nil || len(groups) == 0 {
-		groups = make(pq.StringArray, 0)
-	}
+func NewListVariable(listId, localeID, name, behaviour string, metadata datatypes.JSON, value datatypes.JSON) ListVariable {
 	return ListVariable{
 		ListID:    listId,
 		LocaleID:  localeID,
 		Name:      name,
 		Behaviour: behaviour,
 		Metadata:  metadata,
-		Groups:    groups,
 		Value:     value,
 	}
 }

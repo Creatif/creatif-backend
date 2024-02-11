@@ -37,17 +37,19 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
+func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 	offset := (c.model.Page - 1) * c.model.Limit
 	placeholders := make(map[string]interface{})
 	placeholders["projectID"] = c.model.ProjectID
 	placeholders["offset"] = offset
 	placeholders["name"] = c.model.MapName
 	placeholders["limit"] = c.model.Limit
+	placeholders["groups"] = c.model.Groups
 
 	countPlaceholders := make(map[string]interface{})
 	countPlaceholders["projectID"] = c.model.ProjectID
 	countPlaceholders["name"] = c.model.MapName
+	countPlaceholders["groups"] = c.model.Groups
 
 	if c.model.OrderBy == "" {
 		c.model.OrderBy = "index"
@@ -76,7 +78,8 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 
 	var groupsWhereClause string
 	if len(c.model.Groups) != 0 {
-		groupsWhereClause = fmt.Sprintf("WHERE '{%s}'::text[] && %s", strings.Join(c.model.Groups, ","), "lv.groups")
+		searchForGroups := strings.Join(c.model.Groups, ",")
+		groupsWhereClause = fmt.Sprintf("INNER JOIN LATERAL (SELECT g.variable_id, g.group_id, g.groups FROM %s AS g WHERE lv.id = g.variable_id ORDER BY g.variable_id LIMIT 1) AS g ON '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), searchForGroups)
 	}
 
 	var search string
@@ -94,8 +97,15 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 	}
 
 	returnableFields := ""
+	groupsSubquery := ""
 	if len(c.model.Fields) != 0 {
-		returnableFields = strings.Join(c.model.Fields, ",") + ","
+		if sdk.Includes(c.model.Fields, "groups") {
+			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.name AND vg.variable_id = lv.id)) AS groups")
+		}
+
+		returnableFields = strings.Join(sdk.Filter(c.model.Fields, func(idx int, value string) bool {
+			return value != "groups"
+		}), ",") + ","
 	}
 
 	sql := fmt.Sprintf(`SELECT 
@@ -106,6 +116,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
     	lv.name, 
     	lv.behaviour, 
     	%s
+    	%s
     	lv.created_at, 
     	lv.updated_at 
 			FROM %s AS lv
@@ -115,6 +126,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 		%s
 		ORDER BY lv.%s %s
 		OFFSET @offset LIMIT @limit`,
+		groupsSubquery,
 		returnableFields,
 		(declarations.MapVariable{}).TableName(),
 		(declarations.Map{}).TableName(),
@@ -125,11 +137,11 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 		c.model.OrderBy,
 		c.model.OrderDirection)
 
-	var items []declarations.MapVariable
+	var items []QueryVariable
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateMapVariables", res.Error.Error())
-		return sdk.LogicView[declarations.MapVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("Maps.Paginate.Logic", nil)
+		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("Maps.Paginate.Logic", nil)
 	}
 
 	countSql := fmt.Sprintf(`
@@ -137,7 +149,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
     	    count(lv.id) AS count
 		FROM %s AS lv
 		INNER JOIN %s AS l
-		ON l.project_id = @projectID AND (l.name = @name OR l.id = @name OR l.short_id = @name) AND l.id = lv.map_id %s %s
+		ON l.project_id = @projectID AND (l.id = @name OR l.short_id = @name) AND l.id = lv.map_id %s %s
     	%s
     	%s
 	`,
@@ -153,10 +165,10 @@ func (c Main) Logic() (sdk.LogicView[declarations.MapVariable], error) {
 	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateMapVariables", res.Error.Error())
-		return sdk.LogicView[declarations.MapVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("paginateMapVariable.Logic", nil)
+		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("paginateMapVariable.Logic", nil)
 	}
 
-	return sdk.LogicView[declarations.MapVariable]{
+	return sdk.LogicView[QueryVariable]{
 		Total: count,
 		Data:  items,
 	}, nil
@@ -193,7 +205,7 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 	}, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[declarations.MapVariable]] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[QueryVariable]] {
 	logBuilder.Add("paginateMapVariables", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

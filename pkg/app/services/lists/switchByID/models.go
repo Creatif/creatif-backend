@@ -53,7 +53,6 @@ func newView(model LogicResult) View {
 			Name:      model.From.Name,
 			Locale:    destinationLocale,
 			Behaviour: model.From.Behaviour,
-			Groups:    model.From.Groups,
 		},
 		Destination: ViewSourceDestination{
 			ID:        model.To.ID,
@@ -61,7 +60,6 @@ func newView(model LogicResult) View {
 			Locale:    sourceLocale,
 			Name:      model.To.Name,
 			Behaviour: model.To.Behaviour,
-			Groups:    model.To.Groups,
 		},
 	}
 }

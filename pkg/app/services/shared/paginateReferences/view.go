@@ -12,7 +12,6 @@ type View struct {
 	Index     float64     `json:"index"`
 	Locale    string      `json:"locale"`
 	Name      string      `json:"name"`
-	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
 	Metadata  interface{} `json:"metadata"`
 	Value     interface{} `json:"value"`
@@ -35,7 +34,6 @@ func newView(models []declarations.MapVariable) ([]View, error) {
 			Locale:    locale,
 			ShortID:   value.ShortID,
 			Index:     value.Index,
-			Groups:    value.Groups,
 			Value:     value.Value,
 			Behaviour: value.Behaviour,
 			Metadata:  value.Metadata,

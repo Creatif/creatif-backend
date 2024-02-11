@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func validateGroupsNumAndBehaviour(mapName, projectId, variableName string, groups []string, logBuilder logger.LogBuilder) error {
+func validateBehaviour(mapName, projectId, variableName string, groups []string, logBuilder logger.LogBuilder) error {
 	type GroupBehaviourCheck struct {
 		Count     int    `gorm:"column:count"`
 		Behaviour string `gorm:"column:behaviour"`
@@ -19,7 +19,7 @@ func validateGroupsNumAndBehaviour(mapName, projectId, variableName string, grou
 
 	var check GroupBehaviourCheck
 	res := storage.Gorm().Raw(fmt.Sprintf(`
-SELECT cardinality(mv.groups) AS count, behaviour
+SELECT behaviour
 FROM %s AS mv 
 INNER JOIN %s AS m ON (m.name = ? OR m.id = ? OR m.short_id = ?) AND m.project_id = ? AND m.id = mv.map_id AND (mv.id = ? OR mv.short_id = ?)`,
 		(declarations.MapVariable{}).TableName(),
@@ -41,14 +41,6 @@ INNER JOIN %s AS m ON (m.name = ? OR m.id = ? OR m.short_id = ?) AND m.project_i
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", variableName),
 		})
-	}
-
-	if len(groups) > 0 {
-		if check.Count+len(groups) > 20 {
-			return appErrors.NewValidationError(map[string]string{
-				"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", variableName),
-			})
-		}
 	}
 
 	if check.Behaviour == constants.ReadonlyBehaviour {

@@ -9,7 +9,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Maps pagination tests", func() {
-	ginkgo.It("should paginate through maps", func() {
+	ginkgo.It("should paginate through maps", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		for i := 0; i < 100; i++ {
 			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
@@ -23,7 +23,7 @@ var _ = ginkgo.Describe("Maps pagination tests", func() {
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
 	})
 
-	ginkgo.It("should get an empty result from the end of the maps listing", func() {
+	ginkgo.It("should get an empty result from the end of the maps listing", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		for i := 0; i < 100; i++ {
 			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)
@@ -37,7 +37,7 @@ var _ = ginkgo.Describe("Maps pagination tests", func() {
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
 	})
 
-	ginkgo.It("should return maps search by name with regex", func() {
+	ginkgo.It("should return maps search by name with regex", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		for i := 0; i < 100; i++ {
 			testCreateMap(projectId, fmt.Sprintf("name-%d", i), 10)

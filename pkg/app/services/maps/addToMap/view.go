@@ -3,7 +3,6 @@ package addToMap
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
-	"github.com/lib/pq"
 	"time"
 )
 
@@ -29,11 +28,11 @@ type View struct {
 	ShortID string  `json:"shortId"`
 	Index   float64 `json:"index"`
 
-	Name      string         `json:"name"`
-	Behaviour string         `json:"behaviour"`
-	Groups    pq.StringArray `json:"groups"`
-	Metadata  interface{}    `json:"metadata"`
-	Value     interface{}    `json:"value"`
+	Name      string      `json:"name"`
+	Groups    []string    `json:"groups"`
+	Behaviour string      `json:"behaviour"`
+	Metadata  interface{} `json:"metadata"`
+	Value     interface{} `json:"value"`
 
 	Locale string `json:"locale"`
 
@@ -60,8 +59,8 @@ func newView(model LogicModel) View {
 		Index:     model.Variable.Index,
 		Name:      model.Variable.Name,
 		Behaviour: model.Variable.Behaviour,
-		Groups:    model.Variable.Groups,
 		Metadata:  m,
+		Groups:    model.Groups,
 		Value:     v,
 		Locale:    model.Variable.LocaleID,
 		CreatedAt: model.Variable.CreatedAt,

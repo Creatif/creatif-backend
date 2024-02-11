@@ -7,7 +7,7 @@ import (
 )
 
 var _ = ginkgo.Describe("GET map tests", func() {
-	ginkgo.It("should getVariable names only (default) representation of map of variables by name", func() {
+	ginkgo.It("should getVariable names only (default) representation of map of variables by name", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 

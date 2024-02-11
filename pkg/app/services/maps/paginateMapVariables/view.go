@@ -1,7 +1,6 @@
 package paginateMapVariables
 
 import (
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"time"
 )
@@ -21,7 +20,7 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(models []declarations.MapVariable) ([]View, error) {
+func newView(models []QueryVariable) ([]View, error) {
 	views := make([]View, len(models))
 	for i, value := range models {
 		locale, err := locales.GetAlphaWithID(value.LocaleID)
@@ -33,9 +32,9 @@ func newView(models []declarations.MapVariable) ([]View, error) {
 			ID:        value.ID,
 			Name:      value.Name,
 			Locale:    locale,
+			Groups:    value.Groups,
 			ShortID:   value.ShortID,
 			Index:     value.Index,
-			Groups:    value.Groups,
 			Value:     value.Value,
 			Behaviour: value.Behaviour,
 			Metadata:  value.Metadata,

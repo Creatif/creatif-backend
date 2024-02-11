@@ -1,7 +1,6 @@
 package paginateReferences
 
 import (
-	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"time"
 )
@@ -9,9 +8,8 @@ import (
 type Variable struct {
 	ID string `gorm:"primarykey"`
 
-	Name      string         `gorm:"index;uniqueIndex:unique_variable"`
-	Behaviour string         // readonly,modifiable
-	Groups    pq.StringArray `gorm:"type:text[]"` // if groups is set, group should be invalidated
+	Name      string `gorm:"index;uniqueIndex:unique_variable"`
+	Behaviour string // readonly,modifiable
 	Metadata  datatypes.JSON
 	Value     datatypes.JSON
 	ProjectID string

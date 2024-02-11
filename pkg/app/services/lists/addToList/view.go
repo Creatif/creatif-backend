@@ -60,7 +60,7 @@ func newView(model LogicModel) View {
 		Index:     model.Variable.Index,
 		Name:      model.Variable.Name,
 		Behaviour: model.Variable.Behaviour,
-		Groups:    model.Variable.Groups,
+		Groups:    model.Groups,
 		Metadata:  m,
 		Value:     v,
 		Locale:    model.Variable.LocaleID,

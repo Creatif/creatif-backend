@@ -12,7 +12,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Declaration (DELETE) a map tests", func() {
-	ginkgo.It("should delete a map together with all map entries by name", func() {
+	ginkgo.It("should delete a map together with all map entries by name", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
@@ -31,7 +31,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) a map tests", func() {
 		gomega.Expect(len(mapItems)).Should(gomega.Equal(0))
 	})
 
-	ginkgo.It("should delete a map together with all map entries by id", func() {
+	ginkgo.It("should delete a map together with all map entries by id", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 
@@ -50,7 +50,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) a map tests", func() {
 		gomega.Expect(len(mapItems)).Should(gomega.Equal(0))
 	})
 
-	ginkgo.It("should delete a map together with all map entries by shortID", func() {
+	ginkgo.It("should delete a map together with all map entries by shortID", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		view := testCreateMap(projectId, "mapName", 10)
 

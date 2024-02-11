@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/storage"
 	"fmt"
-	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
@@ -17,7 +16,6 @@ type MapVariable struct {
 
 	Name      string         `gorm:"uniqueIndex:unique_map_variable;not null"`
 	Behaviour string         `gorm:"not null"`
-	Groups    pq.StringArray `gorm:"type:text[];not null"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
@@ -29,18 +27,13 @@ type MapVariable struct {
 	UpdatedAt time.Time
 }
 
-func NewMapVariable(mapId, localeID, name, behaviour string, metadata datatypes.JSON, groups pq.StringArray, value datatypes.JSON) MapVariable {
-	if groups == nil || len(groups) == 0 {
-		groups = make(pq.StringArray, 0)
-	}
-
+func NewMapVariable(mapId, localeID, name, behaviour string, metadata datatypes.JSON, value datatypes.JSON) MapVariable {
 	return MapVariable{
 		MapID:     mapId,
 		LocaleID:  localeID,
 		Name:      name,
 		Behaviour: behaviour,
 		Metadata:  metadata,
-		Groups:    groups,
 		Value:     value,
 	}
 }

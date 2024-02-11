@@ -10,7 +10,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Map variable tests", func() {
-	ginkgo.It("should create multiple maps with different name with only variable entries", func() {
+	ginkgo.It("should create multiple maps with different name with only variable entries", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		entries := make([]VariableModel, 0)
 

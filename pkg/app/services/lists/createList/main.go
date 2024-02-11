@@ -60,7 +60,7 @@ func (c Main) Logic() (declarations.List, error) {
 			for i := 0; i < len(c.model.Variables); i++ {
 				localeID, _ := locales.GetIDWithAlpha(c.model.Variables[i].Locale)
 				v := c.model.Variables[i]
-				listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Groups, v.Value)
+				listVariables[i] = declarations.NewListVariable(list.ID, localeID, v.Name, v.Behaviour, v.Metadata, v.Value)
 				listVariables[i].Index = float64(highestIndex) + 1000
 				highestIndex += 1000
 			}

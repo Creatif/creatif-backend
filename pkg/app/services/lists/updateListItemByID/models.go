@@ -40,6 +40,11 @@ type Model struct {
 	References []shared.UpdateReference
 }
 
+type LogicResult struct {
+	Variable declarations.ListVariable
+	Groups   []string
+}
+
 func NewModel(projectId, locale string, fields []string, listName, itemId, updatingName, behaviour string, groups []string, metadata, value []byte, references []shared.UpdateReference) Model {
 	return Model{
 		Fields:     fields,
@@ -146,27 +151,27 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model declarations.ListVariable) View {
-	var m interface{} = model.Metadata
-	if len(model.Metadata) == 0 {
+func newView(model LogicResult) View {
+	var m interface{} = model.Variable.Metadata
+	if len(model.Variable.Metadata) == 0 {
 		m = nil
 	}
 
-	var v interface{} = model.Value
-	if len(model.Value) == 0 {
+	var v interface{} = model.Variable.Value
+	if len(model.Variable.Value) == 0 {
 		v = nil
 	}
 
-	locale, _ := locales.GetAlphaWithID(model.LocaleID)
+	locale, _ := locales.GetAlphaWithID(model.Variable.LocaleID)
 	return View{
-		ID:        model.ID,
+		ID:        model.Variable.ID,
 		Locale:    locale,
-		Name:      model.Name,
+		Name:      model.Variable.Name,
 		Groups:    model.Groups,
-		Behaviour: model.Behaviour,
+		Behaviour: model.Variable.Behaviour,
 		Metadata:  m,
 		Value:     v,
-		CreatedAt: model.CreatedAt,
-		UpdatedAt: model.UpdatedAt,
+		CreatedAt: model.Variable.CreatedAt,
+		UpdatedAt: model.Variable.UpdatedAt,
 	}
 }

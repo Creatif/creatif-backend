@@ -116,8 +116,8 @@ func UpdateReferences(refs []UpdateReference, childStructureId, ownerId, project
 	return nil
 }
 
-func RemoveAsParent(parentId string) error {
-	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_id = ?", (declarations.Reference{}).TableName()), parentId)
+func RemoveAsParent(parentId string, tx *gorm.DB) error {
+	res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_id = ?", (declarations.Reference{}).TableName()), parentId)
 
 	return res.Error
 }
@@ -138,20 +138,20 @@ func IsParent(variableId string) error {
 	return nil
 }
 
-func RemoveManyAsParent(parentIds []string) error {
-	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_id IN(?)", (declarations.Reference{}).TableName()), parentIds)
+func RemoveManyAsParent(parentIds []string, tx *gorm.DB) error {
+	res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_id IN(?)", (declarations.Reference{}).TableName()), parentIds)
 
 	return res.Error
 }
 
-func RemoveManyAsChild(childIds []string) error {
-	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE child_id IN(?)", (declarations.Reference{}).TableName()), childIds)
+func RemoveManyAsChild(childIds []string, tx *gorm.DB) error {
+	res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE child_id IN(?)", (declarations.Reference{}).TableName()), childIds)
 
 	return res.Error
 }
 
-func RemoveAsChild(childId string) error {
-	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE child_id = ?", (declarations.Reference{}).TableName()), childId)
+func RemoveAsChild(childId string, tx *gorm.DB) error {
+	res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE child_id = ?", (declarations.Reference{}).TableName()), childId)
 
 	return res.Error
 }

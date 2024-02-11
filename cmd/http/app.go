@@ -95,7 +95,6 @@ func appRoutes(group *echo.Group) {
 func declarationRoutes(group *echo.Group) {
 	group.PUT("/list/:projectID", lists.CreateListHandler())
 	group.PUT("/list/add/:projectID", lists.AddToListHandler())
-	group.PUT("/list/append/:projectID", lists.AppendToListHandler())
 	group.DELETE("/list/:projectID/:name", lists.DeleteListHandler())
 	group.POST("/list/item-id/:projectID", lists.DeleteListItemByIDHandler())
 	group.GET("/list/groups/:projectID/:name/:itemId", lists.GetListGroupsHandler())
@@ -103,7 +102,6 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/lists/items/:projectID/:name", lists.PaginateListItemsHandler())
 	group.GET("/lists/:projectID/:name", lists.PaginateListsHandler())
 	group.GET("/list/query-id/:projectID/:name/:itemId", lists.QueryListByIDHandler())
-	group.POST("/lists/:projectID/:name/:itemName", lists.ReplaceListItemHandler())
 	group.POST("/list/rearrange/:projectID/:name/:source/:destination", lists.SwitchByIDHandler())
 	group.POST("/list/update/:projectID/:name", lists.UpdateListHandler())
 	group.POST("/list/update-item-by-id/:projectID/:name/:itemID", lists.UpdateListItemByIDHandler())

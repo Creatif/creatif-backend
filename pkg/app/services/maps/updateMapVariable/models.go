@@ -9,8 +9,6 @@ import (
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/lib/pq"
-	"gorm.io/datatypes"
 	"strings"
 	"time"
 )
@@ -22,27 +20,6 @@ var validUpdateableFields = []string{
 	"locale",
 	"behaviour",
 	"value",
-}
-
-type MapVariableWithMap struct {
-	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
-	ShortID string `gorm:"uniqueIndex:unique_variable;type:text"`
-
-	Name      string `gorm:"uniqueIndex:unique_map_variable"`
-	Behaviour string
-	Groups    pq.StringArray `gorm:"type:text[]"`
-	Metadata  datatypes.JSON `gorm:"type:jsonb"`
-	Value     datatypes.JSON `gorm:"type:jsonb"`
-
-	MapID    string `gorm:"column:map_id"`
-	LocaleID string `gorm:"uniqueIndex:unique_map_variable;type:text"`
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
-
-	MapName      string    `gorm:"column:map_name"`
-	MapCreatedAt time.Time `gorm:"column:map_created_at"`
-	MapUpdatedAt time.Time `gorm:"column:map_updated_at"`
 }
 
 type VariableModel struct {
@@ -75,9 +52,8 @@ func NewModel(projectId, mapName, variableName string, fields []string, values V
 }
 
 type LogicResult struct {
-	Entry     MapVariableWithMap
-	Locale    string
-	ProjectID string
+	Variable declarations.MapVariable
+	Groups   []string
 }
 
 func (a *Model) Validate() map[string]string {
@@ -179,52 +155,40 @@ func (a *Model) Validate() map[string]string {
 	return nil
 }
 
-type Variable struct {
-	ID        string      `json:"id"`
-	Name      string      `json:"name"`
-	ShortID   string      `json:"shortID"`
-	Metadata  interface{} `json:"metadata"`
-	Groups    []string    `json:"groups"`
-	Behaviour string      `json:"behaviour"`
-	Value     interface{} `json:"value"`
-	CreatedAt time.Time   `json:"createdAt"`
-	UpdatedAt time.Time   `json:"updatedAt"`
-}
-
 type View struct {
 	ID        string      `json:"id"`
 	Name      string      `json:"name"`
 	Locale    string      `json:"locale"`
-	ShortID   string      `json:"shortID"`
-	Metadata  interface{} `json:"metadata"`
 	Groups    []string    `json:"groups"`
+	ShortID   string      `json:"shortId"`
+	Metadata  interface{} `json:"metadata"`
 	Behaviour string      `json:"behaviour"`
 	Value     interface{} `json:"value"`
 	CreatedAt time.Time   `json:"createdAt"`
 	UpdatedAt time.Time   `json:"updatedAt"`
 }
 
-func newView(model declarations.MapVariable) View {
-	var m interface{} = model.Metadata
-	if len(model.Metadata) == 0 {
+func newView(model LogicResult) View {
+	var m interface{} = model.Variable.Metadata
+	if len(model.Variable.Metadata) == 0 {
 		m = nil
 	}
 
-	var v interface{} = model.Value
-	if len(model.Value) == 0 {
+	var v interface{} = model.Variable.Value
+	if len(model.Variable.Value) == 0 {
 		v = nil
 	}
 
-	locale, _ := locales.GetAlphaWithID(model.LocaleID)
+	locale, _ := locales.GetAlphaWithID(model.Variable.LocaleID)
 	return View{
-		ID:        model.ID,
+		ID:        model.Variable.ID,
 		Locale:    locale,
-		Name:      model.Name,
 		Groups:    model.Groups,
-		Behaviour: model.Behaviour,
+		Name:      model.Variable.Name,
+		Behaviour: model.Variable.Behaviour,
 		Metadata:  m,
 		Value:     v,
-		CreatedAt: model.CreatedAt,
-		UpdatedAt: model.UpdatedAt,
+		CreatedAt: model.Variable.CreatedAt,
+		UpdatedAt: model.Variable.UpdatedAt,
 	}
 }

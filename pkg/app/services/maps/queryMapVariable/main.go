@@ -44,12 +44,13 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (LogicModel, error) {
 	sql := fmt.Sprintf(`
-			SELECT lv.id, lv.name, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.groups, lv.created_at, lv.updated_at, lv.locale_id
+			SELECT lv.id, lv.name, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.created_at, lv.updated_at, lv.locale_id,
+			       ARRAY((SELECT g.group_id FROM %s AS g WHERE variable_id = lv.id)) AS groups
 			FROM %s AS lv INNER JOIN %s AS l
 			ON l.project_id = ? AND (l.short_id = ? OR l.id = ?) AND lv.map_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
-		(declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())
+		(declarations.VariableGroup{}).TableName(), (declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())
 
-	var variable declarations.MapVariable
+	var variable QueryVariable
 	res := storage.Gorm().
 		Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID).
 		Scan(&variable)
@@ -67,10 +68,6 @@ func (c Main) Logic() (LogicModel, error) {
 	references, err := shared.QueryReferences(variable.ID, c.model.ProjectID)
 	if err != nil {
 		return LogicModel{}, err
-	}
-
-	for _, r := range references {
-		fmt.Println(r.ChildStructureID, "hild")
 	}
 
 	return LogicModel{

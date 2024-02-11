@@ -1,6 +1,7 @@
 package getListGroups
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/lib/pq"
@@ -24,11 +25,10 @@ func NewModel(name, itemId, projectID string) Model {
 	}
 }
 
-type View struct {
-}
-
-func newView(model []string) []string {
-	return model
+func newView(model []declarations.Group) []string {
+	return sdk.Map(model, func(idx int, value declarations.Group) string {
+		return value.Name
+	})
 }
 
 func (a *Model) Validate() map[string]string {

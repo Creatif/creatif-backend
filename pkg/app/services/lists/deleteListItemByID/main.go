@@ -56,7 +56,7 @@ func (c Main) Logic() (*struct{}, error) {
 			(declarations.List{}).TableName(),
 		)
 
-		res := storage.Gorm().Exec(sql, c.model.Name, c.model.Name, c.model.ProjectID, c.model.ItemID, c.model.ItemID)
+		res := tx.Exec(sql, c.model.Name, c.model.Name, c.model.ProjectID, c.model.ItemID, c.model.ItemID)
 		if res.Error != nil {
 			c.logBuilder.Add("deleteListItemByID", res.Error.Error())
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteListItemByID.Logic", nil)
@@ -66,10 +66,14 @@ func (c Main) Logic() (*struct{}, error) {
 			return appErrors.NewNotFoundError(errors.New("List or variable not found")).AddError("deleteListItemByID.Logic", nil)
 		}
 
-		if err := shared.RemoveAsParent(c.model.ItemID); err != nil {
+		if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE variable_id = ?", (declarations.VariableGroup{}).TableName()), c.model.ItemID); res.Error != nil {
+			return res.Error
+		}
+
+		if err := shared.RemoveAsParent(c.model.ItemID, tx); err != nil {
 			return err
 		}
-		if err := shared.RemoveAsChild(c.model.ItemID); err != nil {
+		if err := shared.RemoveAsChild(c.model.ItemID, tx); err != nil {
 			return err
 		}
 

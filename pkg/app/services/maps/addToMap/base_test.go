@@ -3,6 +3,7 @@ package addToMap
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
@@ -96,15 +97,11 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
-
-func testAssertErrNil(err error) {
-	gomega.Expect(err).Should(gomega.BeNil())
-}
 
 func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
@@ -112,11 +109,26 @@ func testAssertIDValid(id string) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }
 
+func testCreateGroups(projectId string, numOfGroups int) []string {
+	groups := make([]string, numOfGroups)
+	for i := 0; i < numOfGroups; i++ {
+		groups[i] = fmt.Sprintf("groups-%d", i)
+	}
+
+	l := logger.NewLogBuilder()
+
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId), l)
+	model, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return model
+}
+
 func testCreateProject(name string) string {
 	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	model, err := handler.Handle()
-	testAssertErrNil(err)
+	gomega.Expect(err).Should(gomega.BeNil())
 	testAssertIDValid(model.ID)
 
 	gomega.Expect(model.Name).Should(gomega.Equal(name))
@@ -124,7 +136,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
+func testCreateMap(projectId, name string, variablesNum int, groups []string) mapCreate.View {
 	entries := make([]mapCreate.VariableModel, 0)
 
 	m := map[string]interface{}{
@@ -157,13 +169,9 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		variableModel := mapCreate.VariableModel{
-			Name:     fmt.Sprintf("name-%d", i),
-			Metadata: b,
-			Groups: []string{
-				"one",
-				"two",
-				"three",
-			},
+			Name:      fmt.Sprintf("name-%d", i),
+			Metadata:  b,
+			Groups:    groups,
 			Value:     v,
 			Locale:    "eng",
 			Behaviour: "modifiable",
@@ -175,7 +183,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
-	testAssertErrNil(err)
+	gomega.Expect(err).Should(gomega.BeNil())
 	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))

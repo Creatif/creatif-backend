@@ -6,6 +6,7 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
@@ -40,19 +41,44 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() ([]declarations.Group, error) {
-	groups := make([]declarations.Group, len(c.model.Groups))
-
 	if transactionErr := storage.Transaction(func(tx *gorm.DB) error {
-		if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID); res.Error != nil {
+		if len(c.model.Groups) == 0 {
+			res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID)
+			if res.Error != nil {
+				return res.Error
+			}
+
+			return nil
+		}
+
+		var existingGroups []string
+		res := tx.Raw(fmt.Sprintf("SELECT name FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID).Scan(&existingGroups)
+		if res.Error != nil {
 			return res.Error
 		}
 
-		if len(c.model.Groups) > 0 {
-			for i, g := range c.model.Groups {
-				groups[i] = declarations.NewGroup(c.model.ProjectID, g)
+		toCreateGroups := make([]declarations.Group, 0)
+		toDeleteGroups := make([]declarations.Group, 0)
+		for _, g := range c.model.Groups {
+			if !sdk.Includes(existingGroups, g) {
+				toCreateGroups = append(toCreateGroups, declarations.NewGroup(c.model.ProjectID, g))
 			}
+		}
 
-			if res := tx.Create(&groups); res.Error != nil {
+		for _, g := range existingGroups {
+			if !sdk.Includes(c.model.Groups, g) {
+				toDeleteGroups = append(toDeleteGroups, declarations.NewGroup(c.model.ProjectID, g))
+			}
+		}
+
+		if len(toDeleteGroups) > 0 {
+			if res := tx.Table((declarations.Group{}).TableName()).Delete(&toDeleteGroups); res.Error != nil {
+				return res.Error
+			}
+		}
+
+		if len(toCreateGroups) > 0 {
+			if res := tx.Create(&toCreateGroups); res.Error != nil {
 				return res.Error
 			}
 		}
@@ -61,32 +87,39 @@ func (c Main) Logic() ([]declarations.Group, error) {
 	}); transactionErr != nil {
 		return []declarations.Group{}, appErrors.NewApplicationError(transactionErr)
 	}
+
+	var groups []declarations.Group
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT name FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID).Scan(&groups)
+	if res.Error != nil {
+		return []declarations.Group{}, appErrors.NewApplicationError(res.Error)
+	}
+
 	return groups, nil
 }
 
-func (c Main) Handle() ([]View, error) {
+func (c Main) Handle() ([]string, error) {
 	if err := c.Validate(); err != nil {
-		return []View{}, err
+		return []string{}, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return []View{}, err
+		return []string{}, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return []View{}, err
+		return []string{}, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return []View{}, err
+		return []string{}, err
 	}
 
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, []declarations.Group] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []declarations.Group] {
 	logBuilder.Add("addToList", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

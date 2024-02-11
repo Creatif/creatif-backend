@@ -30,12 +30,12 @@ func newView(models []declarations.ListVariable) ([]View, error) {
 		}
 
 		views[i] = View{
-			ID:        value.ID,
-			Name:      value.Name,
-			Index:     value.Index,
-			Locale:    locale,
-			ShortID:   value.ShortID,
-			Groups:    value.Groups,
+			ID:      value.ID,
+			Name:    value.Name,
+			Index:   value.Index,
+			Locale:  locale,
+			ShortID: value.ShortID,
+			//Groups:    value.Groups,
 			Value:     value.Value,
 			Behaviour: value.Behaviour,
 			Metadata:  value.Metadata,

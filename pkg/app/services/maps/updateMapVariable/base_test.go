@@ -11,7 +11,6 @@ import (
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -98,9 +97,9 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.REFERENCE_TABLES))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
-	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
@@ -126,54 +125,8 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateMap(projectId, name string, variablesNum int, behaviour string) mapCreate.View {
+func testCreateMap(projectId, name string) mapCreate.View {
 	entries := make([]mapCreate.VariableModel, 0)
-
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	for i := 0; i < variablesNum; i++ {
-		var value interface{}
-		value = "my value"
-		if i%2 == 0 {
-			value = true
-		}
-
-		if i%3 == 0 {
-			value = map[string]interface{}{
-				"one":   "one",
-				"two":   []string{"one", "two", "three"},
-				"three": []int{1, 2, 3},
-				"four":  453,
-			}
-		}
-
-		v, err := json.Marshal(value)
-		gomega.Expect(err).Should(gomega.BeNil())
-
-		variableModel := mapCreate.VariableModel{
-			Name:     fmt.Sprintf("name-%d", i),
-			Metadata: b,
-			Groups: []string{
-				"one",
-				"two",
-				"three",
-			},
-			Value:     v,
-			Locale:    "eng",
-			Behaviour: behaviour,
-		}
-
-		entries = append(entries, variableModel)
-	}
-
 	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	view, err := handler.Handle()
@@ -181,36 +134,37 @@ func testCreateMap(projectId, name string, variablesNum int, behaviour string) m
 	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
 	return view
 }
 
-func testCreateGroups(projectId string, groups []string) {
+func testCreateGroups(projectId string, groups []string) []string {
 	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
-	_, err := handler.Handle()
+	g, err := handler.Handle()
 	testAssertErrNil(err)
+
+	return g
 }
 
-func testAddToMap(projectId, name string, references []shared.Reference) addToMap.LogicModel {
+func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string, behaviour string) addToMap.View {
+	if behaviour == "" {
+		behaviour = "modifiable"
+	}
+
 	variableModel := addToMap.VariableModel{
-		Name:     fmt.Sprintf("new add variable"),
-		Metadata: nil,
-		Groups: []string{
-			"one",
-			"two",
-			"three",
-		},
+		Name:      variableName,
+		Metadata:  nil,
+		Groups:    groups,
 		Value:     nil,
 		Locale:    "eng",
-		Behaviour: "modifiable",
+		Behaviour: behaviour,
 	}
 
 	model := addToMap.NewModel(projectId, name, variableModel, references)
 	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
-	view, err := handler.Logic()
+	view, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	return view

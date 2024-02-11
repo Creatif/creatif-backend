@@ -13,8 +13,9 @@ import (
 )
 
 var _ = ginkgo.Describe("Declaration map item delete tests", func() {
-	ginkgo.It("should delete a range of map items by name", func() {
+	ginkgo.It("should delete a range of map items by name", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
+		groups := testCreateGroups(projectId, 5)
 		mapView := testCreateMap(projectId, "name", 15)
 		referenceView := testCreateMap(projectId, "referenceView", 15)
 
@@ -31,7 +32,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 					StructureType: "map",
 					VariableID:    referenceView.Variables[1].ID,
 				},
-			})
+			}, groups)
 
 			addedMapsWithReferences = append(addedMapsWithReferences, addToMapVariable)
 		}
@@ -60,7 +61,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 		gomega.Expect(count).Should(gomega.Equal(0))
 	})
 
-	ginkgo.It("should delete a range of map items by ID", func() {
+	ginkgo.It("should delete a range of map items by ID", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		mapView := testCreateMap(projectId, "name", 15)
 
@@ -83,7 +84,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 		gomega.Expect(len(remainingItems)).Should(gomega.Equal(5))
 	})
 
-	ginkgo.It("should delete a range of map items by shortID", func() {
+	ginkgo.It("should delete a range of map items by shortID", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		mapView := testCreateMap(projectId, "name", 15)
 

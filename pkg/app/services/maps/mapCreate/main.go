@@ -61,7 +61,6 @@ func (c Main) Logic() (LogicResult, error) {
 				variable.Name,
 				variable.Behaviour,
 				variable.Metadata,
-				variable.Groups,
 				variable.Value,
 			)
 		}

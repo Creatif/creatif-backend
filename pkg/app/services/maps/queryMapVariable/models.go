@@ -1,12 +1,10 @@
 package queryMapVariable
 
 import (
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/sdk"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/lib/pq"
 	"time"
 )
 
@@ -37,7 +35,7 @@ func NewModel(projectId, name, itemID string) Model {
 }
 
 type LogicModel struct {
-	Variable  declarations.MapVariable
+	Variable  QueryVariable
 	Reference []shared.QueryReference
 }
 
@@ -54,14 +52,14 @@ type ReferenceView struct {
 }
 
 type View struct {
-	ID        string         `json:"id"`
-	Locale    string         `json:"locale"`
-	ShortID   string         `json:"shortId"`
-	Name      string         `json:"name"`
-	Behaviour string         `json:"behaviour"`
-	Groups    pq.StringArray `json:"groups"`
-	Metadata  interface{}    `json:"metadata"`
-	Value     interface{}    `json:"value"`
+	ID        string      `json:"id"`
+	Locale    string      `json:"locale"`
+	ShortID   string      `json:"shortId"`
+	Groups    []string    `json:"groups"`
+	Name      string      `json:"name"`
+	Behaviour string      `json:"behaviour"`
+	Metadata  interface{} `json:"metadata"`
+	Value     interface{} `json:"value"`
 
 	References []ReferenceView `json:"references"`
 
@@ -76,8 +74,8 @@ func newView(model LogicModel) View {
 		Locale:    alpha,
 		ShortID:   model.Variable.ShortID,
 		Name:      model.Variable.Name,
-		Behaviour: model.Variable.Behaviour,
 		Groups:    model.Variable.Groups,
+		Behaviour: model.Variable.Behaviour,
 		Metadata:  model.Variable.Metadata,
 		Value:     model.Variable.Value,
 		CreatedAt: model.Variable.CreatedAt,

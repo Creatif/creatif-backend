@@ -6,10 +6,8 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
-	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
-	"strings"
 )
 
 type Main struct {
@@ -42,34 +40,19 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() ([]string, error) {
+func (c Main) Logic() ([]declarations2.Group, error) {
 	sql := fmt.Sprintf(`
-SELECT groups FROM %s AS lv 
-    INNER JOIN %s AS l ON l.project_id = ? AND lv.map_id = l.id AND (l.name = ? OR l.id = ? OR l.short_id = ?) AND (lv.id = ? OR lv.short_id = ?)
-`, (declarations2.MapVariable{}).TableName(), (declarations2.Map{}).TableName())
-	var duplicatedModel []LogicModel
-	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID).Scan(&duplicatedModel)
+	SELECT g.name FROM %s AS g
+	INNER JOIN %s AS vg ON g.name = vg.group_id AND vg.variable_id = ? AND g.project_id = ?
+`, (declarations2.Group{}).TableName(), (declarations2.VariableGroup{}).TableName())
 
-	if res.Error != nil && res.RowsAffected == 0 {
-		return nil, appErrors.NewNotFoundError(res.Error)
-	} else if res.Error != nil && strings.Contains(res.Error.Error(), "cannot accumulate empty arrays") {
-		return make([]string, 0), nil
-	} else if res.Error != nil {
-		return nil, appErrors.NewApplicationError(res.Error)
+	var groups []declarations2.Group
+	res := storage.Gorm().Raw(sql, c.model.ItemID, c.model.ProjectID).Scan(&groups)
+	if res.Error != nil {
+		return []declarations2.Group{}, appErrors.NewApplicationError(res.Error)
 	}
 
-	distinctModels := make([]string, 0)
-	for _, v := range duplicatedModel {
-		groups := v.Groups
-
-		for _, g := range groups {
-			if !sdk.Includes(distinctModels, g) {
-				distinctModels = append(distinctModels, g)
-			}
-		}
-	}
-
-	return distinctModels, nil
+	return groups, nil
 }
 
 func (c Main) Handle() ([]string, error) {
@@ -94,7 +77,7 @@ func (c Main) Handle() ([]string, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []string] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []declarations2.Group] {
 	logBuilder.Add("getMapGroups", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

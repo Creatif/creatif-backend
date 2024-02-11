@@ -2,10 +2,10 @@ package addToList
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
+	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -13,14 +13,16 @@ import (
 var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 	ginkgo.It("should add an entry to a list by name", func() {
 		projectId := testCreateProject("project")
-		m := testCreateList(projectId, "listName", 10)
-		reference := testCreateList(projectId, "referenceMap", 10)
+		groups := testCreateGroups(projectId, 5)
+		m := testCreateList(projectId, "listName")
+		reference := testCreateList(projectId, "referenceMap")
 
-		var listVariables []declarations.ListVariable
-		res := storage.Gorm().Where("list_id = ?", reference.ID).Find(&listVariables)
-		testAssertErrNil(res.Error)
+		listVariables := make([]View, 0)
+		for i := 0; i < 10; i++ {
+			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+		}
 
-		handler := New(NewModel(projectId, m.ID, VariableModel{
+		handler := New(NewModel(projectId, reference.ID, VariableModel{
 			Name:      "newEntry",
 			Metadata:  nil,
 			Groups:    nil,
@@ -49,22 +51,24 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		_, err := handler.Handle()
-		testAssertErrNil(err)
+		gomega.Expect(err).Should(gomega.BeNil())
 
 		var count int
-		res = storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
-		testAssertErrNil(res.Error)
+		res := storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(count).Should(gomega.Equal(3))
 	})
 
 	ginkgo.It("should fail to add an entry because of a duplicate reference", func() {
 		projectId := testCreateProject("project")
-		m := testCreateList(projectId, "mapName", 10)
-		reference := testCreateList(projectId, "referenceMap", 10)
+		m := testCreateList(projectId, "mapName")
+		groups := testCreateGroups(projectId, 5)
+		reference := testCreateList(projectId, "referenceMap")
 
-		var listVariables []declarations.ListVariable
-		res := storage.Gorm().Where("list_id = ?", reference.ID).Find(&listVariables)
-		testAssertErrNil(res.Error)
+		listVariables := make([]View, 0)
+		for i := 0; i < 10; i++ {
+			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+		}
 
 		handler := New(NewModel(projectId, m.ShortID, VariableModel{
 			Name:      "newEntry",
@@ -100,7 +104,13 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 
 	ginkgo.It("should add an entry to a list by id", func() {
 		projectId := testCreateProject("project")
-		m := testCreateList(projectId, "mapName", 10)
+		groups := testCreateGroups(projectId, 5)
+		m := testCreateList(projectId, "mapName")
+
+		listVariables := make([]View, 0)
+		for i := 0; i < 10; i++ {
+			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+		}
 
 		handler := New(NewModel(projectId, m.ShortID, VariableModel{
 			Name:      "newEntry",
@@ -117,7 +127,13 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 
 	ginkgo.It("should add an entry to a list by shortID", func() {
 		projectId := testCreateProject("project")
-		m := testCreateList(projectId, "mapName", 10)
+		m := testCreateList(projectId, "mapName")
+		groups := testCreateGroups(projectId, 5)
+
+		listVariables := make([]View, 0)
+		for i := 0; i < 10; i++ {
+			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+		}
 
 		handler := New(NewModel(projectId, m.ID, VariableModel{
 			Name:      "newEntry",
