@@ -1,19 +1,25 @@
 package paginateReferences
 
 import (
+	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"time"
 )
 
-type Variable struct {
-	ID string `gorm:"primarykey"`
+type QueryVariable struct {
+	ID      string  `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ShortID string  `gorm:"uniqueIndex:unique_map_variable;type:text;not null"`
+	Index   float64 `gorm:"type:float"`
 
-	Name      string `gorm:"index;uniqueIndex:unique_variable"`
-	Behaviour string // readonly,modifiable
-	Metadata  datatypes.JSON
-	Value     datatypes.JSON
-	ProjectID string
+	Name      string         `gorm:"uniqueIndex:unique_map_variable;not null"`
+	Behaviour string         `gorm:"not null"`
+	Metadata  datatypes.JSON `gorm:"type:jsonb"`
+	Value     datatypes.JSON `gorm:"type:jsonb"`
+	Groups    pq.StringArray `gorm:"type:text[];column:groups"`
 
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	MapID    string `gorm:"uniqueIndex:unique_map_variable;type:text"`
+	LocaleID string `gorm:"type:text"`
+
+	CreatedAt time.Time `gorm:"<-:create;index"`
+	UpdatedAt time.Time
 }

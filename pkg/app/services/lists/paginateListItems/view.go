@@ -1,7 +1,6 @@
 package paginateListItems
 
 import (
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"time"
 )
@@ -21,7 +20,7 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(models []declarations.ListVariable) ([]View, error) {
+func newView(models []QueryVariable) ([]View, error) {
 	views := make([]View, len(models))
 	for i, value := range models {
 		locale, err := locales.GetAlphaWithID(value.LocaleID)
@@ -30,12 +29,12 @@ func newView(models []declarations.ListVariable) ([]View, error) {
 		}
 
 		views[i] = View{
-			ID:      value.ID,
-			Name:    value.Name,
-			Index:   value.Index,
-			Locale:  locale,
-			ShortID: value.ShortID,
-			//Groups:    value.Groups,
+			ID:        value.ID,
+			Name:      value.Name,
+			Index:     value.Index,
+			Locale:    locale,
+			ShortID:   value.ShortID,
+			Groups:    value.Groups,
 			Value:     value.Value,
 			Behaviour: value.Behaviour,
 			Metadata:  value.Metadata,

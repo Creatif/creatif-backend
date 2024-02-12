@@ -19,6 +19,7 @@ var validUpdateableFields = []string{
 	"groups",
 	"locale",
 	"behaviour",
+	"references",
 	"value",
 }
 
@@ -88,7 +89,7 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("fieldsValid", validation.Required, validation.By(func(value interface{}) error {
 				t := value.([]string)
 
-				if len(t) == 0 || len(t) > 6 {
+				if len(t) == 0 || len(t) > 8 {
 					return errors.New(fmt.Sprintf("Invalid updateable fields. Valid updatable fields are %s", strings.Join(validUpdateableFields, ", ")))
 				}
 

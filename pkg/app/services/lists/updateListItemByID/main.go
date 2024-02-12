@@ -52,7 +52,7 @@ func (c Main) Validate() error {
 
 	var check GroupBehaviourCheck
 	res := storage.Gorm().Raw(fmt.Sprintf(`
-SELECT cardinality(lv.groups) AS count, behaviour
+SELECT behaviour
 FROM %s AS lv 
 INNER JOIN %s AS l ON (l.id = ? OR l.short_id = ?) AND l.project_id = ? AND l.id = lv.list_id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.ListVariable{}).TableName(),
@@ -68,12 +68,6 @@ INNER JOIN %s AS l ON (l.id = ? OR l.short_id = ?) AND l.project_id = ? AND l.id
 		if res.Error != nil {
 			c.logBuilder.Add("updateListItemByID", res.Error.Error())
 		}
-		return appErrors.NewValidationError(map[string]string{
-			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.ItemID),
-		})
-	}
-
-	if check.Count+len(c.model.Values.Groups) > 20 {
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.ItemID),
 		})
@@ -182,11 +176,15 @@ func (c Main) Logic() (LogicResult, error) {
 				variablesGroups = append(variablesGroups, declarations.NewVariableGroup(g, c.model.ItemID, c.model.Values.Groups))
 			}
 
-			tx.Create(&variablesGroups)
+			if res := tx.Create(&variablesGroups); res.Error != nil {
+				return res.Error
+			}
 		}
 
-		if err := shared.UpdateReferences(c.model.References, list.ID, updated.ID, c.model.ProjectID, tx); err != nil {
-			return err
+		if sdk.Includes(c.model.Fields, "references") {
+			if err := shared.UpdateReferences(c.model.References, list.ID, updated.ID, c.model.ProjectID, tx); err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -202,7 +200,7 @@ func (c Main) Logic() (LogicResult, error) {
 		return LogicResult{}, appErrors.NewApplicationError(transactionErr).AddError("updateMapVariable.Logic", nil)
 	}
 
-	groups := make([]string, 0)
+	var groups []string
 	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.name AND vg.variable_id = ?", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.ItemID).Scan(&groups)
 	if res.Error != nil {
 		return LogicResult{}, appErrors.NewDatabaseError(res.Error)

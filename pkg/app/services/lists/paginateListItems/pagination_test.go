@@ -21,7 +21,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, list.ID, "created_at", "", "desc", 10, 1, []string{"group-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, list.ID, "created_at", "", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -38,12 +38,12 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
 		}
 
-		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 10, 50, []string{"group-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 10, 50, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
 		gomega.Expect(len(views.Data)).Should(gomega.Equal(0))
-		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
+		gomega.Expect(views.Total).Should(gomega.Equal(int64(50)))
 	})
 
 	ginkgo.It("should return empty result for group that does not exist", func() {
@@ -73,7 +73,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
 		}
 
-		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 50, 1, []string{"group-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 50, 1, []string{"groups-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -108,11 +108,11 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, list.ID, "created_at", "1", "desc", 10, 1, []string{"group-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, list.ID, "created_at", "1", "desc", 10, 1, []string{"groups-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
-		gomega.Expect(len(views.Data)).Should(gomega.Equal(5))
-		gomega.Expect(views.Total).Should(gomega.Equal(int64(5)))
+		gomega.Expect(len(views.Data)).Should(gomega.Equal(10))
+		gomega.Expect(views.Total).Should(gomega.Equal(int64(19)))
 	})
 })

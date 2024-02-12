@@ -9,8 +9,15 @@ import (
 
 func createSql(model Model, tables [2]string, orderBy, direction, relationshipType string) string {
 	returnableFields := ""
+	groupsSubquery := ""
 	if len(model.Fields) != 0 {
-		returnableFields = strings.Join(model.Fields, ",") + ","
+		if sdk.Includes(model.Fields, "groups") {
+			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.name AND vg.variable_id = lv.id)) AS groups")
+		}
+
+		returnableFields = strings.Join(sdk.Filter(model.Fields, func(idx int, value string) bool {
+			return value != "groups"
+		}), ",") + ","
 	}
 
 	var behaviour string
@@ -28,7 +35,8 @@ func createSql(model Model, tables [2]string, orderBy, direction, relationshipTy
 
 	var groupsWhereClause string
 	if len(model.Groups) != 0 {
-		groupsWhereClause = fmt.Sprintf("AND '{%s}'::text[] && %s", strings.Join(model.Groups, ","), "lv.groups")
+		searchForGroups := strings.Join(model.Groups, ",")
+		groupsWhereClause = fmt.Sprintf("INNER JOIN LATERAL (SELECT g.variable_id, g.group_id, g.groups FROM %s AS g WHERE lv.id = g.variable_id ORDER BY g.variable_id LIMIT 1) AS g ON '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), searchForGroups)
 	}
 
 	var search string
@@ -53,6 +61,7 @@ func createSql(model Model, tables [2]string, orderBy, direction, relationshipTy
     	lv.name, 
     	lv.behaviour,
     	%s
+    	%s
     	lv.created_at,
     	lv.updated_at
 			FROM %s AS r
@@ -61,6 +70,7 @@ func createSql(model Model, tables [2]string, orderBy, direction, relationshipTy
 		%s %s %s %s
 		ORDER BY lv.%s %s
 		OFFSET @offset LIMIT @limit`,
+		groupsSubquery,
 		returnableFields,
 		(declarations.Reference{}).TableName(),
 		tables[0],

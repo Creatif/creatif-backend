@@ -37,7 +37,7 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
+func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 	offset := (c.model.Page - 1) * c.model.Limit
 	placeholders := make(map[string]interface{})
 	placeholders["projectID"] = c.model.ProjectID
@@ -137,11 +137,11 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 		c.model.OrderBy,
 		c.model.OrderDirection)
 
-	var items []declarations.ListVariable
+	var items []QueryVariable
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateListItems", res.Error.Error())
-		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
+		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
 	}
 
 	countSql := fmt.Sprintf(`
@@ -165,10 +165,10 @@ func (c Main) Logic() (sdk.LogicView[declarations.ListVariable], error) {
 	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
 	if res.Error != nil {
 		c.logBuilder.Add("paginateListItem", res.Error.Error())
-		return sdk.LogicView[declarations.ListVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
+		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
 	}
 
-	return sdk.LogicView[declarations.ListVariable]{
+	return sdk.LogicView[QueryVariable]{
 		Total: count,
 		Data:  items,
 	}, nil
@@ -205,7 +205,7 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 	}, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[declarations.ListVariable]] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[QueryVariable]] {
 	logBuilder.Add("paginateListItems", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

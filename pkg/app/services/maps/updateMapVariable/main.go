@@ -152,11 +152,15 @@ func (c Main) Logic() (LogicResult, error) {
 				variablesGroups = append(variablesGroups, declarations.NewVariableGroup(g, c.model.VariableName, c.model.Values.Groups))
 			}
 
-			tx.Create(&variablesGroups)
+			if res := tx.Create(&variablesGroups); res.Error != nil {
+				return res.Error
+			}
 		}
 
-		if err := shared.UpdateReferences(c.model.References, m.ID, updated.ID, c.model.ProjectID, tx); err != nil {
-			return err
+		if sdk.Includes(c.model.Fields, "references") {
+			if err := shared.UpdateReferences(c.model.References, m.ID, updated.ID, c.model.ProjectID, tx); err != nil {
+				return err
+			}
 		}
 
 		return nil

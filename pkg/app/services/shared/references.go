@@ -86,7 +86,9 @@ func UpdateReferences(refs []UpdateReference, childStructureId, ownerId, project
 			}
 
 			ref := declarations.NewReference(incomingRef.Name, incomingRef.StructureType, "map", pr.ID, ownerId, pr.StructureID, childStructureId, projectId)
-			tx.Create(&ref)
+			if res := tx.Create(&ref); res.Error != nil {
+				return res.Error
+			}
 		}
 	}
 

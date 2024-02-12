@@ -1,7 +1,6 @@
 package paginateReferences
 
 import (
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"time"
 )
@@ -12,6 +11,7 @@ type View struct {
 	Index     float64     `json:"index"`
 	Locale    string      `json:"locale"`
 	Name      string      `json:"name"`
+	Groups    []string    `json:"groups"`
 	Behaviour string      `json:"behaviour"`
 	Metadata  interface{} `json:"metadata"`
 	Value     interface{} `json:"value"`
@@ -20,7 +20,7 @@ type View struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(models []declarations.MapVariable) ([]View, error) {
+func newView(models []QueryVariable) ([]View, error) {
 	views := make([]View, len(models))
 	for i, value := range models {
 		locale, err := locales.GetAlphaWithID(value.LocaleID)
@@ -33,6 +33,7 @@ func newView(models []declarations.MapVariable) ([]View, error) {
 			Name:      value.Name,
 			Locale:    locale,
 			ShortID:   value.ShortID,
+			Groups:    value.Groups,
 			Index:     value.Index,
 			Value:     value.Value,
 			Behaviour: value.Behaviour,

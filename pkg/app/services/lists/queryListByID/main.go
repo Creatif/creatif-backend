@@ -51,14 +51,14 @@ func (c Main) Logic() (LogicModel, error) {
 			    lv.behaviour, 
 			    lv.short_id, 
 			    lv.metadata, 
-			    ARRAY((SELECT g.group_id FROM %s AS g WHERE variable_id = lv.id)) AS groups,
-			    lv.value, 
+				ARRAY((SELECT g.group_id FROM %s AS g WHERE variable_id = lv.id)) AS groups,    
+				lv.value, 
 			    lv.created_at, 
 			    lv.updated_at, 
 			    lv.locale_id
 			FROM %s AS lv INNER JOIN %s AS l
 			ON l.project_id = ? AND (l.name = ? OR l.short_id = ? OR l.id = ?) AND lv.list_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
-		(declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
+		(declarations.VariableGroup{}).TableName(), (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
 
 	var variable QueryVariable
 	res := storage.Gorm().
