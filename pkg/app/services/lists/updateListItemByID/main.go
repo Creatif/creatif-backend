@@ -171,13 +171,15 @@ func (c Main) Logic() (LogicResult, error) {
 				return res.Error
 			}
 
-			variablesGroups := make([]declarations.VariableGroup, 0)
-			for _, g := range c.model.Values.Groups {
-				variablesGroups = append(variablesGroups, declarations.NewVariableGroup(g, c.model.ItemID, c.model.Values.Groups))
-			}
+			if c.model.Values.Groups != nil && len(c.model.Values.Groups) > 0 {
+				variablesGroups := make([]declarations.VariableGroup, 0)
+				for _, g := range c.model.Values.Groups {
+					variablesGroups = append(variablesGroups, declarations.NewVariableGroup(g, c.model.ItemID, c.model.Values.Groups))
+				}
 
-			if res := tx.Create(&variablesGroups); res.Error != nil {
-				return res.Error
+				if res := tx.Create(&variablesGroups); res.Error != nil {
+					return res.Error
+				}
 			}
 		}
 
