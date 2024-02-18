@@ -44,11 +44,20 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (LogicModel, error) {
 	sql := fmt.Sprintf(`
-			SELECT lv.id, lv.name, lv.behaviour, lv.short_id, lv.metadata, lv.value, lv.created_at, lv.updated_at, lv.locale_id,
-			       ARRAY((SELECT g.group_id FROM %s AS g WHERE variable_id = lv.id)) AS groups
+			SELECT 
+			    lv.id, 
+			    lv.name, 
+			    lv.behaviour, 
+			    lv.short_id, 
+			    lv.metadata, 
+			    lv.value, 
+			    lv.created_at, 
+			    lv.updated_at, 
+			    lv.locale_id,
+			       ARRAY((SELECT g.name FROM %s AS vg INNER JOIN %s AS g ON vg.group_id = g.id AND vg.variable_id = lv.id)) AS groups
 			FROM %s AS lv INNER JOIN %s AS l
 			ON l.project_id = ? AND (l.short_id = ? OR l.id = ?) AND lv.map_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
-		(declarations.VariableGroup{}).TableName(), (declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())
+		(declarations.VariableGroup{}).TableName(), (declarations.Group{}).TableName(), (declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())
 
 	var variable QueryVariable
 	res := storage.Gorm().

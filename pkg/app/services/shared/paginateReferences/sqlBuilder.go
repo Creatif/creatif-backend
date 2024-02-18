@@ -103,7 +103,8 @@ func createCountSql(model Model, tables [2]string, relationshipType string) stri
 
 	var groupsWhereClause string
 	if len(model.Groups) != 0 {
-		groupsWhereClause = fmt.Sprintf("AND '{%s}'::text[] && %s", strings.Join(model.Groups, ","), "lv.groups")
+		searchForGroups := strings.Join(model.Groups, ",")
+		groupsWhereClause = fmt.Sprintf("INNER JOIN LATERAL (SELECT g.variable_id, g.group_id, g.groups FROM %s AS g WHERE lv.id = g.variable_id ORDER BY g.variable_id LIMIT 1) AS g ON '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), searchForGroups)
 	}
 
 	var search string

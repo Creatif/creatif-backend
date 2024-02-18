@@ -1,6 +1,6 @@
 package sdk
 
-func IncludesFn[T comparable](values []T, fn func(item T) bool) bool {
+func IncludesFn[T any](values []T, fn func(item T) bool) bool {
 	left, right := 0, len(values)-1
 
 	for i := left; i <= right; i++ {

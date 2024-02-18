@@ -51,18 +51,18 @@ func (c Main) Logic() (LogicModel, error) {
 			    lv.behaviour, 
 			    lv.short_id, 
 			    lv.metadata, 
-				ARRAY((SELECT g.group_id FROM %s AS g WHERE variable_id = lv.id)) AS groups,    
+			       ARRAY((SELECT g.name FROM %s AS vg INNER JOIN %s AS g ON vg.group_id = g.id AND vg.variable_id = lv.id)) AS groups,
 				lv.value, 
 			    lv.created_at, 
 			    lv.updated_at, 
 			    lv.locale_id
-			FROM %s AS lv INNER JOIN %s AS l
-			ON l.project_id = ? AND (l.name = ? OR l.short_id = ? OR l.id = ?) AND lv.list_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
-		(declarations.VariableGroup{}).TableName(), (declarations.ListVariable{}).TableName(), (declarations.List{}).TableName())
+			FROM %s AS l INNER JOIN %s AS lv
+			ON l.project_id = ? AND l.id = ? AND lv.list_id = l.id AND lv.id = ?`,
+		(declarations.VariableGroup{}).TableName(), (declarations.Group{}).TableName(), (declarations.List{}).TableName(), (declarations.ListVariable{}).TableName())
 
 	var variable QueryVariable
 	res := storage.Gorm().
-		Raw(sql, c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name, c.model.ItemID, c.model.ItemID).
+		Raw(sql, c.model.ProjectID, c.model.Name, c.model.ItemID).
 		Scan(&variable)
 
 	if res.Error != nil {

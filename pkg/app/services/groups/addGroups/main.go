@@ -25,6 +25,26 @@ func (c Main) Validate() error {
 	}
 	c.logBuilder.Add("addToList", "Validated.")
 
+	toCreateGroups := make([]string, 0)
+	for _, g := range c.model.Groups {
+		if g.Action == "create" && g.ID == "" {
+			toCreateGroups = append(toCreateGroups, g.Name)
+		}
+	}
+
+	groupExists := fmt.Sprintf("SELECT id FROM %s WHERE project_id = ? AND name IN(?)", (declarations.Group{}).TableName())
+
+	var groups []string
+	if res := storage.Gorm().Raw(groupExists, c.model.ProjectID, toCreateGroups).Scan(&groups); res.Error != nil {
+		return appErrors.NewApplicationError(res.Error)
+	}
+
+	if len(groups) > 0 {
+		return appErrors.NewValidationError(map[string]string{
+			"groupExists": "Some of the groups exist.",
+		})
+	}
+
 	return nil
 }
 
@@ -51,28 +71,28 @@ func (c Main) Logic() ([]declarations.Group, error) {
 			return nil
 		}
 
-		var existingGroups []string
-		res := tx.Raw(fmt.Sprintf("SELECT name FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID).Scan(&existingGroups)
+		var existingGroups []declarations.Group
+		res := tx.Raw(fmt.Sprintf("SELECT name, id FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID).Scan(&existingGroups)
 		if res.Error != nil {
 			return res.Error
 		}
 
 		toCreateGroups := make([]declarations.Group, 0)
-		toDeleteGroups := make([]declarations.Group, 0)
+		toDeleteGroups := make([]string, 0)
 		for _, g := range c.model.Groups {
-			if !sdk.Includes(existingGroups, g) {
-				toCreateGroups = append(toCreateGroups, declarations.NewGroup(c.model.ProjectID, g))
+			if g.Action == "create" && g.ID == "" {
+				toCreateGroups = append(toCreateGroups, declarations.NewGroup(c.model.ProjectID, g.Name))
 			}
-		}
 
-		for _, g := range existingGroups {
-			if !sdk.Includes(c.model.Groups, g) {
-				toDeleteGroups = append(toDeleteGroups, declarations.NewGroup(c.model.ProjectID, g))
+			if g.Action == "remove" && g.ID != "" && sdk.IncludesFn(existingGroups, func(item declarations.Group) bool {
+				return item.ID == g.ID
+			}) {
+				toDeleteGroups = append(toDeleteGroups, g.ID)
 			}
 		}
 
 		if len(toDeleteGroups) > 0 {
-			if res := tx.Table((declarations.Group{}).TableName()).Delete(&toDeleteGroups); res.Error != nil {
+			if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE project_id = ? AND id IN(?)", (declarations.Group{}).TableName()), c.model.ProjectID, toDeleteGroups); res.Error != nil {
 				return res.Error
 			}
 		}

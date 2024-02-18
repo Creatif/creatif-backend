@@ -54,7 +54,7 @@ func NewModel(projectId, mapName, variableName string, fields []string, values V
 
 type LogicResult struct {
 	Variable declarations.MapVariable
-	Groups   []string
+	Groups   []declarations.Group
 }
 
 func (a *Model) Validate() map[string]string {
@@ -160,13 +160,18 @@ type View struct {
 	ID        string      `json:"id"`
 	Name      string      `json:"name"`
 	Locale    string      `json:"locale"`
-	Groups    []string    `json:"groups"`
+	Groups    []GroupView `json:"groups"`
 	ShortID   string      `json:"shortId"`
 	Metadata  interface{} `json:"metadata"`
 	Behaviour string      `json:"behaviour"`
 	Value     interface{} `json:"value"`
 	CreatedAt time.Time   `json:"createdAt"`
 	UpdatedAt time.Time   `json:"updatedAt"`
+}
+
+type GroupView struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func newView(model LogicResult) View {
@@ -182,9 +187,14 @@ func newView(model LogicResult) View {
 
 	locale, _ := locales.GetAlphaWithID(model.Variable.LocaleID)
 	return View{
-		ID:        model.Variable.ID,
-		Locale:    locale,
-		Groups:    model.Groups,
+		ID:     model.Variable.ID,
+		Locale: locale,
+		Groups: sdk.Map(model.Groups, func(idx int, value declarations.Group) GroupView {
+			return GroupView{
+				ID:   value.ID,
+				Name: value.Name,
+			}
+		}),
 		Name:      model.Variable.Name,
 		Behaviour: model.Variable.Behaviour,
 		Metadata:  m,

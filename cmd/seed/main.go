@@ -19,7 +19,7 @@ import (
 )
 
 const apiKey = "$2a$10$aUlSZKvCLkbA65wWB5tme.a6nQDwJRzJrjm.DAlpD9/m4hjcrgf/u"
-const projectId = "01HP45ME16HK3SRC735Q0KWE06"
+const projectId = "01HPVSSYQW1YW525JT7SSFT1ZB"
 
 func main() {
 	loadEnv()
@@ -81,17 +81,24 @@ func seed() {
 	frenchId := listAdd(listStructures[0].ID, "French", []shared.Reference{})
 
 	fmt.Println("Creating languages...")
+	for i := 0; i < 50; i++ {
+		fmt.Println(fmt.Sprintf("Batch %d finished.", i))
+		addBatch(englishId, frenchId, mapStructures[0].ID)
+	}
+}
+
+func addBatch(englishId, frenchId, mapStructureId string) {
 	m := &sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		m.Add(1)
 		go func() {
-			for a := 0; a < 1000; a++ {
+			for a := 0; a < 5000; a++ {
 				languageId := englishId
 				if a%2 == 0 {
 					languageId = frenchId
 				}
 
-				addToMap(mapStructures[0].ID, uuid.NewString(), []shared.Reference{
+				addToMap(mapStructureId, uuid.NewString(), []shared.Reference{
 					{
 						Name:          "language",
 						StructureType: "list",

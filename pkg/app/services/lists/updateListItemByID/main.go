@@ -202,8 +202,8 @@ func (c Main) Logic() (LogicResult, error) {
 		return LogicResult{}, appErrors.NewApplicationError(transactionErr).AddError("updateMapVariable.Logic", nil)
 	}
 
-	var groups []string
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.name AND vg.variable_id = ?", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.ItemID).Scan(&groups)
+	var groups []declarations.Group
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name, g.id FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = ?", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.ItemID).Scan(&groups)
 	if res.Error != nil {
 		return LogicResult{}, appErrors.NewDatabaseError(res.Error)
 	}

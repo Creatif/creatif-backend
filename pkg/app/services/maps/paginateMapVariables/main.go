@@ -100,7 +100,7 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 	groupsSubquery := ""
 	if len(c.model.Fields) != 0 {
 		if sdk.Includes(c.model.Fields, "groups") {
-			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.name AND vg.variable_id = lv.id)) AS groups")
+			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id)) AS groups")
 		}
 
 		returnableFields = strings.Join(sdk.Filter(c.model.Fields, func(idx int, value string) bool {
@@ -144,32 +144,8 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("Maps.Paginate.Logic", nil)
 	}
 
-	countSql := fmt.Sprintf(`
-    	SELECT 
-    	    count(lv.id) AS count
-		FROM %s AS lv
-		INNER JOIN %s AS l
-		ON l.project_id = @projectID AND (l.id = @name OR l.short_id = @name) AND l.id = lv.map_id %s %s
-    	%s
-    	%s
-	`,
-		(declarations.MapVariable{}).TableName(),
-		(declarations.Map{}).TableName(),
-		locale,
-		search,
-		behaviour,
-		groupsWhereClause,
-	)
-
-	var count int64
-	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
-	if res.Error != nil {
-		c.logBuilder.Add("paginateMapVariables", res.Error.Error())
-		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("paginateMapVariable.Logic", nil)
-	}
-
 	return sdk.LogicView[QueryVariable]{
-		Total: count,
+		Total: 0,
 		Data:  items,
 	}, nil
 }

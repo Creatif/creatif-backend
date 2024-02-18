@@ -17,6 +17,11 @@ type Model struct {
 	ProjectID string
 }
 
+type View struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 func NewModel(name, itemId, projectID string) Model {
 	return Model{
 		Name:      name,
@@ -25,9 +30,12 @@ func NewModel(name, itemId, projectID string) Model {
 	}
 }
 
-func newView(model []declarations.Group) []string {
-	return sdk.Map(model, func(idx int, value declarations.Group) string {
-		return value.Name
+func newView(model []declarations.Group) []View {
+	return sdk.Map(model, func(idx int, value declarations.Group) View {
+		return View{
+			ID:   value.ID,
+			Name: value.Name,
+		}
 	})
 }
 

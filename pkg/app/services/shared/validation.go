@@ -9,7 +9,7 @@ import (
 
 func ValidateGroupsExist(projectId string, groups []string) (int, error) {
 	var count int
-	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT count(name) FROM %s WHERE project_id = ? AND name IN(?)", (declarations.Group{}).TableName()), projectId, groups).Scan(&count); res.Error != nil {
+	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT count(id) FROM %s WHERE project_id = ? AND id IN(?)", (declarations.Group{}).TableName()), projectId, groups).Scan(&count); res.Error != nil {
 		return 0, res.Error
 	}
 

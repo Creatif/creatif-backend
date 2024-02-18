@@ -100,7 +100,7 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 	groupsSubquery := ""
 	if len(c.model.Fields) != 0 {
 		if sdk.Includes(c.model.Fields, "groups") {
-			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.name AND vg.variable_id = lv.id)) AS groups")
+			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id)) AS groups")
 		}
 
 		returnableFields = strings.Join(sdk.Filter(c.model.Fields, func(idx int, value string) bool {

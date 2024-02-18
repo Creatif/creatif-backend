@@ -7,6 +7,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -25,7 +26,14 @@ func AddGroupsHandler() func(e echo.Context) error {
 
 		l := logger.NewLogBuilder()
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
-		handler := addGroups.New(addGroups.NewModel(model.ProjectID, model.Groups), authentication, l)
+		handler := addGroups.New(addGroups.NewModel(model.ProjectID, sdk.Map(model.Groups, func(idx int, value app.SingleGroup) addGroups.GroupModel {
+			return addGroups.GroupModel{
+				ID:     value.ID,
+				Name:   value.Name,
+				Type:   value.Type,
+				Action: value.Action,
+			}
+		})), authentication, l)
 
 		return request.SendResponse[addGroups.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {

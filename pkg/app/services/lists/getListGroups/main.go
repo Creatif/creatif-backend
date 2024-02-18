@@ -42,8 +42,8 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() ([]declarations2.Group, error) {
 	sql := fmt.Sprintf(`
-	SELECT g.name FROM %s AS g
-	INNER JOIN %s AS vg ON g.name = vg.group_id AND vg.variable_id = ? AND g.project_id = ?
+	SELECT g.name, g.id FROM %s AS g
+	INNER JOIN %s AS vg ON g.id = vg.group_id AND vg.variable_id = ? AND g.project_id = ?
 `, (declarations2.Group{}).TableName(), (declarations2.VariableGroup{}).TableName())
 
 	var groups []declarations2.Group
@@ -55,7 +55,7 @@ func (c Main) Logic() ([]declarations2.Group, error) {
 	return groups, nil
 }
 
-func (c Main) Handle() ([]string, error) {
+func (c Main) Handle() ([]View, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (c Main) Handle() ([]string, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []declarations2.Group] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, []declarations2.Group] {
 	logBuilder.Add("getListGroups", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

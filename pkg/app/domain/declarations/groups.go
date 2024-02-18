@@ -7,10 +7,12 @@ import (
 )
 
 type Group struct {
-	Name      string `gorm:"primarykey;type:text"`
-	ProjectID string `gorm:"index;type:text"`
+	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
 
-	VariableGroups []VariableGroup `gorm:"foreignKey:GroupID;references:Name;constraint:OnDelete:CASCADE;"`
+	Name      string `gorm:"uniqueIndex:unique_group;type:text"`
+	ProjectID string `gorm:"uniqueIndex:unique_group;type:text"`
+
+	VariableGroups []VariableGroup `gorm:"foreignKey:GroupID;references:ID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time `gorm:"<-:update"`

@@ -6,12 +6,19 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-type Model struct {
-	ProjectID string
-	Groups    []string
+type GroupModel struct {
+	ID     string
+	Name   string
+	Type   string
+	Action string
 }
 
-func NewModel(projectId string, groups []string) Model {
+type Model struct {
+	ProjectID string
+	Groups    []GroupModel
+}
+
+func NewModel(projectId string, groups []GroupModel) Model {
 	return Model{
 		ProjectID: projectId,
 		Groups:    groups,
@@ -27,10 +34,16 @@ func (a *Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("groups", validation.When(len(a.Groups) != 0, validation.Each(validation.RuneLength(1, 200))), validation.By(func(value interface{}) error {
+			validation.Key("groups", validation.By(func(value interface{}) error {
 				if a.Groups != nil {
 					if len(a.Groups) > 200 {
 						return errors.New("Maximum number of groups is 200.")
+					}
+
+					for _, g := range a.Groups {
+						if len(g.Name) > 200 {
+							return errors.New("Group name must have less than 200 characters.")
+						}
 					}
 
 					return nil

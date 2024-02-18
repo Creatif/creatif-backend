@@ -178,8 +178,8 @@ func (c Main) Logic() (LogicResult, error) {
 		return LogicResult{}, appErrors.NewApplicationError(err).AddError("updateMapVariable.Logic", nil)
 	}
 
-	groups := make([]string, 0)
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.name AND vg.variable_id = ?", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.VariableName).Scan(&groups)
+	groups := make([]declarations.Group, 0)
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name, g.id FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = ?", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.VariableName).Scan(&groups)
 	if res.Error != nil {
 		return LogicResult{}, appErrors.NewDatabaseError(res.Error)
 	}

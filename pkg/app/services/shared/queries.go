@@ -38,7 +38,7 @@ func queryParentReferences(id, projectId string, references *[]QueryReference) e
 	SELECT DISTINCT ON (structure_name) id, parent_type, child_type, parent_id, name, child_id, child_structure_id, parent_structure_id,
 	COALESCE(
   		(SELECT name FROM declarations.maps WHERE id = child_structure_id AND project_id = ?),
-  		(SELECT name FROM declarations.lists WHERE id = parent_structure_id AND project_id = ?)
+  		(SELECT name FROM declarations.lists WHERE id = child_structure_id AND project_id = ?)
  	)AS structure_name
 	FROM %s WHERE parent_id = ? AND project_id = ?
 `, (declarations.Reference{}).TableName())

@@ -43,7 +43,7 @@ type Model struct {
 
 type LogicResult struct {
 	Variable declarations.ListVariable
-	Groups   []string
+	Groups   []declarations.Group
 }
 
 func NewModel(projectId, locale string, fields []string, listName, itemId, updatingName, behaviour string, groups []string, metadata, value []byte, references []shared.UpdateReference) Model {
@@ -143,13 +143,18 @@ type View struct {
 	ID        string      `json:"id"`
 	Name      string      `json:"name"`
 	Locale    string      `json:"locale"`
-	Groups    []string    `json:"groups"`
+	Groups    []GroupView `json:"groups"`
 	Behaviour string      `json:"behaviour"`
 	Metadata  interface{} `json:"metadata"`
 	Value     interface{} `json:"value"`
 
 	CreatedAt time.Time `gorm:"<-:createProject" json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type GroupView struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func newView(model LogicResult) View {
@@ -165,10 +170,15 @@ func newView(model LogicResult) View {
 
 	locale, _ := locales.GetAlphaWithID(model.Variable.LocaleID)
 	return View{
-		ID:        model.Variable.ID,
-		Locale:    locale,
-		Name:      model.Variable.Name,
-		Groups:    model.Groups,
+		ID:     model.Variable.ID,
+		Locale: locale,
+		Name:   model.Variable.Name,
+		Groups: sdk.Map(model.Groups, func(idx int, value declarations.Group) GroupView {
+			return GroupView{
+				ID:   value.ID,
+				Name: value.Name,
+			}
+		}),
 		Behaviour: model.Variable.Behaviour,
 		Metadata:  m,
 		Value:     v,
