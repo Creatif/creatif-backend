@@ -138,7 +138,17 @@ func testCreateMap(projectId, name string) mapCreate.View {
 	return view
 }
 
-func testCreateGroups(projectId string, groups []string) []string {
+func testCreateGroups(projectId string, g []string) []string {
+	groups := make([]addGroups.GroupModel, len(g))
+	for i := 0; i < len(g); i++ {
+		groups[i] = addGroups.GroupModel{
+			ID:     "",
+			Name:   fmt.Sprintf("group-%d", i),
+			Type:   "new",
+			Action: "create",
+		}
+	}
+
 	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	g, err := handler.Handle()

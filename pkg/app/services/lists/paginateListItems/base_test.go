@@ -139,9 +139,14 @@ func testCreateList(projectId, name string) createList2.View {
 }
 
 func testCreateGroups(projectId string, numOfGroups int) []string {
-	groups := make([]string, numOfGroups)
+	groups := make([]addGroups.GroupModel, numOfGroups)
 	for i := 0; i < numOfGroups; i++ {
-		groups[i] = fmt.Sprintf("groups-%d", i)
+		groups[i] = addGroups.GroupModel{
+			ID:     groups[i].ID,
+			Name:   fmt.Sprintf("group-%d", i),
+			Type:   "current",
+			Action: "remove",
+		}
 	}
 
 	l := logger.NewLogBuilder()

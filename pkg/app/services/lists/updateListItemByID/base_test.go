@@ -123,7 +123,17 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateGroups(projectId string, groups []string) {
+func testCreateGroups(projectId string, g []string) {
+	groups := make([]addGroups.GroupModel, len(g))
+	for i := 0; i < len(g); i++ {
+		groups[i] = addGroups.GroupModel{
+			ID:     "",
+			Name:   fmt.Sprintf("group-%d", i),
+			Type:   "new",
+			Action: "create",
+		}
+	}
+
 	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	_, err := handler.Handle()

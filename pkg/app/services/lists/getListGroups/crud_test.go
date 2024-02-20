@@ -23,9 +23,9 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		l := logger.NewLogBuilder()
 		handler := New(NewModel(view.ID, listVariables[0].ID, projectId), auth.NewTestingAuthentication(true, ""), l)
-		groups, err := handler.Handle()
+		createdGroups, err := handler.Handle()
 		testAssertErrNil(err)
 
-		gomega.Expect(len(groups)).To(gomega.Equal(5))
+		gomega.Expect(len(createdGroups)).To(gomega.Equal(5))
 	})
 })

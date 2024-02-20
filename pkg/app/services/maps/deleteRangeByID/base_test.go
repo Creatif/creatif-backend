@@ -187,9 +187,14 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 }
 
 func testCreateGroups(projectId string, numOfGroups int) []string {
-	groups := make([]string, numOfGroups)
+	groups := make([]addGroups.GroupModel, numOfGroups)
 	for i := 0; i < numOfGroups; i++ {
-		groups[i] = fmt.Sprintf("groups-%d", i)
+		groups[i] = addGroups.GroupModel{
+			ID:     "",
+			Name:   fmt.Sprintf("group-%d", i),
+			Type:   "new",
+			Action: "create",
+		}
 	}
 
 	l := logger.NewLogBuilder()
