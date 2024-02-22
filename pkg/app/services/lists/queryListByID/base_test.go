@@ -128,7 +128,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateListAndReturnIds(projectId, name string, varNum int) []map[string]string {
+func testCreateListAndReturnIds(projectId, name string, varNum int) (string, []map[string]string) {
 	variables := make([]createList2.Variable, varNum)
 	for i := 0; i < varNum; i++ {
 		variables[i] = createList2.Variable{
@@ -144,7 +144,7 @@ func testCreateListAndReturnIds(projectId, name string, varNum int) []map[string
 	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	list, err := handler.Handle()
-	testAssertErrNil(err)
+	gomega.Expect(err).Should(gomega.BeNil())
 	testAssertIDValid(list.ID)
 
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
@@ -153,7 +153,7 @@ func testCreateListAndReturnIds(projectId, name string, varNum int) []map[string
 	res := storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 
-	return sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) map[string]string {
+	return list.ID, sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) map[string]string {
 		return map[string]string{
 			"id":   value.ID,
 			"name": value.Name,

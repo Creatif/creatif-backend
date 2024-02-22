@@ -2,9 +2,11 @@ package paginateListItems
 
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -17,7 +19,9 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+				return value.ID
+			}))
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
@@ -35,7 +39,9 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 50; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+				return value.ID
+			}))
 		}
 
 		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 10, 50, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -52,7 +58,9 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+				return value.ID
+			}))
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
@@ -70,10 +78,12 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+				return value.ID
+			}))
 		}
 
-		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 50, 1, []string{"groups-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "", "desc", 50, 1, []string{groups[0].ID}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -87,7 +97,9 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+				return value.ID
+			}))
 		}
 
 		handler := New(NewModel(projectId, []string{}, list.ID, "created_at", "1", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -104,11 +116,13 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups)
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+				return value.ID
+			}))
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, list.ID, "created_at", "1", "desc", 10, 1, []string{"groups-0"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, list.ID, "created_at", "1", "desc", 10, 1, []string{groups[0].ID}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

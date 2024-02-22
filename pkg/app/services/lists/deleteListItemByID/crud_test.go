@@ -13,7 +13,7 @@ import (
 var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 	ginkgo.It("should delete a list item by list name and item ID", func() {
 		projectId := testCreateProject("project")
-		testCreateGroups(projectId)
+		groups := testCreateGroups(projectId)
 		_, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 99)
 		referenceListName, referenceListId, _ := testCreateListAndReturnNameAndID(projectId, "referenceName", 100)
 
@@ -34,7 +34,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 				StructureType: "list",
 				VariableID:    referenceListItems[1].ID,
 			},
-		})
+		}, groups)
 
 		handler := New(NewModel(projectId, listId, addToListVariable.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		model, err := handler.Handle()

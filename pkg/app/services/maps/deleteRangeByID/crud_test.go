@@ -3,6 +3,7 @@ package deleteRangeByID
 import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
@@ -32,7 +33,9 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 					StructureType: "map",
 					VariableID:    referenceView.Variables[1].ID,
 				},
-			}, groups)
+			}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+				return value.ID
+			}))
 
 			addedMapsWithReferences = append(addedMapsWithReferences, addToMapVariable)
 		}

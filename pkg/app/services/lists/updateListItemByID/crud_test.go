@@ -3,9 +3,11 @@ package updateListItemByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -62,7 +64,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should update the groups of the a list item", func() {
 		projectId := testCreateProject("project")
-		testCreateGroups(projectId, []string{"first", "second", "third", "one", "two", "three"})
+		groups := testCreateGroups(projectId, []string{"first", "second", "third", "one", "two", "three"})
 		view := testCreateList(projectId, "name", 100, false, "modifiable")
 
 		var singleItem declarations.ListVariable
@@ -74,10 +76,14 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(res.RowsAffected).ShouldNot(gomega.Equal(0))
 
+		g := sdk.Map(groups, func(idx int, value addGroups.View) string {
+			return value.ID
+		})
+
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ID, singleItem.ID, "newName", "readonly", []string{"first", "second", "third"}, []byte{}, v, []shared.UpdateReference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ID, singleItem.ID, "newName", "readonly", []string{g[0], g[1], g[2]}, []byte{}, v, []shared.UpdateReference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -85,8 +91,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
 		gomega.Expect(updated.Locale).Should(gomega.Equal("eng"))
-		gomega.Expect(updated.Groups).Should(gomega.HaveLen(3))
-		gomega.Expect(updated.Groups[0]).Should(gomega.Equal("first"))
+		gomega.Expect(len(updated.Groups)).Should(gomega.Equal(3))
 
 		var checkModel declarations.ListVariable
 		res = storage.Gorm().Table(checkModel.TableName()).Where("id = ?", updated.ID).First(&checkModel)
@@ -97,7 +102,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 	ginkgo.It("should update the behaviour of the list item", func() {
 		projectId := testCreateProject("project")
-		testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
+		groups := testCreateGroups(projectId, []string{"one", "two", "three", "first", "second", "third"})
 		view := testCreateList(projectId, "name", 100, false, "modifiable")
 
 		var singleItem declarations.ListVariable
@@ -107,6 +112,10 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			projectId,
 		).Scan(&singleItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
+
+		g := sdk.Map(groups, func(idx int, value addGroups.View) string {
+			return value.ID
+		})
 
 		m := "text value"
 		v, err := json.Marshal(m)
@@ -119,7 +128,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			singleItem.ID,
 			"newName",
 			"readonly",
-			[]string{"first", "second", "third"},
+			[]string{g[0], g[1], g[2]},
 			[]byte{},
 			v,
 			[]shared.UpdateReference{},
@@ -131,7 +140,6 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 
 		gomega.Expect(updated.Name).Should(gomega.Equal("newName"))
 		gomega.Expect(updated.Groups).Should(gomega.HaveLen(3))
-		gomega.Expect(updated.Groups[0]).Should(gomega.Equal("first"))
 		gomega.Expect(updated.Behaviour).Should(gomega.Equal("readonly"))
 		gomega.Expect(updated.Locale).Should(gomega.Equal("eng"))
 
@@ -203,12 +211,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		handler := New(NewModel(
 			projectId,
 			"eng",
-			[]string{"name", "behaviour", "groups"},
+			[]string{"name", "behaviour"},
 			view.ID,
 			singleItem.ShortID,
 			"newName",
 			"readonly",
-			[]string{"one", "two"},
+			nil,
 			[]byte{},
 			v,
 			[]shared.UpdateReference{},

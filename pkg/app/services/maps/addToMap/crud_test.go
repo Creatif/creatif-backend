@@ -2,9 +2,11 @@ package addToMap
 
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/services/groups/addGroups"
 	getMap2 "creatif/pkg/app/services/maps/getMap"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -14,13 +16,19 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 	ginkgo.It("should add an entry to the map by name with references", ginkgo.Label("map"), func() {
 		projectId := testCreateProject("project")
 		groups := testCreateGroups(projectId, 5)
-		m := testCreateMap(projectId, "mapName", 10, groups)
-		reference := testCreateMap(projectId, "referenceMap", 10, groups)
+		m := testCreateMap(projectId, "mapName", 10, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			return value.ID
+		}))
+		reference := testCreateMap(projectId, "referenceMap", 10, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			return value.ID
+		}))
 
 		handler := New(NewModel(projectId, m.ID, VariableModel{
-			Name:      "newEntry",
-			Metadata:  nil,
-			Groups:    groups,
+			Name:     "newEntry",
+			Metadata: nil,
+			Groups: sdk.Map(groups, func(idx int, value addGroups.View) string {
+				return value.ID
+			}),
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,

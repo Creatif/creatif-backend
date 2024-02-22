@@ -143,7 +143,8 @@ func (c Main) Logic() (LogicResult, error) {
 		}
 
 		if sdk.Includes(c.model.Fields, "groups") {
-			if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE variable_id = ?", (declarations.VariableGroup{}).TableName()), c.model.VariableName); res.Error != nil {
+			res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE variable_id = ?", (declarations.VariableGroup{}).TableName()), c.model.VariableName)
+			if res.Error != nil {
 				return res.Error
 			}
 

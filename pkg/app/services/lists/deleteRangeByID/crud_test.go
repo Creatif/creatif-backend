@@ -16,7 +16,7 @@ import (
 var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 	ginkgo.It("should delete a range of list items by name", func() {
 		projectId := testCreateProject("project")
-		testCreateGroups(projectId)
+		groups := testCreateGroups(projectId)
 		listName, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 15)
 		referenceListName, referenceListId, _ := testCreateListAndReturnNameAndID(projectId, "referenceList", 10)
 
@@ -39,7 +39,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 					StructureType: "list",
 					VariableID:    referenceListItems[1].ID,
 				},
-			})
+			}, groups)
 
 			addedMapsWithReferences = append(addedMapsWithReferences, addToMapVariable)
 		}

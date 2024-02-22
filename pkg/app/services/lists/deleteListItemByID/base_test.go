@@ -10,6 +10,7 @@ import (
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -150,7 +151,7 @@ func testCreateListAndReturnNameAndID(projectId, name string, varNum int) (strin
 	return list.Name, list.ID, list.ShortID
 }
 
-func testCreateGroups(projectId string) {
+func testCreateGroups(projectId string) []string {
 	groups := make([]addGroups.GroupModel, 5)
 	for i := 0; i < 5; i++ {
 		groups[i] = addGroups.GroupModel{
@@ -163,19 +164,19 @@ func testCreateGroups(projectId string) {
 
 	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
-	_, err := handler.Handle()
+	model, err := handler.Handle()
 	testAssertErrNil(err)
+
+	return sdk.Map(model, func(idx int, value addGroups.View) string {
+		return value.ID
+	})
 }
 
-func testAddToList(projectId, name string, references []shared.Reference) addToList.View {
+func testAddToList(projectId, name string, references []shared.Reference, groups []string) addToList.View {
 	variableModel := addToList.VariableModel{
-		Name:     fmt.Sprintf("new add variable"),
-		Metadata: nil,
-		Groups: []string{
-			"one",
-			"two",
-			"three",
-		},
+		Name:      fmt.Sprintf("new add variable"),
+		Metadata:  nil,
+		Groups:    groups,
 		Value:     nil,
 		Locale:    "eng",
 		Behaviour: "modifiable",

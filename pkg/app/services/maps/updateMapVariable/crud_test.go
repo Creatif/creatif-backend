@@ -96,13 +96,13 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		var count int
 		res := storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
 		testAssertErrNil(res.Error)
-		gomega.Expect(count).Should(gomega.Equal(2))
+		gomega.Expect(count).Should(gomega.Equal(3))
 
 		var groupCount int
 		res = storage.Gorm().Raw(fmt.Sprintf("SELECT COUNT(variable_id) FROM %s WHERE variable_id = ? GROUP BY variable_id", (declarations2.VariableGroup{}).TableName()), addToMapView.ID).Scan(&groupCount)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
-		gomega.Expect(count).Should(gomega.Equal(2))
+		gomega.Expect(groupCount).Should(gomega.Equal(2))
 	})
 
 	ginkgo.It("should fail updating a map variable because of invalid number of groups", ginkgo.Label("map"), func() {

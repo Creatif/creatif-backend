@@ -144,8 +144,8 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 		groups[i] = addGroups.GroupModel{
 			ID:     groups[i].ID,
 			Name:   fmt.Sprintf("group-%d", i),
-			Type:   "current",
-			Action: "remove",
+			Type:   "new",
+			Action: "create",
 		}
 	}
 

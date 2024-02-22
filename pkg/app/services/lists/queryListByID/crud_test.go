@@ -10,13 +10,13 @@ import (
 var _ = ginkgo.Describe("Declaration list variable tests", func() {
 	ginkgo.It("should query a list variable by ID", func() {
 		projectId := testCreateProject("project")
-		variableIds := testCreateListAndReturnIds(projectId, "name", 6)
+		listId, variableIds := testCreateListAndReturnIds(projectId, "name", 6)
 
 		selectedVariable := variableIds[3]
 
-		handler := New(NewModel(projectId, "name", selectedVariable["id"]), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, listId, selectedVariable["id"]), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		view, err := handler.Handle()
-		testAssertErrNil(err)
+		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
 
 		gomega.Expect(view.ID).Should(gomega.Equal(variableIds[3]["id"]))

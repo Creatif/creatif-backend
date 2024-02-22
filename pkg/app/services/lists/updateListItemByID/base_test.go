@@ -123,7 +123,7 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateGroups(projectId string, g []string) {
+func testCreateGroups(projectId string, g []string) []addGroups.View {
 	groups := make([]addGroups.GroupModel, len(g))
 	for i := 0; i < len(g); i++ {
 		groups[i] = addGroups.GroupModel{
@@ -136,8 +136,10 @@ func testCreateGroups(projectId string, g []string) {
 
 	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
-	_, err := handler.Handle()
+	model, err := handler.Handle()
 	testAssertErrNil(err)
+
+	return model
 }
 
 func testCreateList(projectId, name string, varNum int, addGroups bool, behaviour string) createList2.View {
