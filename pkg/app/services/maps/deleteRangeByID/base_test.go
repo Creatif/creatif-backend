@@ -186,7 +186,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	return view
 }
 
-func testCreateGroups(projectId string, numOfGroups int) []string {
+func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	groups := make([]addGroups.GroupModel, numOfGroups)
 	for i := 0; i < numOfGroups; i++ {
 		groups[i] = addGroups.GroupModel{

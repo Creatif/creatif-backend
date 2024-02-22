@@ -109,7 +109,7 @@ func (c Main) Logic() ([]declarations.Group, error) {
 	}
 
 	var groups []declarations.Group
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT name FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID).Scan(&groups)
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT name, id FROM %s WHERE project_id = ?", (declarations.Group{}).TableName()), c.model.ProjectID).Scan(&groups)
 	if res.Error != nil {
 		return []declarations.Group{}, appErrors.NewApplicationError(res.Error)
 	}
@@ -117,29 +117,29 @@ func (c Main) Logic() ([]declarations.Group, error) {
 	return groups, nil
 }
 
-func (c Main) Handle() ([]string, error) {
+func (c Main) Handle() ([]View, error) {
 	if err := c.Validate(); err != nil {
-		return []string{}, err
+		return []View{}, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return []string{}, err
+		return []View{}, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return []string{}, err
+		return []View{}, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return []string{}, err
+		return []View{}, err
 	}
 
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []string, []declarations.Group] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, []declarations.Group] {
 	logBuilder.Add("addToList", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

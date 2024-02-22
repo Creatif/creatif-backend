@@ -9,6 +9,7 @@ import (
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -154,7 +155,9 @@ func testCreateGroups(projectId string, numOfGroups int) []string {
 	model, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	return model
+	return sdk.Map(model, func(idx int, value addGroups.View) string {
+		return value.ID
+	})
 }
 
 func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) View {

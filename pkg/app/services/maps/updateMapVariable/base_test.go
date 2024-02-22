@@ -10,6 +10,7 @@ import (
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
+	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -151,10 +152,12 @@ func testCreateGroups(projectId string, g []string) []string {
 
 	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
-	g, err := handler.Handle()
+	gr, err := handler.Handle()
 	testAssertErrNil(err)
 
-	return g
+	return sdk.Map(gr, func(idx int, value addGroups.View) string {
+		return value.ID
+	})
 }
 
 func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string, behaviour string) addToMap.View {

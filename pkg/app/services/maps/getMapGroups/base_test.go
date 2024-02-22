@@ -145,7 +145,7 @@ func testAddToMap(projectId, name string, references []shared.Reference, groups 
 	return view
 }
 
-func testCreateGroups(projectId string, numOfGroups int) []string {
+func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	groups := make([]addGroups.GroupModel, numOfGroups)
 	for i := 0; i < numOfGroups; i++ {
 		groups[i] = addGroups.GroupModel{

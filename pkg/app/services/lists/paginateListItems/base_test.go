@@ -138,7 +138,7 @@ func testCreateList(projectId, name string) createList2.View {
 	return list
 }
 
-func testCreateGroups(projectId string, numOfGroups int) []string {
+func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	groups := make([]addGroups.GroupModel, numOfGroups)
 	for i := 0; i < numOfGroups; i++ {
 		groups[i] = addGroups.GroupModel{
