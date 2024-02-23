@@ -11,4 +11,6 @@ const (
 	VARIABLE_GROUPS_TABLE = "variable_groups"
 	REFERENCE_TABLES      = "references"
 	LIST_VARIABLES_TABLE  = "list_variables"
+	PUBLISHED_LISTS_TABLE = "published_lists"
+	PUBLISHED_MAPS_TABLE  = "published_maps"
 )

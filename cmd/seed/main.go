@@ -19,7 +19,7 @@ import (
 )
 
 const apiKey = "$2a$10$aUlSZKvCLkbA65wWB5tme.a6nQDwJRzJrjm.DAlpD9/m4hjcrgf/u"
-const projectId = "01HPVSSYQW1YW525JT7SSFT1ZB"
+const projectId = "01HQA8Y8DE3N3120MRW5AX421N"
 
 func main() {
 	loadEnv()
@@ -89,10 +89,10 @@ func seed() {
 
 func addBatch(englishId, frenchId, mapStructureId string) {
 	m := &sync.WaitGroup{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 5; i++ {
 		m.Add(1)
 		go func() {
-			for a := 0; a < 5000; a++ {
+			for a := 0; a < 1000; a++ {
 				languageId := englishId
 				if a%2 == 0 {
 					languageId = frenchId
@@ -116,9 +116,14 @@ func addBatch(englishId, frenchId, mapStructureId string) {
 
 func createGroups(projectId string) {
 	l := logger.NewLogBuilder()
-	groups := make([]string, 0)
+	groups := make([]addGroups.GroupModel, 0)
 	for i := 0; i < 100; i++ {
-		groups = append(groups, fmt.Sprintf("group-%d", i))
+		groups = append(groups, addGroups.GroupModel{
+			ID:     "",
+			Name:   fmt.Sprintf("group-%d", i),
+			Type:   "new",
+			Action: "create",
+		})
 	}
 
 	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewNoopAuthentication(), l)

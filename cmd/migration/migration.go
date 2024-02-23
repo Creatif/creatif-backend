@@ -3,6 +3,7 @@ package main
 import (
 	"creatif/pkg/app/domain/app"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/domain/published"
 	storage2 "creatif/pkg/lib/storage"
 	"database/sql"
 	"fmt"
@@ -94,6 +95,20 @@ func runMigrations() {
 		closeConnection()
 		log.Fatalln(err)
 	}
+
+	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO published;"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(published.PublishedList{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
+	if err := storage2.Gorm().AutoMigrate(published.PublishedMap{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
 	/*
 		storage2.Gorm().Exec(fmt.Sprintf("ALTER TABLE %s ADD CONSTRAINT unique_variable_per_project UNIQUE (name, project_id)", domain.VARIABLES_TABLE))
 		storage2.Gorm().Exec(fmt.Sprintf("CREATE UNIQUE INDEX idx_unique_variable_name ON %s (name) WHERE project_id IS NOT NULL", domain.VARIABLES_TABLE))*/
@@ -137,12 +152,7 @@ func createSchemas() *sql.DB {
 	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS declarations"); err != nil {
 		log.Fatalln(err)
 	}
-
-	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS assignments"); err != nil {
-		log.Fatalln(err)
-	}
-
-	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS content"); err != nil {
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS published"); err != nil {
 		log.Fatalln(err)
 	}
 
