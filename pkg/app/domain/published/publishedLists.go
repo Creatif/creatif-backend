@@ -11,10 +11,10 @@ import (
 type PublishedList struct {
 	ID      string `gorm:"index;type:text"`
 	ShortID string `gorm:"index;type:text"`
-	Version string `gorm:"uniqueIndex;type:text"`
 
-	Name      string `gorm:"index;type:text"`
-	ProjectID string `gorm:"index;type:text"`
+	VersionID string `gorm:"type:text"`
+
+	Name string `gorm:"index;type:text"`
 
 	VariableName    string         `gorm:"index;type:text"`
 	VariableID      string         `gorm:"index;type:text"`
@@ -29,10 +29,33 @@ type PublishedList struct {
 	UpdatedAt time.Time
 }
 
-func NewPublishedList(projectId, name string) PublishedList {
+func NewPublishedList(
+	id,
+	shortId,
+	versionId,
+	name,
+	variableName,
+	variableId,
+	variableShortId,
+	behaviour,
+	locale string,
+	value []byte,
+	groups []string,
+	index float64,
+) PublishedList {
 	return PublishedList{
-		Name:      name,
-		ProjectID: projectId,
+		Name:            name,
+		ID:              id,
+		ShortID:         shortId,
+		VersionID:       versionId,
+		VariableName:    variableName,
+		VariableID:      variableId,
+		VariableShortID: variableShortId,
+		Behaviour:       behaviour,
+		LocaleID:        locale,
+		Value:           value,
+		Groups:          groups,
+		Index:           index,
 	}
 }
 

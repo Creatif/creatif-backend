@@ -19,7 +19,6 @@ import (
 )
 
 const apiKey = "$2a$10$aUlSZKvCLkbA65wWB5tme.a6nQDwJRzJrjm.DAlpD9/m4hjcrgf/u"
-const projectId = "01HQA8Y8DE3N3120MRW5AX421N"
 
 func main() {
 	loadEnv()
@@ -48,10 +47,16 @@ func main() {
 		}
 	}
 
-	seed()
+	projectids := []string{
+		"01HQB3VJ10XNAC3M4KVJVT6AZS",
+	}
+
+	for _, p := range projectids {
+		seed(p)
+	}
 }
 
-func seed() {
+func seed(projectId string) {
 	createGroups(projectId)
 	structureNames := map[string][]string{
 		"list": []string{"Languages"},
@@ -64,30 +69,30 @@ func seed() {
 	for key, value := range structureNames {
 		if key == "list" {
 			for _, name := range value {
-				listStructures = append(listStructures, listCreate(name))
+				listStructures = append(listStructures, listCreate(projectId, name))
 			}
 		}
 
 		if key == "map" {
 			for _, name := range value {
-				mapStructures = append(mapStructures, createMap(name))
+				mapStructures = append(mapStructures, createMap(projectId, name))
 			}
 		}
 	}
 
 	fmt.Println("Structures finished!")
 
-	englishId := listAdd(listStructures[0].ID, "English", []shared.Reference{})
-	frenchId := listAdd(listStructures[0].ID, "French", []shared.Reference{})
+	englishId := listAdd(projectId, listStructures[0].ID, "English", []shared.Reference{})
+	frenchId := listAdd(projectId, listStructures[0].ID, "French", []shared.Reference{})
 
 	fmt.Println("Creating languages...")
 	for i := 0; i < 50; i++ {
 		fmt.Println(fmt.Sprintf("Batch %d finished.", i))
-		addBatch(englishId, frenchId, mapStructures[0].ID)
+		addBatch(projectId, englishId, frenchId, mapStructures[0].ID)
 	}
 }
 
-func addBatch(englishId, frenchId, mapStructureId string) {
+func addBatch(projectId, englishId, frenchId, mapStructureId string) {
 	m := &sync.WaitGroup{}
 	for i := 0; i < 5; i++ {
 		m.Add(1)
@@ -98,7 +103,7 @@ func addBatch(englishId, frenchId, mapStructureId string) {
 					languageId = frenchId
 				}
 
-				addToMap(mapStructureId, uuid.NewString(), []shared.Reference{
+				addToMap(projectId, mapStructureId, uuid.NewString(), []shared.Reference{
 					{
 						Name:          "language",
 						StructureType: "list",
@@ -134,7 +139,7 @@ func createGroups(projectId string) {
 	}
 }
 
-func createMap(name string) mapCreate.View {
+func createMap(projectId, name string) mapCreate.View {
 	l := logger.NewLogBuilder()
 	handler := mapCreate.New(mapCreate.NewModel(projectId, name, []mapCreate.VariableModel{}), auth.NewNoopAuthentication(), l)
 	m, err := handler.Handle()
@@ -145,7 +150,7 @@ func createMap(name string) mapCreate.View {
 	return m
 }
 
-func listCreate(name string) createList.View {
+func listCreate(projectId, name string) createList.View {
 	l := logger.NewLogBuilder()
 	handler := createList.New(createList.NewModel(projectId, name, []createList.Variable{}), auth.NewNoopAuthentication(), l)
 	m, err := handler.Handle()
@@ -156,7 +161,7 @@ func listCreate(name string) createList.View {
 	return m
 }
 
-func addToMap(structureId, variableName string, references []shared.Reference) string {
+func addToMap(projectId, structureId, variableName string, references []shared.Reference) string {
 	l := logger.NewLogBuilder()
 	value := map[string]interface{}{
 		"name": variableName,
@@ -188,7 +193,7 @@ func addToMap(structureId, variableName string, references []shared.Reference) s
 	return entry.ID
 }
 
-func listAdd(structureId, variableName string, references []shared.Reference) string {
+func listAdd(projectId, structureId, variableName string, references []shared.Reference) string {
 	l := logger.NewLogBuilder()
 	value := map[string]interface{}{
 		"name": variableName,

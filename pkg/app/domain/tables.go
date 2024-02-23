@@ -13,4 +13,5 @@ const (
 	LIST_VARIABLES_TABLE  = "list_variables"
 	PUBLISHED_LISTS_TABLE = "published_lists"
 	PUBLISHED_MAPS_TABLE  = "published_maps"
+	VERSION_TABLE         = "versions"
 )
