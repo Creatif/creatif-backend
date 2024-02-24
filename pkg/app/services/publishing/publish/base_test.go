@@ -4,6 +4,8 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/groups/addGroups"
+	"creatif/pkg/app/services/lists/addToList"
+	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
@@ -11,7 +13,6 @@ import (
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
@@ -38,7 +39,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration Lists -> CRUD tests")
+	GinkgoRunSpecs(t, "Publishing tests")
 }
 
 func runLogger() {
@@ -102,6 +103,14 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.VARIABLE_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_LISTS_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_MAPS_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.VERSION_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_REFERENCES_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
 func testAssertErrNil(err error) {
@@ -126,53 +135,8 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
+func testCreateMap(projectId, name string) mapCreate.View {
 	entries := make([]mapCreate.VariableModel, 0)
-
-	m := map[string]interface{}{
-		"one":   "one",
-		"two":   []string{"one", "two", "three"},
-		"three": []int{1, 2, 3},
-		"four":  453,
-	}
-
-	b, err := json.Marshal(m)
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	for i := 0; i < variablesNum; i++ {
-		var value interface{}
-		value = "my value"
-		if i%2 == 0 {
-			value = true
-		}
-
-		if i%3 == 0 {
-			value = map[string]interface{}{
-				"one":   "one",
-				"two":   []string{"one", "two", "three"},
-				"three": []int{1, 2, 3},
-				"four":  453,
-			}
-		}
-
-		v, err := json.Marshal(value)
-		gomega.Expect(err).Should(gomega.BeNil())
-
-		variableModel := mapCreate.VariableModel{
-			Name:     fmt.Sprintf("name-%d", i),
-			Metadata: b,
-			Groups: []string{
-				"one",
-				"two",
-				"three",
-			},
-			Value:     v,
-			Locale:    "eng",
-			Behaviour: "modifiable",
-		}
-
-		entries = append(entries, variableModel)
-	}
 
 	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
@@ -181,9 +145,20 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
-	gomega.Expect(len(view.Variables)).Should(gomega.Equal(variablesNum))
 
 	return view
+}
+
+func testCreateList(projectId, name string) createList2.View {
+	handler := createList2.New(createList2.NewModel(projectId, name, []createList2.Variable{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	list, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
+
+	return list
 }
 
 func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
@@ -206,9 +181,9 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	return model
 }
 
-func testAddToMap(projectId, name string, references []shared.Reference, groups []string) addToMap.LogicModel {
+func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.LogicModel {
 	variableModel := addToMap.VariableModel{
-		Name:      fmt.Sprintf("new add variable"),
+		Name:      variableName,
 		Metadata:  nil,
 		Groups:    groups,
 		Value:     nil,
@@ -220,6 +195,25 @@ func testAddToMap(projectId, name string, references []shared.Reference, groups 
 	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	view, err := handler.Logic()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return view
+}
+
+func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) addToList.View {
+	variableModel := addToList.VariableModel{
+		Name:      variableName,
+		Metadata:  nil,
+		Groups:    groups,
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToList.NewModel(projectId, name, variableModel, references)
+	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+
+	view, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	return view

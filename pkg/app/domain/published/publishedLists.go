@@ -9,16 +9,17 @@ import (
 )
 
 type PublishedList struct {
-	ID      string `gorm:"index;type:text"`
-	ShortID string `gorm:"index;type:text"`
+	ID      string `gorm:"primaryKey;type:text"`
+	ShortID string `gorm:"type:text"`
 
-	VersionID string `gorm:"type:text"`
+	VersionID string  `gorm:"primaryKey;type:text"`
+	Version   Version `gorm:"foreignKey:VersionID"`
 
-	Name string `gorm:"index;type:text"`
+	Name string `gorm:"type:text"`
 
-	VariableName    string         `gorm:"index;type:text"`
-	VariableID      string         `gorm:"index;type:text"`
-	VariableShortID string         `gorm:"index;type:text"`
+	VariableName    string         `gorm:"type:text"`
+	VariableID      string         `gorm:"primaryKey;type:text"`
+	VariableShortID string         `gorm:"type:text"`
 	Index           float64        `gorm:"type:float"`
 	Behaviour       string         `gorm:"not null"`
 	Value           datatypes.JSON `gorm:"type:jsonb"`

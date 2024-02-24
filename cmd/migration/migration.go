@@ -110,6 +110,11 @@ func runMigrations() {
 		log.Fatalln(err)
 	}
 
+	if err := storage2.Gorm().AutoMigrate(published.PublishedReference{}); err != nil {
+		closeConnection()
+		log.Fatalln(err)
+	}
+
 	if err := storage2.Gorm().AutoMigrate(published.Version{}); err != nil {
 		closeConnection()
 		log.Fatalln(err)

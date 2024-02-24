@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -47,89 +46,15 @@ func (c Main) Logic() (published.Version, error) {
 			return res.Error
 		}
 
-		fmt.Println(version.ID)
-
-		listSql := fmt.Sprintf(`
-	MERGE INTO %s AS p
-	USING (%s) AS t
-	ON p.variable_id != t.variableId
-	WHEN NOT MATCHED THEN
-        INSERT (
-			id, 
-			short_id, 
-			version_id, 
-			name, 
-			variable_name, 
-			variable_id, 
-			variable_short_id, 
-			index, 
-			behaviour, 
-			value, 
-			locale_id, 
-			groups
-		) VALUES (
-			t.ID, 
-			t.shortId, 
-			'%s', 
-			t.name, 
-			t.variableName, 
-			t.variableId, 
-			t.variableShortId, 
-			t.index, 
-			t.behaviour, 
-			t.value, 
-			t.locale, 
-			t.groups
-		)
-`,
-			(published.PublishedList{}).TableName(),
-			getSelectListSql(c.model.ProjectID),
-			version.ID,
-		)
-
-		mapSql := fmt.Sprintf(`
-	MERGE INTO %s
-	USING (%s) AS t
-	ON p.variable_id != t.variableId
-	WHEN NOT MATCHED THEN
-        INSERT (
-			id, 
-			short_id, 
-			version_id, 
-			name, 
-			variable_name, 
-			variable_id, 
-			variable_short_id, 
-			index, 
-			behaviour, 
-			value, 
-			locale_id, 
-			groups
-		) VALUES (
-			t.ID, 
-			t.shortId, 
-			'%s', 
-			t.name, 
-			t.variableName, 
-			t.variableId, 
-			t.variableShortId, 
-			t.index, 
-			t.behaviour, 
-			t.value, 
-			t.locale, 
-			t.groups
-		)
-`,
-			(published.PublishedList{}).TableName(),
-			getSelectMapSql(c.model.ProjectID),
-			version.ID,
-		)
-
-		if res := tx.Exec(listSql, c.model.ProjectID); res.Error != nil {
+		if res := tx.Exec(getMergeSql(version.ID, (published.PublishedList{}).TableName(), getSelectListSql()), c.model.ProjectID); res.Error != nil {
 			return res.Error
 		}
 
-		if res := tx.Exec(mapSql, c.model.ProjectID); res.Error != nil {
+		if res := tx.Exec(getMergeSql(version.ID, (published.PublishedMap{}).TableName(), getSelectMapSql()), c.model.ProjectID); res.Error != nil {
+			return res.Error
+		}
+
+		if res := tx.Exec(getReferenceMergeSql(version.ID, getReferencesSql()), c.model.ProjectID); res.Error != nil {
 			return res.Error
 		}
 
@@ -164,6 +89,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, published.Version] {
-	logBuilder.Add("deleteRangeByID", "Created")
+	logBuilder.Add("publish", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }
