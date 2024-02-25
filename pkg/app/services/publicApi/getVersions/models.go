@@ -1,32 +1,29 @@
-package publish
+package getVersions
 
 import (
 	"creatif/pkg/app/domain/published"
 	"creatif/pkg/lib/sdk"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"time"
 )
 
 type Model struct {
 	ProjectID string
-	Name      string
 }
 
-func NewModel(projectId, name string) Model {
+func NewModel(projectId string) Model {
 	return Model{
 		ProjectID: projectId,
-		Name:      name,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"projectID": a.ProjectID,
-		"name":      a.Name,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.When(a.Name != "", validation.RuneLength(1, 200))),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 		),
 	); err != nil {
@@ -37,13 +34,20 @@ func (a Model) Validate() map[string]string {
 }
 
 type View struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID        string `json:"id"`
+	ProjectID string `json:"projectId"`
+
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func newView(model published.Version) View {
-	return View{
-		ID:   model.ID,
-		Name: model.Name,
-	}
+func newView(model []published.Version) []View {
+	return sdk.Map(model, func(idx int, value published.Version) View {
+		return View{
+			ID:        value.ID,
+			ProjectID: value.ProjectID,
+			CreatedAt: value.CreatedAt,
+			UpdatedAt: value.UpdatedAt,
+		}
+	})
 }

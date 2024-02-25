@@ -48,7 +48,7 @@ func main() {
 	}
 
 	projectids := []string{
-		"01HQB3VJ10XNAC3M4KVJVT6AZS",
+		"01HQGEJPS2X76EZ6BPW8PBJTWM",
 	}
 
 	for _, p := range projectids {
@@ -94,7 +94,7 @@ func seed(projectId string) {
 
 func addBatch(projectId, englishId, frenchId, mapStructureId string) {
 	m := &sync.WaitGroup{}
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 10; i++ {
 		m.Add(1)
 		go func() {
 			for a := 0; a < 1000; a++ {
@@ -134,6 +134,7 @@ func createGroups(projectId string) {
 	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewNoopAuthentication(), l)
 
 	_, err := handler.Handle()
+	l.Flush("")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -146,6 +147,7 @@ func createMap(projectId, name string) mapCreate.View {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	l.Flush("")
 
 	return m
 }
@@ -157,6 +159,7 @@ func listCreate(projectId, name string) createList.View {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	l.Flush("")
 
 	return m
 }
@@ -189,6 +192,7 @@ func addToMap(projectId, structureId, variableName string, references []shared.R
 		}
 		log.Fatalln(err)
 	}
+	l.Flush("")
 
 	return entry.ID
 }
@@ -221,6 +225,7 @@ func listAdd(projectId, structureId, variableName string, references []shared.Re
 		}
 		log.Fatalln(err)
 	}
+	l.Flush("")
 
 	return entry.ID
 }

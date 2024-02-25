@@ -9,6 +9,7 @@ import (
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
 	"creatif/cmd/http/handlers/declarations/references"
+	"creatif/cmd/http/handlers/publicApi/getVersions"
 	"creatif/cmd/http/handlers/publishing/publish"
 	"creatif/cmd/server"
 	"creatif/pkg/lib/cache"
@@ -68,6 +69,7 @@ func app() {
 	declarationRoutes(srv.Group("/api/v1/declarations"))
 	appRoutes(srv.Group("/api/v1/app"))
 	publishingRoutes(srv.Group("/api/v1/publishing"))
+	publishingRoutes(srv.Group("/api/v1/public"))
 
 	server.StartServer(srv)
 }
@@ -126,4 +128,8 @@ func declarationRoutes(group *echo.Group) {
 
 func publishingRoutes(group *echo.Group) {
 	group.PUT("/publish/:projectId", publish.PublishHandler())
+}
+
+func publicRoutes(group *echo.Group) {
+	group.PUT("/versions/:projectId", getVersions.GetVersionsHandler())
 }

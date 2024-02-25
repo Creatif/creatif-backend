@@ -37,7 +37,7 @@ func CreateDeclarationReferences(refs []Reference, structureId, childId, childTy
 			return nil, err
 		}
 
-		ref := declarations.NewReference(pr.ID, r.StructureType, childType, pr.ID, childId, pr.StructureID, structureId, projectId)
+		ref := declarations.NewReference(r.Name, r.StructureType, childType, pr.ID, childId, pr.StructureID, structureId, projectId)
 		references = append(references, ref)
 	}
 

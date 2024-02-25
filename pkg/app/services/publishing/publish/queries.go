@@ -4,7 +4,24 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/domain/published"
 	"fmt"
+	"github.com/lib/pq"
+	"gorm.io/datatypes"
 )
+
+type SingleItem struct {
+	ID      string `gorm:"type:text;column:id"`
+	ShortID string `gorm:"type:text;column:short_id"`
+	Name    string `gorm:"type:text;column:name"`
+
+	VariableID      string         `gorm:"type:text;column:variable_id"`
+	VariableName    string         `gorm:"type:text;column:variable_name"`
+	Behaviour       string         `gorm:"type:text;column:behaviour"`
+	Value           datatypes.JSON `gorm:"type:text"`
+	Groups          pq.StringArray `gorm:"type:[]text"`
+	VariableShortID string         `gorm:"type:text;column:variable_short_id"`
+	Locale          string         `gorm:"type:text;column:locale"`
+	Index           float64        `gorm:"type:text;column:index"`
+}
 
 func getSelectListSql() string {
 	return fmt.Sprintf(`
@@ -31,15 +48,15 @@ INNER JOIN %s AS lv ON l.project_id = ? AND lv.list_id = l.id
 func getSelectMapSql() string {
 	return fmt.Sprintf(`
 SELECT 
-lv.id AS variableId,
-lv.name AS variableName,
+lv.id AS variable_id,
+lv.name AS variable_name,
 lv.behaviour AS behaviour,
 lv.value AS value,
-lv.short_id AS variableShortId,
+lv.short_id AS variable_short_id,
 lv.locale_id AS locale,
 lv.index AS index,
 l.id AS ID,
-l.short_id AS shortId,
+l.short_id AS short_id,
 l.name AS name,
 (SELECT g.groups FROM %s AS g WHERE lv.id = g.variable_id LIMIT 1) AS groups
 FROM %s AS l

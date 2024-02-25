@@ -103,10 +103,11 @@ var _ = ginkgo.Describe("Publishing", func() {
 			}))
 		}
 
-		handler := New(NewModel(projectId), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "version name"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(model.VersionID).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(model.Name).Should(gomega.Equal("version name"))
 
 		var listsCount int64
 		res := storage.Gorm().Raw("SELECT count(*) FROM published.published_lists").Scan(&listsCount)

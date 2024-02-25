@@ -40,7 +40,7 @@ func NewPublishedMap(
 	variableShortId,
 	behaviour,
 	locale string,
-	value []byte,
+	value datatypes.JSON,
 	groups []string,
 	index float64,
 ) PublishedMap {

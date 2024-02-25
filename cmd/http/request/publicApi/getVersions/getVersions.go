@@ -1,18 +1,16 @@
-package publish
+package getVersions
 
 import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type Publish struct {
+type GetVersions struct {
 	ProjectID string `param:"projectId"`
-	Name      string `param:"name"`
 }
 
-func SanitizePublish(model Publish) Publish {
+func SanitizeGetVersions(model GetVersions) GetVersions {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Name = p.Sanitize(model.Name)
 
 	return model
 }

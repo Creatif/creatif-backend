@@ -25,7 +25,7 @@ func PublishHandler() func(e echo.Context) error {
 
 		l := logger.NewLogBuilder()
 		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
-		handler := publish.New(publish.NewModel(model.ProjectID), authentication, l)
+		handler := publish.New(publish.NewModel(model.ProjectID, model.Name), authentication, l)
 
 		return request.SendResponse[publish.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
