@@ -83,44 +83,69 @@ func (c Main) Logic() (published.Version, error) {
 			return res.Error
 		}
 
-		publishedMaps := make([]published.PublishedMap, 0)
-		batches := make([][]published.PublishedMap, 0)
-		currentBatchNum := 0
-		for _, m := range maps {
-			if currentBatchNum == 4500 {
-				currentBatchNum = 0
-				batches = append(batches, publishedMaps)
-				publishedMaps = make([]published.PublishedMap, 0)
-			}
-
-			publishedMaps = append(publishedMaps, published.NewPublishedMap(
-				m.ID,
-				m.ShortID,
-				version.ID,
-				m.Name,
-				m.VariableName,
-				m.VariableID,
-				m.VariableShortID,
-				m.Behaviour,
-				m.Locale,
-				m.Value,
-				m.Groups,
-				m.Index,
-			))
-
-			currentBatchNum++
+		sql := fmt.Sprintf(`INSERT INTO published.published_maps (version_id, variable_id, variable_name, behaviour, value, variable_short_id, locale_id, "index", ID, short_id, name, groups)
+SELECT
+    lv.id AS variable_id,
+    lv.name AS variable_name,
+    lv.behaviour AS behaviour,
+    COALESCE(lv.value::jsonb, '{}'::jsonb) AS value,
+    lv.short_id AS variable_short_id,
+    lv.locale_id AS locale_id,
+    lv."index" AS "index", -- "index" is quoted
+    l.id AS ID,
+    l.short_id AS short_id,
+    l.name AS name,
+    (
+        SELECT g.groups 
+        FROM declarations.variable_groups AS g 
+        WHERE lv.id = g.variable_id 
+        LIMIT 1
+    ) AS groups,
+    '%s' AS version_id
+FROM declarations.maps AS l
+INNER JOIN declarations.map_variables AS lv ON l.project_id = ? AND lv.map_id = l.id`, version.ID)
+		if res := storage.Gorm().Exec(sql, c.model.ProjectID); res.Error != nil {
+			return res.Error
 		}
 
-		if len(publishedMaps) > 0 {
-			batches = append(batches, publishedMaps)
-			publishedMaps = nil
-		}
+		/*		publishedMaps := make([]published.PublishedMap, 0)
+				batches := make([][]published.PublishedMap, 0)
+				currentBatchNum := 0
+				for _, m := range maps {
+					if currentBatchNum == 4500 {
+						currentBatchNum = 0
+						batches = append(batches, publishedMaps)
+						publishedMaps = make([]published.PublishedMap, 0)
+					}
 
-		for _, batch := range batches {
-			if res := tx.Create(&batch); res.Error != nil {
-				return res.Error
-			}
-		}
+					publishedMaps = append(publishedMaps, published.NewPublishedMap(
+						m.ID,
+						m.ShortID,
+						version.ID,
+						m.Name,
+						m.VariableName,
+						m.VariableID,
+						m.VariableShortID,
+						m.Behaviour,
+						m.Locale,
+						m.Value,
+						m.Groups,
+						m.Index,
+					))
+
+					currentBatchNum++
+				}
+
+				if len(publishedMaps) > 0 {
+					batches = append(batches, publishedMaps)
+					publishedMaps = nil
+				}
+
+				for _, batch := range batches {
+					if res := tx.Create(&batch); res.Error != nil {
+						return res.Error
+					}
+				}*/
 
 		/*		if res := tx.WithContext(ctx).Exec(getReferenceMergeSql(version.ID, getReferencesSql()), c.model.ProjectID); res.Error != nil {
 				return res.Error
