@@ -1,11 +1,14 @@
 package publish
 
 import (
+	"context"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/domain/published"
 	"fmt"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
+	"time"
 )
 
 type SingleItem struct {
@@ -23,139 +26,143 @@ type SingleItem struct {
 	Index           float64        `gorm:"type:text;column:index"`
 }
 
-func getSelectListSql() string {
-	return fmt.Sprintf(`
-SELECT 
-lv.id AS variableId,
-lv.name AS variableName,
-lv.behaviour AS behaviour,
-lv.value AS value,
-lv.short_id AS variableShortId,
-lv.locale_id AS locale,
-lv.index AS index,
-l.id AS ID,
-l.short_id AS shortId,
-l.name AS name,
-(SELECT g.groups FROM %s AS g WHERE lv.id = g.variable_id LIMIT 1) AS groups
-FROM %s AS l 
-INNER JOIN %s AS lv ON l.project_id = ? AND lv.list_id = l.id
-`,
-		(declarations.VariableGroup{}).TableName(),
-		(declarations.List{}).TableName(),
-		(declarations.ListVariable{}).TableName())
-}
-
-func getSelectMapSql() string {
-	return fmt.Sprintf(`
-SELECT 
-lv.id AS variable_id,
-lv.name AS variable_name,
-lv.behaviour AS behaviour,
-lv.value AS value,
-lv.short_id AS variable_short_id,
-lv.locale_id AS locale,
-lv.index AS index,
-l.id AS ID,
-l.short_id AS short_id,
-l.name AS name,
-(SELECT g.groups FROM %s AS g WHERE lv.id = g.variable_id LIMIT 1) AS groups
+func publishMaps(tx *gorm.DB, projectId, versionId string, ctx context.Context) error {
+	sql := fmt.Sprintf(`
+INSERT INTO %s (
+    version_id, 
+    variable_id, 
+    variable_name, 
+    behaviour, 
+    value, 
+    variable_short_id, 
+    locale_id, 
+    "index", 
+    ID, 
+    short_id, 
+    name, 
+    groups
+)
+SELECT
+    '%s' AS version_id,
+    lv.id AS variable_id,
+    lv.name AS variable_name,
+    lv.behaviour AS behaviour,
+    COALESCE(lv.value::jsonb, '{}'::jsonb) AS value,
+    lv.short_id AS variable_short_id,
+    lv.locale_id AS locale_id,
+    lv."index" AS "index",
+    l.id AS ID,
+    l.short_id AS short_id,
+    l.name AS name,
+    (
+        SELECT g.groups 
+        FROM %s AS g 
+        WHERE lv.id = g.variable_id 
+        LIMIT 1
+    ) AS groups
 FROM %s AS l
-INNER JOIN %s AS lv ON l.project_id = ? AND lv.map_id = l.id
-`,
+INNER JOIN %s AS lv ON l.project_id = ? AND lv.map_id = l.id`,
+		(published.PublishedMap{}).TableName(),
+		versionId,
 		(declarations.VariableGroup{}).TableName(),
 		(declarations.Map{}).TableName(),
-		(declarations.MapVariable{}).TableName())
+		(declarations.MapVariable{}).TableName(),
+	)
+
+	if res := tx.WithContext(ctx).Exec(sql, projectId); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
 }
 
-func getReferencesSql() string {
-	return fmt.Sprintf(`
-SELECT 
-lv.id AS id,
-lv.project_id AS projectId,
-lv.name AS name,
-lv.parent_type AS parentType,
-lv.child_type AS childType,
-lv.parent_structure_id AS parentStructureId,
-lv.child_structure_id AS childStructureId,
-lv.parent_id AS parentId,
-lv.child_id AS childId
-FROM %s AS lv WHERE project_id = ?
-`,
-		(declarations.Reference{}).TableName())
+func publishLists(tx *gorm.DB, projectId, versionId string, ctx context.Context) error {
+	sql := fmt.Sprintf(`
+INSERT INTO %s (
+    version_id, 
+    variable_id, 
+    variable_name, 
+    behaviour, 
+    value, 
+    variable_short_id, 
+    locale_id, 
+    "index", 
+    ID, 
+    short_id, 
+    name, 
+    groups
+)
+SELECT
+    '%s' AS version_id,
+    lv.id AS variable_id,
+    lv.name AS variable_name,
+    lv.behaviour AS behaviour,
+    COALESCE(lv.value::jsonb, '{}'::jsonb) AS value,
+    lv.short_id AS variable_short_id,
+    lv.locale_id AS locale_id,
+    lv."index" AS "index",
+    l.id AS ID,
+    l.short_id AS short_id,
+    l.name AS name,
+    (
+        SELECT g.groups 
+        FROM %s AS g 
+        WHERE lv.id = g.variable_id 
+        LIMIT 1
+    ) AS groups
+FROM %s AS l
+INNER JOIN %s AS lv ON l.project_id = ? AND lv.list_id = l.id`,
+		(published.PublishedList{}).TableName(),
+		versionId,
+		(declarations.VariableGroup{}).TableName(),
+		(declarations.List{}).TableName(),
+		(declarations.ListVariable{}).TableName(),
+	)
+
+	if res := tx.WithContext(ctx).Exec(sql, projectId); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
 }
 
-func getReferenceMergeSql(versionId, selectSql string) string {
-	return fmt.Sprintf(`
-	MERGE INTO %s AS p
-	USING (%s) AS t
-	ON p.project_id = t.projectId
-	WHEN NOT MATCHED THEN
-        INSERT (
-			id, 
-			project_id, 
-			version_id, 
-			name, 
-			parent_type, 
-			child_type, 
-			parent_structure_id, 
-			child_structure_id, 
-			parent_id, 
-			child_id
-		) VALUES (
-			t.id, 
-			t.projectId,
-			'%s', 
-			t.name, 
-			t.parentType, 
-			t.childType, 
-			t.parentStructureId, 
-			t.childStructureId, 
-			t.parentId, 
-			t.childId
-		)
-`,
+func publishReferences(tx *gorm.DB, projectId, versionId string, ctx context.Context) error {
+	sql := fmt.Sprintf(`
+INSERT INTO %s (
+    id,
+    project_id, 
+    version_id, 
+    name, 
+    parent_type, 
+    child_type, 
+    parent_structure_id, 
+    child_structure_id, 
+    parent_id, 
+    child_id
+)
+SELECT
+    r.id,
+    '%s' AS project_id,
+    '%s' AS version_id,
+    r.name,
+    r.parent_type,
+    r.child_type,
+    r.parent_structure_id,
+    r.child_structure_id,
+    r.parent_id,
+    r.child_id
+FROM %s AS r WHERE r.project_id = ?`,
 		(published.PublishedReference{}).TableName(),
-		selectSql,
+		projectId,
 		versionId,
+		(declarations.Reference{}).TableName(),
 	)
-}
 
-func getMergeSql(versionId, tableName, selectSql string) string {
-	return fmt.Sprintf(`
-	MERGE INTO %s AS p
-	USING (%s) AS t
-	ON p.variable_id != t.variableId
-	WHEN NOT MATCHED THEN
-        INSERT (
-			id, 
-			short_id, 
-			version_id, 
-			name, 
-			variable_name, 
-			variable_id, 
-			variable_short_id, 
-			index, 
-			behaviour, 
-			value, 
-			locale_id, 
-			groups
-		) VALUES (
-			t.ID, 
-			t.shortId, 
-			'%s', 
-			t.name, 
-			t.variableName, 
-			t.variableId, 
-			t.variableShortId, 
-			t.index, 
-			t.behaviour, 
-			t.value, 
-			t.locale, 
-			t.groups
-		)
-`,
-		tableName,
-		selectSql,
-		versionId,
-	)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if res := tx.WithContext(ctx).Exec(sql, projectId); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
 }

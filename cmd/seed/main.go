@@ -48,7 +48,7 @@ func main() {
 	}
 
 	projectids := []string{
-		"01HQJ4S0VRSC169QDDY8DJY90H",
+		"01HQT2266YM2EMKVMPWCVZXC6G",
 	}
 
 	for _, p := range projectids {
@@ -97,7 +97,7 @@ func addBatch(projectId, englishId, frenchId, mapStructureId string) {
 	for i := 0; i < 5; i++ {
 		m.Add(1)
 		go func() {
-			for a := 0; a < 5000; a++ {
+			for a := 0; a < 1000; a++ {
 				languageId := englishId
 				if a%2 == 0 {
 					languageId = frenchId
