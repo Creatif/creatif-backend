@@ -67,62 +67,24 @@ func (c Main) Logic() (published.Version, error) {
 			return res.Error
 		}
 
-		engine := newPublishEngine()
-		engine.addWorker("lists")
-		engine.addWorker("maps")
-		engine.addWorker("references")
-
-		parentContext, cancel := context.WithTimeout(context.Background(), 31*time.Second)
-		listCtx, listCancel := context.WithTimeout(parentContext, 30*time.Second)
-		mapCtx, mapCancel := context.WithTimeout(parentContext, 30*time.Second)
-		refCtx, refCancel := context.WithTimeout(parentContext, 30*time.Second)
-		defer cancel()
-
-		results := engine.run(map[string]fnExecutioner{
-			"lists": {
-				fn: func() error {
-					if err := publishLists(tx, c.model.ProjectID, version.ID, listCtx); err != nil {
-						return err
-					}
-
-					return nil
-				},
-				cancel: listCancel,
-			},
-			"maps": {
-				fn: func() error {
-					if err := publishMaps(tx, c.model.ProjectID, version.ID, mapCtx); err != nil {
-						return err
-					}
-
-					return nil
-				},
-				cancel: mapCancel,
-			},
-			"references": {
-				fn: func() error {
-					if err := publishReferences(tx, c.model.ProjectID, version.ID, refCtx); err != nil {
-						return err
-					}
-
-					return nil
-				},
-				cancel: refCancel,
-			},
-		}, parentContext)
-
-		fmt.Println("Results: ", results)
-
-		for _, res := range results {
-			fmt.Println(res.error)
-			if res.error != nil {
-				return res.error
-			}
+		listCtx, listCancel := context.WithTimeout(context.Background(), 45*time.Second)
+		mapCtx, mapCancel := context.WithTimeout(context.Background(), 45*time.Second)
+		refCtx, refCancel := context.WithTimeout(context.Background(), 45*time.Second)
+		defer listCancel()
+		defer mapCancel()
+		defer refCancel()
+		if err := publishLists(tx, c.model.ProjectID, version.ID, listCtx); err != nil {
+			return err
+		}
+		if err := publishMaps(tx, c.model.ProjectID, version.ID, mapCtx); err != nil {
+			return err
+		}
+		if err := publishReferences(tx, c.model.ProjectID, version.ID, refCtx); err != nil {
+			return err
 		}
 
 		return nil
 	}); transactionError != nil {
-		fmt.Println(transactionError)
 		return published.Version{}, appErrors.NewApplicationError(transactionError)
 	}
 

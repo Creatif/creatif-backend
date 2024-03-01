@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
@@ -19,7 +20,7 @@ type ErrorResponse[T any] struct {
 	Data T `json:"data"`
 }
 
-func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, logger logger.LogBuilder, callback func(c echo.Context, model interface{}) error, gracefulFail bool) error {
+func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, lg logger.LogBuilder, callback func(c echo.Context, model interface{}) error, gracefulFail bool) error {
 	model, err := handler.Handle()
 
 	if err != nil {
@@ -32,7 +33,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 				}
 			}
 
-			if err := flushLogger(logger, "info", context); err != nil {
+			if err := flushLogger(lg, "info", context); err != nil {
 				return err
 			}
 			return context.JSON(http.StatusUnprocessableEntity, ErrorResponse[map[string]string]{
@@ -43,7 +44,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 		otherError, ok := err.(appErrors.AppError[struct{}])
 		if ok {
 			if otherError.Type() == appErrors.AUTHENTICATION_ERROR {
-				if err := flushLogger(logger, "info", context); err != nil {
+				if err := flushLogger(lg, "info", context); err != nil {
 					return err
 				}
 				return context.JSON(http.StatusForbidden, ErrorResponse[map[string]string]{
@@ -52,7 +53,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 					},
 				})
 			} else if otherError.Type() == appErrors.AUTHORIZATION_ERROR {
-				if err := flushLogger(logger, "info", context); err != nil {
+				if err := flushLogger(lg, "info", context); err != nil {
 					return err
 				}
 				return context.JSON(http.StatusUnauthorized, ErrorResponse[map[string]string]{
@@ -61,7 +62,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 					},
 				})
 			} else if otherError.Type() == appErrors.NOT_FOUND_ERROR {
-				if err := flushLogger(logger, "info", context); err != nil {
+				if err := flushLogger(lg, "info", context); err != nil {
 					return err
 				}
 				return context.JSON(http.StatusNotFound, ErrorResponse[map[string]string]{
@@ -70,7 +71,7 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 					},
 				})
 			} else if otherError.Type() == appErrors.USER_UNCOFIRMED {
-				if err := flushLogger(logger, "info", context); err != nil {
+				if err := flushLogger(lg, "info", context); err != nil {
 					return err
 				}
 				return context.JSON(http.StatusNotFound, ErrorResponse[map[string]string]{
@@ -88,16 +89,16 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 					},
 				}
 				lb, _ := json.Marshal(er)
-				logger.Add("Internal server error", string(lb))
+				lg.Add("Internal server error", string(lb))
 
-				if err := flushLogger(logger, "error", context); err != nil {
+				if err := flushLogger(lg, "error", context); err != nil {
 					return err
 				}
 				return context.JSON(http.StatusInternalServerError, er)
 			}
 		}
 
-		if err := flushLogger(logger, "error", context); err != nil {
+		if err := flushLogger(lg, "error", context); err != nil {
 			return err
 		}
 		return context.JSON(http.StatusInternalServerError, ErrorResponse[string]{
@@ -106,21 +107,32 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 	}
 
 	if err := callCallback(context, model, callback); err != nil {
-		logger.Add("Callback error", err.Error())
-		if err := flushLogger(logger, "info", context); err != nil {
+		lg.Add("Callback error", err.Error())
+		if err := flushLogger(lg, "info", context); err != nil {
+			fmt.Println("Flush error: ", err)
 			return err
 		}
 
-		return context.JSON(http.StatusInternalServerError, ErrorResponse[string]{
+		if err := context.JSON(http.StatusInternalServerError, ErrorResponse[string]{
 			Data: "Internal server error",
-		})
+		}); err != nil {
+			logger.Error(err.Error())
+			return err
+		}
+
+		return nil
 	}
 
-	if err := flushLogger(logger, "info", context); err != nil {
+	if err := flushLogger(lg, "info", context); err != nil {
 		return err
 	}
 
-	return context.JSON(status, model)
+	if err := context.JSON(status, model); err != nil {
+		logger.Error(err.Error())
+		return err
+	}
+
+	return nil
 }
 
 func flushLogger(logger logger.LogBuilder, t string, context echo.Context) error {
