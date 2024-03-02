@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type MapItem struct {
+type Item struct {
 	ID            string `gorm:"column:id"`
 	ShortID       string `gorm:"column:short_id"`
 	StructureName string `gorm:"column:structure_name"`
@@ -28,7 +28,7 @@ type MapItem struct {
 	UpdatedAt time.Time
 }
 
-type ConnectionMapItem struct {
+type ConnectionItem struct {
 	ID             string `gorm:"column:id"`
 	ConnectionName string `gorm:"column:connection_name"`
 	ShortID        string `gorm:"column:short_id"`
@@ -99,7 +99,7 @@ INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id A
 INNER JOIN %s AS c ON c.project_id = ? AND c.project_id = v.project_id AND v.name = ? AND v.id = c.version_id AND c.child_id = ?
 `,
 		(declarations.VariableGroup{}).TableName(),
-		(published.PublishedMap{}).TableName(),
+		(published.PublishedList{}).TableName(),
 		(published.Version{}).TableName(),
 		(published.PublishedReference{}).TableName(),
 	)

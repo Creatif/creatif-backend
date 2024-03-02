@@ -221,10 +221,10 @@ func testAddToList(projectId, name, variableName string, references []shared.Ref
 	return view
 }
 
-func publishFullProject(projectId string) (addToMap.View, publish.View) {
+func publishFullProject(projectId string) (addToList.View, publish.View) {
 	groups := testCreateGroups(projectId, 5)
 
-	map1 := testCreateMap(projectId, "map1")
+	list1 := testCreateList(projectId, "list1")
 
 	referenceMap := testCreateMap(projectId, "referenceMap")
 	referenceMapItem1 := testAddToMap(projectId, referenceMap.ID, "reference-map-1", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
@@ -242,7 +242,7 @@ func publishFullProject(projectId string) (addToMap.View, publish.View) {
 		return value.ID
 	}))
 
-	addToMapModel := testAddToMap(projectId, map1.ID, "mapItemName", []shared.Reference{
+	returnModel := testAddToList(projectId, list1.ID, "mapItemName", []shared.Reference{
 		{
 			Name:          "first",
 			StructureName: referenceMap.Name,
@@ -277,5 +277,5 @@ func publishFullProject(projectId string) (addToMap.View, publish.View) {
 	gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
 	gomega.Expect(model.Name).ShouldNot(gomega.BeEmpty())
 
-	return addToMapModel, model
+	return returnModel, model
 }

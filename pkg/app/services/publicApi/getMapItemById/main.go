@@ -39,8 +39,8 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
-	var mapItem MapItem
-	res := storage.Gorm().Raw(getMapItemSql(), c.model.ProjectID, c.model.VersionName, c.model.ItemID).Scan(&mapItem)
+	var mapItem Item
+	res := storage.Gorm().Raw(getItemSql(), c.model.ProjectID, c.model.VersionName, c.model.ItemID).Scan(&mapItem)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}
@@ -49,8 +49,8 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewNotFoundError(errors.New("This item does not seem to exist"))
 	}
 
-	var connections []ConnectionMapItem
-	res = storage.Gorm().Raw(getConnectionsMapSql(), c.model.ProjectID, c.model.VersionName, c.model.ItemID, c.model.ProjectID, c.model.VersionName, c.model.ItemID).Scan(&connections)
+	var connections []ConnectionItem
+	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, c.model.VersionName, c.model.ItemID, c.model.ProjectID, c.model.VersionName, c.model.ItemID).Scan(&connections)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}

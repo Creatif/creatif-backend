@@ -67,9 +67,9 @@ type View struct {
 	StructureShortID string `json:"structureShortId"`
 	StructureName    string `json:"structureName"`
 
-	ItemName    string `json:"itemName"`
-	ItemID      string `json:"itemId"`
-	ItemShortID string `json:"itemShortId"`
+	Name    string `json:"itemName"`
+	ID      string `json:"itemId"`
+	ShortID string `json:"itemShortId"`
 
 	ProjectID string      `json:"projectId"`
 	Locale    string      `json:"locale"`
@@ -85,8 +85,8 @@ type View struct {
 }
 
 type LogicModel struct {
-	Item        MapItem
-	Connections []ConnectionMapItem
+	Item        Item
+	Connections []ConnectionItem
 }
 
 func newView(model LogicModel) View {
@@ -100,7 +100,7 @@ func newView(model LogicModel) View {
 			StructureShortID: c.ShortID,
 			StructureName:    c.StructureName,
 			ConnectionType:   c.ConnectionType,
-			ItemName:         c.ItemName,
+			ItemName:         c.Name,
 			ItemID:           c.ItemID,
 			ItemShortID:      c.ItemShortID,
 			ProjectID:        c.ProjectID,
@@ -118,9 +118,9 @@ func newView(model LogicModel) View {
 		StructureID:      model.Item.ID,
 		StructureShortID: model.Item.ShortID,
 		StructureName:    model.Item.StructureName,
-		ItemName:         model.Item.ItemName,
-		ItemID:           model.Item.ItemID,
-		ItemShortID:      model.Item.ItemShortID,
+		Name:             model.Item.ItemName,
+		ID:               model.Item.ItemID,
+		ShortID:          model.Item.ItemShortID,
 		ProjectID:        model.Item.ProjectID,
 		Locale:           locale,
 		Index:            model.Item.Index,

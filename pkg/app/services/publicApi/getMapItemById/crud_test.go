@@ -18,14 +18,14 @@ var _ = ginkgo.Describe("Public API", func() {
 
 		gomega.Expect(model.ProjectID).Should(gomega.Equal(projectId))
 		gomega.Expect(model.Behaviour).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(model.ItemName).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(model.Name).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(model.Groups).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(model.StructureShortID).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(model.StructureID).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(model.StructureName).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(model.ItemShortID).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(model.ShortID).ShouldNot(gomega.BeEmpty())
 
-		gomega.Expect(model.ItemID).Should(gomega.Equal(mapItem.ID))
+		gomega.Expect(model.ID).Should(gomega.Equal(mapItem.ID))
 		gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 	})
 })

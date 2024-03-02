@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type MapItem struct {
+type Item struct {
 	ID            string `gorm:"column:id"`
 	ShortID       string `gorm:"column:short_id"`
 	StructureName string `gorm:"column:structure_name"`
@@ -28,15 +28,17 @@ type MapItem struct {
 	UpdatedAt time.Time
 }
 
-type ConnectionMapItem struct {
-	ID             string `gorm:"column:id"`
-	ConnectionName string `gorm:"column:connection_name"`
-	ShortID        string `gorm:"column:short_id"`
-	StructureName  string `gorm:"column:structure_name"`
-	ConnectionType string `gorm:"column:connection_type"`
-	ProjectID      string `gorm:"column:project_id"`
+type ConnectionItem struct {
+	ID            string `gorm:"column:id"`
+	ShortID       string `gorm:"column:short_id"`
+	StructureName string `gorm:"column:structure_name"`
 
-	ItemName    string         `gorm:"column:variable_name"`
+	ConnectionName string `gorm:"column:connection_name"`
+	ConnectionType string `gorm:"column:connection_type"`
+
+	ProjectID string `gorm:"column:project_id"`
+
+	Name        string         `gorm:"column:variable_name"`
 	ItemID      string         `gorm:"column:variable_id"`
 	ItemShortID string         `gorm:"column:variable_short_id"`
 	Value       datatypes.JSON `gorm:"type:jsonb"`
@@ -49,7 +51,7 @@ type ConnectionMapItem struct {
 	UpdatedAt time.Time
 }
 
-func getMapItemSql() string {
+func getItemSql() string {
 	return fmt.Sprintf(`
 SELECT 
     v.project_id,
@@ -75,7 +77,7 @@ INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id A
 	)
 }
 
-func getConnectionsMapSql() string {
+func getConnectionsSql() string {
 	return fmt.Sprintf(`
 SELECT 
     v.project_id,
