@@ -1,7 +1,6 @@
 package getMapItemById
 
 import (
-	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/domain/published"
 	"fmt"
 	"github.com/lib/pq"
@@ -65,13 +64,12 @@ SELECT
 	lv.behaviour,
 	lv.locale_id,
 	lv.index,
+	lv.groups,
 	lv.created_at,
-	lv.updated_at,
-(SELECT g.groups FROM %s AS g WHERE lv.variable_id = g.variable_id LIMIT 1) AS groups
+	lv.updated_at
 FROM %s AS lv
 INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_id = ?  
 `,
-		(declarations.VariableGroup{}).TableName(),
 		(published.PublishedMap{}).TableName(),
 		(published.Version{}).TableName(),
 	)
@@ -93,14 +91,13 @@ SELECT
 	lv.behaviour,
 	lv.locale_id,
 	lv.index,
+	lv.groups,
 	lv.created_at,
-	lv.updated_at,
-(SELECT g.groups FROM %s AS g WHERE lv.variable_id = g.variable_id LIMIT 1) AS groups
+	lv.updated_at
 FROM %s AS lv
 INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_id = ?
 INNER JOIN %s AS c ON c.project_id = ? AND c.project_id = v.project_id AND v.name = ? AND v.id = c.version_id AND c.child_id = ?
 `,
-		(declarations.VariableGroup{}).TableName(),
 		(published.PublishedMap{}).TableName(),
 		(published.Version{}).TableName(),
 		(published.PublishedReference{}).TableName(),

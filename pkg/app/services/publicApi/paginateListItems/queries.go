@@ -1,10 +1,11 @@
-package getListItemsByName
+package paginateListItems
 
 import (
 	"creatif/pkg/app/domain/published"
 	"fmt"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
+	"strings"
 	"time"
 )
 
@@ -50,7 +51,32 @@ type ConnectionItem struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql() string {
+func getItemSql(structureIdentifier string, page int, order, sortBy, search string, lcls, groups []string) (string, map[string]interface{}) {
+	offset := (page - 1) * 100
+	placeholders := make(map[string]interface{})
+	placeholders["offset"] = offset
+	placeholders["structureIdentifier"] = structureIdentifier
+
+	var searchSql string
+	if search != "" {
+		searchSql = fmt.Sprintf("AND (%s ILIKE @searchOne OR %s ILIKE @searchTwo OR %s ILIKE @searchThree OR %s ILIKE @searchFour)", "lv.variable_name", "lv.variable_name", "lv.variable_name", "lv.variable_name")
+		placeholders["searchOne"] = fmt.Sprintf("%%%s", search)
+		placeholders["searchTwo"] = fmt.Sprintf("%s%%", search)
+		placeholders["searchThree"] = fmt.Sprintf("%%%s%%", search)
+		placeholders["searchFour"] = search
+	}
+
+	var groupsSql string
+	if len(groups) > 0 {
+		groupsSql = fmt.Sprintf("AND'{%s}'::text[] && lv.groups ", strings.Join(groups, ","))
+	}
+
+	var localesSql string
+	if len(lcls) > 0 {
+		placeholders["locales"] = lcls
+		localesSql = fmt.Sprintf("AND lv.locale_id IN (@locales)")
+	}
+
 	return fmt.Sprintf(`
 SELECT 
     v.project_id,
@@ -68,11 +94,23 @@ SELECT
 	lv.updated_at,
 	lv.groups
 FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_name = ? AND locale_id = ?  
+INNER JOIN %s AS v ON v.project_id = @projectId AND v.name = @versionName AND v.id = lv.version_id 
+AND (lv.name = @structureIdentifier OR lv.id = @structureIdentifier OR lv.short_id = @structureIdentifier)
+%s
+%s
+%s
+ORDER BY %s %s
+OFFSET @offset
+LIMIT 100
 `,
 		(published.PublishedList{}).TableName(),
 		(published.Version{}).TableName(),
-	)
+		searchSql,
+		groupsSql,
+		localesSql,
+		sortBy,
+		order,
+	), placeholders
 }
 
 func getConnectionsSql() string {

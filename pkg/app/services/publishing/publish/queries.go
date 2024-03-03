@@ -55,15 +55,13 @@ SELECT
     l.short_id AS short_id,
     l.name AS name,
     (
-        SELECT g.groups 
-        FROM %s AS g 
-        WHERE lv.id = g.variable_id 
-        LIMIT 1
+		ARRAY((SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id))
     ) AS groups
 FROM %s AS l
 INNER JOIN %s AS lv ON l.project_id = ? AND lv.map_id = l.id`,
 		(published.PublishedMap{}).TableName(),
 		versionId,
+		(declarations.Group{}).TableName(),
 		(declarations.VariableGroup{}).TableName(),
 		(declarations.Map{}).TableName(),
 		(declarations.MapVariable{}).TableName(),
@@ -105,15 +103,13 @@ SELECT
     l.short_id AS short_id,
     l.name AS name,
     (
-        SELECT g.groups 
-        FROM %s AS g 
-        WHERE lv.id = g.variable_id 
-        LIMIT 1
+		ARRAY((SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id))
     ) AS groups
 FROM %s AS l
 INNER JOIN %s AS lv ON l.project_id = ? AND lv.list_id = l.id`,
 		(published.PublishedList{}).TableName(),
 		versionId,
+		(declarations.Group{}).TableName(),
 		(declarations.VariableGroup{}).TableName(),
 		(declarations.List{}).TableName(),
 		(declarations.ListVariable{}).TableName(),
