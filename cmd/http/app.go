@@ -12,6 +12,7 @@ import (
 	"creatif/cmd/http/handlers/publicApi/getVersions"
 	"creatif/cmd/http/handlers/publishing/publish"
 	"creatif/cmd/http/handlers/publishing/removeVersion"
+	"creatif/cmd/http/handlers/publishing/toggleProduction"
 	"creatif/cmd/server"
 	"creatif/pkg/lib/cache"
 	"creatif/pkg/lib/storage"
@@ -130,6 +131,7 @@ func declarationRoutes(group *echo.Group) {
 func publishingRoutes(group *echo.Group) {
 	group.PUT("/publish/:projectId", publish.PublishHandler())
 	group.DELETE("/publish/version/:projectId/:id", removeVersion.RemoveVersionHandler())
+	group.POST("/publish/toggle-production/:projectId/:id", toggleProduction.ToggleProductionHandler())
 }
 
 func publicRoutes(group *echo.Group) {

@@ -1,49 +1,36 @@
-package publish
+package toggleProduction
 
 import (
-	"creatif/pkg/app/domain/published"
 	"creatif/pkg/lib/sdk"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
 type Model struct {
 	ProjectID string
-	Name      string
+	ID        string
 }
 
-func NewModel(projectId, name string) Model {
+func NewModel(projectId, id string) Model {
 	return Model{
 		ProjectID: projectId,
-		Name:      name,
+		ID:        id,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"projectID": a.ProjectID,
-		"name":      a.Name,
+		"id":        a.ID,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("id", validation.Required, validation.RuneLength(26, 26)),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)
 	}
 
 	return nil
-}
-
-type View struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-func newView(model published.Version) View {
-	return View{
-		ID:   model.ID,
-		Name: model.Name,
-	}
 }

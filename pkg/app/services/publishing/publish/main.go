@@ -57,7 +57,7 @@ func (c Main) Logic() (published.Version, error) {
 		name = uuid.NewString()
 	}
 
-	version := published.NewVersion(c.model.ProjectID, name, true)
+	version := published.NewVersion(c.model.ProjectID, name, false)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Exec(fmt.Sprintf("UPDATE %s SET is_production_version = false WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID); res.Error != nil {
 			return res.Error
