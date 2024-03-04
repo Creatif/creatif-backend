@@ -10,9 +10,9 @@ import (
 var _ = ginkgo.Describe("Public API", func() {
 	ginkgo.It("should get public list item by id (getListItemById)", func() {
 		projectId := testCreateProject("project")
-		mapItem, version := publishFullProject(projectId)
+		mapItem, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, mapItem.ID, version.Name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapItem.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

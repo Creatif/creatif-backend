@@ -34,9 +34,10 @@ func (a Model) Validate() map[string]string {
 }
 
 type View struct {
-	ID        string `json:"id"`
-	ProjectID string `json:"projectId"`
-	Name      string `json:"name"`
+	ID                  string `json:"id"`
+	ProjectID           string `json:"projectId"`
+	Name                string `json:"name"`
+	IsProductionVersion bool   `json:"isProductionVersion"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -45,11 +46,12 @@ type View struct {
 func newView(model []published.Version) []View {
 	return sdk.Map(model, func(idx int, value published.Version) View {
 		return View{
-			ID:        value.ID,
-			Name:      value.Name,
-			ProjectID: value.ProjectID,
-			CreatedAt: value.CreatedAt,
-			UpdatedAt: value.UpdatedAt,
+			ID:                  value.ID,
+			Name:                value.Name,
+			IsProductionVersion: value.IsProductionVersion,
+			ProjectID:           value.ProjectID,
+			CreatedAt:           value.CreatedAt,
+			UpdatedAt:           value.UpdatedAt,
 		}
 	})
 }

@@ -10,34 +10,30 @@ import (
 )
 
 type Model struct {
-	ProjectID   string
-	Name        string
-	Locale      string
-	VersionName string
+	ProjectID string
+	Name      string
+	Locale    string
 }
 
-func NewModel(projectId, versionName, name, locale string) Model {
+func NewModel(projectId, name, locale string) Model {
 	return Model{
-		ProjectID:   projectId,
-		Name:        name,
-		Locale:      locale,
-		VersionName: versionName,
+		ProjectID: projectId,
+		Name:      name,
+		Locale:    locale,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID":   a.ProjectID,
-		"versionName": a.VersionName,
-		"name":        a.Name,
-		"locale":      a.Locale,
+		"projectID": a.ProjectID,
+		"name":      a.Name,
+		"locale":    a.Locale,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
-			validation.Key("versionName", validation.Required),
 			validation.Key("locale", validation.RuneLength(3, 3), validation.By(func(value interface{}) error {
 				l := value.(string)
 				if l == "" {

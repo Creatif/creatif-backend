@@ -10,9 +10,9 @@ import (
 var _ = ginkgo.Describe("Public API", func() {
 	ginkgo.It("should get public list items by name and default locale (getListItemsByName)", func() {
 		projectId := testCreateProject("project")
-		item, version := publishFullProject(projectId)
+		item, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, version.Name, item.Name, ""), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, item.Name, ""), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		models, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

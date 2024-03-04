@@ -3,6 +3,7 @@ package getListItemsByName
 import "C"
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -10,6 +11,7 @@ import (
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 )
 
 type Main struct {
@@ -41,6 +43,16 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
+	var version published.Version
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version)
+	if res.Error != nil {
+		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+	}
+
+	if res.RowsAffected == 0 {
+		return LogicModel{}, appErrors.NewNotFoundError(errors.New("Production version has not been found"))
+	}
+
 	var locale string
 	l, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
@@ -51,7 +63,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var items []Item
-	res := storage.Gorm().Raw(getItemSql(), c.model.ProjectID, c.model.VersionName, c.model.Name, locale).Scan(&items)
+	res = storage.Gorm().Raw(getItemSql(), c.model.ProjectID, version.Name, c.model.Name, locale).Scan(&items)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}
@@ -65,7 +77,7 @@ func (c Main) Logic() (LogicModel, error) {
 	})
 
 	var connections []ConnectionItem
-	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, c.model.VersionName, childIds, c.model.ProjectID, c.model.VersionName, childIds).Scan(&connections)
+	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, childIds, c.model.ProjectID, version.Name, childIds).Scan(&connections)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}

@@ -3,12 +3,14 @@ package getMapItemByName
 import "C"
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
+	"fmt"
 )
 
 type Main struct {
@@ -40,6 +42,16 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
+	var version published.Version
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version)
+	if res.Error != nil {
+		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+	}
+
+	if res.RowsAffected == 0 {
+		return LogicModel{}, appErrors.NewNotFoundError(errors.New("Production version has not been found"))
+	}
+
 	var locale string
 	l, err := locales.GetIDWithAlpha(c.model.Locale)
 	if err != nil {
@@ -50,7 +62,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var mapItem Item
-	res := storage.Gorm().Raw(getItemSql(), c.model.ProjectID, c.model.VersionName, c.model.Name, locale).Scan(&mapItem)
+	res = storage.Gorm().Raw(getItemSql(), c.model.ProjectID, version.Name, c.model.Name, locale).Scan(&mapItem)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}
@@ -60,7 +72,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var connections []ConnectionItem
-	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, c.model.VersionName, mapItem.ItemID, c.model.ProjectID, c.model.VersionName, mapItem.ItemID).Scan(&connections)
+	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, mapItem.ItemID, c.model.ProjectID, version.Name, mapItem.ItemID).Scan(&connections)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}

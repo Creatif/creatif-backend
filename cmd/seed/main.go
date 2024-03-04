@@ -48,7 +48,7 @@ func main() {
 	}
 
 	projectids := []string{
-		"01HR2CDP2RA1P0CHVNA57BHHZ2",
+		"01HR44KNHMMRW94BAF2FX7ZBDV",
 	}
 
 	for _, p := range projectids {
@@ -94,7 +94,7 @@ func seed(projectId string) {
 
 func addBatch(projectId, englishId, frenchId, mapStructureId string) {
 	m := &sync.WaitGroup{}
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 10; i++ {
 		m.Add(1)
 		go func() {
 			for a := 0; a < 100; a++ {

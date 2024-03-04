@@ -8,31 +8,27 @@ import (
 )
 
 type Model struct {
-	ProjectID   string
-	ItemID      string
-	VersionName string
+	ProjectID string
+	ItemID    string
 }
 
 func NewModel(projectId, itemId, versionName string) Model {
 	return Model{
-		ProjectID:   projectId,
-		ItemID:      itemId,
-		VersionName: versionName,
+		ProjectID: projectId,
+		ItemID:    itemId,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID":   a.ProjectID,
-		"versionName": a.VersionName,
-		"itemId":      a.ItemID,
+		"projectID": a.ProjectID,
+		"itemId":    a.ItemID,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("itemId", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("versionName", validation.Required),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

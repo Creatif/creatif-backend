@@ -3,12 +3,14 @@ package paginateListItems
 import "C"
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
+	"errors"
 	"fmt"
 )
 
@@ -41,6 +43,16 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
+	var version published.Version
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version)
+	if res.Error != nil {
+		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+	}
+
+	if res.RowsAffected == 0 {
+		return LogicModel{}, appErrors.NewNotFoundError(errors.New("Production version has not been found"))
+	}
+
 	var items []Item
 	sortBy := "lv.index"
 	if c.model.SortBy != "" {
@@ -60,8 +72,8 @@ func (c Main) Logic() (LogicModel, error) {
 
 	itemsSql, placeholders := getItemSql(c.model.StructureName, c.model.Page, order, sortBy, c.model.Search, lcls, c.model.Groups)
 	placeholders["projectId"] = c.model.ProjectID
-	placeholders["versionName"] = c.model.VersionName
-	res := storage.Gorm().Raw(itemsSql, placeholders).Scan(&items)
+	placeholders["versionName"] = version.Name
+	res = storage.Gorm().Raw(itemsSql, placeholders).Scan(&items)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}
@@ -78,7 +90,7 @@ func (c Main) Logic() (LogicModel, error) {
 	})
 
 	var connections []ConnectionItem
-	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, c.model.VersionName, childIds, c.model.ProjectID, c.model.VersionName, childIds).Scan(&connections)
+	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, childIds, c.model.ProjectID, version.Name, childIds).Scan(&connections)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}
