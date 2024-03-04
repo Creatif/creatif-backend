@@ -91,13 +91,13 @@ var _ = ginkgo.Describe("Publishing", func() {
 			}))
 		}
 
-		for i := 0; i < 100; i++ {
+		for i := 100; i < 200; i++ {
 			testAddToList(projectId, list2.ID, fmt.Sprintf("list-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
 
-		for i := 0; i < 100; i++ {
+		for i := 200; i < 300; i++ {
 			testAddToList(projectId, list3.ID, fmt.Sprintf("list-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))

@@ -41,7 +41,7 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() ([]published.Version, error) {
 	var version []published.Version
-	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, project_id, created_at, updated_at FROM %s WHERE project_id = ?", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version); res.Error != nil {
+	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name, project_id, created_at, updated_at FROM %s WHERE project_id = ?", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version); res.Error != nil {
 		return []published.Version{}, appErrors.NewApplicationError(res.Error)
 	}
 

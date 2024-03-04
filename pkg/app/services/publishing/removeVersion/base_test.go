@@ -1,4 +1,4 @@
-package getVersions
+package removeVersion
 
 import (
 	"creatif/pkg/app/auth"
@@ -183,7 +183,7 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	return model
 }
 
-func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.LogicModel {
+func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.View {
 	variableModel := addToMap.VariableModel{
 		Name:      variableName,
 		Metadata:  nil,
@@ -196,7 +196,7 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 	model := addToMap.NewModel(projectId, name, variableModel, references)
 	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
-	view, err := handler.Logic()
+	view, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	return view
@@ -221,16 +221,10 @@ func testAddToList(projectId, name, variableName string, references []shared.Ref
 	return view
 }
 
-func publishFullProject(projectId string) {
+func publishFullProject(projectId string) ([]addToList.View, publish.View) {
 	groups := testCreateGroups(projectId, 5)
 
-	map1 := testCreateMap(projectId, "map1")
-	map2 := testCreateMap(projectId, "map2")
-	map3 := testCreateMap(projectId, "map3")
-
-	list1 := testCreateList(projectId, "list1")
-	list2 := testCreateList(projectId, "list2")
-	list3 := testCreateList(projectId, "list3")
+	paginationList := testCreateList(projectId, "paginationList")
 
 	referenceMap := testCreateMap(projectId, "referenceMap")
 	referenceMapItem1 := testAddToMap(projectId, referenceMap.ID, "reference-map-1", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
@@ -248,66 +242,38 @@ func publishFullProject(projectId string) {
 		return value.ID
 	}))
 
-	for i := 0; i < 5; i++ {
-		testAddToMap(projectId, map1.ID, fmt.Sprintf("map-%d", i), []shared.Reference{
+	views := make([]addToList.View, 0)
+	for i := 0; i < 200; i++ {
+		addToListModel := testAddToList(projectId, paginationList.ID, fmt.Sprintf("name-%d", i), []shared.Reference{
 			{
 				Name:          "first",
 				StructureName: referenceMap.Name,
 				StructureType: "map",
-				VariableID:    referenceMapItem1.Variable.ID,
+				VariableID:    referenceMapItem1.ID,
 			},
 			{
 				Name:          "second",
 				StructureName: referenceMap.Name,
 				StructureType: "map",
-				VariableID:    referenceMapItem2.Variable.ID,
+				VariableID:    referenceMapItem2.ID,
 			},
-		}, sdk.Map(groups, func(idx int, value addGroups.View) string {
-			return value.ID
-		}))
-	}
-
-	for i := 0; i < 5; i++ {
-		testAddToMap(projectId, map2.ID, fmt.Sprintf("map-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
-			return value.ID
-		}))
-	}
-
-	for i := 0; i < 5; i++ {
-		testAddToMap(projectId, map3.ID, fmt.Sprintf("map-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
-			return value.ID
-		}))
-	}
-
-	for i := 0; i < 5; i++ {
-		testAddToList(projectId, list1.ID, fmt.Sprintf("list-%d", i), []shared.Reference{
 			{
-				Name:          "first",
-				StructureName: referenceList.Name,
+				Name:          "third",
+				StructureName: paginationList.Name,
 				StructureType: "list",
 				VariableID:    referenceListItem1.ID,
 			},
 			{
-				Name:          "second",
-				StructureName: referenceList.Name,
+				Name:          "fourth",
+				StructureName: paginationList.Name,
 				StructureType: "list",
 				VariableID:    referenceListItem2.ID,
 			},
 		}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 			return value.ID
 		}))
-	}
 
-	for i := 5; i < 10; i++ {
-		testAddToList(projectId, list2.ID, fmt.Sprintf("list-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
-			return value.ID
-		}))
-	}
-
-	for i := 10; i < 15; i++ {
-		testAddToList(projectId, list3.ID, fmt.Sprintf("list-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
-			return value.ID
-		}))
+		views = append(views, addToListModel)
 	}
 
 	handler := publish.New(publish.NewModel(projectId, ""), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
@@ -315,4 +281,6 @@ func publishFullProject(projectId string) {
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
 	gomega.Expect(model.Name).ShouldNot(gomega.BeEmpty())
+
+	return views, model
 }

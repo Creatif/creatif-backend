@@ -17,7 +17,7 @@ type PublishedMap struct {
 
 	Name string `gorm:"type:text"`
 
-	VariableName    string         `gorm:"type:text"`
+	VariableName    string         `gorm:"primaryKey;type:text"`
 	VariableID      string         `gorm:"primaryKey;type:text"`
 	VariableShortID string         `gorm:"type:text"`
 	Index           float64        `gorm:"type:float"`

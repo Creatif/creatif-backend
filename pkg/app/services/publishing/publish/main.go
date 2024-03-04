@@ -57,10 +57,22 @@ func (c Main) Logic() (published.Version, error) {
 		name = uuid.NewString()
 	}
 
+	versionDeletionId := ""
+	var existingVersion []published.Version
+	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT id FROM %s WHERE project_id = ? ORDER BY created_at ASC", (published.Version{}).TableName()), c.model.ProjectID).Scan(&existingVersion); res.Error != nil {
+		return published.Version{}, appErrors.NewApplicationError(res.Error)
+	}
+
+	if len(existingVersion) == 2 {
+		versionDeletionId = existingVersion[0].ID
+	}
+
 	version := published.NewVersion(c.model.ProjectID, name)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
-		if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE project_id = ?", (published.Version{}).TableName()), c.model.ProjectID); res.Error != nil {
-			return res.Error
+		if versionDeletionId != "" {
+			if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE project_id = ? AND id = ?", (published.Version{}).TableName()), c.model.ProjectID, versionDeletionId); res.Error != nil {
+				return res.Error
+			}
 		}
 
 		if res := tx.Create(&version); res.Error != nil {

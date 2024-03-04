@@ -48,7 +48,7 @@ func main() {
 	}
 
 	projectids := []string{
-		"01HQZ82MGW1ZPB787DRY4J72Z7",
+		"01HR2CDP2RA1P0CHVNA57BHHZ2",
 	}
 
 	for _, p := range projectids {

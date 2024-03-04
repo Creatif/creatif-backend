@@ -1,18 +1,18 @@
-package publish
+package removeVersion
 
 import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type Publish struct {
+type RemoveVersion struct {
 	ProjectID string `param:"projectId"`
-	Name      string `json:"name"`
+	ID        string `param:"id"`
 }
 
-func SanitizePublish(model Publish) Publish {
+func SanitizeRemoveVersion(model RemoveVersion) RemoveVersion {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
-	model.Name = p.Sanitize(model.Name)
+	model.ID = p.Sanitize(model.ID)
 
 	return model
 }

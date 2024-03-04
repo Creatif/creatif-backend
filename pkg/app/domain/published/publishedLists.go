@@ -17,13 +17,13 @@ type PublishedList struct {
 
 	Name string `gorm:"type:text"`
 
-	VariableName    string         `gorm:"type:text"`
+	VariableName    string         `gorm:"primaryKey;type:text"`
 	VariableID      string         `gorm:"primaryKey;type:text"`
 	VariableShortID string         `gorm:"type:text"`
 	Index           float64        `gorm:"type:float"`
 	Behaviour       string         `gorm:"not null"`
 	Value           datatypes.JSON `gorm:"type:jsonb"`
-	LocaleID        string         `gorm:"type:text"`
+	LocaleID        string         `gorm:"primaryKey;type:text"`
 	Groups          pq.StringArray `gorm:"type:text[];not_null"`
 
 	CreatedAt time.Time

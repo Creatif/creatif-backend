@@ -14,13 +14,13 @@ type ListVariable struct {
 	ShortID string  `gorm:"uniqueIndex:unique_variable;type:text;not null"`
 	Index   float64 `gorm:"type:float"`
 
-	Name      string         `gorm:"not null"`
+	Name      string         `gorm:"uniqueIndex:unique_variable;not null"`
 	Behaviour string         `gorm:"not null"`
 	Metadata  datatypes.JSON `gorm:"type:jsonb"`
 	Value     datatypes.JSON `gorm:"type:jsonb"`
 
-	LocaleID string `gorm:"type:text"`
-	ListID   string `gorm:"type:text"`
+	LocaleID string `gorm:"uniqueIndex:unique_variable;type:text"`
+	ListID   string `gorm:"uniqueIndex:unique_variable;type:text"`
 	List     List   `gorm:"foreignKey:ListID"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime;index"`
