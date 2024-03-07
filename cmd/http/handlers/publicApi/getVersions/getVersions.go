@@ -22,6 +22,6 @@ func GetVersionsHandler() func(e echo.Context) error {
 		l := logger.NewLogBuilder()
 		handler := publicApiGetVersions.New(publicApiGetVersions.NewModel(model.ProjectID), auth.NewAnonymousAuthentication(), l)
 
-		return request.SendResponse[publicApiGetVersions.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[publicApiGetVersions.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

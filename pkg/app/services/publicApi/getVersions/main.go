@@ -3,8 +3,8 @@ package getVersions
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/published"
+	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -19,7 +19,7 @@ type Main struct {
 func (c Main) Validate() error {
 	c.logBuilder.Add("getVersions", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
-		return appErrors.NewValidationError(errs)
+		return publicApiError.NewError("getVersions", errs, publicApiError.ValidationError)
 	}
 
 	c.logBuilder.Add("getVersions", "Validated")
@@ -28,7 +28,9 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return appErrors.NewAuthenticationError(err)
+		return publicApiError.NewError("getVersions", map[string]string{
+			"unauthorized": "You are unauthorized to use this route",
+		}, 403)
 	}
 
 	return nil
@@ -41,7 +43,9 @@ func (c Main) Authorize() error {
 func (c Main) Logic() ([]published.Version, error) {
 	var version []published.Version
 	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name, project_id, created_at, updated_at, is_production_version FROM %s WHERE project_id = ?", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version); res.Error != nil {
-		return []published.Version{}, appErrors.NewApplicationError(res.Error)
+		return []published.Version{}, publicApiError.NewError("getVersions", map[string]string{
+			"internalError": res.Error.Error(),
+		}, publicApiError.DatabaseError)
 	}
 
 	return version, nil
