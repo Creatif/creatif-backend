@@ -1,14 +1,12 @@
 package getListItemById
 
-import "C"
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/published"
+	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
 	"fmt"
 )
 
@@ -21,7 +19,7 @@ type Main struct {
 func (c Main) Validate() error {
 	c.logBuilder.Add("getVersions", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
-		return appErrors.NewValidationError(errs)
+		return publicApiError.NewError("getVersions", errs, 422)
 	}
 
 	c.logBuilder.Add("getVersions", "Validated")
@@ -30,7 +28,9 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return appErrors.NewAuthenticationError(err)
+		return publicApiError.NewError("getListItemById", map[string]string{
+			"unauthorized": "You are unauthorized to use this route",
+		}, 403)
 	}
 
 	return nil
@@ -43,28 +43,39 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (LogicModel, error) {
 	var version published.Version
 	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version)
+
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
+			"internalError": res.Error.Error(),
+		}, publicApiError.DatabaseError)
 	}
 
 	if res.RowsAffected == 0 {
-		return LogicModel{}, appErrors.NewNotFoundError(errors.New("Production version has not been found"))
+		return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
+			"notFound": "This list item does not exist",
+		}, publicApiError.NotFoundError)
 	}
 
 	var item Item
 	res = storage.Gorm().Raw(getListItemSql(), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&item)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
+			"internalError": res.Error.Error(),
+		}, publicApiError.DatabaseError)
 	}
 
 	if res.RowsAffected == 0 {
-		return LogicModel{}, appErrors.NewNotFoundError(errors.New("This item does not exist."))
+		return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
+			"notFound": "This list item does not exist",
+		}, publicApiError.NotFoundError)
 	}
 
 	var connections []ConnectionItem
 	res = storage.Gorm().Raw(getConnectionsMapSql(), c.model.ProjectID, version.Name, c.model.ItemID, c.model.ProjectID, version.Name, c.model.ItemID).Scan(&connections)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
+			"notFound": res.Error.Error(),
+		}, publicApiError.DatabaseError)
 	}
 
 	return LogicModel{
