@@ -11,6 +11,7 @@ import (
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/publishing/publish"
+	"creatif/pkg/app/services/publishing/toggleProduction"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
@@ -310,9 +311,13 @@ func publishFullProject(projectId string) {
 		}))
 	}
 
-	handler := publish.New(publish.NewModel(projectId, ""), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := publish.New(publish.NewModel(projectId, "v1"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 	model, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
 	gomega.Expect(model.Name).ShouldNot(gomega.BeEmpty())
+
+	toggleHandler := toggleProduction.New(toggleProduction.NewModel(projectId, model.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	_, err = toggleHandler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
 }

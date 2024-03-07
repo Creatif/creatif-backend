@@ -1,6 +1,5 @@
 package paginateListItems
 
-import "C"
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/published"

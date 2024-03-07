@@ -276,7 +276,7 @@ func publishFullProject(projectId string) ([]addToList.View, publish.View) {
 		views = append(views, addToListModel)
 	}
 
-	handler := publish.New(publish.NewModel(projectId, ""), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := publish.New(publish.NewModel(projectId, "v1"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 	model, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
