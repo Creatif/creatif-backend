@@ -31,6 +31,6 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			model.SanitizedGroups,
 		), auth.NewAnonymousAuthentication(), l)
 
-		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[paginateListItems.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }

@@ -93,7 +93,6 @@ func loadLocales() error {
 	var exists app2.Locale
 	fmt.Println("Loading locales")
 	if res := storage2.Gorm().First(&exists); res.Error != nil {
-		fmt.Println(res.Error)
 		if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return res.Error
 		}
@@ -101,7 +100,6 @@ func loadLocales() error {
 
 	if exists.ID != "" {
 		if err := locales.Store(); err != nil {
-			fmt.Println(err)
 			return err
 		}
 
@@ -110,7 +108,6 @@ func loadLocales() error {
 
 	readFile, err := os.Open("/app/assets/locales.csv")
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -125,17 +122,14 @@ func loadLocales() error {
 	}
 
 	if err := readFile.Close(); err != nil {
-		fmt.Println(err)
 		return err
 	}
 
 	if res := storage2.Gorm().Create(&l); res.Error != nil {
-		fmt.Println(res.Error)
 		return res.Error
 	}
 
 	if err := locales.Store(); err != nil {
-		fmt.Println(err)
 		return err
 	}
 

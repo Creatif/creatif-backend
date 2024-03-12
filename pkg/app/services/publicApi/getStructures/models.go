@@ -3,7 +3,6 @@ package getStructures
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
-	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"time"
 )
@@ -61,7 +60,6 @@ type LogicModel struct {
 }
 
 func newView(model LogicModel) View {
-	fmt.Println(model)
 	return View{
 		Lists: sdk.Map(model.Lists, func(idx int, value declarations.List) ListView {
 			return ListView{

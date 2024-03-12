@@ -31,6 +31,6 @@ func PaginateMapItemsHandler() func(e echo.Context) error {
 			model.SanitizedGroups,
 		), auth.NewAnonymousAuthentication(), l)
 
-		return request.SendResponse[paginateMapItems.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[paginateMapItems.Model](handler, c, http.StatusOK, l, nil, false)
 	}
 }
