@@ -9,7 +9,12 @@ import (
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
 	"creatif/cmd/http/handlers/declarations/references"
+	"creatif/cmd/http/handlers/publicApi/getListItemByID"
+	"creatif/cmd/http/handlers/publicApi/getMapItemByID"
+	"creatif/cmd/http/handlers/publicApi/getStructures"
 	"creatif/cmd/http/handlers/publicApi/getVersions"
+	"creatif/cmd/http/handlers/publicApi/paginateListItems"
+	"creatif/cmd/http/handlers/publicApi/paginateMapItems"
 	"creatif/cmd/http/handlers/publishing/publish"
 	"creatif/cmd/http/handlers/publishing/removeVersion"
 	"creatif/cmd/http/handlers/publishing/toggleProduction"
@@ -135,5 +140,10 @@ func publishingRoutes(group *echo.Group) {
 }
 
 func publicRoutes(group *echo.Group) {
-	group.GET("/versions/:projectId", getVersions.GetVersionsHandler())
+	group.GET("/:projectId/versions", getVersions.GetVersionsHandler())
+	group.GET("/:projectId/structures", getStructures.GetStructuresHandler())
+	group.GET("/:projectId/list/id/:id", getListItemByID.GetListItemByIDHandler())
+	group.GET("/:projectId/map/id/:id", getMapItemByID.GetMapItemByIDHandler())
+	group.GET("/:projectId/lists/:name", paginateListItems.PaginateListItemsHandler())
+	group.GET("/:projectId/maps/:name", paginateMapItems.PaginateMapItemsHandler())
 }

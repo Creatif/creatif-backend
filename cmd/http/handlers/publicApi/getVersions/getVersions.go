@@ -2,7 +2,7 @@ package getVersions
 
 import (
 	"creatif/cmd/http/request"
-	getVersionsRequest "creatif/cmd/http/request/publicApi/getVersions"
+	getVersionsRequest "creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	publicApiGetVersions "creatif/pkg/app/services/publicApi/getVersions"
 	"creatif/pkg/lib/logger"

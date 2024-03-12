@@ -12,7 +12,7 @@ type Model struct {
 	ItemID    string
 }
 
-func NewModel(projectId, itemId, versionName string) Model {
+func NewModel(projectId, itemId string) Model {
 	return Model{
 		ProjectID: projectId,
 		ItemID:    itemId,

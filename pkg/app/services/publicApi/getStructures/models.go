@@ -1,0 +1,83 @@
+package getStructures
+
+import (
+	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/lib/sdk"
+	"fmt"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"time"
+)
+
+type Model struct {
+	ProjectID string
+}
+
+func NewModel(projectId string) Model {
+	return Model{
+		ProjectID: projectId,
+	}
+}
+
+func (a Model) Validate() map[string]string {
+	v := map[string]interface{}{
+		"projectID": a.ProjectID,
+	}
+
+	if err := validation.Validate(v,
+		validation.Map(
+			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+		),
+	); err != nil {
+		return sdk.ErrorToResponseError(err)
+	}
+
+	return nil
+}
+
+type ListView struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type MapView struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type View struct {
+	Lists []ListView `json:"lists"`
+	Maps  []MapView  `json:"maps"`
+}
+
+type LogicModel struct {
+	Lists []declarations.List `json:"lists"`
+	Maps  []declarations.Map  `json:"maps"`
+}
+
+func newView(model LogicModel) View {
+	fmt.Println(model)
+	return View{
+		Lists: sdk.Map(model.Lists, func(idx int, value declarations.List) ListView {
+			return ListView{
+				ID:        value.ID,
+				Name:      value.Name,
+				CreatedAt: value.CreatedAt,
+				UpdatedAt: value.UpdatedAt,
+			}
+		}),
+		Maps: sdk.Map(model.Maps, func(idx int, value declarations.Map) MapView {
+			return MapView{
+				ID:        value.ID,
+				Name:      value.Name,
+				CreatedAt: value.CreatedAt,
+				UpdatedAt: value.UpdatedAt,
+			}
+		}),
+	}
+}

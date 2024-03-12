@@ -1,16 +1,18 @@
-package getVersions
+package publicApi
 
 import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type GetVersions struct {
+type GetMapItemByID struct {
 	ProjectID string `param:"projectId"`
+	ItemID    string `param:"id"`
 }
 
-func SanitizeGetVersions(model GetVersions) GetVersions {
+func SanitizeGetMapItemByID(model GetMapItemByID) GetMapItemByID {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
+	model.ItemID = p.Sanitize(model.ItemID)
 
 	return model
 }
