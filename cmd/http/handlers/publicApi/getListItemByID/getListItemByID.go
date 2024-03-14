@@ -20,7 +20,9 @@ func GetListItemByIDHandler() func(e echo.Context) error {
 		model = publicApi.SanitizeGetListItemByID(model)
 
 		l := logger.NewLogBuilder()
-		handler := getListItemByIDService.New(getListItemByIDService.NewModel(model.ProjectID, model.ItemID), auth.NewAnonymousAuthentication(), l)
+		handler := getListItemByIDService.New(getListItemByIDService.NewModel(model.ProjectID, model.ItemID, getListItemByIDService.Options{
+			ValueOnly: model.ResolvedOptions.ValueOnly,
+		}), auth.NewAnonymousAuthentication(), l)
 
 		return request.SendPublicResponse[getListItemByIDService.Model](handler, c, http.StatusOK, l, nil, false)
 	}

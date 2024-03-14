@@ -20,7 +20,9 @@ func GetMapItemByIDHandler() func(e echo.Context) error {
 		model = publicApi.SanitizeGetMapItemByID(model)
 
 		l := logger.NewLogBuilder()
-		handler := getMapItemByIDService.New(getMapItemByIDService.NewModel(model.ProjectID, model.ItemID), auth.NewAnonymousAuthentication(), l)
+		handler := getMapItemByIDService.New(getMapItemByIDService.NewModel(model.ProjectID, model.ItemID, getMapItemByIDService.Options{
+			ValueOnly: model.ResolvedOptions.ValueOnly,
+		}), auth.NewAnonymousAuthentication(), l)
 
 		return request.SendPublicResponse[getMapItemByIDService.Model](handler, c, http.StatusOK, l, nil, false)
 	}

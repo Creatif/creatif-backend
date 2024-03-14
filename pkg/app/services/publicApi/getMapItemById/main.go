@@ -51,7 +51,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var mapItem Item
-	res = storage.Gorm().Raw(getItemSql(), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&mapItem)
+	res = storage.Gorm().Raw(getItemSql(c.model.Options), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&mapItem)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}
@@ -69,10 +69,11 @@ func (c Main) Logic() (LogicModel, error) {
 	return LogicModel{
 		Item:        mapItem,
 		Connections: connections,
+		Options:     c.model.Options,
 	}, nil
 }
 
-func (c Main) Handle() (View, error) {
+func (c Main) Handle() (interface{}, error) {
 	if err := c.Validate(); err != nil {
 		return View{}, err
 	}
@@ -94,7 +95,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, LogicModel] {
 	logBuilder.Add("getVersions", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

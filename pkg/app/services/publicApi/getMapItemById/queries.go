@@ -1,6 +1,7 @@
 package getMapItemById
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/domain/published"
 	"fmt"
 	"github.com/lib/pq"
@@ -50,9 +51,8 @@ type ConnectionItem struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql() string {
-	return fmt.Sprintf(`
-SELECT 
+func getItemSql(options Options) string {
+	selectFields := fmt.Sprintf(`
     v.project_id,
 	lv.id,
 	lv.short_id,
@@ -64,12 +64,24 @@ SELECT
 	lv.behaviour,
 	lv.locale_id,
 	lv.index,
-	lv.groups,
 	lv.created_at,
-	lv.updated_at
+	lv.updated_at,
+(SELECT g.groups FROM %s AS g WHERE lv.variable_id = g.variable_id LIMIT 1) AS groups
+`, (declarations.VariableGroup{}).TableName())
+
+	if options.ValueOnly {
+		selectFields = fmt.Sprintf(`
+	lv.value
+`)
+	}
+
+	return fmt.Sprintf(`
+SELECT 
+    %s
 FROM %s AS lv
 INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_id = ?  
 `,
+		selectFields,
 		(published.PublishedMap{}).TableName(),
 		(published.Version{}).TableName(),
 	)

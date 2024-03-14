@@ -57,7 +57,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var item Item
-	res = storage.Gorm().Raw(getListItemSql(), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&item)
+	res = storage.Gorm().Raw(getListItemSql(c.model.Options), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&item)
 	if res.Error != nil {
 		return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
 			"internalError": res.Error.Error(),
@@ -71,20 +71,23 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var connections []ConnectionItem
-	res = storage.Gorm().Raw(getConnectionsMapSql(), c.model.ProjectID, version.Name, c.model.ItemID, c.model.ProjectID, version.Name, c.model.ItemID).Scan(&connections)
-	if res.Error != nil {
-		return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
-			"notFound": res.Error.Error(),
-		}, publicApiError.DatabaseError)
+	if !c.model.Options.ValueOnly {
+		res = storage.Gorm().Raw(getConnectionsMapSql(), c.model.ProjectID, version.Name, c.model.ItemID, c.model.ProjectID, version.Name, c.model.ItemID).Scan(&connections)
+		if res.Error != nil {
+			return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
+				"notFound": res.Error.Error(),
+			}, publicApiError.DatabaseError)
+		}
 	}
 
 	return LogicModel{
 		Item:        item,
 		Connections: connections,
+		Options:     c.model.Options,
 	}, nil
 }
 
-func (c Main) Handle() (View, error) {
+func (c Main) Handle() (interface{}, error) {
 	if err := c.Validate(); err != nil {
 		return View{}, err
 	}
@@ -106,7 +109,7 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, LogicModel] {
 	logBuilder.Add("getVersions", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }
