@@ -64,8 +64,8 @@ func getListItemSql(options Options) string {
 	lv.index,
 	lv.created_at,
 	lv.updated_at,
-(SELECT g.groups FROM %s AS g WHERE lv.variable_id = g.variable_id LIMIT 1) AS groups
-`, (declarations.VariableGroup{}).TableName())
+	lv.groups
+`)
 
 	if options.ValueOnly {
 		selectFields = fmt.Sprintf(`

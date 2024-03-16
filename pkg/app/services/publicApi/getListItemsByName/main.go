@@ -77,7 +77,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 	var items []Item
 	res = storage.Gorm().Raw(
-		getItemSql(locale),
+		getItemSql(locale, c.model.Options),
 		placeholders,
 	).Scan(&items)
 	if res.Error != nil {
@@ -116,10 +116,11 @@ func (c Main) Logic() (LogicModel, error) {
 	return LogicModel{
 		Items:       items,
 		Connections: mappedConnections,
+		Options:     c.model.Options,
 	}, nil
 }
 
-func (c Main) Handle() ([]View, error) {
+func (c Main) Handle() (interface{}, error) {
 	if err := c.Validate(); err != nil {
 		return []View{}, err
 	}
@@ -141,7 +142,7 @@ func (c Main) Handle() ([]View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, LogicModel] {
 	logBuilder.Add("getListItemsByName", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }
