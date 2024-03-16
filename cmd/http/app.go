@@ -10,6 +10,7 @@ import (
 	"creatif/cmd/http/handlers/declarations/maps"
 	"creatif/cmd/http/handlers/declarations/references"
 	"creatif/cmd/http/handlers/publicApi/getListItemByID"
+	"creatif/cmd/http/handlers/publicApi/getListItemByName"
 	"creatif/cmd/http/handlers/publicApi/getMapItemByID"
 	"creatif/cmd/http/handlers/publicApi/getStructures"
 	"creatif/cmd/http/handlers/publicApi/getVersions"
@@ -141,6 +142,7 @@ func publishingRoutes(group *echo.Group) {
 
 func publicRoutes(group *echo.Group) {
 	group.GET("/:projectId/versions", getVersions.GetVersionsHandler())
+	group.GET("/:projectId/list/:structureName/:name", getListItemByName.GetListItemByNameHandler())
 	group.GET("/:projectId/structures", getStructures.GetStructuresHandler())
 	group.GET("/:projectId/list/id/:id", getListItemByID.GetListItemByIDHandler())
 	group.GET("/:projectId/map/id/:id", getMapItemByID.GetMapItemByIDHandler())

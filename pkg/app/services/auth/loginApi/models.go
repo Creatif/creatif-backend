@@ -26,11 +26,11 @@ func NewModel(email, password, apiKey, projectId, session string) Model {
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"email":     a.Email,
 		"password":  a.Password,
 		"apiKey":    a.ApiKey,
 		"projectId": a.ProjectID,
 		"session":   a.Session,
+		"email":     a.Email,
 	}
 
 	if err := validation.Validate(v,
