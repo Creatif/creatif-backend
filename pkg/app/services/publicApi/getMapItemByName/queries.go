@@ -51,7 +51,12 @@ type ConnectionItem struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql() string {
+func getItemSql(locale string) string {
+	localeSql := ""
+	if locale != "" {
+		localeSql = "AND lv.locale_id = @localeId"
+	}
+
 	return fmt.Sprintf(`
 SELECT 
     v.project_id,
@@ -67,13 +72,13 @@ SELECT
 	lv.index,
 	lv.created_at,
 	lv.updated_at,
-(SELECT g.groups FROM %s AS g WHERE lv.variable_id = g.variable_id LIMIT 1) AS groups
+	lv.groups
 FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_name = ? AND locale_id = ?  
+INNER JOIN %s AS v ON v.project_id = @projectId AND v.name = @versionName AND v.id = lv.version_id AND lv.name = @structureName AND lv.variable_name = @variableName %s  
 `,
-		(declarations.VariableGroup{}).TableName(),
 		(published.PublishedMap{}).TableName(),
 		(published.Version{}).TableName(),
+		localeSql,
 	)
 }
 

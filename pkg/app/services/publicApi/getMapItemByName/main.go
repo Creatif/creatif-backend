@@ -4,11 +4,11 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
 	"fmt"
 )
 
@@ -44,36 +44,50 @@ func (c Main) Logic() (LogicModel, error) {
 	var version published.Version
 	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("getMapItemByName", map[string]string{
+			"error": res.Error.Error(),
+		}, publicApiError.DatabaseError)
 	}
 
 	if res.RowsAffected == 0 {
-		return LogicModel{}, appErrors.NewNotFoundError(errors.New("Production version has not been found"))
+		return LogicModel{}, publicApiError.NewError("getMapItemByName", map[string]string{
+			"versionNotFound": "Production version has not been found.",
+		}, publicApiError.NotFoundError)
 	}
 
+	placeholders := make(map[string]interface{})
+	placeholders["projectId"] = c.model.ProjectID
+	placeholders["versionName"] = version.Name
+	placeholders["structureName"] = c.model.StructureName
+	placeholders["variableName"] = c.model.Name
+
 	var locale string
-	l, err := locales.GetIDWithAlpha(c.model.Locale)
-	if err != nil {
-		l, _ := locales.GetIDWithAlpha("eng")
+	if c.model.Locale != "" {
+		l, _ := locales.GetIDWithAlpha(c.model.Locale)
 		locale = l
-	} else {
-		locale = l
+		placeholders["localeId"] = l
 	}
 
 	var mapItem Item
-	res = storage.Gorm().Raw(getItemSql(), c.model.ProjectID, version.Name, c.model.Name, locale).Scan(&mapItem)
+	res = storage.Gorm().Raw(getItemSql(locale), placeholders).Scan(&mapItem)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("getMapItemByName", map[string]string{
+			"error": res.Error.Error(),
+		}, publicApiError.DatabaseError)
 	}
 
 	if res.RowsAffected == 0 {
-		return LogicModel{}, appErrors.NewNotFoundError(errors.New("This item does not seem to exist"))
+		return LogicModel{}, publicApiError.NewError("getMapItemByName", map[string]string{
+			"notFound": "Item has not been found.",
+		}, publicApiError.NotFoundError)
 	}
 
 	var connections []ConnectionItem
 	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, mapItem.ItemID, c.model.ProjectID, version.Name, mapItem.ItemID).Scan(&connections)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("getMapItemByName", map[string]string{
+			"error": res.Error.Error(),
+		}, publicApiError.DatabaseError)
 	}
 
 	return LogicModel{

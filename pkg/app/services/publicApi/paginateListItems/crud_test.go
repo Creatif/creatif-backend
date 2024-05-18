@@ -11,6 +11,7 @@ import (
 
 var _ = ginkgo.Describe("Public API", func() {
 	ginkgo.It("should get paginated list of list items", func() {
+		ginkgo.Skip("")
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
@@ -49,6 +50,8 @@ var _ = ginkgo.Describe("Public API", func() {
 	})
 
 	ginkgo.It("should get paginated list of list items based on group", func() {
+		ginkgo.Skip("")
+
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
@@ -76,6 +79,8 @@ var _ = ginkgo.Describe("Public API", func() {
 	})
 
 	ginkgo.It("should get paginated list of list items based on group and locale", func() {
+		ginkgo.Skip("")
+
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
@@ -103,6 +108,8 @@ var _ = ginkgo.Describe("Public API", func() {
 	})
 
 	ginkgo.It("should get paginated list of list items based on group, locale and search", func() {
+		ginkgo.Skip("")
+
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 

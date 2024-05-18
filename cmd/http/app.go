@@ -10,8 +10,9 @@ import (
 	"creatif/cmd/http/handlers/declarations/maps"
 	"creatif/cmd/http/handlers/declarations/references"
 	"creatif/cmd/http/handlers/publicApi/getListItemByID"
-	"creatif/cmd/http/handlers/publicApi/getListItemByName"
+	"creatif/cmd/http/handlers/publicApi/getListItemsByName"
 	"creatif/cmd/http/handlers/publicApi/getMapItemByID"
+	"creatif/cmd/http/handlers/publicApi/getMapItemByName"
 	"creatif/cmd/http/handlers/publicApi/getStructures"
 	"creatif/cmd/http/handlers/publicApi/getVersions"
 	"creatif/cmd/http/handlers/publicApi/paginateListItems"
@@ -20,11 +21,13 @@ import (
 	"creatif/cmd/http/handlers/publishing/removeVersion"
 	"creatif/cmd/http/handlers/publishing/toggleProduction"
 	"creatif/cmd/server"
+	"creatif/pkg/app/services/publicApi/publicApiError"
 	"creatif/pkg/lib/cache"
 	"creatif/pkg/lib/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
+	"net/http"
 )
 
 func app() {
@@ -142,10 +145,20 @@ func publishingRoutes(group *echo.Group) {
 
 func publicRoutes(group *echo.Group) {
 	group.GET("/:projectId/versions", getVersions.GetVersionsHandler())
-	group.GET("/:projectId/list/:structureName/:name", getListItemByName.GetListItemByNameHandler())
+	group.GET("/:projectId/list/:structureName/:name", getListItemsByName.GetListItemsByNameHandler())
+	group.GET("/:projectId/map/:structureName/:name", getMapItemByName.GetMapItemByNameHandler())
 	group.GET("/:projectId/structures", getStructures.GetStructuresHandler())
 	group.GET("/:projectId/list/id/:id", getListItemByID.GetListItemByIDHandler())
 	group.GET("/:projectId/map/id/:id", getMapItemByID.GetMapItemByIDHandler())
 	group.GET("/:projectId/lists/:name", paginateListItems.PaginateListItemsHandler())
 	group.GET("/:projectId/maps/:name", paginateMapItems.PaginateMapItemsHandler())
+	group.Any("/:projectId/*", func(c echo.Context) error {
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"call": "unknown",
+			"messages": map[string]string{
+				"notFound": "This route does not exist",
+			},
+			"status": publicApiError.NotFoundError,
+		})
+	})
 }

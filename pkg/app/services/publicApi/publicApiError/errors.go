@@ -2,6 +2,7 @@ package publicApiError
 
 import (
 	"encoding/json"
+	"net/http"
 )
 
 const NotFoundError = 1
@@ -36,11 +37,20 @@ func (e appError) Status() int {
 }
 
 func NewError(call string, messages map[string]string, status int) PublicApiError {
+	s := http.StatusInternalServerError
+	if status == ValidationError {
+		s = http.StatusUnprocessableEntity
+	} else if status == NotFoundError {
+		s = http.StatusNotFound
+	} else if status == ApplicationError {
+		s = http.StatusBadRequest
+	}
+
 	return appError{
 		data: map[string]interface{}{
 			"call":     call,
 			"messages": messages,
-			"status":   status,
+			"status":   s,
 		},
 		status: status,
 	}

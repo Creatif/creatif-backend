@@ -8,7 +8,7 @@ import (
 
 type PublishedReference struct {
 	ID        string `gorm:"primaryKey;type:text"`
-	ProjectID string `gorm:"index"`
+	ProjectID string `gorm:"primaryKey;type:text"`
 
 	VersionID string  `gorm:"primaryKey;type:text"`
 	Version   Version `gorm:"foreignKey:VersionID"`
@@ -17,13 +17,13 @@ type PublishedReference struct {
 	ParentType string `gorm:"type:text"`
 	ChildType  string `gorm:"type:text"`
 
-	ParentStructureID string `gorm:"index;type:text"`
-	ChildStructureID  string `gorm:"index;type:text"`
+	ParentStructureID string `gorm:"primaryKey;type:text"`
+	ChildStructureID  string `gorm:"primaryKey;type:text"`
 
 	// must be structure type item
-	ParentID string `gorm:"index;type:text"`
+	ParentID string `gorm:"primaryKey;type:text"`
 	// must be entire structure
-	ChildID string `gorm:"index;type:text"`
+	ChildID string `gorm:"primaryKey;type:text"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time `gorm:"<-:update"`

@@ -107,7 +107,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 	return LogicModel{
 		Items:       items,
-		Connections: mappedConnections,
+		Connections: make(map[string][]ConnectionItem),
 	}, nil
 }
 

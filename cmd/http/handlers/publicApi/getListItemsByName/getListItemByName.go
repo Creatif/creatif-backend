@@ -1,4 +1,4 @@
-package getListItemByName
+package getListItemsByName
 
 import (
 	"creatif/cmd/http/request"
@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func GetListItemByNameHandler() func(e echo.Context) error {
+func GetListItemsByNameHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		var model publicApi.GetListItemByName
 		if err := c.Bind(&model); err != nil {

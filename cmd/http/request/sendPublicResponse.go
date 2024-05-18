@@ -15,6 +15,7 @@ func SendPublicResponse[T any, F any, K any](handler pkg.Job[T, F, K], context e
 	if err != nil {
 		appError, ok := err.(publicApiError.PublicApiError)
 		if ok {
+			fmt.Println(appError)
 			s := http.StatusInternalServerError
 			if appError.Status() == publicApiError.ValidationError {
 				s = http.StatusUnprocessableEntity

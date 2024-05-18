@@ -10,30 +10,40 @@ import (
 )
 
 type Model struct {
-	ProjectID string
-	Name      string
-	Locale    string
+	ProjectID     string
+	Name          string
+	Locale        string
+	StructureName string
+	Options       Options
 }
 
-func NewModel(projectId, name, locale string) Model {
+type Options struct {
+	ValueOnly bool
+}
+
+func NewModel(projectId, structureName, name, locale string, options Options) Model {
 	return Model{
-		ProjectID: projectId,
-		Name:      name,
-		Locale:    locale,
+		ProjectID:     projectId,
+		Name:          name,
+		StructureName: structureName,
+		Locale:        locale,
+		Options:       options,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID": a.ProjectID,
-		"name":      a.Name,
-		"locale":    a.Locale,
+		"projectID":     a.ProjectID,
+		"name":          a.Name,
+		"structureName": a.StructureName,
+		"locale":        a.Locale,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
+			validation.Key("structureName", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("locale", validation.RuneLength(3, 3), validation.By(func(value interface{}) error {
 				l := value.(string)
 				if l == "" {

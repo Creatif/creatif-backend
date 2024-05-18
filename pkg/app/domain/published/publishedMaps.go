@@ -10,16 +10,16 @@ import (
 
 type PublishedMap struct {
 	ID      string `gorm:"primaryKey;type:text"`
-	ShortID string `gorm:"type:text"`
+	ShortID string `gorm:"primaryKey;type:text"`
 
 	VersionID string  `gorm:"primaryKey;type:text"`
 	Version   Version `gorm:"foreignKey:VersionID"`
 
-	Name string `gorm:"type:text"`
+	Name string `gorm:"primaryKey;type:text"`
 
 	VariableName    string         `gorm:"primaryKey;type:text"`
 	VariableID      string         `gorm:"primaryKey;type:text"`
-	VariableShortID string         `gorm:"type:text"`
+	VariableShortID string         `gorm:"primaryKey;type:text"`
 	Index           float64        `gorm:"type:float"`
 	Behaviour       string         `gorm:"not null"`
 	Value           datatypes.JSON `gorm:"type:jsonb"`

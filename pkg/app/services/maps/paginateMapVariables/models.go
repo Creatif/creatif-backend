@@ -13,6 +13,7 @@ var validOrderByFields = []string{
 	"created_at",
 	"updated_at",
 	"behaviour",
+	"index",
 }
 
 var validFields = []string{

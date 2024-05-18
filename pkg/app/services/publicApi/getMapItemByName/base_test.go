@@ -222,7 +222,7 @@ func testAddToList(projectId, name, variableName string, references []shared.Ref
 	return view
 }
 
-func publishFullProject(projectId string) (addToMap.View, publish.View) {
+func publishFullProject(projectId string) (addToMap.View, mapCreate.View, publish.View) {
 	groups := testCreateGroups(projectId, 5)
 
 	map1 := testCreateMap(projectId, "map1")
@@ -282,5 +282,5 @@ func publishFullProject(projectId string) (addToMap.View, publish.View) {
 	_, err = toggleHandler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	return addToMapModel, model
+	return addToMapModel, map1, model
 }

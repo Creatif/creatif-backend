@@ -10,11 +10,12 @@ import (
 var _ = ginkgo.Describe("Public API", func() {
 	ginkgo.It("should get public map item by id (getMapItemById)", func() {
 		projectId := testCreateProject("project")
-		mapItem, version := publishFullProject(projectId)
+		mapItem, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, mapItem.ID, version.Name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-		model, err := handler.Handle()
+		handler := New(NewModel(projectId, mapItem.ID, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
+		model := m.(View)
 
 		gomega.Expect(model.ProjectID).Should(gomega.Equal(projectId))
 		gomega.Expect(model.Behaviour).ShouldNot(gomega.BeEmpty())

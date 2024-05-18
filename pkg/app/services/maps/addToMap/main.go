@@ -22,11 +22,11 @@ type Main struct {
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("addToList", "Validating...")
+	c.logBuilder.Add("addToMap", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("addToList", "Validated.")
+	c.logBuilder.Add("addToMap", "Validated.")
 
 	if len(c.model.Entry.Groups) > 0 {
 		count, err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Entry.Groups)
@@ -84,25 +84,32 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (LogicModel, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Entry.Locale)
 	if err != nil {
-		c.logBuilder.Add("addToList", err.Error())
-		return LogicModel{}, appErrors.NewApplicationError(err).AddError("addToList.Logic", nil)
+		c.logBuilder.Add("addToMap", err.Error())
+		return LogicModel{}, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
 
 	var m declarations.Map
 	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name).Select("ID", "name").First(&m); res.Error != nil {
-		c.logBuilder.Add("addToList", res.Error.Error())
-		return LogicModel{}, appErrors.NewNotFoundError(res.Error).AddError("addToList.Logic", nil)
+		c.logBuilder.Add("addToMap", res.Error.Error())
+		return LogicModel{}, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
 
 	if c.model.Entry.Groups == nil {
 		c.model.Entry.Groups = []string{}
 	}
 
+	highestIndex, err := getHighestIndex(m.ID)
+	if err != nil {
+		c.logBuilder.Add("addToMap", err.Error())
+		return LogicModel{}, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
+	}
+
 	variable := declarations.NewMapVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Value)
+	variable.Index = highestIndex + 1024
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&variable); res.Error != nil {
-			c.logBuilder.Add("addToList", res.Error.Error())
+			c.logBuilder.Add("addToMap", res.Error.Error())
 
 			return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
 		}
@@ -174,6 +181,6 @@ func (c Main) Handle() (View, error) {
 }
 
 func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
-	logBuilder.Add("addToList", "Created")
+	logBuilder.Add("addToMap", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }
