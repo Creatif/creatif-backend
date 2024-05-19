@@ -86,6 +86,7 @@ func appRoutes(group *echo.Group) {
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 
 	group.PUT("/project", appHandlers.CreateProjectHandler())
+	group.GET("/project/exists", appHandlers.HasProjectsHandler())
 	group.GET("/project-metadata", appHandlers.GetProjectMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
 	group.GET("/project/:id", appHandlers.GetProjectHandler())
@@ -94,10 +95,7 @@ func appRoutes(group *echo.Group) {
 
 	group.PUT("/auth/admin/create", authHandlers.CreateAdminHandler())
 	group.GET("/auth/admin/exists", authHandlers.AdminExistsHandler())
-	group.POST("/auth/login/email", authHandlers.CreateLoginEmailHandler())
-	group.POST("/auth/login/api", authHandlers.CreateLoginApiHandler())
-	group.POST("/auth/frontend-authenticated", authHandlers.CreateIsFrontendAuthenticated())
-	group.POST("/auth/frontend-logout", authHandlers.CreateFrontendLogout())
+	group.POST("/auth/login", authHandlers.LoginHandler())
 
 	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
 }

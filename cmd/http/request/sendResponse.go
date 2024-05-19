@@ -23,6 +23,8 @@ type ErrorResponse[T any] struct {
 func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, lg logger.LogBuilder, callback func(c echo.Context, model interface{}) error, gracefulFail bool) error {
 	model, err := handler.Handle()
 
+	fmt.Println(model, err)
+
 	if err != nil {
 		validationError, ok := err.(appErrors.AppError[map[string]string])
 		if ok {

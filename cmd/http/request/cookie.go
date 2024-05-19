@@ -8,7 +8,7 @@ import (
 )
 
 func GetAuthenticationCookie(c echo.Context) string {
-	cookie, err := c.Cookie("authentication")
+	cookie, err := c.Cookie("api_authentication")
 	if err != nil {
 		return ""
 	}

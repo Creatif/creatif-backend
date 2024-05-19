@@ -7,25 +7,20 @@ import (
 )
 
 type Model struct {
-	Email     string
-	Password  string
-	Session   string
-	ApiKey    string
-	ProjectID string
+	Email    string
+	Password string
 }
 
-func NewModel(email, password, session string) Model {
+func NewModel(email, password string) Model {
 	return Model{
 		Email:    email,
 		Password: password,
-		Session:  session,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"password": a.Password,
-		"session":  a.Session,
 		"email":    a.Email,
 	}
 
@@ -33,7 +28,6 @@ func (a Model) Validate() map[string]string {
 		validation.Map(
 			validation.Key("email", is.Email),
 			validation.Key("password", validation.Required, validation.RuneLength(8, 20)),
-			validation.Key("session", validation.Required),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

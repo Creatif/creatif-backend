@@ -1,4 +1,4 @@
-package loginEmail
+package hasProjects
 
 import (
 	"creatif/pkg/app/domain"
@@ -31,7 +31,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Login email account")
+	GinkgoRunSpecs(t, "Admin exists")
 }
 
 func runLogger() {

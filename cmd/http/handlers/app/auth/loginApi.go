@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func CreateLoginApiHandler() func(e echo.Context) error {
+func LoginHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		var model app.LoginApi
 		if err := c.Bind(&model); err != nil {
@@ -19,7 +19,7 @@ func CreateLoginApiHandler() func(e echo.Context) error {
 		model = app.SanitizeLoginApi(model)
 
 		l := logger.NewLogBuilder()
-		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password, model.Session), nil, l)
+		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password), nil, l)
 
 		return request.SendResponse[loginApi.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
 			c.SetCookie(request.EncryptApiAuthenticationCookie(model.(string)))

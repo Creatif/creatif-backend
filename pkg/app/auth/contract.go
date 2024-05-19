@@ -29,14 +29,12 @@ type AuthenticatedApiSession struct {
 	Type  string `json:"type"`
 }
 
-func NewAuthenticatedUser(id, name, lastName, email string, createdAt, updatedAt, refresh time.Time, projectID, apiKey string) AuthenticatedUser {
+func NewAuthenticatedUser(id, name, lastName, email string, createdAt, updatedAt, refresh time.Time) AuthenticatedUser {
 	return AuthenticatedUser{
-		ID:        id,
-		Name:      name,
-		LastName:  lastName,
-		Email:     email,
-		ApiKey:    apiKey,
-		ProjectID: projectID,
+		ID:       id,
+		Name:     name,
+		LastName: lastName,
+		Email:    email,
 
 		Refresh: refresh,
 
