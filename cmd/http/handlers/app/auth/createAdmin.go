@@ -3,13 +3,13 @@ package auth
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/app"
-	"creatif/pkg/app/services/auth/registerEmail"
+	"creatif/pkg/app/services/auth/createAdmin"
 	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func CreateRegisterEmailHandler() func(e echo.Context) error {
+func CreateAdminHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
 		var model app.RegisterEmail
 		if err := c.Bind(&model); err != nil {
@@ -19,8 +19,8 @@ func CreateRegisterEmailHandler() func(e echo.Context) error {
 		model = app.SanitizeRegisterEmail(model)
 
 		l := logger.NewLogBuilder()
-		handler := registerEmail.New(registerEmail.NewModel(model.Name, model.LastName, model.Email, model.Password, model.PolicyAccepted), nil, l)
+		handler := createAdmin.New(createAdmin.NewModel(model.Name, model.LastName, model.Email, model.Password, true), l)
 
-		return request.SendResponse[registerEmail.Model](handler, c, http.StatusCreated, l, nil, false)
+		return request.SendResponse[createAdmin.Model](handler, c, http.StatusCreated, l, nil, false)
 	}
 }

@@ -95,7 +95,8 @@ func appRoutes(group *echo.Group) {
 	group.PUT("/groups/:projectId", groups.AddGroupsHandler())
 	group.GET("/groups/:projectId", groups.GetGroupsHandler())
 
-	group.PUT("/auth/register/email", authHandlers.CreateRegisterEmailHandler())
+	group.PUT("/auth/admin/create", authHandlers.CreateAdminHandler())
+	group.GET("/auth/admin/exists", authHandlers.AdminExistsHandler())
 	group.POST("/auth/login/email", authHandlers.CreateLoginEmailHandler())
 	group.POST("/auth/login/api", authHandlers.CreateLoginApiHandler())
 	group.POST("/auth/frontend-authenticated", authHandlers.CreateIsFrontendAuthenticated())

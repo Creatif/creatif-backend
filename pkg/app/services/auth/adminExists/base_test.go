@@ -1,4 +1,4 @@
-package registerEmail
+package adminExists
 
 import (
 	"creatif/pkg/app/domain"

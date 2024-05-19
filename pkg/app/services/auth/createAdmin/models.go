@@ -1,4 +1,4 @@
-package registerEmail
+package createAdmin
 
 import (
 	"creatif/pkg/lib/sdk"

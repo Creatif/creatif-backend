@@ -1,4 +1,4 @@
-package registerEmail
+package createAdmin
 
 import (
 	"golang.org/x/crypto/bcrypt"

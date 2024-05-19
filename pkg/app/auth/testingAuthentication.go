@@ -23,7 +23,7 @@ func (a *testingAuthentication) Authenticate() error {
 
 func (a *testingAuthentication) User() AuthenticatedUser {
 	if a.shouldCreateUser && testSessionUser.ID == "" {
-		user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true)
+		user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true, true)
 		res := storage2.Gorm().Create(&user)
 		if res.Error != nil {
 			ginkgo.Fail(res.Error.Error())

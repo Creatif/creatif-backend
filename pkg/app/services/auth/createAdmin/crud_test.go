@@ -1,15 +1,14 @@
-package registerEmail
+package createAdmin
 
 import (
-	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/logger"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/onsi/ginkgo/v2"
 )
 
-var _ = ginkgo.Describe("Register account tests", func() {
-	ginkgo.It("should register a user", func() {
+var _ = ginkgo.Describe("Create admin tests", func() {
+	ginkgo.It("should register the admin user", func() {
 		handler := New(NewModel(
 			"name",
 			"lastName",
@@ -17,7 +16,6 @@ var _ = ginkgo.Describe("Register account tests", func() {
 			"password",
 			true,
 		),
-			auth.NewTestingAuthentication(false, ""),
 			logger.NewLogBuilder())
 
 		_, err := handler.Handle()

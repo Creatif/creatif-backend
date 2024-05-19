@@ -1,7 +1,6 @@
-package registerEmail
+package createAdmin
 
 import (
-	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/app"
 	auth2 "creatif/pkg/app/services/auth"
 	pkg "creatif/pkg/lib"
@@ -16,27 +15,26 @@ import (
 type Main struct {
 	model      Model
 	logBuilder logger.LogBuilder
-	auth       auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("registerEmail", "Validating...")
+	c.logBuilder.Add("createAdmin", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
 	var user app.User
-	if res := storage.Gorm().Where("email = ?", user.Email).Select("id").First(&user); res.Error != nil {
+	if res := storage.Gorm().Where("is_admin = ?", true).Select("id").First(&user); res.Error != nil {
 		if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return appErrors.NewValidationError(map[string]string{
-				"email": fmt.Sprintf("Invalid email"),
+				"admin": fmt.Sprintf("There is already an admin for this site"),
 			})
 		} else if res.Error != nil {
-			c.logBuilder.Add("emailCheckError", res.Error.Error())
+			c.logBuilder.Add("adminExists", res.Error.Error())
 		}
 	}
 
-	c.logBuilder.Add("registerEmail", "Validated.")
+	c.logBuilder.Add("createAdmin", "Validated.")
 	return nil
 }
 
@@ -51,11 +49,11 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (interface{}, error) {
 	pass, err := hashPassword(c.model.Password)
 	if err != nil {
-		c.logBuilder.Add("registerEmail.hashPasswordError", err.Error())
+		c.logBuilder.Add("createAdmin.hashPasswordError", err.Error())
 		return nil, appErrors.NewUnexpectedError(err)
 	}
 
-	user := app.NewUser(c.model.Name, c.model.LastName, c.model.Email, pass, auth2.EmailProvider, true, c.model.PolicyAccepted)
+	user := app.NewUser(c.model.Name, c.model.LastName, c.model.Email, pass, auth2.EmailProvider, true, c.model.PolicyAccepted, true)
 
 	if res := storage.Gorm().Create(&user); res.Error != nil {
 		return nil, appErrors.NewDatabaseError(res.Error)
@@ -86,7 +84,7 @@ func (c Main) Handle() (interface{}, error) {
 	return nil, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
-	logBuilder.Add("registerEmail", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
+	logBuilder.Add("createAdmin", "Created")
+	return Main{model: model, logBuilder: logBuilder}
 }

@@ -1,14 +1,11 @@
-package createProject
+package createAdmin
 
 import (
-	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/app/domain/app"
-	auth2 "creatif/pkg/app/services/auth"
+	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
 	"github.com/onsi/ginkgo/v2"
@@ -34,7 +31,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Project -> CRUD tests")
+	GinkgoRunSpecs(t, "Register account")
 }
 
 func runLogger() {
@@ -65,6 +62,8 @@ var _ = ginkgo.BeforeSuite(func() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	gomega.Expect(locales.Store()).Should(gomega.BeNil())
 })
 
 var _ = GinkgoAfterSuite(func() {
@@ -115,23 +114,4 @@ func testAssertIDValid(id string) {
 	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
 	_, err := ulid.Parse(id)
 	gomega.Expect(err).Should(gomega.BeNil())
-}
-
-func testCreateUser() app.User {
-	user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true, true)
-	storage2.Gorm().Create(&user)
-
-	return user
-}
-
-func testCreateProject(name string) string {
-	handler := New(NewModel(name), auth.NewTestingAuthentication(true, ""), logger.NewLogBuilder())
-
-	model, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(model.ID)
-
-	gomega.Expect(model.Name).Should(gomega.Equal(name))
-
-	return model.ID
 }
