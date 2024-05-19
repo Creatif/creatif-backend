@@ -36,7 +36,6 @@ func (c Main) Logic() (bool, error) {
 
 	var projectCount int
 	res := storage.Gorm().Raw(sql).Scan(&projectCount)
-	fmt.Println(res.Error)
 	if res.Error != nil {
 		return false, appErrors.NewApplicationError(res.Error)
 	}

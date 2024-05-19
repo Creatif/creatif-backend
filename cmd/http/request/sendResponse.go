@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"encoding/json"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
@@ -22,8 +21,6 @@ type ErrorResponse[T any] struct {
 
 func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, lg logger.LogBuilder, callback func(c echo.Context, model interface{}) error, gracefulFail bool) error {
 	model, err := handler.Handle()
-
-	fmt.Println(model, err)
 
 	if err != nil {
 		validationError, ok := err.(appErrors.AppError[map[string]string])
@@ -111,7 +108,6 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 	if err := callCallback(context, model, callback); err != nil {
 		lg.Add("Callback error", err.Error())
 		if err := flushLogger(lg, "info", context); err != nil {
-			fmt.Println("Flush error: ", err)
 			return err
 		}
 

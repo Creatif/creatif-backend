@@ -91,7 +91,6 @@ func releaseAllLocks() error {
 
 func loadLocales() error {
 	var exists app2.Locale
-	fmt.Println("Loading locales")
 	if res := storage2.Gorm().First(&exists); res.Error != nil {
 		if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return res.Error

@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/logger"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -15,7 +14,6 @@ func SendPublicResponse[T any, F any, K any](handler pkg.Job[T, F, K], context e
 	if err != nil {
 		appError, ok := err.(publicApiError.PublicApiError)
 		if ok {
-			fmt.Println(appError)
 			s := http.StatusInternalServerError
 			if appError.Status() == publicApiError.ValidationError {
 				s = http.StatusUnprocessableEntity
@@ -32,7 +30,6 @@ func SendPublicResponse[T any, F any, K any](handler pkg.Job[T, F, K], context e
 	if err := callCallback(context, model, callback); err != nil {
 		lg.Add("Callback error", err.Error())
 		if err := flushLogger(lg, "info", context); err != nil {
-			fmt.Println("Flush error: ", err)
 			return err
 		}
 

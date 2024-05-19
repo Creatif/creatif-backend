@@ -2,7 +2,6 @@ package publish
 
 import (
 	"context"
-	"fmt"
 )
 
 type fnExecutioner struct {
@@ -55,8 +54,6 @@ func (p *publishEngine) run(fns mappedFn, ctx context.Context) map[string]result
 		go func(name string, worker chan result) {
 			results[name] = <-worker
 
-			fmt.Println("Received: ", name)
-
 			if len(results) == 3 {
 				done <- true
 			}
@@ -64,8 +61,6 @@ func (p *publishEngine) run(fns mappedFn, ctx context.Context) map[string]result
 
 		go func(name string, worker chan result) {
 			fn := fns[name]
-
-			fmt.Println("Sending: ", name)
 
 			err := fn.fn()
 			worker <- result{error: err, name: name}
