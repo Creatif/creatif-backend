@@ -1,7 +1,6 @@
 package lists
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
@@ -19,11 +18,9 @@ func DeleteRangeByIDHandler() func(e echo.Context) error {
 		}
 
 		model = lists.SanitizeDeleteRangeByID(model)
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
 
 		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := deleteRangeByID.New(deleteRangeByID.NewModel(
 			model.ProjectID,
 			model.Name,

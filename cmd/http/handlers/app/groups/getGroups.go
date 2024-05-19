@@ -1,7 +1,6 @@
 package groups
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/auth"
@@ -20,11 +19,8 @@ func GetGroupsHandler() func(e echo.Context) error {
 
 		model = app.SanitizeGetGroups(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := getGroups.New(getGroups.NewModel(model.ProjectID), authentication, l)
 
 		return request.SendResponse[getGroups.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {

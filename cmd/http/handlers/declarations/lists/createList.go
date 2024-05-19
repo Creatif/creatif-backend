@@ -1,7 +1,6 @@
 package lists
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
@@ -21,11 +20,8 @@ func CreateListHandler() func(e echo.Context) error {
 
 		model = lists.SanitizeCreateList(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := createList.New(createList.NewModel(
 			model.ProjectID,
 			model.Name,

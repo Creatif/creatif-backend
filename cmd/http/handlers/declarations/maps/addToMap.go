@@ -1,7 +1,6 @@
 package maps
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
@@ -22,11 +21,8 @@ func AddToMapHandler() func(e echo.Context) error {
 
 		model = maps.SanitizeAddToMap(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := addToMap2.New(addToMap2.NewModel(model.ProjectID, model.Name, addToMap2.VariableModel{
 			Name:      model.Variable.Name,
 			Metadata:  []byte(model.Variable.Metadata),

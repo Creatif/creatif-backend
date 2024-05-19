@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/services/auth/loginApi"
@@ -19,11 +18,8 @@ func CreateLoginApiHandler() func(e echo.Context) error {
 
 		model = app.SanitizeLoginApi(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password, apiKey, projectId, model.Session), nil, l)
+		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password, model.Session), nil, l)
 
 		return request.SendResponse[loginApi.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
 			c.SetCookie(request.EncryptApiAuthenticationCookie(model.(string)))

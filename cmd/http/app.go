@@ -1,7 +1,6 @@
 package main
 
 import (
-	"creatif/cmd"
 	authHandlers "creatif/cmd/http/handlers/app/auth"
 	"creatif/cmd/http/handlers/app/groups"
 	appHandlers "creatif/cmd/http/handlers/app/project"
@@ -71,8 +70,6 @@ func app() {
 			echo.HeaderAccept,
 			echo.HeaderCookie,
 			echo.HeaderAccessControlAllowCredentials,
-			cmd.CreatifApiHeader,
-			cmd.CreatifProjectIDHeader,
 		},
 		AllowMethods: []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))
@@ -102,10 +99,7 @@ func appRoutes(group *echo.Group) {
 	group.POST("/auth/frontend-authenticated", authHandlers.CreateIsFrontendAuthenticated())
 	group.POST("/auth/frontend-logout", authHandlers.CreateFrontendLogout())
 
-	group.POST("/auth/api-auth-session", authHandlers.CreateApiAuthSessionHandler())
-	group.POST("/auth/api-check", authHandlers.LoginApiCheckHandler())
 	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
-	group.GET("/auth/api-auth-session/:session", authHandlers.GetApiAuthSession())
 }
 
 func declarationRoutes(group *echo.Group) {

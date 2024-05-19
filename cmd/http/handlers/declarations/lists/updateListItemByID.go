@@ -1,7 +1,6 @@
 package lists
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
@@ -35,11 +34,8 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			})
 		}
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := updateListItemByID.New(updateListItemByID.NewModel(
 			model.ProjectID,
 			model.Values.Locale,

@@ -1,7 +1,6 @@
 package maps
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
@@ -20,11 +19,8 @@ func GetMapHandler() func(e echo.Context) error {
 
 		model = maps.SanitizeGetMap(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Name), authentication, l)
 
 		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {

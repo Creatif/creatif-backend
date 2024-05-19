@@ -1,7 +1,6 @@
 package maps
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
@@ -20,11 +19,8 @@ func QueryMapVariableHandler() func(e echo.Context) error {
 
 		model = maps.SanitizeQueryMapVariable(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := queryMapVariable.New(queryMapVariable.NewModel(
 			model.ProjectID,
 			model.Name,

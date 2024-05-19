@@ -1,7 +1,6 @@
 package lists
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
@@ -20,11 +19,8 @@ func QueryListByIDHandler() func(e echo.Context) error {
 
 		model = lists.SanitizeQueryListByID(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := queryListByID.New(queryListByID.NewModel(
 			model.ProjectID,
 			model.Name,

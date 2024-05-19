@@ -1,7 +1,6 @@
 package project
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/auth"
@@ -20,11 +19,8 @@ func GetProjectMetadataHandler() func(e echo.Context) error {
 
 		model = app.SanitizeGetProject(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := getProjectMetadata.New(a, l)
 
 		return request.SendResponse(handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {

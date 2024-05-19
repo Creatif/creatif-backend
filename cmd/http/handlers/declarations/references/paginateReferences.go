@@ -1,7 +1,6 @@
 package references
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/references"
 	"creatif/pkg/app/auth"
@@ -21,11 +20,8 @@ func PaginateReferencesHandler() func(e echo.Context) error {
 
 		model = references.SanitizePaginateReferences(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := paginateReferences.New(paginateReferences.NewModel(
 			model.ProjectID,
 			model.ParentID,

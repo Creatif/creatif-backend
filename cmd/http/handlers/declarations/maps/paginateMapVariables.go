@@ -1,7 +1,6 @@
 package maps
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
@@ -21,11 +20,8 @@ func PaginateMapVariables() func(e echo.Context) error {
 
 		model = maps.SanitizePaginateListItems(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := paginateMapVariables.New(paginateMapVariables.NewModel(
 			model.ProjectID,
 			model.SanitizedLocales,

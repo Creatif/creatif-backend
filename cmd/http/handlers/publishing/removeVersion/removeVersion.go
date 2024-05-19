@@ -1,7 +1,6 @@
 package removeVersion
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/publishing/removeVersion"
 	"creatif/pkg/app/auth"
@@ -20,11 +19,8 @@ func RemoveVersionHandler() func(e echo.Context) error {
 
 		model = removeVersion.SanitizeRemoveVersion(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := removeVersionService.New(removeVersionService.NewModel(model.ProjectID, model.ID), authentication, l)
 
 		return request.SendResponse[removeVersionService.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {

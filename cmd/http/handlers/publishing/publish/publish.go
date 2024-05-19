@@ -1,7 +1,6 @@
 package publish
 
 import (
-	"creatif/cmd"
 	"creatif/cmd/http/request"
 	publishRequest "creatif/cmd/http/request/publishing/publish"
 	"creatif/pkg/app/auth"
@@ -20,11 +19,8 @@ func PublishHandler() func(e echo.Context) error {
 
 		model = publishRequest.SanitizePublish(model)
 
-		apiKey := c.Request().Header.Get(cmd.CreatifApiHeader)
-		projectId := c.Request().Header.Get(cmd.CreatifProjectIDHeader)
-
 		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), projectId, apiKey, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := publish.New(publish.NewModel(model.ProjectID, model.Name), authentication, l)
 
 		return request.SendResponse[publish.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {

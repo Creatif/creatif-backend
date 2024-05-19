@@ -14,31 +14,25 @@ type Model struct {
 	ProjectID string
 }
 
-func NewModel(email, password, apiKey, projectId, session string) Model {
+func NewModel(email, password, session string) Model {
 	return Model{
-		Email:     email,
-		Password:  password,
-		ApiKey:    apiKey,
-		Session:   session,
-		ProjectID: projectId,
+		Email:    email,
+		Password: password,
+		Session:  session,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"password":  a.Password,
-		"apiKey":    a.ApiKey,
-		"projectId": a.ProjectID,
-		"session":   a.Session,
-		"email":     a.Email,
+		"password": a.Password,
+		"session":  a.Session,
+		"email":    a.Email,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("email", is.Email),
-			validation.Key("apiKey", validation.Required),
 			validation.Key("password", validation.Required, validation.RuneLength(8, 20)),
-			validation.Key("projectId", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("session", validation.Required),
 		),
 	); err != nil {
