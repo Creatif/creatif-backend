@@ -34,6 +34,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Name, model.ItemID, model.ResolvedFields, updateMapVariable2.VariableModel{
 			Name:      model.Variable.Name,
 			Metadata:  []byte(model.Variable.Metadata),
@@ -41,8 +42,19 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Groups:    model.Variable.Groups,
 			Behaviour: model.Variable.Behaviour,
 			Value:     []byte(model.Variable.Value),
-		}, references), auth.NewNoopAuthentication(), l)
+		}, references), authentication, l)
 
-		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

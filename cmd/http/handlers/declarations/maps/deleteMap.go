@@ -20,8 +20,20 @@ func DeleteMap() func(e echo.Context) error {
 		model = maps.SanitizeDeleteMap(model)
 
 		l := logger.NewLogBuilder()
-		handler := removeMap.New(removeMap.NewModel(model.ProjectID, model.Name), auth.NewNoopAuthentication(), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		handler := removeMap.New(removeMap.NewModel(model.ProjectID, model.Name), authentication, l)
 
-		return request.SendResponse[removeMap.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[removeMap.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

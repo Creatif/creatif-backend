@@ -24,13 +24,25 @@ func DeleteListHandler() func(e echo.Context) error {
 		}
 
 		l := logger.NewLogBuilder()
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := deleteList.New(deleteList.NewModel(
 			model.ProjectID,
 			model.Name,
 			model.ID,
 			model.ShortID,
-		), auth.NewNoopAuthentication(), l)
+		), authentication, l)
 
-		return request.SendResponse[deleteList.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[deleteList.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

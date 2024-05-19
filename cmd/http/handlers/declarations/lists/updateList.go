@@ -20,13 +20,25 @@ func UpdateListHandler() func(e echo.Context) error {
 		model = lists.SanitizeUpdateList(model)
 
 		l := logger.NewLogBuilder()
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
 		handler := updateList.New(updateList.NewModel(
 			model.ProjectID,
 			model.Fields,
 			model.Name,
 			model.Values.Name,
-		), auth.NewNoopAuthentication(), l)
+		), authentication, l)
 
-		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+			if authentication.ShouldRefresh() {
+				session, err := authentication.Refresh()
+				if err != nil {
+					return err
+				}
+
+				c.SetCookie(request.EncryptAuthenticationCookie(session))
+			}
+
+			return nil
+		}, false)
 	}
 }

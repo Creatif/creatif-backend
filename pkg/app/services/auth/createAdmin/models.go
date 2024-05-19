@@ -37,7 +37,7 @@ func (a Model) Validate() map[string]string {
 		validation.Map(
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("lastName", validation.Required, validation.RuneLength(1, 200)),
-			validation.Key("email", is.EmailFormat),
+			validation.Key("email", is.EmailFormat, is.Email),
 			validation.Key("policyAccepted", validation.Required, validation.By(func(value interface{}) error {
 				policyAccepted := value.(bool)
 
