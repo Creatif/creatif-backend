@@ -67,7 +67,11 @@ func (e *appError[T]) JSON() ([]byte, error) {
 }
 
 func (e *appError[T]) Error() string {
-	return e.errors[0].Error()
+	if len(e.errors) > 1 {
+		return e.errors[0].Error()
+	}
+
+	return "No error provided"
 }
 
 func NewValidationError(data map[string]string) AppError[map[string]string] {

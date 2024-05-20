@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
+	"errors"
 	"fmt"
 )
 
@@ -17,7 +18,7 @@ func getProject(projectId string) (app.Project, error) {
 	}
 
 	if res.RowsAffected == 0 {
-		return app.Project{}, appErrors.NewApplicationError(res.Error)
+		return app.Project{}, appErrors.NewNotFoundError(errors.New("Project not found"))
 	}
 
 	return project, nil
