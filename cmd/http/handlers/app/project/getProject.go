@@ -20,7 +20,7 @@ func GetProjectHandler() func(e echo.Context) error {
 		model = app.SanitizeGetProject(model)
 
 		l := logger.NewLogBuilder()
-		handler := getProject.New(getProject.NewModel(model.ProjectID), auth.NewFrontendAuthentication(request.GetAuthenticationCookie(c), l), l)
+		handler := getProject.New(getProject.NewModel(model.ProjectID), auth.NewApiAuthentication(request.GetAuthenticationCookie(c), l), l)
 
 		return request.SendResponse[getProject.Model](handler, c, http.StatusOK, l, nil, false)
 	}

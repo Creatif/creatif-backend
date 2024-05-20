@@ -45,7 +45,7 @@ func (c Main) Logic() (app.Project, error) {
 	id := c.model.ProjectID
 
 	var project app.Project
-	if res := storage.Gorm().Where("id = ?", id).First(&project); res.Error != nil {
+	if res := storage.Gorm().Where("id = ? OR name = ?", id, id).First(&project); res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return app.Project{}, appErrors.NewNotFoundError(res.Error)
 		}
