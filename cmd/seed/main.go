@@ -18,8 +18,6 @@ import (
 	"sync"
 )
 
-const apiKey = "$2a$10$aUlSZKvCLkbA65wWB5tme.a6nQDwJRzJrjm.DAlpD9/m4hjcrgf/u"
-
 func main() {
 	loadEnv()
 	runDb()
@@ -48,9 +46,7 @@ func main() {
 	}
 
 	projectids := []string{
-		"01HSRFEB5JZWM71N0BR7V3DP26",
-		"01HSRFEFTCEHGY90QAV422XKWJ",
-		"01HSRFEKHJD5EEZ4952FC3HNG6",
+		"01HYBPT62WJPCJQJ7KWQXAW9A9",
 	}
 
 	for _, p := range projectids {
@@ -59,6 +55,7 @@ func main() {
 }
 
 func seed(projectId string) {
+	fmt.Println("Creating groups...")
 	createGroups(projectId)
 	structureNames := map[string][]string{
 		"list": []string{"Languages"},
@@ -99,7 +96,7 @@ func addBatch(projectId, englishId, frenchId, mapStructureId string) {
 	for i := 0; i < 5; i++ {
 		m.Add(1)
 		go func() {
-			for a := 0; a < 1000; a++ {
+			for a := 0; a < 100; a++ {
 				languageId := englishId
 				if a%2 == 0 {
 					languageId = frenchId

@@ -8,12 +8,11 @@ import (
 )
 
 var _ = ginkgo.Describe("Public API", func() {
-	ginkgo.It("should get public list items by name and default locale (getListItemsByName)", func() {
-		ginkgo.Skip("")
+	ginkgo.It("should get public list items by name and default locale (getListItemsByName)", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		item, structure, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, item.Name, structure.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, structure.Name, item.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		models := m.([]View)

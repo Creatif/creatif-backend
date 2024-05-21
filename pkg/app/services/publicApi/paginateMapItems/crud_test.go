@@ -7,15 +7,16 @@ import (
 	"creatif/pkg/lib/sdk"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
+	"log"
 )
 
 var _ = ginkgo.Describe("Public API", func() {
-	ginkgo.It("should get paginated list of map items", func() {
-		ginkgo.Skip("")
+	ginkgo.It("should get paginated list of map items", ginkgo.Label("public_api"), func() {
 
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
+		log.Fatalln("")
 		handler := New(NewModel(projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		models, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -35,13 +36,12 @@ var _ = ginkgo.Describe("Public API", func() {
 			sdk.IncludesFn(items, func(item addToMap.View) bool {
 				return item.ID == model.ID
 			})
+
 			gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 		}
 	})
 
-	ginkgo.It("should return empty result when there aren't enough items in page", func() {
-		ginkgo.Skip("")
-
+	ginkgo.It("should return empty result when there aren't enough items in page", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
@@ -52,9 +52,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		gomega.Expect(len(models)).Should(gomega.Equal(0))
 	})
 
-	ginkgo.It("should get paginated list of map items based on group", func() {
-		ginkgo.Skip("")
-
+	ginkgo.It("should get paginated list of map items based on group", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
@@ -81,9 +79,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		}
 	})
 
-	ginkgo.It("should get paginated list of map items based on group and locale", func() {
-		ginkgo.Skip("")
-
+	ginkgo.It("should get paginated list of map items based on group and locale", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
@@ -110,9 +106,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		}
 	})
 
-	ginkgo.It("should get paginated list of map items based on group, locale and search", func() {
-		ginkgo.Skip("")
-
+	ginkgo.It("should get paginated list of map items based on group, locale and search", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 

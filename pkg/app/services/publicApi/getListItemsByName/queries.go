@@ -83,7 +83,13 @@ func getItemSql(locale string, options Options) string {
 SELECT 
     %s
 FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = @projectId AND v.name = @versionName AND v.id = lv.version_id AND (lv.name = @structureName OR lv.id = @structureName OR lv.short_id = @structureName) AND lv.variable_name = @variableName %s 
+INNER JOIN %s AS v ON 
+    v.project_id = @projectId AND 
+    v.name = @versionName AND 
+    v.id = lv.version_id AND 
+    (lv.name = @structureName OR lv.id = @structureName OR 
+    lv.short_id = @structureName) AND 
+    lv.variable_name = @variableName %s 
 `,
 		selectFields,
 		(published.PublishedList{}).TableName(),

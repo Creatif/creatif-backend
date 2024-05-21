@@ -8,7 +8,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Public API", func() {
-	ginkgo.It("should get public list item by id (getListItemById)", func() {
+	ginkgo.It("should get public list item by id (getListItemById)", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		mapItem, _ := publishFullProject(projectId)
 

@@ -10,8 +10,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Public API", func() {
-	ginkgo.It("should get paginated list of list items", func() {
-		ginkgo.Skip("")
+	ginkgo.It("should get paginated list of list items", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
@@ -49,9 +48,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		gomega.Expect(len(models)).Should(gomega.Equal(0))
 	})
 
-	ginkgo.It("should get paginated list of list items based on group", func() {
-		ginkgo.Skip("")
-
+	ginkgo.It("should get paginated list of list items based on group", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
@@ -78,9 +75,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		}
 	})
 
-	ginkgo.It("should get paginated list of list items based on group and locale", func() {
-		ginkgo.Skip("")
-
+	ginkgo.It("should get paginated list of list items based on group and locale", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
@@ -107,9 +102,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		}
 	})
 
-	ginkgo.It("should get paginated list of list items based on group, locale and search", func() {
-		ginkgo.Skip("")
-
+	ginkgo.It("should get paginated list of list items based on group, locale and search", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 

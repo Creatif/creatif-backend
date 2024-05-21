@@ -8,7 +8,7 @@ import (
 )
 
 var _ = ginkgo.Describe("Public API", func() {
-	ginkgo.It("should get all version of a published project", func() {
+	ginkgo.It("should get all version of a published project", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
