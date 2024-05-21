@@ -109,7 +109,7 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/list/groups/:projectID/:name/:itemId", lists.GetListGroupsHandler())
 	group.POST("/list/range/:projectID/:name", lists.DeleteRangeByIDHandler())
 	group.GET("/lists/items/:projectID/:name", lists.PaginateListItemsHandler())
-	group.GET("/lists/:projectID/:name", lists.PaginateListsHandler())
+	group.GET("/lists/:projectID", lists.PaginateListsHandler())
 	group.GET("/list/query-id/:projectID/:name/:itemId", lists.QueryListByIDHandler())
 	group.POST("/list/rearrange/:projectID/:name/:source/:destination", lists.SwitchByIDHandler())
 	group.POST("/list/update/:projectID/:name", lists.UpdateListHandler())
@@ -125,7 +125,7 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/map/groups/:projectID/:name/:itemId", maps.GetMapGroupsHandler())
 	group.POST("/map/range/:projectID/:name", maps.DeleteRange())
 	group.GET("/maps/items/:projectID/:name", maps.PaginateMapVariables())
-	group.GET("/maps/:projectID/:name", maps.PaginateMapsHandler())
+	group.GET("/maps/:projectID", maps.PaginateMapsHandler())
 	group.GET("/map/:projectID/:name", maps.GetMapHandler())
 
 	group.GET("/references/:projectID/:parentID/:childID/:structureType/:relationshipType/:childStructureId/:parentStructureId", references.PaginateReferencesHandler())
