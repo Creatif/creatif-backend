@@ -1,5 +1,0 @@
-package sdk
-
-func ConcatSlices() {
-
-}

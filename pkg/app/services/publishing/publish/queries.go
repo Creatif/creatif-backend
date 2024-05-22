@@ -40,7 +40,9 @@ INSERT INTO %s (
     ID, 
     short_id, 
     name, 
-    groups
+    groups,
+    created_at,
+	updated_at
 )
 SELECT
     '%s' AS version_id,
@@ -56,7 +58,9 @@ SELECT
     l.name AS name,
     (
 		ARRAY((SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id))
-    ) AS groups
+    ) AS groups,
+    lv.created_at,
+    lv.updated_at
 FROM %s AS l
 INNER JOIN %s AS lv ON l.project_id = ? AND lv.map_id = l.id`,
 		(published.PublishedMap{}).TableName(),
@@ -88,7 +92,9 @@ INSERT INTO %s (
     ID, 
     short_id, 
     name, 
-    groups
+    groups,
+    created_at,
+    updated_at
 )
 SELECT
     '%s' AS version_id,
@@ -104,7 +110,9 @@ SELECT
     l.name AS name,
     (
 		ARRAY((SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id))
-    ) AS groups
+    ) AS groups,
+    lv.created_at,
+    lv.updated_at
 FROM %s AS l
 INNER JOIN %s AS lv ON l.project_id = ? AND lv.list_id = l.id`,
 		(published.PublishedList{}).TableName(),

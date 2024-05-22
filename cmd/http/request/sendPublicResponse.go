@@ -24,6 +24,10 @@ func SendPublicResponse[T any, F any, K any](handler pkg.Job[T, F, K], context e
 			}
 
 			return context.JSON(s, appError.Data())
+		} else {
+			return context.JSON(http.StatusInternalServerError, map[string]string{
+				"data": err.Error(),
+			})
 		}
 	}
 

@@ -33,25 +33,14 @@ func (a Model) Validate() map[string]string {
 	return nil
 }
 
-type ListView struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
-type MapView struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
 type View struct {
-	Lists []ListView `json:"lists"`
-	Maps  []MapView  `json:"maps"`
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	ShortID       string `json:"shortId"`
+	StructureType string `json:"structureType"`
+
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type LogicModel struct {
@@ -59,23 +48,37 @@ type LogicModel struct {
 	Maps  []declarations.Map  `json:"maps"`
 }
 
-func newView(model LogicModel) View {
-	return View{
-		Lists: sdk.Map(model.Lists, func(idx int, value declarations.List) ListView {
-			return ListView{
-				ID:        value.ID,
-				Name:      value.Name,
-				CreatedAt: value.CreatedAt,
-				UpdatedAt: value.UpdatedAt,
-			}
-		}),
-		Maps: sdk.Map(model.Maps, func(idx int, value declarations.Map) MapView {
-			return MapView{
-				ID:        value.ID,
-				Name:      value.Name,
-				CreatedAt: value.CreatedAt,
-				UpdatedAt: value.UpdatedAt,
-			}
-		}),
+func newView(model LogicModel) []View {
+	lists := sdk.Map(model.Lists, func(idx int, value declarations.List) View {
+		return View{
+			ID:            value.ID,
+			Name:          value.Name,
+			ShortID:       value.ShortID,
+			StructureType: "list",
+			CreatedAt:     value.CreatedAt,
+			UpdatedAt:     value.UpdatedAt,
+		}
+	})
+
+	maps := sdk.Map(model.Maps, func(idx int, value declarations.Map) View {
+		return View{
+			ID:            value.ID,
+			Name:          value.Name,
+			ShortID:       value.ShortID,
+			StructureType: "map",
+			CreatedAt:     value.CreatedAt,
+			UpdatedAt:     value.UpdatedAt,
+		}
+	})
+
+	views := make([]View, len(lists)+len(maps))
+	for i, l := range lists {
+		views[i] = l
 	}
+
+	for i, m := range maps {
+		views[i] = m
+	}
+
+	return views
 }

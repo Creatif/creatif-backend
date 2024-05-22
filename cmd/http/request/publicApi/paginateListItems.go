@@ -1,7 +1,6 @@
 package publicApi
 
 import (
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"github.com/microcosm-cc/bluemonday"
 	"strings"
@@ -38,10 +37,7 @@ func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
 
 	if model.Locales != "" {
 		model.SanitizedLocales = sdk.Map(strings.Split(model.Locales, ","), func(idx int, value string) string {
-			sanitized := p.Sanitize(strings.TrimSpace(value))
-			locale, _ := locales.GetIDWithAlpha(sanitized)
-
-			return locale
+			return p.Sanitize(strings.TrimSpace(value))
 		})
 	}
 

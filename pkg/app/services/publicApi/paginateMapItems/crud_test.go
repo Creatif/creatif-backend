@@ -7,7 +7,6 @@ import (
 	"creatif/pkg/lib/sdk"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"log"
 )
 
 var _ = ginkgo.Describe("Public API", func() {
@@ -16,7 +15,6 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		log.Fatalln("")
 		handler := New(NewModel(projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		models, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())

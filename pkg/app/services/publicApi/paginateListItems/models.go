@@ -37,14 +37,16 @@ func NewModel(projectId, structureName string, page int, order string, sortBy, s
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID": a.ProjectID,
-		"order":     a.Order,
-		"sortBy":    a.SortBy,
-		"locales":   a.Locales,
+		"projectID":     a.ProjectID,
+		"order":         a.Order,
+		"sortBy":        a.SortBy,
+		"structureName": a.StructureName,
+		"locales":       a.Locales,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("structureName", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("order", validation.By(func(value interface{}) error {
 				order := strings.ToLower(a.Order)
