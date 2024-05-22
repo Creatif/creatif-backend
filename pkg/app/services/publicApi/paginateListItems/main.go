@@ -75,7 +75,6 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	itemsSql, placeholders := getItemSql(c.model.StructureName, c.model.Page, order, sortBy, c.model.Search, lcls, c.model.Groups)
-	fmt.Println(itemsSql)
 	placeholders["projectId"] = c.model.ProjectID
 	placeholders["versionName"] = version.Name
 	res = storage.Gorm().Raw(itemsSql, placeholders).Scan(&items)

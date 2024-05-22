@@ -11,7 +11,6 @@ import (
 
 var _ = ginkgo.Describe("Public API", func() {
 	ginkgo.It("should get paginated list of map items", ginkgo.Label("public_api"), func() {
-
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
