@@ -15,7 +15,7 @@ import (
 func main() {
 	loadEnv()
 	db()
-	runMigrations()
+	RunMigration()
 	closeConnection()
 }
 
@@ -30,7 +30,7 @@ func closeConnection() {
 	}
 }
 
-func runMigrations() {
+func RunMigration() {
 	sqlDb := createSchemas()
 
 	if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO declarations;"); err != nil {

@@ -2,11 +2,14 @@ package main
 
 import (
 	"creatif/pkg/app/auth"
+	createAdmin2 "creatif/pkg/app/services/auth/createAdmin"
+	"creatif/pkg/app/services/auth/loginApi"
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/lists/addToList"
 	"creatif/pkg/app/services/lists/createList"
 	addToMap2 "creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
+	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -45,13 +48,8 @@ func main() {
 		}
 	}
 
-	projectids := []string{
-		"01HYBPT62WJPCJQJ7KWQXAW9A9",
-	}
-
-	for _, p := range projectids {
-		seed(p)
-	}
+	createAdmin()
+	seed(createProject("project", login()))
 }
 
 func seed(projectId string) {
@@ -81,8 +79,16 @@ func seed(projectId string) {
 
 	fmt.Println("Structures finished!")
 
+	fmt.Println("Creating real languages...")
 	englishId := listAdd(projectId, listStructures[0].ID, "English", []shared.Reference{})
 	frenchId := listAdd(projectId, listStructures[0].ID, "French", []shared.Reference{})
+	fmt.Println("Real languages created...")
+
+	fmt.Println("Creating fake languages...")
+	for i := 0; i < 10000; i++ {
+		listAdd(projectId, listStructures[0].ID, uuid.NewString(), []shared.Reference{})
+	}
+	fmt.Println("Fake languages finished")
 
 	fmt.Println("Creating languages...")
 	for i := 0; i < 50; i++ {
@@ -198,6 +204,8 @@ func addToMap(projectId, structureId, variableName string, references []shared.R
 
 func listAdd(projectId, structureId, variableName string, references []shared.Reference) string {
 	l := logger.NewLogBuilder()
+	defer l.Flush("")
+
 	value := map[string]interface{}{
 		"name": variableName,
 	}
@@ -224,7 +232,45 @@ func listAdd(projectId, structureId, variableName string, references []shared.Re
 		}
 		log.Fatalln(err)
 	}
-	l.Flush("")
 
 	return entry.ID
+}
+
+func createAdmin() {
+	l := logger.NewLogBuilder()
+	defer l.Flush("")
+	handler := createAdmin2.New(createAdmin2.NewModel("Mario", "Škrlec", "marioskrlec222@gmail.com", "password", true), l)
+
+	_, err := handler.Handle()
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func login() string {
+	l := logger.NewLogBuilder()
+	defer l.Flush("")
+	handler := loginApi.New(loginApi.NewModel("marioskrlec222@gmail.com", "password"), nil, l)
+
+	token, err := handler.Handle()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return token
+}
+
+func createProject(name, token string) string {
+	l := logger.NewLogBuilder()
+	defer l.Flush("")
+
+	auth := auth.NewApiAuthentication(token, l)
+	handler := createProject2.New(createProject2.NewModel(name), auth, l)
+
+	project, err := handler.Handle()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return project.ID
 }

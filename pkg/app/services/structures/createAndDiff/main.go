@@ -108,23 +108,23 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, err
 	}
 
-	structures := make([]ListOrMap, len(allLists)+len(allMaps))
-	for i, item := range allLists {
-		structures[i] = ListOrMap{
+	structures := make([]ListOrMap, 0)
+	for _, item := range allLists {
+		structures = append(structures, ListOrMap{
 			ID:            item.ID,
 			Name:          item.Name,
 			ShortID:       item.ShortID,
 			StructureType: "list",
-		}
+		})
 	}
 
-	for i, item := range allMaps {
-		structures[i] = ListOrMap{
+	for _, item := range allMaps {
+		structures = append(structures, ListOrMap{
 			ID:            item.ID,
 			Name:          item.Name,
 			ShortID:       item.ShortID,
 			StructureType: "map",
-		}
+		})
 	}
 
 	return LogicModel{

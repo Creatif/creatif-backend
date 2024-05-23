@@ -2,10 +2,13 @@ package main
 
 import (
 	"bufio"
-	app2 "creatif/pkg/app/domain/declarations"
+	app2 "creatif/pkg/app/domain/app"
+	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -90,7 +93,7 @@ func releaseAllLocks() error {
 }
 
 func loadLocales() error {
-	var exists app2.Locale
+	var exists declarations.Locale
 	if res := storage2.Gorm().First(&exists); res.Error != nil {
 		if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return res.Error
@@ -113,11 +116,11 @@ func loadLocales() error {
 	fileScanner := bufio.NewScanner(readFile)
 	fileScanner.Split(bufio.ScanLines)
 
-	l := make([]app2.Locale, 0)
+	l := make([]declarations.Locale, 0)
 	fileScanner.Scan()
 	for fileScanner.Scan() {
 		values := strings.Split(fileScanner.Text(), ",")
-		l = append(l, app2.NewLocale(values[3], values[0]))
+		l = append(l, declarations.NewLocale(values[3], values[0]))
 	}
 
 	if err := readFile.Close(); err != nil {
@@ -133,4 +136,118 @@ func loadLocales() error {
 	}
 
 	return nil
+}
+
+func createDatabase() {
+	ok, err := isMigrationPerformed()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if !ok {
+		sqlDb := createSchemas()
+
+		if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO declarations;"); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.Group{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.VariableGroup{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.Map{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.MapVariable{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.List{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.ListVariable{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.Group{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.Reference{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(declarations.Locale{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app;"); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(app2.Project{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(app2.User{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO published;"); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(published.PublishedList{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(published.PublishedMap{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(published.PublishedReference{}); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := storage2.Gorm().AutoMigrate(published.Version{}); err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+func isMigrationPerformed() (bool, error) {
+	// Most stupid check and migration ever
+	var count int
+	res := storage2.Gorm().Raw("SELECT count(schemaname) FROM pg_catalog.pg_tables where schemaname IN('declarations', 'app', 'published')").Scan(&count)
+	if res.Error != nil {
+		return false, res.Error
+	}
+
+	return count == 14, nil
+}
+
+func createSchemas() *sql.DB {
+	sqlDb, err := storage2.SQLDB()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS app"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS declarations"); err != nil {
+		log.Fatalln(err)
+	}
+	if _, err := sqlDb.Exec("CREATE SCHEMA IF NOT EXISTS published"); err != nil {
+		log.Fatalln(err)
+	}
+
+	return sqlDb
 }

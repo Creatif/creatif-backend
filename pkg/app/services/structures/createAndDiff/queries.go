@@ -41,7 +41,7 @@ func getStructures(projectId string, tableName string, model interface{}) error 
 func getProjectMetadata(projectId string) ([]MetadataModel, error) {
 	var logicModels []MetadataModel
 	res := storage.Gorm().Raw(fmt.Sprintf(`
-SELECT 
+SELECT DISTINCT ON (map_id, list_id)
 p.id,
 p.name,
 p.state,
@@ -53,8 +53,8 @@ l.name AS list_name,
 l.id AS list_id,
 l.short_id AS list_short_id
 FROM %s AS p
-LEFT JOIN %s AS m ON m.project_id = p.id AND m.project_id = ?
-LEFT JOIN %s AS l ON l.project_id = p.id AND l.project_id = ?
+FULL JOIN %s AS m ON m.project_id = p.id AND m.project_id = ?
+FULL JOIN %s AS l ON l.project_id = p.id AND l.project_id = ?
 WHERE p.id = ?
 `,
 		(app.Project{}).TableName(),

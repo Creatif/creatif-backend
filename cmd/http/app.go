@@ -49,6 +49,8 @@ func app() {
 		}
 	}
 
+	createDatabase()
+
 	if err := loadLocales(); err != nil {
 		sqlDB, err := storage.SQLDB()
 		if err != nil {
@@ -89,7 +91,6 @@ func appRoutes(group *echo.Group) {
 	group.PUT("/project", appHandlers.CreateProjectHandler())
 	group.GET("/project/exists", appHandlers.HasProjectsHandler())
 	group.POST("/project/metadata/:projectId", appHandlers.GetStructureMetadataHandler())
-	group.GET("/project-metadata", appHandlers.GetProjectMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
 	group.GET("/project/single/:id", appHandlers.GetProjectHandler())
 	group.PUT("/groups/:projectId", groups.AddGroupsHandler())

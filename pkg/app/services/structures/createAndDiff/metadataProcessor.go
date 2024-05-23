@@ -17,18 +17,15 @@ func processMetadata(metadata []MetadataModel) PreViewModel {
 
 	for _, v := range metadata {
 		if v.Map != "" {
-			// if an entry exists, skip
-			for _, l := range preViewModel.Lists {
-				if l.Name == v.Map {
-					continue
-				}
+			if !sdk.IncludesFn(preViewModel.Maps, func(item PreViewStructure) bool {
+				return item.Name == v.Map
+			}) {
+				preViewModel.Maps = append(preViewModel.Maps, PreViewStructure{
+					Name:    v.Map,
+					ID:      v.MapID,
+					ShortID: v.MapShortID,
+				})
 			}
-
-			preViewModel.Maps = append(preViewModel.Maps, PreViewStructure{
-				Name:    v.Map,
-				ID:      v.MapID,
-				ShortID: v.MapShortID,
-			})
 		}
 
 		if v.List != "" {
