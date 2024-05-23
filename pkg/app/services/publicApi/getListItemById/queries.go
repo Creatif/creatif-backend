@@ -3,9 +3,12 @@ package getListItemById
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/domain/published"
+	"creatif/pkg/app/services/publicApi/publicApiError"
+	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -76,7 +79,7 @@ func getListItemSql(options Options) string {
 SELECT 
     %s
 FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_id = ?  
+INNER JOIN %s AS v ON v.project_id = ? AND lv.version_id = ? AND v.id = lv.version_id AND lv.variable_id = ?  
 `,
 		selectFields,
 		(published.PublishedList{}).TableName(),
@@ -104,7 +107,7 @@ SELECT
 	lv.updated_at,
 (SELECT g.groups FROM %s AS g WHERE lv.variable_id = g.variable_id LIMIT 1) AS groups
 FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_id = ?
+INNER JOIN %s AS v ON v.project_id = ? AND v.id = ? AND v.id = lv.version_id AND lv.variable_id = ?
 INNER JOIN %s AS c ON c.project_id = ? AND c.project_id = v.project_id AND v.name = ? AND v.id = c.version_id AND c.child_id = ?
 `,
 		(declarations.VariableGroup{}).TableName(),
@@ -112,4 +115,33 @@ INNER JOIN %s AS c ON c.project_id = ? AND c.project_id = v.project_id AND v.nam
 		(published.Version{}).TableName(),
 		(published.PublishedReference{}).TableName(),
 	)
+}
+
+func getVersion(projectId, versionName string) (published.Version, error) {
+	var version published.Version
+	var res *gorm.DB
+	if versionName == "" {
+		res = storage.Gorm().Raw(
+			fmt.Sprintf("SELECT id, name FROM %s WHERE project_id = ? AND is_production_version = true",
+				(published.Version{}).TableName()),
+			projectId).
+			Scan(&version)
+	} else {
+		res = storage.Gorm().Raw(
+			fmt.Sprintf("SELECT id, name FROM %s WHERE project_id = ? AND name = ?", (published.Version{}).TableName()), projectId, versionName).Scan(&version)
+	}
+
+	if res.Error != nil {
+		return published.Version{}, publicApiError.NewError("getListItemById", map[string]string{
+			"internalError": res.Error.Error(),
+		}, publicApiError.DatabaseError)
+	}
+
+	if res.RowsAffected == 0 {
+		return published.Version{}, publicApiError.NewError("getListItemById", map[string]string{
+			"notFound": "This list item does not exist",
+		}, publicApiError.NotFoundError)
+	}
+
+	return version, nil
 }

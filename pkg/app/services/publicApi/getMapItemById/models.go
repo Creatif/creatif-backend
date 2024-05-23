@@ -12,16 +12,18 @@ type Options struct {
 }
 
 type Model struct {
-	ProjectID string
-	ItemID    string
+	ProjectID   string
+	ItemID      string
+	VersionName string
 
 	Options Options
 }
 
-func NewModel(projectId, itemId string, options Options) Model {
+func NewModel(versionName string, projectId, itemId string, options Options) Model {
 	return Model{
-		ProjectID: projectId,
-		ItemID:    itemId,
+		ProjectID:   projectId,
+		ItemID:      itemId,
+		VersionName: versionName,
 
 		Options: options,
 	}
@@ -29,12 +31,14 @@ func NewModel(projectId, itemId string, options Options) Model {
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID": a.ProjectID,
-		"itemId":    a.ItemID,
+		"projectID":   a.ProjectID,
+		"itemId":      a.ItemID,
+		"versionName": a.VersionName,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("versionName", validation.When(a.VersionName != "", validation.RuneLength(1, 200))),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("itemId", validation.Required, validation.RuneLength(26, 26)),
 		),

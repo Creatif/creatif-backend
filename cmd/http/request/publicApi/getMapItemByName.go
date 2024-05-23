@@ -14,6 +14,7 @@ type GetMapItemByName struct {
 	Name          string `param:"name"`
 	Locale        string `query:"locale"`
 	Options       string `query:"options"`
+	VersionName   string
 
 	ResolvedOptions GetListItemByIDOptions
 }
@@ -25,6 +26,7 @@ func SanitizeGetMapItemByName(model GetMapItemByName) GetMapItemByName {
 	model.Locale = p.Sanitize(model.Locale)
 	model.Name = p.Sanitize(model.Name)
 	model.Options = p.Sanitize(model.Options)
+	model.VersionName = p.Sanitize(model.VersionName)
 
 	if model.Options != "" {
 		model.ResolvedOptions = resolveListOptions(model.Options)

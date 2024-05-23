@@ -13,6 +13,7 @@ import (
 type Model struct {
 	ProjectID     string
 	StructureName string
+	VersionName   string
 
 	Page    int
 	Order   string
@@ -22,9 +23,10 @@ type Model struct {
 	Groups  []string
 }
 
-func NewModel(projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string) Model {
+func NewModel(versionName, projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string) Model {
 	return Model{
 		StructureName: structureName,
+		VersionName:   versionName,
 		ProjectID:     projectId,
 		Page:          page,
 		Order:         order,
@@ -42,10 +44,12 @@ func (a Model) Validate() map[string]string {
 		"sortBy":        a.SortBy,
 		"structureName": a.StructureName,
 		"locales":       a.Locales,
+		"versionName":   a.VersionName,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("versionName", validation.When(a.VersionName != "", validation.RuneLength(1, 200))),
 			validation.Key("structureName", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("order", validation.By(func(value interface{}) error {

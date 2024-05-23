@@ -15,6 +15,7 @@ type PaginateListItems struct {
 	Search         string `query:"search"`
 	OrderBy        string `query:"orderBy"`
 	OrderDirection string `query:"direction"`
+	VersionName    string
 
 	SanitizedGroups  []string
 	SanitizedLocales []string
@@ -28,6 +29,7 @@ func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
 	model.Search = p.Sanitize(model.Search)
 	model.OrderDirection = p.Sanitize(model.OrderDirection)
 	model.OrderBy = p.Sanitize(model.OrderBy)
+	model.VersionName = p.Sanitize(model.VersionName)
 
 	if model.Groups != "" {
 		model.SanitizedGroups = sdk.Map(strings.Split(model.Groups, ","), func(idx int, value string) string {

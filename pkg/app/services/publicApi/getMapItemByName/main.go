@@ -2,14 +2,12 @@ package getMapItemByName
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"fmt"
 )
 
 type Main struct {
@@ -41,18 +39,9 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
-	var version published.Version
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version)
-	if res.Error != nil {
-		return LogicModel{}, publicApiError.NewError("getMapItemByName", map[string]string{
-			"error": res.Error.Error(),
-		}, publicApiError.DatabaseError)
-	}
-
-	if res.RowsAffected == 0 {
-		return LogicModel{}, publicApiError.NewError("getMapItemByName", map[string]string{
-			"versionNotFound": "Production version has not been found.",
-		}, publicApiError.NotFoundError)
+	version, err := getVersion(c.model.ProjectID, c.model.VersionName)
+	if err != nil {
+		return LogicModel{}, err
 	}
 
 	placeholders := make(map[string]interface{})
@@ -69,7 +58,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var mapItem Item
-	res = storage.Gorm().Raw(getItemSql(locale), placeholders).Scan(&mapItem)
+	res := storage.Gorm().Raw(getItemSql(locale), placeholders).Scan(&mapItem)
 	if res.Error != nil {
 		return LogicModel{}, publicApiError.NewError("getMapItemByName", map[string]string{
 			"error": res.Error.Error(),

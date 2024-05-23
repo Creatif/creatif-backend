@@ -2,7 +2,6 @@ package getListItemsByName
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
@@ -10,8 +9,6 @@ import (
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
-	"fmt"
-	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -43,27 +40,9 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
-	var version published.Version
-	var res *gorm.DB
-	if c.model.VersionName == "" {
-		res = storage.Gorm().Raw(
-			fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()),
-			c.model.ProjectID).Scan(&version)
-	} else {
-		res = storage.Gorm().Raw(
-			fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND name = ?", (published.Version{}).TableName()), c.model.ProjectID, c.model.VersionName).Scan(&version)
-	}
-
-	if res.Error != nil {
-		return LogicModel{}, publicApiError.NewError("getListItemsByName", map[string]string{
-			"error": res.Error.Error(),
-		}, publicApiError.DatabaseError)
-	}
-
-	if res.RowsAffected == 0 {
-		return LogicModel{}, publicApiError.NewError("getListItemsByName", map[string]string{
-			"invalidVersion": "Production version has not been found",
-		}, publicApiError.NotFoundError)
+	version, err := getVersion(c.model.ProjectID, c.model.VersionName)
+	if err != nil {
+		return LogicModel{}, err
 	}
 
 	placeholders := make(map[string]interface{})
@@ -86,7 +65,7 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	var items []Item
-	res = storage.Gorm().Raw(
+	res := storage.Gorm().Raw(
 		getItemSql(locale, c.model.Options),
 		placeholders,
 	).Scan(&items)

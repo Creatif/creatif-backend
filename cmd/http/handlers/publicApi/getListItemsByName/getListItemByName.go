@@ -1,6 +1,7 @@
 package getListItemsByName
 
 import (
+	publicApi2 "creatif/cmd/http/handlers/publicApi"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
@@ -17,7 +18,7 @@ func GetListItemsByNameHandler() func(e echo.Context) error {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		versionName := c.Request().Header.Get("Creatif_Version")
+		versionName := c.Request().Header.Get(publicApi2.CreatifVersionHeader)
 		model.VersionName = versionName
 		model = publicApi.SanitizeGetListItemByName(model)
 

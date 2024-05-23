@@ -97,7 +97,15 @@ func (c Main) Logic() (LogicModel, error) {
 		c.model.Entry.Groups = []string{}
 	}
 
+	highestIndex, err := getHighestIndex(m.ID)
+	if err != nil {
+		c.logBuilder.Add("addToMap", err.Error())
+		return LogicModel{}, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
+	}
+
 	variable := declarations.NewListVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Value)
+	variable.Index = highestIndex + 1024
+
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&variable); res.Error != nil {

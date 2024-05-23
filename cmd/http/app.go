@@ -70,6 +70,7 @@ func app() {
 			echo.HeaderAccept,
 			echo.HeaderCookie,
 			echo.HeaderAccessControlAllowCredentials,
+			"Creatif-Version",
 		},
 		AllowMethods: []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))

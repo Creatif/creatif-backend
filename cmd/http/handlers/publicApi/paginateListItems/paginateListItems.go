@@ -1,6 +1,7 @@
 package paginateListItems
 
 import (
+	publicApi2 "creatif/cmd/http/handlers/publicApi"
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
@@ -17,10 +18,13 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
+		versionName := c.Request().Header.Get(publicApi2.CreatifVersionHeader)
+		model.VersionName = versionName
 		model = publicApi.SanitizePaginateListItems(model)
 
 		l := logger.NewLogBuilder()
 		handler := paginateListItems.New(paginateListItems.NewModel(
+			model.VersionName,
 			model.ProjectID,
 			model.ListName,
 			model.Page,

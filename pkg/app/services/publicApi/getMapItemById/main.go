@@ -2,13 +2,11 @@ package getMapItemById
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/published"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
-	"fmt"
 )
 
 type Main struct {
@@ -40,18 +38,13 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (LogicModel, error) {
-	var version published.Version
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version)
-	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
-	}
-
-	if res.RowsAffected == 0 {
-		return LogicModel{}, appErrors.NewNotFoundError(errors.New("Production version has not been found"))
+	version, err := getVersion(c.model.ProjectID, c.model.VersionName)
+	if err != nil {
+		return LogicModel{}, err
 	}
 
 	var mapItem Item
-	res = storage.Gorm().Raw(getItemSql(c.model.Options), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&mapItem)
+	res := storage.Gorm().Raw(getItemSql(c.model.Options), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&mapItem)
 	if res.Error != nil {
 		return LogicModel{}, appErrors.NewApplicationError(res.Error)
 	}
