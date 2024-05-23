@@ -13,6 +13,7 @@ type GetListItemByName struct {
 	StructureName string `param:"structureName"`
 	Name          string `param:"name"`
 	Locale        string `query:"locale"`
+	VersionName   string
 	Options       string `query:"options"`
 
 	ResolvedOptions GetListItemByIDOptions
@@ -25,6 +26,7 @@ func SanitizeGetListItemByName(model GetListItemByName) GetListItemByName {
 	model.Locale = p.Sanitize(model.Locale)
 	model.Name = p.Sanitize(model.Name)
 	model.Options = p.Sanitize(model.Options)
+	model.VersionName = p.Sanitize(model.VersionName)
 
 	if model.Options != "" {
 		model.ResolvedOptions = resolveListOptions(model.Options)

@@ -17,10 +17,13 @@ func GetListItemByIDHandler() func(e echo.Context) error {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
+		versionName := c.Request().Header.Get("Creatif-Version")
+		model.VersionName = versionName
+
 		model = publicApi.SanitizeGetListItemByID(model)
 
 		l := logger.NewLogBuilder()
-		handler := getListItemByIDService.New(getListItemByIDService.NewModel(model.ProjectID, model.ItemID, getListItemByIDService.Options{
+		handler := getListItemByIDService.New(getListItemByIDService.NewModel(model.VersionName, model.ProjectID, model.ItemID, getListItemByIDService.Options{
 			ValueOnly: model.ResolvedOptions.ValueOnly,
 		}), auth.NewAnonymousAuthentication(), l)
 

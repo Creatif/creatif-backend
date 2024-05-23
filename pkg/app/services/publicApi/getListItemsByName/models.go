@@ -14,6 +14,7 @@ type Model struct {
 	StructureName string
 	Name          string
 	Locale        string
+	VersionName   string
 	Options       Options
 }
 
@@ -21,10 +22,11 @@ type Options struct {
 	ValueOnly bool
 }
 
-func NewModel(projectId, structureName, name, locale string, options Options) Model {
+func NewModel(versionName, projectId, structureName, name, locale string, options Options) Model {
 	return Model{
 		ProjectID:     projectId,
 		StructureName: structureName,
+		VersionName:   versionName,
 		Name:          name,
 		Locale:        locale,
 		Options:       options,
@@ -37,10 +39,12 @@ func (a Model) Validate() map[string]string {
 		"name":          a.Name,
 		"structureName": a.StructureName,
 		"locale":        a.Locale,
+		"versionName":   a.VersionName,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("versionName", validation.When(a.VersionName != "", validation.RuneLength(1, 200))),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("structureName", validation.Required, validation.RuneLength(1, 200)),

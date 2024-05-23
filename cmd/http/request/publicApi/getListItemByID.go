@@ -9,9 +9,10 @@ type GetListItemByIDOptions struct {
 }
 
 type GetListItemByID struct {
-	ProjectID string `param:"projectId"`
-	ItemID    string `param:"id"`
-	Options   string `query:"options"`
+	ProjectID   string `param:"projectId"`
+	ItemID      string `param:"id"`
+	VersionName string
+	Options     string `query:"options"`
 
 	ResolvedOptions GetListItemByIDOptions
 }
@@ -21,6 +22,7 @@ func SanitizeGetListItemByID(model GetListItemByID) GetListItemByID {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.ItemID = p.Sanitize(model.ItemID)
 	model.Options = p.Sanitize(model.Options)
+	model.VersionName = p.Sanitize(model.VersionName)
 
 	if model.Options != "" {
 		model.ResolvedOptions = resolveListOptions(model.Options)

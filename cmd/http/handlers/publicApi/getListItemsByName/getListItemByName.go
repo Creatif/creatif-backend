@@ -17,10 +17,12 @@ func GetListItemsByNameHandler() func(e echo.Context) error {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
+		versionName := c.Request().Header.Get("Creatif_Version")
+		model.VersionName = versionName
 		model = publicApi.SanitizeGetListItemByName(model)
 
 		l := logger.NewLogBuilder()
-		handler := getListItemsByNameService.New(getListItemsByNameService.NewModel(model.ProjectID, model.StructureName, model.Name, model.Locale, getListItemsByNameService.Options{
+		handler := getListItemsByNameService.New(getListItemsByNameService.NewModel(model.VersionName, model.ProjectID, model.StructureName, model.Name, model.Locale, getListItemsByNameService.Options{
 			ValueOnly: model.ResolvedOptions.ValueOnly,
 		}), auth.NewAnonymousAuthentication(), l)
 

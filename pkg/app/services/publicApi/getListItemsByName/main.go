@@ -11,6 +11,7 @@ import (
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
+	"gorm.io/gorm"
 )
 
 type Main struct {
@@ -43,7 +44,16 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (LogicModel, error) {
 	var version published.Version
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version)
+	var res *gorm.DB
+	if c.model.VersionName == "" {
+		res = storage.Gorm().Raw(
+			fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true", (published.Version{}).TableName()),
+			c.model.ProjectID).Scan(&version)
+	} else {
+		res = storage.Gorm().Raw(
+			fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND name = ?", (published.Version{}).TableName()), c.model.ProjectID, c.model.VersionName).Scan(&version)
+	}
+
 	if res.Error != nil {
 		return LogicModel{}, publicApiError.NewError("getListItemsByName", map[string]string{
 			"error": res.Error.Error(),

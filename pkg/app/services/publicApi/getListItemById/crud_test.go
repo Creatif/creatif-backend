@@ -12,7 +12,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		mapItem, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, mapItem.ID, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, mapItem.ID, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		model, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		item := model.(View)

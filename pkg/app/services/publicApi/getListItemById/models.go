@@ -8,8 +8,9 @@ import (
 )
 
 type Model struct {
-	ProjectID string
-	ItemID    string
+	ProjectID   string
+	ItemID      string
+	VersionName string
 
 	Options Options
 }
@@ -18,22 +19,25 @@ type Options struct {
 	ValueOnly bool
 }
 
-func NewModel(projectId, itemId string, options Options) Model {
+func NewModel(versionName, projectId, itemId string, options Options) Model {
 	return Model{
-		ProjectID: projectId,
-		ItemID:    itemId,
-		Options:   options,
+		ProjectID:   projectId,
+		ItemID:      itemId,
+		Options:     options,
+		VersionName: versionName,
 	}
 }
 
 func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"projectID": a.ProjectID,
-		"itemId":    a.ItemID,
+		"projectID":   a.ProjectID,
+		"itemId":      a.ItemID,
+		"versionName": a.VersionName,
 	}
 
 	if err := validation.Validate(v,
 		validation.Map(
+			validation.Key("versionName", validation.When(a.VersionName != "", validation.RuneLength(1, 200))),
 			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
 			validation.Key("itemId", validation.Required, validation.RuneLength(26, 26)),
 		),
@@ -97,7 +101,7 @@ func newView(model LogicModel) interface{} {
 	if model.Options.ValueOnly {
 		return model.Item.Value
 	}
-	
+
 	locale, _ := locales.GetAlphaWithID(model.Item.Locale)
 	connections := make(map[string]ConnectionView)
 	for _, c := range model.Connections {
