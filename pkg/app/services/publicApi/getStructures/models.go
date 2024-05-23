@@ -71,13 +71,13 @@ func newView(model LogicModel) []View {
 		}
 	})
 
-	views := make([]View, len(lists)+len(maps))
-	for i, l := range lists {
-		views[i] = l
+	views := make([]View, 0)
+	for _, l := range lists {
+		views = append(views, l)
 	}
 
-	for i, m := range maps {
-		views[i] = m
+	for _, m := range maps {
+		views = append(views, m)
 	}
 
 	return views

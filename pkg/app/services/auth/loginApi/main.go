@@ -61,7 +61,7 @@ FROM %s AS u WHERE u.email = ?
 
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.model.Password))
 	if err != nil {
-		return "", appErrors.NewAuthenticationError(err)
+		return "", appErrors.NewAuthenticationError(errors.New("Email or password are invalid"))
 	}
 
 	if !user.Confirmed {
