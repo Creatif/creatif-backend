@@ -16,15 +16,19 @@ import (
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
+	"github.com/jaswdr/faker"
 	"log"
 	"sync"
 )
+
+var fake faker.Person
 
 func main() {
 	loadEnv()
 	runDb()
 	runLogger()
+
+	fake = faker.New().Person()
 
 	if err := releaseAllLocks(); err != nil {
 		sqlDB, err := storage.SQLDB()
@@ -86,7 +90,7 @@ func seed(projectId string) {
 
 	fmt.Println("Creating fake languages...")
 	for i := 0; i < 10000; i++ {
-		listAdd(projectId, listStructures[0].ID, uuid.NewString(), []shared.Reference{})
+		listAdd(projectId, listStructures[0].ID, fakePerson(), []shared.Reference{})
 	}
 	fmt.Println("Fake languages finished")
 
@@ -108,7 +112,7 @@ func addBatch(projectId, englishId, frenchId, mapStructureId string) {
 					languageId = frenchId
 				}
 
-				addToMap(projectId, mapStructureId, uuid.NewString(), []shared.Reference{
+				addToMap(projectId, mapStructureId, fakePerson(), []shared.Reference{
 					{
 						Name:          "language",
 						StructureType: "list",
@@ -273,4 +277,8 @@ func createProject(name, token string) string {
 	}
 
 	return project.ID
+}
+
+func fakePerson() string {
+	return fmt.Sprintf("%s %s", fake.Name(), fake.Name())
 }
