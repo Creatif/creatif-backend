@@ -114,9 +114,14 @@ type View struct {
 type LogicModel struct {
 	Item        Item
 	Connections []ConnectionItem
+	Options     Options
 }
 
-func newView(model LogicModel) View {
+func newView(model LogicModel) interface{} {
+	if model.Options.ValueOnly {
+		return model.Item.Value
+	}
+
 	locale, _ := locales.GetAlphaWithID(model.Item.Locale)
 	connections := make(map[string]ConnectionView)
 	for _, c := range model.Connections {

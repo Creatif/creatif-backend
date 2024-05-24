@@ -95,9 +95,11 @@ func seed(projectId string) {
 	fmt.Println("Fake languages finished")
 
 	fmt.Println("Creating languages...")
-	for i := 0; i < 50; i++ {
-		fmt.Println(fmt.Sprintf("Batch %d finished.", i))
-		addBatch(projectId, englishId, frenchId, mapStructures[0].ID)
+	for a := 0; a < 10; a++ {
+		for i := 0; i < 50; i++ {
+			fmt.Println(fmt.Sprintf("Batch %d finished.", i))
+			addBatch(projectId, englishId, frenchId, mapStructures[0].ID)
+		}
 	}
 }
 

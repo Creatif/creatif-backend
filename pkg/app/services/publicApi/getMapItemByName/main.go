@@ -82,32 +82,33 @@ func (c Main) Logic() (LogicModel, error) {
 	return LogicModel{
 		Item:        mapItem,
 		Connections: connections,
+		Options:     c.model.Options,
 	}, nil
 }
 
-func (c Main) Handle() (View, error) {
+func (c Main) Handle() (interface{}, error) {
 	if err := c.Validate(); err != nil {
-		return View{}, err
+		return nil, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return View{}, err
+		return nil, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return View{}, err
+		return nil, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return View{}, err
+		return nil, err
 	}
 
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, LogicModel] {
 	logBuilder.Add("getMapItemByName", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }
