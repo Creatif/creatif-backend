@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 )
@@ -19,7 +18,7 @@ type Main struct {
 func (c Main) Validate() error {
 	c.logBuilder.Add("getMapItemByName", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
-		return appErrors.NewValidationError(errs)
+		return publicApiError.NewError("getMapItemByName", errs, publicApiError.ValidationError)
 	}
 
 	c.logBuilder.Add("getMapItemByName", "Validated")
@@ -28,7 +27,9 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return appErrors.NewAuthenticationError(err)
+		return publicApiError.NewError("getMapItemByName", map[string]string{
+			"unauthorized": "You are unauthorized to use this route",
+		}, 403)
 	}
 
 	return nil

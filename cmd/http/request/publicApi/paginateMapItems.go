@@ -1,7 +1,6 @@
 package publicApi
 
 import (
-	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
 	"github.com/microcosm-cc/bluemonday"
 	"strings"
@@ -16,11 +15,13 @@ type PaginateMapItems struct {
 	Search         string `query:"search"`
 	OrderBy        string `query:"orderBy"`
 	OrderDirection string `query:"direction"`
+	Options        string `query:"options"`
 	VersionName    string
 
 	SanitizedGroups  []string
 	SanitizedLocales []string
 	SanitizedFields  []string
+	ResolvedOptions  GetListItemByIDOptions
 }
 
 func SanitizePaginateMapItems(model PaginateMapItems) PaginateMapItems {
@@ -40,11 +41,12 @@ func SanitizePaginateMapItems(model PaginateMapItems) PaginateMapItems {
 
 	if model.Locales != "" {
 		model.SanitizedLocales = sdk.Map(strings.Split(model.Locales, ","), func(idx int, value string) string {
-			sanitized := p.Sanitize(strings.TrimSpace(value))
-			locale, _ := locales.GetIDWithAlpha(sanitized)
-
-			return locale
+			return p.Sanitize(strings.TrimSpace(value))
 		})
+	}
+
+	if model.Options != "" {
+		model.ResolvedOptions = resolveListOptions(model.Options)
 	}
 
 	return model

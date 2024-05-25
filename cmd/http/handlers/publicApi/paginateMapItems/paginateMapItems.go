@@ -33,6 +33,9 @@ func PaginateMapItemsHandler() func(e echo.Context) error {
 			model.Search,
 			model.SanitizedLocales,
 			model.SanitizedGroups,
+			paginateMapItems.Options{
+				ValueOnly: model.ResolvedOptions.ValueOnly,
+			},
 		), auth.NewAnonymousAuthentication(), l)
 
 		return request.SendPublicResponse[paginateMapItems.Model](handler, c, http.StatusOK, l, nil, false)

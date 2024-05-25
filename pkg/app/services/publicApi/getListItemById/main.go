@@ -17,7 +17,7 @@ type Main struct {
 func (c Main) Validate() error {
 	c.logBuilder.Add("getListItemById", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
-		return publicApiError.NewError("getListItemById", errs, 422)
+		return publicApiError.NewError("getListItemById", errs, publicApiError.ValidationError)
 	}
 
 	c.logBuilder.Add("getListItemById", "Validated")

@@ -33,6 +33,9 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			model.Search,
 			model.SanitizedLocales,
 			model.SanitizedGroups,
+			paginateListItems.Options{
+				ValueOnly: model.ResolvedOptions.ValueOnly,
+			},
 		), auth.NewAnonymousAuthentication(), l)
 
 		return request.SendPublicResponse[paginateListItems.Model](handler, c, http.StatusOK, l, nil, false)

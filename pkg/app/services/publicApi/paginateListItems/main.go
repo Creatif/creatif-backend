@@ -20,7 +20,7 @@ type Main struct {
 func (c Main) Validate() error {
 	c.logBuilder.Add("paginateListItems", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
-		return publicApiError.NewError("paginateListItems", errs, 422)
+		return publicApiError.NewError("paginateListItems", errs, publicApiError.ValidationError)
 	}
 
 	c.logBuilder.Add("paginateListItems", "Validated")
@@ -86,7 +86,7 @@ func (c Main) Logic() (LogicModel, error) {
 	})
 
 	var connections []ConnectionItem
-	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, childIds, c.model.ProjectID, version.Name, childIds).Scan(&connections)
+	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, c.model.ProjectID, version.Name, childIds).Scan(&connections)
 	if res.Error != nil {
 		return LogicModel{}, publicApiError.NewError("paginateListItems", map[string]string{
 			"error": res.Error.Error(),
@@ -107,32 +107,33 @@ func (c Main) Logic() (LogicModel, error) {
 	return LogicModel{
 		Items:       items,
 		Connections: mappedConnections,
+		Options:     c.model.Options,
 	}, nil
 }
 
-func (c Main) Handle() ([]View, error) {
+func (c Main) Handle() (interface{}, error) {
 	if err := c.Validate(); err != nil {
-		return []View{}, err
+		return nil, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return []View{}, err
+		return nil, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return []View{}, err
+		return nil, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return []View{}, err
+		return nil, err
 	}
 
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, LogicModel] {
 	logBuilder.Add("paginateListItems", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

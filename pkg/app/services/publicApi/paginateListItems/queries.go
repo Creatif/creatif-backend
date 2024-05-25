@@ -136,7 +136,7 @@ SELECT
 	lv.updated_at,
 	lv.groups
 FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_id IN(?)
+INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id
 INNER JOIN %s AS c ON c.project_id = ? AND c.project_id = v.project_id AND v.name = ? AND v.id = c.version_id AND c.child_id IN (?)
 `,
 		(published.PublishedList{}).TableName(),

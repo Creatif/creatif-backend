@@ -2,11 +2,10 @@ package getMapItemById
 
 import (
 	"creatif/pkg/app/auth"
+	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"errors"
 )
 
 type Main struct {
@@ -18,7 +17,7 @@ type Main struct {
 func (c Main) Validate() error {
 	c.logBuilder.Add("getVersions", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
-		return appErrors.NewValidationError(errs)
+		return publicApiError.NewError("getMapItemById", errs, publicApiError.ValidationError)
 	}
 
 	c.logBuilder.Add("getVersions", "Validated")
@@ -27,7 +26,9 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return appErrors.NewAuthenticationError(err)
+		return publicApiError.NewError("getMapItemById", map[string]string{
+			"unauthorized": "You are unauthorized to use this route",
+		}, 403)
 	}
 
 	return nil
@@ -46,17 +47,23 @@ func (c Main) Logic() (LogicModel, error) {
 	var mapItem Item
 	res := storage.Gorm().Raw(getItemSql(c.model.Options), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&mapItem)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("getMapItemById", map[string]string{
+			"data": res.Error.Error(),
+		}, publicApiError.ApplicationError)
 	}
 
 	if res.RowsAffected == 0 {
-		return LogicModel{}, appErrors.NewNotFoundError(errors.New("This item does not seem to exist"))
+		return LogicModel{}, publicApiError.NewError("getMapItemById", map[string]string{
+			"data": "This item does not exist",
+		}, publicApiError.NotFoundError)
 	}
 
 	var connections []ConnectionItem
 	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, c.model.ItemID, c.model.ProjectID, version.Name, c.model.ItemID).Scan(&connections)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("getMapItemById", map[string]string{
+			"data": res.Error.Error(),
+		}, publicApiError.ApplicationError)
 	}
 
 	return LogicModel{

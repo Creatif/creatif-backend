@@ -59,6 +59,7 @@ func UpdateReferences(refs []UpdateReference, childStructureId, ownerId, project
 		updatePerformed := false
 		// to update
 		for _, updatableRef := range updateableReferences {
+			fmt.Println(incomingRef.Name, incomingRef.StructureName, incomingRef.StructureType, incomingRef.VariableID, childStructureId)
 			if updatableRef.Name == incomingRef.Name {
 				pr, err := getParentReference(incomingRef.StructureType, incomingRef.VariableID, childStructureId)
 				if err != nil {

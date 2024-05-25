@@ -1,6 +1,8 @@
 package publicApi
 
-import "strings"
+import (
+	"strings"
+)
 
 func resolveListOptions(options string) GetListItemByIDOptions {
 	opts := GetListItemByIDOptions{}

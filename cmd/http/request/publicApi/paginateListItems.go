@@ -15,11 +15,13 @@ type PaginateListItems struct {
 	Search         string `query:"search"`
 	OrderBy        string `query:"orderBy"`
 	OrderDirection string `query:"direction"`
+	Options        string `query:"options"`
 	VersionName    string
 
 	SanitizedGroups  []string
 	SanitizedLocales []string
 	SanitizedFields  []string
+	ResolvedOptions  GetListItemByIDOptions
 }
 
 func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
@@ -41,6 +43,10 @@ func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
 		model.SanitizedLocales = sdk.Map(strings.Split(model.Locales, ","), func(idx int, value string) string {
 			return p.Sanitize(strings.TrimSpace(value))
 		})
+	}
+
+	if model.Options != "" {
+		model.ResolvedOptions = resolveListOptions(model.Options)
 	}
 
 	return model

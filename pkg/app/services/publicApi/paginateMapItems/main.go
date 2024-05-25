@@ -3,8 +3,8 @@ package paginateMapItems
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
@@ -20,7 +20,7 @@ type Main struct {
 func (c Main) Validate() error {
 	c.logBuilder.Add("getListItemsByName", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
-		return appErrors.NewValidationError(errs)
+		return publicApiError.NewError("paginateMapItems", errs, publicApiError.ValidationError)
 	}
 
 	c.logBuilder.Add("getListItemsByName", "Validated")
@@ -29,7 +29,9 @@ func (c Main) Validate() error {
 
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
-		return appErrors.NewAuthenticationError(err)
+		return publicApiError.NewError("paginateMapItems", map[string]string{
+			"unauthorized": "You are unauthorized to use this route",
+		}, 403)
 	}
 
 	return nil
@@ -67,7 +69,9 @@ func (c Main) Logic() (LogicModel, error) {
 	placeholders["versionName"] = version.Name
 	res := storage.Gorm().Raw(itemsSql, placeholders).Scan(&items)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("paginateListItems", map[string]string{
+			"error": res.Error.Error(),
+		}, publicApiError.ApplicationError)
 	}
 
 	if res.RowsAffected == 0 {
@@ -84,7 +88,9 @@ func (c Main) Logic() (LogicModel, error) {
 	var connections []ConnectionItem
 	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, childIds, c.model.ProjectID, version.Name, childIds).Scan(&connections)
 	if res.Error != nil {
-		return LogicModel{}, appErrors.NewApplicationError(res.Error)
+		return LogicModel{}, publicApiError.NewError("paginateMapItems", map[string]string{
+			"error": res.Error.Error(),
+		}, publicApiError.ApplicationError)
 	}
 
 	mappedConnections := make(map[string][]ConnectionItem)
@@ -101,32 +107,33 @@ func (c Main) Logic() (LogicModel, error) {
 	return LogicModel{
 		Items:       items,
 		Connections: mappedConnections,
+		Options:     c.model.Options,
 	}, nil
 }
 
-func (c Main) Handle() ([]View, error) {
+func (c Main) Handle() (interface{}, error) {
 	if err := c.Validate(); err != nil {
-		return []View{}, err
+		return nil, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return []View{}, err
+		return nil, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return []View{}, err
+		return nil, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return []View{}, err
+		return nil, err
 	}
 
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, LogicModel] {
+func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, LogicModel] {
 	logBuilder.Add("getListItemsByName", "Created")
 	return Main{model: model, logBuilder: logBuilder, auth: auth}
 }

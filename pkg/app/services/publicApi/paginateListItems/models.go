@@ -14,6 +14,7 @@ type Model struct {
 	ProjectID     string
 	StructureName string
 	VersionName   string
+	Options       Options
 
 	Page    int
 	Order   string
@@ -23,9 +24,14 @@ type Model struct {
 	Groups  []string
 }
 
-func NewModel(versionName, projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string) Model {
+type Options struct {
+	ValueOnly bool
+}
+
+func NewModel(versionName, projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string, options Options) Model {
 	return Model{
 		StructureName: structureName,
+		Options:       options,
 		VersionName:   versionName,
 		ProjectID:     projectId,
 		Page:          page,
@@ -129,9 +135,20 @@ type View struct {
 type LogicModel struct {
 	Items       []Item
 	Connections map[string][]ConnectionItem
+	Options     Options
 }
 
-func newView(model LogicModel) []View {
+func newView(model LogicModel) interface{} {
+	if model.Options.ValueOnly {
+		items := make([]interface{}, len(model.Items))
+
+		for i, item := range model.Items {
+			items[i] = item.Value
+		}
+
+		return items
+	}
+
 	views := make([]View, len(model.Items))
 	for i, item := range model.Items {
 		locale, _ := locales.GetAlphaWithID(item.Locale)
