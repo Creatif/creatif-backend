@@ -22,7 +22,6 @@ import (
 	"creatif/cmd/http/handlers/publishing/toggleProduction"
 	"creatif/cmd/server"
 	"creatif/pkg/app/services/publicApi/publicApiError"
-	"creatif/pkg/lib/cache"
 	"creatif/pkg/lib/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -35,9 +34,6 @@ func app() {
 	runLogger()
 	runAssets()
 	runDb()
-	if err := cache.NewCache(); err != nil {
-		log.Fatalln(err)
-	}
 
 	if err := releaseAllLocks(); err != nil {
 		sqlDB, err := storage.SQLDB()
