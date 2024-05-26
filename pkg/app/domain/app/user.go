@@ -18,9 +18,8 @@ type User struct {
 	Email    string `gorm:"uniqueIndex"`
 	Password string
 
-	Key            string `gorm:"uniqueIndex"`
-	Confirmed      bool
-	PolicyAccepted bool
+	Key       string `gorm:"uniqueIndex"`
+	Confirmed bool
 
 	Provider string
 
@@ -30,16 +29,15 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func NewUser(name, lastName, email, password, provider string, confirmed, policyAccepted, isAdmin bool) User {
+func NewUser(name, lastName, email, password, provider string, confirmed, isAdmin bool) User {
 	return User{
-		Name:           name,
-		IsAdmin:        isAdmin,
-		LastName:       lastName,
-		Email:          email,
-		Password:       password,
-		Provider:       provider,
-		Confirmed:      confirmed,
-		PolicyAccepted: policyAccepted,
+		Name:      name,
+		IsAdmin:   isAdmin,
+		LastName:  lastName,
+		Email:     email,
+		Password:  password,
+		Provider:  provider,
+		Confirmed: confirmed,
 	}
 }
 

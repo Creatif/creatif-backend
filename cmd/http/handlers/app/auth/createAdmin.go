@@ -19,7 +19,7 @@ func CreateAdminHandler() func(e echo.Context) error {
 		model = app.SanitizeRegisterEmail(model)
 
 		l := logger.NewLogBuilder()
-		handler := createAdmin.New(createAdmin.NewModel(model.Name, model.LastName, model.Email, model.Password, true), l)
+		handler := createAdmin.New(createAdmin.NewModel(model.Name, model.LastName, model.Email, model.Password), l)
 
 		return request.SendResponse[createAdmin.Model](handler, c, http.StatusCreated, l, nil, false)
 	}

@@ -3,11 +3,10 @@ package app
 import "github.com/microcosm-cc/bluemonday"
 
 type RegisterEmail struct {
-	Name           string `json:"name"`
-	LastName       string `json:"lastName"`
-	Email          string `json:"email"`
-	Password       string `json:"password"`
-	PolicyAccepted bool   `json:"policyAccepted"`
+	Name     string `json:"name"`
+	LastName string `json:"lastName"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func SanitizeRegisterEmail(model RegisterEmail) RegisterEmail {

@@ -14,7 +14,6 @@ var _ = ginkgo.Describe("Create admin tests", func() {
 			"lastName",
 			fmt.Sprintf("%s@gmail.com", uuid.NewString()),
 			"password",
-			true,
 		),
 			logger.NewLogBuilder())
 

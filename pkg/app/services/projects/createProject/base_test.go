@@ -118,7 +118,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateUser() app.User {
-	user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true, true)
+	user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true)
 	storage2.Gorm().Create(&user)
 
 	return user
