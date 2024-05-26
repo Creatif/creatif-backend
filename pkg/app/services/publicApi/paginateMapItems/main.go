@@ -87,30 +87,28 @@ func (c Main) Logic() (LogicModel, error) {
 	})
 
 	mappedConnections := make(map[string]connections)
-	if !c.model.Options.ValueOnly {
-		connections := newConnections()
+	connections := newConnections()
+	models, err := connections2.GetManyConnections(version.ID, c.model.ProjectID, childIds)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
+	for _, item := range items {
 		parents := make([]string, 0)
 		children := make([]string, 0)
-		models, err := connections2.GetManyConnections(version.ID, c.model.ProjectID, childIds)
-		if err != nil {
-			return LogicModel{}, err
-		}
-
-		for _, item := range items {
-			for _, model := range models {
-				if model.Parent == item.ItemID {
-					children = append(children, model.Child)
-				}
-
-				if model.Child == item.ItemID {
-					parents = append(parents, model.Parent)
-				}
+		for _, model := range models {
+			if model.Parent == item.ItemID {
+				children = append(children, model.Child)
 			}
 
-			connections.parents = parents
-			connections.children = children
-			mappedConnections[item.ItemID] = connections
+			if model.Child == item.ItemID {
+				parents = append(parents, model.Parent)
+			}
 		}
+
+		connections.parents = parents
+		connections.children = children
+		mappedConnections[item.ItemID] = connections
 	}
 
 	return LogicModel{

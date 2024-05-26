@@ -3,6 +3,7 @@ package paginateListItems
 import (
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
+	"encoding/json"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -136,13 +137,22 @@ type LogicModel struct {
 
 func newView(model LogicModel) interface{} {
 	if model.Options.ValueOnly {
-		items := make([]interface{}, len(model.Items))
+		returnValue := make([]map[string]interface{}, len(model.Items))
+		for i, val := range model.Items {
+			var m map[string]interface{}
+			// ok to ignore
+			json.Unmarshal(val.Value, &m)
+			connections := model.Connections[val.ItemID]
 
-		for i, item := range model.Items {
-			items[i] = item.Value
+			m["connections"] = ConnectionsView{
+				Parents:  connections.parents,
+				Children: connections.children,
+			}
+
+			returnValue[i] = m
 		}
 
-		return items
+		return returnValue
 	}
 
 	views := make([]View, len(model.Items))

@@ -3,6 +3,7 @@ package getMapItemByName
 import (
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
+	"encoding/json"
 	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -115,7 +116,16 @@ type LogicModel struct {
 
 func newView(model LogicModel) interface{} {
 	if model.Options.ValueOnly {
-		return model.Item.Value
+		var m map[string]interface{}
+		// ok to ignore
+		json.Unmarshal(model.Item.Value, &m)
+
+		m["connections"] = ConnectionsView{
+			Parents:  model.Connections.parents,
+			Children: model.Connections.children,
+		}
+
+		return m
 	}
 
 	locale, _ := locales.GetAlphaWithID(model.Item.Locale)
