@@ -31,7 +31,7 @@ func (a Model) Validate() map[string]string {
 			validation.Key("name", validation.Required),
 			validation.Key("itemID", validation.Required),
 
-			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

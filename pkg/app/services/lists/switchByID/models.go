@@ -75,9 +75,9 @@ func (a *Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("name", validation.Required),
-			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("source", validation.Required, validation.RuneLength(26, 26)),
-			validation.Key("destination", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
+			validation.Key("source", validation.Required, validation.RuneLength(27, 27)),
+			validation.Key("destination", validation.Required, validation.RuneLength(27, 27)),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

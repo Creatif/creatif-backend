@@ -4,12 +4,13 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/storage"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type Map struct {
-	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID      string `gorm:"primarykey;type:text"`
 	ShortID string `gorm:"uniqueIndex:unique_map;type:text"`
 
 	Name string `gorm:"uniqueIndex:unique_map_name;not null"`
@@ -34,6 +35,7 @@ func (u *Map) BeforeCreate(tx *gorm.DB) (err error) {
 		return err
 	}
 	u.ShortID = shortId
+	u.ID = ksuid.New().String()
 
 	return nil
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type User struct {
-	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID string `gorm:"primarykey;type:text"`
 
 	Name     string
 	LastName string
@@ -50,6 +50,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 
 	key := ksuid.New().String() + string(b)
 	u.Key = key
+	u.ID = ksuid.New().String()
 
 	return nil
 }

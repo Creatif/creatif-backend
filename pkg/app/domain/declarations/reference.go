@@ -3,11 +3,12 @@ package declarations
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"time"
 )
 
 type Reference struct {
-	ID        string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID        string `gorm:"primarykey;type:text"`
 	ProjectID string `gorm:"index"`
 
 	Name       string `gorm:"type:text"`
@@ -28,6 +29,7 @@ type Reference struct {
 
 func NewReference(name, parentType, childType, parentId, childId, parentStructureId, childStructureId, projectId string) Reference {
 	return Reference{
+		ID:                ksuid.New().String(),
 		Name:              name,
 		ParentType:        parentType,
 		ParentStructureID: parentStructureId,

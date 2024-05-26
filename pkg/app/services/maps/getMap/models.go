@@ -69,7 +69,7 @@ func (a *Model) Validate() map[string]string {
 		validation.Map(
 			// Name cannot be empty, and the length must be between 5 and 20.
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
-			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
 		),
 	); err != nil {
 		var e map[string]string

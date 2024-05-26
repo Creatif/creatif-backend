@@ -3,11 +3,13 @@ package published
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
+	"github.com/segmentio/ksuid"
+	"gorm.io/gorm"
 	"time"
 )
 
 type Version struct {
-	ID                  string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID                  string `gorm:"primarykey;type:text"`
 	ProjectID           string `gorm:"uniqueIndex:unique_version;type:text"`
 	Name                string `gorm:"uniqueIndex:unique_version;type:text"`
 	IsProductionVersion bool
@@ -18,6 +20,12 @@ type Version struct {
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time `gorm:"<-:update"`
+}
+
+func (u *Version) BeforeCreate(tx *gorm.DB) (err error) {
+	u.ID = ksuid.New().String()
+	
+	return nil
 }
 
 func NewVersion(projectId, name string, isProduction bool) Version {

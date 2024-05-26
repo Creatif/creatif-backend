@@ -3,12 +3,13 @@ package declarations
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type Locale struct {
-	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID string `gorm:"primarykey;type:text"`
 
 	Name  string
 	Alpha string `gorm:"unique"`
@@ -25,6 +26,7 @@ func NewLocale(name, alpha string) Locale {
 }
 
 func (u *Locale) BeforeCreate(tx *gorm.DB) (err error) {
+	u.ID = ksuid.New().String()
 	return nil
 }
 

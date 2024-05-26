@@ -4,12 +4,13 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/storage"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type List struct {
-	ID      string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID      string `gorm:"primarykey;type:text"`
 	ShortID string `gorm:"uniqueIndex:unique_list;type:text;not null"`
 
 	Name          string         `gorm:"uniqueIndex:unique_list_name;not null"`
@@ -24,6 +25,7 @@ type List struct {
 
 func NewList(projectId, name string) List {
 	return List{
+		ID:        ksuid.New().String(),
 		Name:      name,
 		ProjectID: projectId,
 	}

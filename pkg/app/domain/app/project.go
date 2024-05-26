@@ -4,12 +4,13 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/domain/declarations"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type Project struct {
-	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID string `gorm:"primarykey;type:text"`
 
 	Name string `gorm:"index"`
 
@@ -18,7 +19,7 @@ type Project struct {
 	Maps  []declarations.Map  `gorm:"foreignKey:ProjectID;references:ID;constraint:OnDelete:CASCADE;"`
 	Lists []declarations.List `gorm:"foreignKey:ProjectID;references:ID;constraint:OnDelete:CASCADE;"`
 
-	UserID string `gorm:"type:text CHECK(length(id)=26);not null"`
+	UserID string `gorm:"type:text CHECK(length(id)=27);not null"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
@@ -26,6 +27,7 @@ type Project struct {
 
 func NewProject(name, userID string) Project {
 	return Project{
+		ID:     ksuid.New().String(),
 		Name:   name,
 		UserID: userID,
 	}

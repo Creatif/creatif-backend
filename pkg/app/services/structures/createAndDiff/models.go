@@ -79,7 +79,7 @@ func (a Model) Validate() map[string]string {
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("id", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("id", validation.Required, validation.RuneLength(27, 27)),
 			validation.Key("structures", validation.By(func(value interface{}) error {
 				items := a.Structures
 

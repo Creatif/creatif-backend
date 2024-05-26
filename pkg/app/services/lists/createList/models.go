@@ -44,7 +44,7 @@ func (a Model) Validate() map[string]string {
 
 	if err := validation.Validate(v,
 		validation.Map(
-			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("variableLen", validation.By(func(value interface{}) error {
 				l := value.(int)

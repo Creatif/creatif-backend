@@ -56,7 +56,7 @@ func (a Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("versionName", validation.When(a.VersionName != "", validation.RuneLength(1, 200))),
-			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
 			validation.Key("order", validation.By(func(value interface{}) error {
 				order := strings.ToLower(a.Order)
 				if order != "desc" && order != "asc" {

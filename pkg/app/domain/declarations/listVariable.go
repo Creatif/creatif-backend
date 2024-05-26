@@ -4,13 +4,14 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/storage"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
 )
 
 type ListVariable struct {
-	ID      string  `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID      string  `gorm:"primarykey;type:text"`
 	ShortID string  `gorm:"uniqueIndex:unique_variable;type:text;not null"`
 	Index   float64 `gorm:"type:float"`
 
@@ -29,6 +30,7 @@ type ListVariable struct {
 
 func NewListVariable(listId, localeID, name, behaviour string, metadata datatypes.JSON, value datatypes.JSON) ListVariable {
 	return ListVariable{
+		ID:        ksuid.New().String(),
 		ListID:    listId,
 		LocaleID:  localeID,
 		Name:      name,

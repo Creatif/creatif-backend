@@ -3,11 +3,12 @@ package declarations
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"time"
 )
 
 type Group struct {
-	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID string `gorm:"primarykey;type:text"`
 
 	Name      string `gorm:"uniqueIndex:unique_group;type:text"`
 	ProjectID string `gorm:"uniqueIndex:unique_group;type:text"`
@@ -20,6 +21,7 @@ type Group struct {
 
 func NewGroup(projectId, name string) Group {
 	return Group{
+		ID:        ksuid.New().String(),
 		Name:      name,
 		ProjectID: projectId,
 	}

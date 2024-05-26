@@ -4,13 +4,14 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/lib/storage"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
 )
 
 type MapVariable struct {
-	ID      string  `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID      string  `gorm:"primarykey;type:text"`
 	ShortID string  `gorm:"uniqueIndex:unique_map_variable;type:text;not null"`
 	Index   float64 `gorm:"type:float"`
 
@@ -29,6 +30,7 @@ type MapVariable struct {
 
 func NewMapVariable(mapId, localeID, name, behaviour string, metadata datatypes.JSON, value datatypes.JSON) MapVariable {
 	return MapVariable{
+		ID:        ksuid.New().String(),
 		MapID:     mapId,
 		LocaleID:  localeID,
 		Name:      name,

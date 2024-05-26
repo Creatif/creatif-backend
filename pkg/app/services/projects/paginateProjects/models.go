@@ -24,7 +24,7 @@ type Model struct {
 }
 
 type QueryModel struct {
-	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID string `gorm:"primarykey;type:text"`
 
 	Name  string `gorm:"index"`
 	State string

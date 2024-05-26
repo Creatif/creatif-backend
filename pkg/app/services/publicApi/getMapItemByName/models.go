@@ -46,7 +46,7 @@ func (a Model) Validate() map[string]string {
 	if err := validation.Validate(v,
 		validation.Map(
 			validation.Key("versionName", validation.When(a.VersionName != "", validation.RuneLength(1, 200))),
-			validation.Key("projectID", validation.Required, validation.RuneLength(26, 26)),
+			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("structureName", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("locale", validation.RuneLength(3, 3), validation.By(func(value interface{}) error {

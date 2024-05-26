@@ -7,7 +7,7 @@ import (
 )
 
 type QueryVariable struct {
-	ID      string  `gorm:"primarykey;type:text;default:gen_ulid()"`
+	ID      string  `gorm:"primarykey;type:text"`
 	ShortID string  `gorm:"uniqueIndex:unique_map_variable;type:text;not null"`
 	Index   float64 `gorm:"type:float"`
 
