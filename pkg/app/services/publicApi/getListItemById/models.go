@@ -48,25 +48,21 @@ func (a Model) Validate() map[string]string {
 	return nil
 }
 
-type ConnectionView struct {
-	StructureID      string `json:"structureId"`
-	StructureShortID string `json:"structureShortId"`
-	StructureName    string `json:"structureName"`
-	ConnectionType   string `json:"connectionType"`
+type ConnectionsView struct {
+	Parents  []string `json:"parents"`
+	Children []string `json:"children"`
+}
 
-	Name    string `json:"name"`
-	ID      string `json:"id"`
-	ShortID string `json:"shortId"`
+type connections struct {
+	parents  []string
+	children []string
+}
 
-	ProjectID string      `json:"projectId"`
-	Locale    string      `json:"locale"`
-	Index     float64     `json:"index"`
-	Groups    []string    `json:"groups"`
-	Behaviour string      `json:"behaviour"`
-	Value     interface{} `json:"value"`
-
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+func newConnections() connections {
+	return connections{
+		parents:  []string{},
+		children: []string{},
+	}
 }
 
 type View struct {
@@ -85,7 +81,7 @@ type View struct {
 	Behaviour string      `json:"behaviour,omitempty"`
 	Value     interface{} `json:"value"`
 
-	Connections map[string]ConnectionView `json:"connections,omitempty"`
+	Connections ConnectionsView `json:"connections"`
 
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
@@ -93,7 +89,7 @@ type View struct {
 
 type LogicModel struct {
 	Item        Item
-	Connections []ConnectionItem
+	Connections connections
 	Options     Options
 }
 
@@ -103,28 +99,6 @@ func newView(model LogicModel) interface{} {
 	}
 
 	locale, _ := locales.GetAlphaWithID(model.Item.Locale)
-	connections := make(map[string]ConnectionView)
-	for _, c := range model.Connections {
-		connectionLocale, _ := locales.GetAlphaWithID(model.Item.Locale)
-
-		connections[c.ConnectionName] = ConnectionView{
-			StructureID:      c.ID,
-			StructureShortID: c.ShortID,
-			StructureName:    c.StructureName,
-			ConnectionType:   c.ConnectionType,
-			Name:             c.ItemName,
-			ID:               c.ItemID,
-			ShortID:          c.ItemShortID,
-			ProjectID:        c.ProjectID,
-			Locale:           connectionLocale,
-			Index:            c.Index,
-			Groups:           c.Groups,
-			Behaviour:        c.Behaviour,
-			Value:            c.Value,
-			CreatedAt:        c.CreatedAt,
-			UpdatedAt:        c.UpdatedAt,
-		}
-	}
 
 	view := View{
 		StructureID:      model.Item.ID,
@@ -139,9 +113,12 @@ func newView(model LogicModel) interface{} {
 		Groups:           model.Item.Groups,
 		Behaviour:        model.Item.Behaviour,
 		Value:            model.Item.Value,
-		Connections:      connections,
-		CreatedAt:        nil,
-		UpdatedAt:        nil,
+		Connections: ConnectionsView{
+			Parents:  model.Connections.parents,
+			Children: model.Connections.children,
+		},
+		CreatedAt: nil,
+		UpdatedAt: nil,
 	}
 
 	if !model.Options.ValueOnly {

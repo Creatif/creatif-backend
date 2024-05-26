@@ -20,6 +20,7 @@ type PublishedMap struct {
 	VariableName    string         `gorm:"primaryKey;type:text"`
 	VariableID      string         `gorm:"primaryKey;type:text"`
 	VariableShortID string         `gorm:"primaryKey;type:text"`
+	StructureID     string         `gorm:"type:text"`
 	Index           float64        `gorm:"type:float"`
 	Behaviour       string         `gorm:"not null"`
 	Value           datatypes.JSON `gorm:"type:jsonb"`

@@ -14,8 +14,9 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-		models, err := handler.Handle()
+		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		m, err := handler.Handle()
+		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		gomega.Expect(len(models)).Should(gomega.Equal(100))
@@ -33,8 +34,6 @@ var _ = ginkgo.Describe("Public API", func() {
 			sdk.IncludesFn(items, func(item addToMap.View) bool {
 				return item.ID == model.ID
 			})
-
-			gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 		}
 	})
 
@@ -42,8 +41,9 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, "paginationMap", 3, "desc", "index", "", []string{}, []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-		models, err := handler.Handle()
+		handler := New(NewModel("", projectId, "paginationMap", 3, "desc", "index", "", []string{}, []string{}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		m, err := handler.Handle()
+		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		gomega.Expect(len(models)).Should(gomega.Equal(0))
@@ -53,8 +53,9 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{"group-0"}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-		models, err := handler.Handle()
+		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		m, err := handler.Handle()
+		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		gomega.Expect(len(models)).Should(gomega.Equal(100))
@@ -72,7 +73,6 @@ var _ = ginkgo.Describe("Public API", func() {
 			sdk.IncludesFn(items, func(item addToMap.View) bool {
 				return item.ID == model.ID
 			})
-			gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 		}
 	})
 
@@ -80,8 +80,9 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, "paginationMap", 1, "desc", "index", "", []string{"eng"}, []string{"group-0"}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-		models, err := handler.Handle()
+		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{"eng"}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		m, err := handler.Handle()
+		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		gomega.Expect(len(models)).Should(gomega.Equal(100))
@@ -99,7 +100,6 @@ var _ = ginkgo.Describe("Public API", func() {
 			sdk.IncludesFn(items, func(item addToMap.View) bool {
 				return item.ID == model.ID
 			})
-			gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 		}
 	})
 
@@ -107,8 +107,9 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, "paginationMap", 1, "desc", "index", "0", []string{"eng"}, []string{"group-0"}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-		models, err := handler.Handle()
+		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "0", []string{"eng"}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		m, err := handler.Handle()
+		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(len(models)).Should(gomega.Equal(29))
 
@@ -125,7 +126,6 @@ var _ = ginkgo.Describe("Public API", func() {
 			sdk.IncludesFn(items, func(item addToMap.View) bool {
 				return item.ID == model.ID
 			})
-			gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 		}
 	})
 })

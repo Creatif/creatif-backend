@@ -2,6 +2,7 @@ package getListItemById
 
 import (
 	"creatif/pkg/app/auth"
+	connections2 "creatif/pkg/app/services/publicApi/connections"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/logger"
@@ -58,14 +59,27 @@ func (c Main) Logic() (LogicModel, error) {
 		}, publicApiError.NotFoundError)
 	}
 
-	var connections []ConnectionItem
+	connections := newConnections()
 	if !c.model.Options.ValueOnly {
-		res = storage.Gorm().Raw(getConnectionsMapSql(), c.model.ProjectID, version.ID, c.model.ItemID, c.model.ProjectID, version.Name, c.model.ItemID).Scan(&connections)
-		if res.Error != nil {
-			return LogicModel{}, publicApiError.NewError("getListItemById", map[string]string{
-				"notFound": res.Error.Error(),
-			}, publicApiError.DatabaseError)
+		parents := make([]string, 0)
+		children := make([]string, 0)
+		models, err := connections2.GetConnections(version.ID, c.model.ProjectID, c.model.ItemID)
+		if err != nil {
+			return LogicModel{}, err
 		}
+
+		for _, model := range models {
+			if model.Parent == c.model.ItemID {
+				children = append(children, model.Child)
+			}
+
+			if model.Child == c.model.ItemID {
+				parents = append(parents, model.Parent)
+			}
+		}
+
+		connections.parents = parents
+		connections.children = children
 	}
 
 	return LogicModel{

@@ -3,6 +3,7 @@ package getListItemsByName
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/locales"
+	connections2 "creatif/pkg/app/services/publicApi/connections"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/logger"
@@ -84,22 +85,30 @@ func (c Main) Logic() (LogicModel, error) {
 		return value.ItemID
 	})
 
-	var connections []ConnectionItem
-	res = storage.Gorm().Raw(getConnectionsSql(), c.model.ProjectID, version.Name, childIds, c.model.ProjectID, version.Name, childIds).Scan(&connections)
-	if res.Error != nil {
-		return LogicModel{}, publicApiError.NewError("getListItemsByName", map[string]string{
-			"error": res.Error.Error(),
-		}, publicApiError.DatabaseError)
-	}
+	mappedConnections := make(map[string]connections)
+	if !c.model.Options.ValueOnly {
+		connections := newConnections()
+		parents := make([]string, 0)
+		children := make([]string, 0)
+		models, err := connections2.GetManyConnections(version.ID, c.model.ProjectID, childIds)
+		if err != nil {
+			return LogicModel{}, err
+		}
 
-	mappedConnections := make(map[string][]ConnectionItem)
-	if len(connections) > 0 {
-		for _, conn := range connections {
-			if _, ok := mappedConnections[conn.ItemID]; !ok {
-				mappedConnections[conn.ItemID] = make([]ConnectionItem, 0)
+		for _, item := range items {
+			for _, model := range models {
+				if model.Parent == item.ItemID {
+					children = append(children, model.Child)
+				}
+
+				if model.Child == item.ItemID {
+					parents = append(parents, model.Parent)
+				}
 			}
 
-			mappedConnections[conn.ItemID] = append(mappedConnections[conn.ItemID], conn)
+			connections.parents = parents
+			connections.children = children
+			mappedConnections[item.ItemID] = connections
 		}
 	}
 

@@ -30,7 +30,6 @@ var _ = ginkgo.Describe("Public API", func() {
 			gomega.Expect(model.ShortID).ShouldNot(gomega.BeEmpty())
 
 			gomega.Expect(model.ID).Should(gomega.Equal(item.ID))
-			gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 		}
 	})
 })

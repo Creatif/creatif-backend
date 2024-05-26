@@ -87,7 +87,7 @@ INNER JOIN %s AS v ON v.project_id = ? AND lv.version_id = ? AND v.id = lv.versi
 	)
 }
 
-func getConnectionsMapSql() string {
+func getConnectionsSql(table string) string {
 	return fmt.Sprintf(`
 SELECT 
     v.project_id,
@@ -108,10 +108,10 @@ SELECT
 (SELECT g.groups FROM %s AS g WHERE lv.variable_id = g.variable_id LIMIT 1) AS groups
 FROM %s AS lv
 INNER JOIN %s AS v ON v.project_id = ? AND v.id = ? AND v.id = lv.version_id AND lv.variable_id = ?
-INNER JOIN %s AS c ON c.project_id = ? AND c.project_id = v.project_id AND v.name = ? AND v.id = c.version_id AND c.child_id = ?
+INNER JOIN %s AS c ON c.project_id = ? AND c.project_id = v.project_id AND v.id = c.version_id AND c.child_id = ?
 `,
 		(declarations.VariableGroup{}).TableName(),
-		(published.PublishedList{}).TableName(),
+		table,
 		(published.Version{}).TableName(),
 		(published.PublishedReference{}).TableName(),
 	)
@@ -145,3 +145,36 @@ func getVersion(projectId, versionName string) (published.Version, error) {
 
 	return version, nil
 }
+
+func getListConnections(
+	projectId,
+	itemId,
+	versionId string,
+	model interface{},
+) error {
+	res := storage.Gorm().Raw(getConnectionsSql((published.PublishedList{}).TableName()), projectId, versionId, itemId, projectId, itemId).Scan(model)
+	if res.Error != nil {
+		return publicApiError.NewError("getListItemById", map[string]string{
+			"notFound": res.Error.Error(),
+		}, publicApiError.DatabaseError)
+	}
+
+	return nil
+}
+
+func getMapConnections(
+	projectId,
+	itemId,
+	versionId string,
+	model interface{},
+) error {
+	res := storage.Gorm().Raw(getConnectionsSql((published.PublishedMap{}).TableName()), projectId, versionId, itemId, projectId, itemId).Scan(model)
+	if res.Error != nil {
+		return publicApiError.NewError("getListItemById", map[string]string{
+			"notFound": res.Error.Error(),
+		}, publicApiError.DatabaseError)
+	}
+
+	return nil
+}
+

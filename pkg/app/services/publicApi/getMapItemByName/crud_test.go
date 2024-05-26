@@ -12,9 +12,10 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		mapItem, structure, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, structure.Name, mapItem.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-		model, err := handler.Handle()
+		handler := New(NewModel("", projectId, structure.Name, mapItem.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
+		model := m.(View)
 
 		gomega.Expect(model.ProjectID).Should(gomega.Equal(projectId))
 		gomega.Expect(model.Behaviour).ShouldNot(gomega.BeEmpty())
@@ -26,16 +27,16 @@ var _ = ginkgo.Describe("Public API", func() {
 		gomega.Expect(model.ShortID).ShouldNot(gomega.BeEmpty())
 
 		gomega.Expect(model.ID).Should(gomega.Equal(mapItem.ID))
-		gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 	})
 
 	ginkgo.It("should get public map item by name and eng locale (getMapItemByName)", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
 		mapItem, structure, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, structure.Name, mapItem.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
-		model, err := handler.Handle()
+		handler := New(NewModel("", projectId, structure.Name, mapItem.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
+		model := m.(View)
 
 		gomega.Expect(model.ProjectID).Should(gomega.Equal(projectId))
 		gomega.Expect(model.Behaviour).ShouldNot(gomega.BeEmpty())
@@ -47,6 +48,5 @@ var _ = ginkgo.Describe("Public API", func() {
 		gomega.Expect(model.ShortID).ShouldNot(gomega.BeEmpty())
 
 		gomega.Expect(model.ID).Should(gomega.Equal(mapItem.ID))
-		gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 	})
 })

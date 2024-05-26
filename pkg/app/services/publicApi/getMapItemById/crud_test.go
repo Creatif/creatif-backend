@@ -12,7 +12,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		mapItem, _ := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, mapItem.ID, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, mapItem.ID, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		model := m.(View)
@@ -27,6 +27,5 @@ var _ = ginkgo.Describe("Public API", func() {
 		gomega.Expect(model.ShortID).ShouldNot(gomega.BeEmpty())
 
 		gomega.Expect(model.ID).Should(gomega.Equal(mapItem.ID))
-		gomega.Expect(len(model.Connections)).Should(gomega.Equal(4))
 	})
 })
