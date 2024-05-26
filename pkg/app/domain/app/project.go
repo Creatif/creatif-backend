@@ -4,8 +4,6 @@ import (
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/domain/declarations"
 	"fmt"
-	"github.com/segmentio/ksuid"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -13,9 +11,7 @@ import (
 type Project struct {
 	ID string `gorm:"primarykey;type:text;default:gen_ulid()"`
 
-	Name   string `gorm:"index"`
-	APIKey string `gorm:"uniqueIndex"`
-	Secret string `gorm:"uniqueIndex"`
+	Name string `gorm:"index"`
 
 	State string `gorm:"default: 'draft'"`
 
@@ -36,29 +32,6 @@ func NewProject(name, userID string) Project {
 }
 
 func (u *Project) BeforeCreate(tx *gorm.DB) (err error) {
-	genereateHash := func() (string, error) {
-		id := ksuid.New().String()
-		cost := 10
-		bytes, err := bcrypt.GenerateFromPassword([]byte(id), cost)
-		if err != nil {
-			return "", err
-		}
-
-		return string(bytes), nil
-	}
-
-	apiKey, err := genereateHash()
-	if err != nil {
-		return err
-	}
-
-	secret, err := genereateHash()
-	if err != nil {
-		return err
-	}
-
-	u.APIKey = apiKey
-	u.Secret = secret
 	return nil
 }
 

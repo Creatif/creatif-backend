@@ -18,7 +18,5 @@ var _ = ginkgo.Describe("Get project tests", func() {
 
 		gomega.Expect(model.Name).Should(gomega.Equal("project"))
 		gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(model.APIKey).ShouldNot(gomega.BeEmpty())
-		gomega.Expect(model.Secret).ShouldNot(gomega.BeEmpty())
 	})
 })

@@ -48,8 +48,6 @@ func newView(model app.Project) View {
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
-		APIKey:    model.APIKey,
-		Secret:    model.Secret,
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 	}
