@@ -87,7 +87,8 @@ func appRoutes(group *echo.Group) {
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 
 	group.PUT("/project", appHandlers.CreateProjectHandler())
-	group.POST("/project/truncate/:projectId", structures.TruncateStructureHandler())
+	group.POST("/project/structure/truncate/:projectId", structures.TruncateStructureHandler())
+	group.POST("/project/structure/remove/:projectId", structures.RemoveStructureHandler())
 	group.GET("/project/exists", appHandlers.HasProjectsHandler())
 	group.POST("/project/metadata/:projectId", structures.GetStructureMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())

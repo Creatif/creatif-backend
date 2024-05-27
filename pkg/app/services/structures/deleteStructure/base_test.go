@@ -1,4 +1,4 @@
-package truncateStructure
+package removeStructure
 
 import (
 	"creatif/pkg/app/auth"
