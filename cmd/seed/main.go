@@ -245,7 +245,7 @@ func listAdd(projectId, structureId, variableName string, references []shared.Re
 func createAdmin() {
 	l := logger.NewLogBuilder()
 	defer l.Flush("")
-	handler := createAdmin2.New(createAdmin2.NewModel("Mario", "Škrlec", "marioskrlec222@gmail.com", "password", true), l)
+	handler := createAdmin2.New(createAdmin2.NewModel("Mario", "Škrlec", "marioskrlec222@gmail.com", "password"), l)
 
 	_, err := handler.Handle()
 	if err != nil {

@@ -1,33 +1,31 @@
-package project
+package structures
 
 import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/services/structures/createAndDiff"
+	"creatif/pkg/app/services/structures/truncateStructure"
 	"creatif/pkg/lib/logger"
-	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func GetStructureMetadataHandler() func(e echo.Context) error {
+func TruncateStructureHandler() func(e echo.Context) error {
 	return func(c echo.Context) error {
-		var model app.GetStructureMetadata
+		var model app.TruncateStructure
 		if err := c.Bind(&model); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		model = app.SanitizeGetStructureMetadata(model)
+		model = app.SanitizeTruncateStructure(model)
 
 		l := logger.NewLogBuilder()
 		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
-		handler := createAndDiff.New(createAndDiff.NewModel(model.ID, sdk.Map(model.Config, func(idx int, value app.GetStructureMetadataConfig) createAndDiff.Structure {
-			return createAndDiff.Structure{
-				Name: value.Name,
-				Type: value.Type,
-			}
-		})), a, l)
+		handler := truncateStructure.New(
+			truncateStructure.NewModel(model.ProjectID, model.ID, model.Type),
+			a,
+			l,
+		)
 
 		return request.SendResponse(handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
 			if a.ShouldRefresh() {

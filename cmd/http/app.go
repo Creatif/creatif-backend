@@ -4,6 +4,7 @@ import (
 	authHandlers "creatif/cmd/http/handlers/app/auth"
 	"creatif/cmd/http/handlers/app/groups"
 	appHandlers "creatif/cmd/http/handlers/app/project"
+	"creatif/cmd/http/handlers/app/structures"
 	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
@@ -86,8 +87,9 @@ func appRoutes(group *echo.Group) {
 	group.GET("/supported-locales", locale.GetSupportedLocalesHandler())
 
 	group.PUT("/project", appHandlers.CreateProjectHandler())
+	group.POST("/project/truncate/:projectId", structures.TruncateStructureHandler())
 	group.GET("/project/exists", appHandlers.HasProjectsHandler())
-	group.POST("/project/metadata/:projectId", appHandlers.GetStructureMetadataHandler())
+	group.POST("/project/metadata/:projectId", structures.GetStructureMetadataHandler())
 	group.GET("/projects", appHandlers.PaginateProjectsHandler())
 	group.GET("/project/single/:id", appHandlers.GetProjectHandler())
 	group.PUT("/groups/:projectId", groups.AddGroupsHandler())
