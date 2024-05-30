@@ -1,24 +1,22 @@
-FROM golang:1.21.6-alpine as golang_build
+FROM golang:1.22.3-alpine as golang_build
 
 ENV APP_DIR /app
 WORKDIR /app
 
-VOLUME /app
-
 RUN apk add build-base
-
-RUN go env -w GOPATH=/app
 
 COPY go.mod .
 COPY go.sum .
-RUN go mod download && go mod tidy
 
-RUN go install github.com/githubnemo/CompileDaemon@latest
+RUN go install github.com/cosmtrek/air@latest
+RUN go get github.com/onsi/ginkgo/v2/ginkgo
+RUN go install github.com/onsi/ginkgo/v2/ginkgo
+
+RUN go mod download
+RUN go mod tidy
 
 COPY . .
 
-RUN go install github.com/onsi/ginkgo/v2/ginkgo
 EXPOSE 3002
 
-RUN ["chmod", "+x", "/app/entrypoint.sh"]
-ENTRYPOINT ["./entrypoint.sh"]
+CMD ["air", "-c", "/app/cmd/http/.air.toml"]
