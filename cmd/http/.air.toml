@@ -9,7 +9,7 @@ tmp_dir = "tmp"
 # Just plain old shell command. You could use `make` as well.
 cmd = "cd /app/cmd/http && go build -o go_build_api"
 # Binary file yields from `cmd`.
-bin = "go_build_api"
+bin = "go_api_build"
 # Customize binary, can setup environment variables when run your app.
 full_bin = "/app/cmd/http/./go_build_api"
 # Follow symlink for directories
