@@ -7,11 +7,11 @@ tmp_dir = "tmp"
 
 [build]
 # Just plain old shell command. You could use `make` as well.
-cmd = "cd /app/cmd/http && go build -o go_build_api"
+cmd = "cd /app/cmd/http && go build -o go_api_build"
 # Binary file yields from `cmd`.
 bin = "go_api_build"
 # Customize binary, can setup environment variables when run your app.
-full_bin = "/app/cmd/http/./go_build_api"
+full_bin = "/app/cmd/http/./go_api_build"
 # Follow symlink for directories
 follow_symlink = true
 # This log file places in your tmp_dir.
