@@ -32,7 +32,7 @@ func (c Main) Validate() error {
 		}
 	}
 
-	groupExists := fmt.Sprintf("SELECT id FROM %s WHERE project_id = ? AND name IN(?)", (declarations.Group{}).TableName())
+	groupExists := fmt.Sprintf("SELECT name FROM %s WHERE project_id = ? AND name IN(?)", (declarations.Group{}).TableName())
 
 	var groups []string
 	if res := storage.Gorm().Raw(groupExists, c.model.ProjectID, toCreateGroups).Scan(&groups); res.Error != nil {

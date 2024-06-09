@@ -8,7 +8,7 @@ RUN apk add build-base
 COPY go.mod .
 COPY go.sum .
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 RUN go get github.com/onsi/ginkgo/v2/ginkgo
 RUN go install github.com/onsi/ginkgo/v2/ginkgo
 
