@@ -12,3 +12,4 @@ ui-debug.log
 cmd/http/go_api_build
 .idea
 coverprofile.out
+public

@@ -28,6 +28,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"net/http"
+	"os"
 )
 
 func app() {
@@ -79,6 +80,7 @@ func app() {
 	appRoutes(srv.Group("/api/v1/app"))
 	publishingRoutes(srv.Group("/api/v1/publishing"))
 	publicRoutes(srv.Group("/api/v1/public"))
+	staticFiles(srv.Group("/api/v1/static"))
 
 	server.StartServer(srv)
 }
@@ -101,6 +103,10 @@ func appRoutes(group *echo.Group) {
 	group.POST("/auth/login", authHandlers.LoginHandler())
 
 	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
+}
+
+func staticFiles(group *echo.Group) {
+	group.Static("/", os.Getenv("PUBLIC_DIRECTORY"))
 }
 
 func declarationRoutes(group *echo.Group) {

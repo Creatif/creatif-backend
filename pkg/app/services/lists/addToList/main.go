@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -108,6 +109,14 @@ func (c Main) Logic() (LogicModel, error) {
 
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
+		newValue, err := fileProcessor.UploadFiles(c.model.ProjectID, c.model.Entry.Value, c.model.ImagePaths)
+		if err != nil {
+			return err
+		}
+
+		variable.Value = newValue
+		// before creating a variable, create images, ensures failure if image upload fails
+
 		if res := tx.Create(&variable); res.Error != nil {
 			c.logBuilder.Add("addToList", res.Error.Error())
 
@@ -140,7 +149,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 		return nil
 	}); transactionError != nil {
-		return LogicModel{}, transactionError
+		return LogicModel{}, appErrors.NewApplicationError(transactionError).AddError("addToList.Logic", nil)
 	}
 
 	return LogicModel{
