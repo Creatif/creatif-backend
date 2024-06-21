@@ -25,6 +25,7 @@ require (
 )
 
 require (
+	github.com/Jeffail/gabs v1.4.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect

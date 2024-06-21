@@ -12,7 +12,8 @@ services:
       - 3002:3002
     volumes:
       - .:/app
-      - .:/assets:${ASSETS_DIRECTORY}
+      - .:/assets:/app/assets
+      - .:/public:${PUBLIC_DIRECTORY}
       - .:/var/log:${LOG_DIRECTORY}
     depends_on:
       - db

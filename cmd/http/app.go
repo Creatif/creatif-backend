@@ -33,7 +33,7 @@ import (
 func app() {
 	loadEnv()
 	runLogger()
-	runAssets()
+	runPublic()
 	runDb()
 
 	if err := releaseAllLocks(); err != nil {

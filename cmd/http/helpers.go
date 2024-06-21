@@ -55,13 +55,13 @@ func runLogger() {
 	logger.Error("Health error logger health check... Ignore!")
 }
 
-func runAssets() {
-	assetsDir := os.Getenv("ASSETS_DIRECTORY")
+func runPublic() {
+	assetsDir := os.Getenv("PUBLIC_DIRECTORY")
 	if _, err := os.Stat(assetsDir); os.IsNotExist(err) {
 		err := os.MkdirAll(assetsDir, os.ModePerm)
 
 		if err != nil {
-			log.Fatalln(fmt.Sprintf("Cannot createProject assets directory: %s", err.Error()))
+			log.Fatalln(fmt.Sprintf("Cannot create public directory: %s", err.Error()))
 		}
 	}
 }

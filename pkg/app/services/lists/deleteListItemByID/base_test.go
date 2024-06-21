@@ -190,7 +190,7 @@ func testAddToList(projectId, name string, references []shared.Reference, groups
 		Behaviour: "modifiable",
 	}
 
-	model := addToList.NewModel(projectId, name, variableModel, references)
+	model := addToList.NewModel(projectId, name, variableModel, references, []string{})
 	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
 
 	view, err := handler.Handle()

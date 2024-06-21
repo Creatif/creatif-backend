@@ -37,7 +37,7 @@ func AddToListHandler() func(e echo.Context) error {
 				StructureType: value.StructureType,
 				VariableID:    value.VariableID,
 			}
-		})), authentication, l)
+		}), model.ImagePaths), authentication, l)
 
 		return request.SendResponse[addToList.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
