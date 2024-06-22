@@ -109,7 +109,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
-		newValue, err := fileProcessor.UploadFiles(c.model.ProjectID, c.model.Entry.Value, c.model.ImagePaths)
+		newValue, createdFiles, err := fileProcessor.UploadFiles(c.model.ProjectID, c.model.Entry.Value, c.model.ImagePaths)
 		if err != nil {
 			return err
 		}
@@ -121,6 +121,15 @@ func (c Main) Logic() (LogicModel, error) {
 			c.logBuilder.Add("addToList", res.Error.Error())
 
 			return errors.New(fmt.Sprintf("List item with name '%s' already exists.", c.model.Entry.Name))
+		}
+
+		images := make([]declarations.Image, len(createdFiles))
+		for i := 0; i < len(createdFiles); i++ {
+			images[i] = declarations.NewImage(c.model.ProjectID, variable.ID, createdFiles[i].FileSystemFilePath)
+		}
+
+		if res := tx.Create(images); res.Error != nil {
+			return res.Error
 		}
 
 		if len(c.model.Entry.Groups) > 0 {

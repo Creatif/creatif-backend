@@ -11,82 +11,75 @@ import (
 	"strings"
 )
 
-type tempImage struct {
-	path        string
-	base64Image *string
+type tempFile struct {
+	path       string
+	base64File *string
 }
 
 type createdFile struct {
-	path     string
-	filePath string
+	Path               string
+	PublicFilePath     string
+	FileSystemFilePath string
 }
 
-type uploadResult struct {
-	createdFile createdFile
-	error       error
-}
-
-func UploadFiles(projectId string, value []byte, imagePaths []string) ([]byte, error) {
+func UploadFiles(projectId string, value []byte, imagePaths []string) ([]byte, []createdFile, error) {
 	jsonParsed, err := gabs.ParseJSON(value)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Parsing JSON failed: %s", err.Error()))
+		return nil, nil, errors.New(fmt.Sprintf("Parsing JSON failed: %s", err.Error()))
 	}
 
-	base64Images := make([]tempImage, 0)
+	base64Files := make([]tempFile, 0)
 	for _, path := range imagePaths {
 		base64Image, ok := jsonParsed.Path(path).Data().(string)
 		if !ok {
-			return nil, errors.New(fmt.Sprintf("Could not find path: %s", path))
+			return nil, nil, errors.New(fmt.Sprintf("Could not find path: %s", path))
 		}
 
-		base64Images = append(base64Images, tempImage{
-			path:        path,
-			base64Image: &base64Image,
+		base64Files = append(base64Files, tempFile{
+			path:       path,
+			base64File: &base64Image,
 		})
 
 		_, err := jsonParsed.Set(nil, path)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Could not nullify path: %s", path))
+			return nil, nil, errors.New(fmt.Sprintf("Could not nullify path: %s", path))
 		}
 	}
 
-	createdFiles, err := uploadFiles(projectId, base64Images)
-	fmt.Println(err)
+	createdFiles, err := uploadFiles(projectId, base64Files)
 	if err != nil {
 		for _, file := range createdFiles {
-			os.Remove(file.filePath)
+			os.Remove(file.FileSystemFilePath)
 		}
 
-		return nil, err
+		return nil, nil, err
 	}
-
-	fmt.Println(createdFiles)
 
 	for _, file := range createdFiles {
-		_, err := jsonParsed.Set(file.filePath, file.path)
+		_, err := jsonParsed.Set(file.PublicFilePath, file.Path)
 		if err != nil {
 			for _, file := range createdFiles {
-				os.Remove(file.filePath)
+				os.Remove(file.FileSystemFilePath)
 			}
 
-			return value, err
+			return value, nil, err
 		}
 	}
 
-	return jsonParsed.Bytes(), nil
+	return jsonParsed.Bytes(), createdFiles, nil
 }
 
-func uploadFiles(projectId string, base64Images []tempImage) ([]createdFile, error) {
+func uploadFiles(projectId string, base64Files []tempFile) ([]createdFile, error) {
 	createdFiles := make([]createdFile, 0)
 
-	for _, image := range base64Images {
-		spl := strings.Split(*image.base64Image, "base64,")
+	for _, file := range base64Files {
+		spl := strings.Split(*file.base64File, "base64,")
 		dec, err := base64.StdEncoding.DecodeString(spl[1])
 		if err != nil {
 			return createdFiles, fmt.Errorf("Could not decode base64 image: %w", err)
 		}
 
-		extension, err := extractAndValidateMimeType(image.base64Image)
+		extension, err := extractAndValidateMimeType(file.base64File)
 		if err != nil {
 			return createdFiles, err
 		}
@@ -115,8 +108,9 @@ func uploadFiles(projectId string, base64Images []tempImage) ([]createdFile, err
 		}
 
 		createdFiles = append(createdFiles, createdFile{
-			path:     image.path,
-			filePath: fmt.Sprintf("/api/v1/static/%s/%s", projectId, fileName),
+			Path:               file.path,
+			PublicFilePath:     fmt.Sprintf("/api/v1/static/%s/%s", projectId, fileName),
+			FileSystemFilePath: filePath,
 		})
 	}
 
