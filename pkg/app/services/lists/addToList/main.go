@@ -125,7 +125,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 		images := make([]declarations.Image, len(createdFiles))
 		for i := 0; i < len(createdFiles); i++ {
-			images[i] = declarations.NewImage(c.model.ProjectID, variable.ID, createdFiles[i].FileSystemFilePath)
+			images[i] = declarations.NewImage(c.model.ProjectID, variable.ID, createdFiles[i].FileSystemFilePath, createdFiles[i].Path)
 		}
 
 		if res := tx.Create(images); res.Error != nil {

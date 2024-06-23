@@ -1,6 +1,7 @@
 package fileProcessor
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -22,6 +23,12 @@ type createdFile struct {
 	FileSystemFilePath string
 }
 
+type updatedFile struct {
+	toUpdate []createdFile
+	toDelete []createdFile
+	toCreate []createdFile
+}
+
 func UploadFiles(projectId string, value []byte, imagePaths []string) ([]byte, []createdFile, error) {
 	jsonParsed, err := gabs.ParseJSON(value)
 	if err != nil {
@@ -35,10 +42,12 @@ func UploadFiles(projectId string, value []byte, imagePaths []string) ([]byte, [
 			return nil, nil, errors.New(fmt.Sprintf("Could not find path: %s", path))
 		}
 
-		base64Files = append(base64Files, tempFile{
-			path:       path,
-			base64File: &base64Image,
-		})
+		if base64Image != "" {
+			base64Files = append(base64Files, tempFile{
+				path:       path,
+				base64File: &base64Image,
+			})
+		}
 
 		_, err := jsonParsed.Set(nil, path)
 		if err != nil {
@@ -67,6 +76,28 @@ func UploadFiles(projectId string, value []byte, imagePaths []string) ([]byte, [
 	}
 
 	return jsonParsed.Bytes(), createdFiles, nil
+}
+
+func UpdateFiles(projectId string, value []byte, updatedPaths []string, deletedPaths []string, dbImages []declarations.Image) ([]byte, []updatedFile, error) {
+	base64Files := make([]tempFile, 0)
+	for _, path := range updatedPaths {
+		base64Image, ok := jsonParsed.Path(path).Data().(string)
+		if !ok {
+			return nil, nil, errors.New(fmt.Sprintf("Could not find path: %s", path))
+		}
+
+		if base64Image != "" {
+			base64Files = append(base64Files, tempFile{
+				path:       path,
+				base64File: &base64Image,
+			})
+		}
+
+		_, err := jsonParsed.Set(nil, path)
+		if err != nil {
+			return nil, nil, errors.New(fmt.Sprintf("Could not nullify path: %s", path))
+		}
+	}
 }
 
 func uploadFiles(projectId string, base64Files []tempFile) ([]createdFile, error) {

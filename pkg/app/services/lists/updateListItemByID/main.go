@@ -96,6 +96,7 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (LogicResult, error) {
 	var list declarations.List
+	
 	if res := storage.Gorm().Where(
 		fmt.Sprintf("(id = ? OR short_id = ?) AND project_id = ?"),
 		c.model.ListName,
