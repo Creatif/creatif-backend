@@ -3,6 +3,7 @@ module creatif
 go 1.20
 
 require (
+	github.com/Jeffail/gabs v1.4.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/google/uuid v1.3.0
 	github.com/jaswdr/faker v1.19.1
@@ -25,7 +26,6 @@ require (
 )
 
 require (
-	github.com/Jeffail/gabs v1.4.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
