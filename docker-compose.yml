@@ -13,8 +13,9 @@ services:
     volumes:
       - .:/app
       - .:/assets:/app/assets
-      - .:/public:${PUBLIC_DIRECTORY}
-      - .:/var/log:${LOG_DIRECTORY}
+      - .:/public:/app/public
+      - .:/var/log:/app/var/log
+      - .:/var/assets:/app/var/assets
     depends_on:
       - db
   db:

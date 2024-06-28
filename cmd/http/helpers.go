@@ -46,7 +46,7 @@ func runDb() {
 }
 
 func runLogger() {
-	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
+	if err := logger.BuildLoggers("/app/var/log"); err != nil {
 		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
 	}
 
@@ -56,9 +56,18 @@ func runLogger() {
 }
 
 func runPublic() {
-	assetsDir := os.Getenv("PUBLIC_DIRECTORY")
-	if _, err := os.Stat(assetsDir); os.IsNotExist(err) {
-		err := os.MkdirAll(assetsDir, os.ModePerm)
+	if _, err := os.Stat("/app/public"); os.IsNotExist(err) {
+		err := os.MkdirAll("/app/public", os.ModePerm)
+
+		if err != nil {
+			log.Fatalln(fmt.Sprintf("Cannot create public directory: %s", err.Error()))
+		}
+	}
+}
+
+func runAssets() {
+	if _, err := os.Stat("/app/var/assets"); os.IsNotExist(err) {
+		err := os.MkdirAll("/app/var/assets", os.ModePerm)
 
 		if err != nil {
 			log.Fatalln(fmt.Sprintf("Cannot create public directory: %s", err.Error()))

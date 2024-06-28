@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
-	"os"
 )
 
 type Main struct {
@@ -50,18 +49,12 @@ func (c Main) Logic() (app.Project, error) {
 		return app.Project{}, appErrors.NewApplicationError(err).AddError("createProject", nil)
 	}
 
-	projectPublicDir := fmt.Sprintf("%s/%s", os.Getenv("PUBLIC_DIRECTORY"), model.ID)
-	_, err := os.Stat(projectPublicDir)
-	if !os.IsNotExist(err) {
-		return app.Project{}, appErrors.NewApplicationError(err).AddError("createProject", nil)
+	if err := createProjectInPublicDirectory(model.ID); err != nil {
+		return app.Project{}, err
 	}
 
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(projectPublicDir, os.ModePerm)
-
-		if err != nil {
-			return app.Project{}, appErrors.NewApplicationError(err).AddError("createProject", nil)
-		}
+	if err := createProjectInAssetsDirectory(model.ID); err != nil {
+		return app.Project{}, err
 	}
 
 	c.logBuilder.Add("projectService", fmt.Sprintf("Project %s created", c.model.Name))

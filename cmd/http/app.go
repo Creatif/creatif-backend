@@ -5,6 +5,7 @@ import (
 	"creatif/cmd/http/handlers/app/groups"
 	appHandlers "creatif/cmd/http/handlers/app/project"
 	"creatif/cmd/http/handlers/app/structures"
+	"creatif/cmd/http/handlers/declarations/images"
 	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
@@ -34,6 +35,7 @@ import (
 func app() {
 	loadEnv()
 	runLogger()
+	runAssets()
 	runPublic()
 	runDb()
 
@@ -80,6 +82,7 @@ func app() {
 	appRoutes(srv.Group("/api/v1/app"))
 	publishingRoutes(srv.Group("/api/v1/publishing"))
 	publicRoutes(srv.Group("/api/v1/public"))
+	appImages(srv.Group("/api/v1/images"))
 	staticFiles(srv.Group("/api/v1/static"))
 
 	server.StartServer(srv)
@@ -103,6 +106,10 @@ func appRoutes(group *echo.Group) {
 	group.POST("/auth/login", authHandlers.LoginHandler())
 
 	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
+}
+
+func appImages(group *echo.Group) {
+	group.GET("/image/:projectID/:id", images.GetImageHandler())
 }
 
 func staticFiles(group *echo.Group) {
