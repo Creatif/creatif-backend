@@ -10,7 +10,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"sync"
 )
 
 type tempFile struct {
@@ -41,71 +40,63 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 	}
 
 	files := make([]fileResult, 0)
-	wg := &sync.WaitGroup{}
 	for _, path := range imagePaths {
-		wg.Add(1)
-		go func(path string) {
-			defer wg.Done()
-
-			base64Image, ok := jsonParsed.Path(path).Data().(string)
-			if !ok {
-				files = append(files, fileResult{
-					createdFile: createdFile{},
-					error:       errors.New(fmt.Sprintf("Could not find path: %s", path)),
-				})
-
-				return
-			}
-
-			_, err := jsonParsed.Set(nil, path)
-			if err != nil {
-				files = append(files, fileResult{
-					createdFile: createdFile{},
-					error:       errors.New(fmt.Sprintf("Could not nullify path: %s", path)),
-				})
-
-				return
-			}
-
-			uploadedFile, err := uploadFile(projectId, tempFile{
-				path:       path,
-				base64File: &base64Image,
-			})
-
-			if err != nil {
-				files = append(files, fileResult{
-					createdFile: createdFile{},
-					error:       err,
-				})
-
-				return
-			}
-
-			id, err := callback(
-				uploadedFile.FileSystemFilePath,
-				uploadedFile.Path,
-				uploadedFile.MimeType,
-				uploadedFile.Extension,
-			)
-
-			if err != nil {
-				files = append(files, fileResult{
-					createdFile: createdFile{},
-					error:       err,
-				})
-
-				return
-			}
-
-			uploadedFile.ID = id
+		base64Image, ok := jsonParsed.Path(path).Data().(string)
+		if !ok {
 			files = append(files, fileResult{
-				createdFile: uploadedFile,
-				error:       nil,
+				createdFile: createdFile{},
+				error:       errors.New(fmt.Sprintf("Could not find path: %s", path)),
 			})
-		}(path)
-	}
 
-	wg.Wait()
+			break
+		}
+
+		_, err := jsonParsed.Set(nil, path)
+		if err != nil {
+			files = append(files, fileResult{
+				createdFile: createdFile{},
+				error:       errors.New(fmt.Sprintf("Could not nullify path: %s", path)),
+			})
+
+			break
+		}
+
+		uploadedFile, err := uploadFile(projectId, tempFile{
+			path:       path,
+			base64File: &base64Image,
+		})
+
+		if err != nil {
+			files = append(files, fileResult{
+				createdFile: createdFile{},
+				error:       err,
+			})
+
+			break
+		}
+
+		id, err := callback(
+			uploadedFile.FileSystemFilePath,
+			uploadedFile.Path,
+			uploadedFile.MimeType,
+			uploadedFile.Extension,
+		)
+
+		if err != nil {
+			files = append(files, fileResult{
+				createdFile: createdFile{},
+				error:       err,
+			})
+
+			break
+		}
+
+		uploadedFile.ID = id
+		files = append(files, fileResult{
+			createdFile: uploadedFile,
+			error:       nil,
+		})
+	}
 
 	for _, uploadedFile := range files {
 		if uploadedFile.error != nil {

@@ -57,7 +57,7 @@ func (c Main) Logic() (*struct{}, error) {
 		}
 
 		deleteImagesSql := fmt.Sprintf(
-			`DELETE FROM %s WHERE structure_id = ? AND project_id = ?`,
+			`DELETE FROM %s WHERE list_id = ? AND project_id = ?`,
 			(declarations.Image{}).TableName(),
 		)
 

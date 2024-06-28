@@ -109,33 +109,36 @@ func (c Main) Logic() (LogicModel, error) {
 
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
-		newValue, _, err := fileProcessor.UploadFiles(
-			c.model.ProjectID,
-			c.model.Entry.Value,
-			c.model.ImagePaths,
-			func(fileSystemFilePath, path, mimeType, extension string) (string, error) {
-				image := declarations.NewImage(
-					c.model.ProjectID,
-					variable.ID,
-					fileSystemFilePath,
-					path,
-					mimeType,
-					extension,
-				)
+		if len(c.model.ImagePaths) != 0 {
+			newValue, _, err := fileProcessor.UploadFiles(
+				c.model.ProjectID,
+				c.model.Entry.Value,
+				c.model.ImagePaths,
+				func(fileSystemFilePath, path, mimeType, extension string) (string, error) {
+					image := declarations.NewImage(
+						c.model.ProjectID,
+						&variable.ID,
+						nil,
+						fileSystemFilePath,
+						path,
+						mimeType,
+						extension,
+					)
 
-				if res := tx.Create(&image); res.Error != nil {
-					return "", res.Error
-				}
+					if res := tx.Create(&image); res.Error != nil {
+						return "", res.Error
+					}
 
-				return image.ID, nil
-			},
-		)
-		if err != nil {
-			return err
+					return image.ID, nil
+				},
+			)
+
+			if err != nil {
+				return err
+			}
+
+			variable.Value = newValue
 		}
-
-		variable.Value = newValue
-		// before creating a variable, create images, ensures failure if image upload fails
 
 		if res := tx.Create(&variable); res.Error != nil {
 			c.logBuilder.Add("addToList", res.Error.Error())

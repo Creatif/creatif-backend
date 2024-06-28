@@ -11,6 +11,7 @@ import (
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
+	"os"
 )
 
 type Main struct {
@@ -44,13 +45,29 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (*struct{}, error) {
 
 	if transactionErr := storage.Transaction(func(tx *gorm.DB) error {
+		paths, err := getImagePaths(c.model.ProjectID, c.model.Items)
+		if err != nil {
+			return err
+		}
+
+		deleteImagesSql := fmt.Sprintf(
+			`DELETE FROM %s WHERE list_id IN(?) AND project_id = ?`,
+			(declarations.Image{}).TableName(),
+		)
+
+		res := tx.Exec(deleteImagesSql, c.model.Items, c.model.ProjectID)
+		if res.Error != nil {
+			c.logBuilder.Add("deleteListItemByID", res.Error.Error())
+			return appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
+		}
+
 		sql := fmt.Sprintf(
 			`DELETE FROM %s AS lv USING %s AS l WHERE (l.name = ? OR l.id = ? OR l.short_id = ?) AND l.project_id = ? AND lv.list_id = l.id AND lv.id IN(?)`,
 			(declarations.ListVariable{}).TableName(),
 			(declarations.List{}).TableName(),
 		)
 
-		res := tx.Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
+		res = tx.Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
 		if res.Error != nil {
 			c.logBuilder.Add("deleteRangeByID", res.Error.Error())
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
@@ -70,6 +87,11 @@ func (c Main) Logic() (*struct{}, error) {
 		}
 		if err := shared.RemoveManyAsChild(c.model.Items, tx); err != nil {
 			return err
+		}
+
+		for _, path := range paths {
+			// TODO: handle delete failure in goroutine cron job with a failure table
+			os.Remove(path)
 		}
 
 		return nil
