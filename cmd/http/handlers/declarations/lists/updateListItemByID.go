@@ -48,6 +48,7 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			[]byte(model.Values.Metadata),
 			[]byte(model.Values.Value),
 			references,
+			model.ImagePaths,
 		), authentication, l)
 
 		res := request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {

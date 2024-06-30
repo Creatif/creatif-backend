@@ -22,6 +22,7 @@ type UpdateListItemByID struct {
 	ProjectID  string                   `param:"projectID"`
 	Fields     string                   `query:"fields"`
 	References []UpdateReference        `json:"references"`
+	ImagePaths []string                 `json:"imagePaths"`
 
 	ResolvedFields []string
 }
@@ -40,6 +41,9 @@ func SanitizeUpdateListItemByID(model UpdateListItemByID) UpdateListItemByID {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.ItemID = p.Sanitize(model.ItemID)
 	model.Fields = p.Sanitize(model.Fields)
+	model.ImagePaths = sdk.Map(model.ImagePaths, func(idx int, value string) string {
+		return p.Sanitize(value)
+	})
 
 	model.ResolvedFields = sdk.Map(strings.Split(model.Fields, "|"), func(idx int, value string) string {
 		trimmed := strings.Trim(value, " ")

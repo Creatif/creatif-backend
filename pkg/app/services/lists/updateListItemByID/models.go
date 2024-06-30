@@ -38,6 +38,7 @@ type Model struct {
 	ItemID     string
 	Values     ModelValues
 	ProjectID  string
+	ImagePaths []string
 	References []shared.UpdateReference
 }
 
@@ -46,7 +47,20 @@ type LogicResult struct {
 	Groups   []declarations.Group
 }
 
-func NewModel(projectId, locale string, fields []string, listName, itemId, updatingName, behaviour string, groups []string, metadata, value []byte, references []shared.UpdateReference) Model {
+func NewModel(
+	projectId,
+	locale string,
+	fields []string,
+	listName,
+	itemId,
+	updatingName,
+	behaviour string,
+	groups []string,
+	metadata,
+	value []byte,
+	references []shared.UpdateReference,
+	imagePaths []string,
+) Model {
 	return Model{
 		Fields:     fields,
 		ProjectID:  projectId,
@@ -61,6 +75,7 @@ func NewModel(projectId, locale string, fields []string, listName, itemId, updat
 			Behaviour: behaviour,
 			Value:     value,
 		},
+		ImagePaths: imagePaths,
 	}
 }
 

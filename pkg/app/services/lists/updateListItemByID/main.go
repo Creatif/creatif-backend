@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
@@ -96,7 +97,7 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (LogicResult, error) {
 	var list declarations.List
-	
+
 	if res := storage.Gorm().Where(
 		fmt.Sprintf("(id = ? OR short_id = ?) AND project_id = ?"),
 		c.model.ListName,
@@ -152,6 +153,70 @@ func (c Main) Logic() (LogicResult, error) {
 
 	var updated declarations.ListVariable
 	if transactionErr := storage.Transaction(func(tx *gorm.DB) error {
+		fmt.Println("getting files")
+		var images []declarations.Image
+		if res := tx.Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND list_id = ?", (declarations.Image{}).TableName()), c.model.ProjectID, c.model.ItemID).Scan(&images); res.Error != nil {
+			return res.Error
+		}
+
+		fmt.Println("start file update")
+		newValue, err := fileProcessor.UpdateFiles(
+			c.model.ProjectID,
+			c.model.Values.Value,
+			c.model.ImagePaths,
+			images,
+			func(fileSystemFilePath, path, mimeType, extension string) (string, error) {
+				image := declarations.NewImage(
+					c.model.ProjectID,
+					&c.model.ItemID,
+					nil,
+					fileSystemFilePath,
+					path,
+					mimeType,
+					extension,
+				)
+
+				fmt.Println("creating new file")
+				if res := tx.Create(&image); res.Error != nil {
+					return "", res.Error
+				}
+
+				return image.ID, nil
+			},
+			func(imageId, fileSystemFilePath, path, mimeType, extension string) error {
+				fmt.Println("updating file")
+				if res := tx.Save(&declarations.Image{
+					ID:        imageId,
+					ListID:    &c.model.ItemID,
+					MapID:     nil,
+					ProjectID: c.model.ProjectID,
+					Name:      fileSystemFilePath,
+					FieldName: path,
+					MimeType:  mimeType,
+					Extension: extension,
+				}); res.Error != nil {
+					return res.Error
+				}
+
+				return nil
+			},
+			func(imageId string) error {
+				fmt.Println("deleting file")
+				if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ?", (declarations.Image{}).TableName()), imageId); res.Error != nil {
+					return res.Error
+				}
+
+				return nil
+			},
+		)
+
+		fmt.Println("MUST ENTER HERE: ", err)
+		if err != nil {
+			return err
+		}
+
+		existing.Value = newValue
+
 		if res := tx.Model(&updated).Clauses(clause.Returning{Columns: []clause.Column{
 			{Name: "id"},
 			{Name: "name"},
@@ -161,7 +226,7 @@ func (c Main) Logic() (LogicResult, error) {
 			{Name: "value"},
 			{Name: "created_at"},
 			{Name: "updated_at"},
-		}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
+		}}).Where("id = ?", existing.ID).Updates(&existing); res.Error != nil {
 			c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 			return appErrors.NewApplicationError(res.Error).AddError("updateListItemByID.Logic", nil)
