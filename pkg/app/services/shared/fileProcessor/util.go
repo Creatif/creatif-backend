@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/Jeffail/gabs"
 	"github.com/google/uuid"
 	"os"
 	"regexp"
@@ -81,4 +82,31 @@ func extractAndValidateMimeType(image *string) (string, string, error) {
 	}
 
 	return sep[0], sep[1], nil
+}
+
+func setJsonFields(jsonParsed *gabs.Container, fileId string, file createdFile) error {
+	_, err := jsonParsed.Object(file.Path)
+	if err != nil {
+		return err
+	}
+
+	paths := map[string]string{
+		fmt.Sprintf("%s.id", file.Path):        fileId,
+		fmt.Sprintf("%s.path", file.Path):      file.PublicFilePath,
+		fmt.Sprintf("%s.mimeType", file.Path):  file.MimeType,
+		fmt.Sprintf("%s.extension", file.Path): file.Extension,
+	}
+
+	for p, v := range paths {
+		_, err := jsonParsed.SetP(
+			v,
+			p,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

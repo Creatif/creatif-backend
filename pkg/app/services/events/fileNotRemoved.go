@@ -8,13 +8,19 @@ import (
 type FileNotRemovedEvent struct {
 	FilePath   string `json:"filePath"`
 	RelationID string `json:"relationID"`
+	ProjectID  string `json:"projectID"`
 }
 
-func NewFileNotRemoveEvent(filePath, relation string) FileNotRemovedEvent {
+func NewFileNotRemoveEvent(filePath, relation, projectID string) FileNotRemovedEvent {
 	return FileNotRemovedEvent{
 		FilePath:   filePath,
 		RelationID: relation,
+		ProjectID:  projectID,
 	}
+}
+
+func (e FileNotRemovedEvent) Project() string {
+	return e.ProjectID
 }
 
 func (e FileNotRemovedEvent) Type() string {

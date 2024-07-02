@@ -14,26 +14,32 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 		return nil, errors.New(fmt.Sprintf("Parsing JSON failed: %s", err.Error()))
 	}
 
-	files := make([]fileResult, 0)
+	uploadedFiles := make([]createdFile, 0)
+	var processingError error
+
+	defer func() {
+		if processingError == nil {
+			return
+		}
+
+		for _, file := range uploadedFiles {
+			if err := os.Remove(file.FileSystemFilePath); err != nil {
+				events.DispatchEvent(events.NewFileNotRemoveEvent(file.FileSystemFilePath, "", projectId))
+			}
+		}
+	}()
+
 	for _, path := range imagePaths {
 		base64Image, ok := jsonParsed.Path(path).Data().(string)
 		if !ok {
-			files = append(files, fileResult{
-				createdFile: createdFile{},
-				error:       errors.New(fmt.Sprintf("Could not find path: %s", path)),
-			})
-
-			break
+			processingError = errors.New(fmt.Sprintf("Could not find path: %s", path))
+			return nil, processingError
 		}
 
 		_, err := jsonParsed.Set(nil, path)
 		if err != nil {
-			files = append(files, fileResult{
-				createdFile: createdFile{},
-				error:       errors.New(fmt.Sprintf("Could not nullify path: %s", path)),
-			})
-
-			break
+			processingError = errors.New(fmt.Sprintf("Could not nullify path: %s", path))
+			return nil, processingError
 		}
 
 		uploadedFile, err := uploadFile(projectId, tempFile{
@@ -42,13 +48,11 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 		})
 
 		if err != nil {
-			files = append(files, fileResult{
-				createdFile: createdFile{},
-				error:       err,
-			})
-
-			break
+			processingError = err
+			return nil, processingError
 		}
+
+		uploadedFiles = append(uploadedFiles, uploadedFile)
 
 		id, err := callback(
 			uploadedFile.FileSystemFilePath,
@@ -58,77 +62,16 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 		)
 
 		if err != nil {
-			files = append(files, fileResult{
-				createdFile: createdFile{},
-				error:       err,
-			})
-
-			break
+			processingError = err
+			return nil, processingError
 		}
 
-		uploadedFile.ID = id
-		files = append(files, fileResult{
-			createdFile: uploadedFile,
-			error:       nil,
-		})
-	}
-
-	for _, uploadedFile := range files {
-		if uploadedFile.error != nil {
-			return value, uploadedFile.error
-		}
-	}
-
-	createdFiles := make([]createdFile, 0)
-	for _, uploadedFile := range files {
-		if uploadedFile.error != nil {
-			for _, createdFile := range createdFiles {
-				if err := os.Remove(createdFile.FileSystemFilePath); err != nil {
-					events.DispatchEvent(events.NewFileNotRemoveEvent(createdFile.FileSystemFilePath, ""))
-				}
-			}
-
-			return value, uploadedFile.error
+		if err := setJsonFields(jsonParsed, id, uploadedFile); err != nil {
+			processingError = err
+			return nil, processingError
 		}
 
-		_, err := jsonParsed.Object(uploadedFile.createdFile.Path)
-		if err != nil {
-			if err != nil {
-				for _, createdFile := range createdFiles {
-					if err := os.Remove(createdFile.FileSystemFilePath); err != nil {
-						events.DispatchEvent(events.NewFileNotRemoveEvent(createdFile.FileSystemFilePath, ""))
-					}
-				}
-
-				return value, err
-			}
-		}
-
-		paths := map[string]string{
-			fmt.Sprintf("%s.id", uploadedFile.createdFile.Path):        uploadedFile.createdFile.ID,
-			fmt.Sprintf("%s.path", uploadedFile.createdFile.Path):      uploadedFile.createdFile.PublicFilePath,
-			fmt.Sprintf("%s.mimeType", uploadedFile.createdFile.Path):  uploadedFile.createdFile.MimeType,
-			fmt.Sprintf("%s.extension", uploadedFile.createdFile.Path): uploadedFile.createdFile.Extension,
-		}
-
-		for p, v := range paths {
-			_, err := jsonParsed.SetP(
-				v,
-				p,
-			)
-
-			if err != nil {
-				for _, createdFile := range createdFiles {
-					if err := os.Remove(createdFile.FileSystemFilePath); err != nil {
-						events.DispatchEvent(events.NewFileNotRemoveEvent(createdFile.FileSystemFilePath, ""))
-					}
-				}
-
-				return value, err
-			}
-		}
-
-		createdFiles = append(createdFiles, uploadedFile.createdFile)
+		uploadedFiles = append(uploadedFiles, uploadedFile)
 	}
 
 	return jsonParsed.Bytes(), nil

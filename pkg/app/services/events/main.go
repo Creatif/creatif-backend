@@ -11,7 +11,7 @@ import (
 )
 
 func DispatchEvent(dispachableEvent DispachableEvent) {
-	evn := app.NewEvent(dispachableEvent.Type(), dispachableEvent.Data())
+	evn := app.NewEvent(dispachableEvent.Project(), dispachableEvent.Type(), dispachableEvent.Data())
 	// TODO: log failure somewhere
 	storage.Gorm().Create(&evn)
 }
@@ -24,7 +24,7 @@ func checkEvents() {
 	for currentLen != 0 {
 		sql := fmt.Sprintf("SELECT id, type, data FROM %s OFFSET ? LIMIT ?", (app.Event{}).TableName())
 		if res := storage.Gorm().Raw(sql, offset, limit).Scan(&events); res.Error != nil {
-			fmt.Errorf("Event system fail: %w", res.Error)
+			fmt.Errorf("Event system fail: %w\n", res.Error)
 		}
 
 		fmt.Printf("Found %d events to be processed", len(events))
@@ -33,18 +33,19 @@ func checkEvents() {
 				var realEvent FileNotRemovedEvent
 				// TODO: log failure to future logging system
 				if err := json.Unmarshal(evn.Data, &realEvent); err != nil {
-					fmt.Errorf("Event system fail: %w", err)
+					fmt.Errorf("Event system fail: %w\n", err)
 				}
 
-				fmt.Println("Unmarshaled FileNotRemovedEvent: ", string(evn.Data))
+				fmt.Printf("Unmarshaled FileNotRemovedEvent: %s\n", string(evn.Data))
 
 				// TODO: log failure to future logging system
 				if err := os.Remove(realEvent.FilePath); err != nil {
-					fmt.Errorf("Event system fail: %w", err)
+					fmt.Errorf("Event system fail: %w\n", err)
+					continue
 				}
 
 				if res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ?", (app.Event{}).TableName()), evn.ID); res.Error != nil {
-					fmt.Errorf("Event system fail: %w", res.Error)
+					fmt.Errorf("Event system fail: %w\n", res.Error)
 				}
 			}
 		}
@@ -57,7 +58,7 @@ func checkEvents() {
 
 func RunEvents() {
 	go func() {
-		ticker := time.NewTicker(5 * time.Second)
+		ticker := time.NewTicker(20 * time.Second)
 		defer ticker.Stop()
 
 		for {

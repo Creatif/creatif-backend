@@ -19,11 +19,12 @@ type Event struct {
 	UpdatedAt time.Time
 }
 
-func NewEvent(t string, data []byte) Event {
+func NewEvent(projectId, t string, data []byte) Event {
 	return Event{
-		ID:   ksuid.New().String(),
-		Type: t,
-		Data: data,
+		ID:        ksuid.New().String(),
+		Type:      t,
+		ProjectID: projectId,
+		Data:      data,
 	}
 }
 
