@@ -49,6 +49,10 @@ func UpdateFiles(
 		}
 
 		if !existsInPath && existsInJson {
+			if err := jsonParsed.Delete(currentImage.FieldName); err != nil {
+				return nil, err
+			}
+
 			if err := os.Remove(currentImage.Name); err != nil {
 				fmt.Println("os remove error: ", err)
 				return nil, err

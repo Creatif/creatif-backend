@@ -23,6 +23,7 @@ import (
 	"creatif/cmd/http/handlers/publishing/removeVersion"
 	"creatif/cmd/http/handlers/publishing/toggleProduction"
 	"creatif/cmd/server"
+	"creatif/pkg/app/services/events"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	"creatif/pkg/lib/storage"
 	"github.com/labstack/echo/v4"
@@ -85,7 +86,9 @@ func app() {
 	appImages(srv.Group("/api/v1/images"))
 	staticFiles(srv.Group("/api/v1/static"))
 
+	events.RunEvents()
 	server.StartServer(srv)
+
 }
 
 func appRoutes(group *echo.Group) {

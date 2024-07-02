@@ -16,4 +16,5 @@ const (
 	VERSION_TABLE              = "versions"
 	IMAGE_TABLE                = "images"
 	PUBLISHED_REFERENCES_TABLE = "published_references"
+	EVENTS_TABLE               = "events"
 )

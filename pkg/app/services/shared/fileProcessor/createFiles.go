@@ -1,16 +1,17 @@
 package fileProcessor
 
 import (
+	"creatif/pkg/app/services/events"
 	"errors"
 	"fmt"
 	"github.com/Jeffail/gabs"
 	"os"
 )
 
-func UploadFiles(projectId string, value []byte, imagePaths []string, callback callbackCreateFn) ([]byte, []createdFile, error) {
+func UploadFiles(projectId string, value []byte, imagePaths []string, callback callbackCreateFn) ([]byte, error) {
 	jsonParsed, err := gabs.ParseJSON(value)
 	if err != nil {
-		return nil, nil, errors.New(fmt.Sprintf("Parsing JSON failed: %s", err.Error()))
+		return nil, errors.New(fmt.Sprintf("Parsing JSON failed: %s", err.Error()))
 	}
 
 	files := make([]fileResult, 0)
@@ -74,7 +75,7 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 
 	for _, uploadedFile := range files {
 		if uploadedFile.error != nil {
-			return value, nil, uploadedFile.error
+			return value, uploadedFile.error
 		}
 	}
 
@@ -82,20 +83,24 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 	for _, uploadedFile := range files {
 		if uploadedFile.error != nil {
 			for _, createdFile := range createdFiles {
-				os.Remove(createdFile.FileSystemFilePath)
+				if err := os.Remove(createdFile.FileSystemFilePath); err != nil {
+					events.DispatchEvent(events.NewFileNotRemoveEvent(createdFile.FileSystemFilePath, ""))
+				}
 			}
 
-			return value, createdFiles, uploadedFile.error
+			return value, uploadedFile.error
 		}
 
 		_, err := jsonParsed.Object(uploadedFile.createdFile.Path)
 		if err != nil {
 			if err != nil {
 				for _, createdFile := range createdFiles {
-					os.Remove(createdFile.FileSystemFilePath)
+					if err := os.Remove(createdFile.FileSystemFilePath); err != nil {
+						events.DispatchEvent(events.NewFileNotRemoveEvent(createdFile.FileSystemFilePath, ""))
+					}
 				}
 
-				return value, createdFiles, err
+				return value, err
 			}
 		}
 
@@ -114,15 +119,17 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 
 			if err != nil {
 				for _, createdFile := range createdFiles {
-					os.Remove(createdFile.FileSystemFilePath)
+					if err := os.Remove(createdFile.FileSystemFilePath); err != nil {
+						events.DispatchEvent(events.NewFileNotRemoveEvent(createdFile.FileSystemFilePath, ""))
+					}
 				}
 
-				return value, createdFiles, err
+				return value, err
 			}
 		}
 
 		createdFiles = append(createdFiles, uploadedFile.createdFile)
 	}
 
-	return jsonParsed.Bytes(), createdFiles, nil
+	return jsonParsed.Bytes(), nil
 }

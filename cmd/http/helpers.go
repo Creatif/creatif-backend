@@ -212,6 +212,10 @@ func createDatabase() {
 			log.Fatalln(err)
 		}
 
+		if err := storage2.Gorm().AutoMigrate(app2.Event{}); err != nil {
+			log.Fatalln(err)
+		}
+
 		if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO published;"); err != nil {
 			log.Fatalln(err)
 		}
@@ -242,7 +246,7 @@ func isMigrationPerformed() (bool, error) {
 		return false, res.Error
 	}
 
-	return count == 15, nil
+	return count == 16, nil
 }
 
 func createSchemas() *sql.DB {

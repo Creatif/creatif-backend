@@ -110,7 +110,7 @@ func (c Main) Logic() (LogicModel, error) {
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if len(c.model.ImagePaths) != 0 {
-			newValue, _, err := fileProcessor.UploadFiles(
+			newValue, err := fileProcessor.UploadFiles(
 				c.model.ProjectID,
 				c.model.Entry.Value,
 				c.model.ImagePaths,

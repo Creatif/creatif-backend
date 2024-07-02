@@ -19,6 +19,7 @@ type Project struct {
 	Maps   []declarations.Map   `gorm:"foreignKey:ProjectID;references:ID;constraint:OnDelete:CASCADE;"`
 	Lists  []declarations.List  `gorm:"foreignKey:ProjectID;references:ID;constraint:OnDelete:CASCADE;"`
 	Images []declarations.Image `gorm:"foreignKey:ProjectID;references:ID;constraint:OnDelete:CASCADE;"`
+	Events []Event              `gorm:"foreignKey:ProjectID;references:ID;constraint:OnDelete:CASCADE;"`
 
 	UserID string `gorm:"type:text CHECK(length(id)=27);not null"`
 
