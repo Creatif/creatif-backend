@@ -3,7 +3,6 @@ module creatif
 go 1.20
 
 require (
-	github.com/Jeffail/gabs v1.4.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/google/uuid v1.3.0
 	github.com/jaswdr/faker v1.19.1
@@ -17,6 +16,8 @@ require (
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/segmentio/ksuid v1.0.4
 	github.com/teris-io/shortid v0.0.0-20220617161101-71ec9f2aa569
+	github.com/tidwall/gjson v1.17.1
+	github.com/tidwall/sjson v1.2.5
 	go.uber.org/zap v1.25.0
 	golang.org/x/crypto v0.23.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -46,6 +47,8 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.uber.org/multierr v1.10.0 // indirect

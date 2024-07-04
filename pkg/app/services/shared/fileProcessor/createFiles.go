@@ -4,16 +4,12 @@ import (
 	"creatif/pkg/app/services/events"
 	"errors"
 	"fmt"
-	"github.com/Jeffail/gabs"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"os"
 )
 
 func UploadFiles(projectId string, value []byte, imagePaths []string, callback callbackCreateFn) ([]byte, error) {
-	jsonParsed, err := gabs.ParseJSON(value)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Parsing JSON failed: %s", err.Error()))
-	}
-
 	uploadedFiles := make([]createdFile, 0)
 	var processingError error
 
@@ -30,13 +26,14 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 	}()
 
 	for _, path := range imagePaths {
-		base64Image, ok := jsonParsed.Path(path).Data().(string)
-		if !ok {
+		pathValue := gjson.GetBytes(value, path)
+
+		if pathValue.Type == gjson.Null {
 			processingError = errors.New(fmt.Sprintf("Could not find path: %s", path))
 			return nil, processingError
 		}
 
-		_, err := jsonParsed.Set(nil, path)
+		modifiedValue, err := sjson.SetBytes(value, path, nil)
 		if err != nil {
 			processingError = errors.New(fmt.Sprintf("Could not nullify path: %s", path))
 			return nil, processingError
@@ -44,7 +41,7 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 
 		uploadedFile, err := uploadFile(projectId, tempFile{
 			path:       path,
-			base64File: &base64Image,
+			base64File: &pathValue.Str,
 		})
 
 		if err != nil {
@@ -66,13 +63,15 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 			return nil, processingError
 		}
 
-		if err := setJsonFields(jsonParsed, id, uploadedFile); err != nil {
+		modifiedValue, err = setJsonFields(modifiedValue, id, uploadedFile)
+		if err != nil {
 			processingError = err
 			return nil, processingError
 		}
 
 		uploadedFiles = append(uploadedFiles, uploadedFile)
+		value = modifiedValue
 	}
 
-	return jsonParsed.Bytes(), nil
+	return value, nil
 }

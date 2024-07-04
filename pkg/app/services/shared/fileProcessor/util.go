@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/Jeffail/gabs"
 	"github.com/google/uuid"
+	"github.com/tidwall/sjson"
 	"os"
 	"regexp"
 	"strings"
@@ -84,29 +84,22 @@ func extractAndValidateMimeType(image *string) (string, string, error) {
 	return sep[0], sep[1], nil
 }
 
-func setJsonFields(jsonParsed *gabs.Container, fileId string, file createdFile) error {
-	_, err := jsonParsed.Object(file.Path)
-	if err != nil {
-		return err
-	}
-
+func setJsonFields(value []byte, fileId string, file createdFile) ([]byte, error) {
 	paths := map[string]string{
-		fmt.Sprintf("%s.id", file.Path):        fileId,
-		fmt.Sprintf("%s.path", file.Path):      file.PublicFilePath,
-		fmt.Sprintf("%s.mimeType", file.Path):  file.MimeType,
-		fmt.Sprintf("%s.extension", file.Path): file.Extension,
+		"id":        fileId,
+		"path":      file.PublicFilePath,
+		"mimeType":  file.MimeType,
+		"extension": file.Extension,
 	}
 
-	for p, v := range paths {
-		_, err := jsonParsed.SetP(
-			v,
-			p,
-		)
+	return sjson.SetBytes(value, file.Path, paths)
+}
 
-		if err != nil {
-			return err
-		}
+func replacePath(path string) string {
+	if strings.Contains(path, ".") {
+		path = strings.Replace(path, ".", "/", -1)
+		return fmt.Sprintf("/%s", path)
 	}
 
-	return nil
+	return fmt.Sprintf("/%s", path)
 }

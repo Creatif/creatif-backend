@@ -27,7 +27,6 @@ func checkEvents() {
 			fmt.Errorf("Event system fail: %w\n", res.Error)
 		}
 
-		fmt.Printf("Found %d events to be processed", len(events))
 		for _, evn := range events {
 			if evn.Type == constants.FileNotRemovedEvent {
 				var realEvent FileNotRemovedEvent
@@ -35,8 +34,6 @@ func checkEvents() {
 				if err := json.Unmarshal(evn.Data, &realEvent); err != nil {
 					fmt.Errorf("Event system fail: %w\n", err)
 				}
-
-				fmt.Printf("Unmarshaled FileNotRemovedEvent: %s\n", string(evn.Data))
 
 				// TODO: log failure to future logging system
 				if err := os.Remove(realEvent.FilePath); err != nil {
@@ -64,7 +61,6 @@ func RunEvents() {
 		for {
 			select {
 			case <-ticker.C:
-				fmt.Println("Execute event system")
 				checkEvents()
 			}
 		}
