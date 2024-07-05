@@ -118,8 +118,9 @@ func UpdateFiles(
 			processingError = errors.New(fmt.Sprintf("Uploading path %s does not exist", uploadingPath))
 			return nil, processingError
 		}
+
 		base64Image := raw.Str
-		value, err := sjson.SetBytes(value, uploadingPath, nil)
+		modifiedValue, err := sjson.SetBytes(value, uploadingPath, nil)
 		if err != nil {
 			processingError = err
 			return nil, processingError
@@ -151,7 +152,7 @@ func UpdateFiles(
 			return nil, processingError
 		}
 
-		newValue, err := setJsonFields(value, id, uploadedFile)
+		newValue, err := setJsonFields(modifiedValue, id, uploadedFile)
 		value = newValue
 
 		uploadedPaths = append(uploadedPaths, uploadedFile.FileSystemFilePath)

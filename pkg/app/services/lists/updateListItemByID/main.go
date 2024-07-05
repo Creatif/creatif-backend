@@ -153,13 +153,11 @@ func (c Main) Logic() (LogicResult, error) {
 
 	var updated declarations.ListVariable
 	if transactionErr := storage.Transaction(func(tx *gorm.DB) error {
-		fmt.Println("getting files")
 		var images []declarations.Image
 		if res := tx.Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND list_id = ?", (declarations.Image{}).TableName()), c.model.ProjectID, c.model.ItemID).Scan(&images); res.Error != nil {
 			return res.Error
 		}
 
-		fmt.Println("start file update")
 		newValue, err := fileProcessor.UpdateFiles(
 			c.model.ProjectID,
 			c.model.Values.Value,
@@ -176,7 +174,6 @@ func (c Main) Logic() (LogicResult, error) {
 					extension,
 				)
 
-				fmt.Println("creating new file")
 				if res := tx.Create(&image); res.Error != nil {
 					return "", res.Error
 				}
@@ -184,7 +181,6 @@ func (c Main) Logic() (LogicResult, error) {
 				return image.ID, nil
 			},
 			func(imageId, fileSystemFilePath, path, mimeType, extension string) error {
-				fmt.Println("updating file")
 				if res := tx.Save(&declarations.Image{
 					ID:        imageId,
 					ListID:    &c.model.ItemID,
@@ -201,7 +197,6 @@ func (c Main) Logic() (LogicResult, error) {
 				return nil
 			},
 			func(imageId string) error {
-				fmt.Println("deleting file")
 				if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ?", (declarations.Image{}).TableName()), imageId); res.Error != nil {
 					return res.Error
 				}
@@ -210,7 +205,6 @@ func (c Main) Logic() (LogicResult, error) {
 			},
 		)
 
-		fmt.Println("MUST ENTER HERE: ", err)
 		if err != nil {
 			return err
 		}

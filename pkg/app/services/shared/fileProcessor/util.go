@@ -22,7 +22,6 @@ func uploadFile(projectId string, file tempFile) (createdFile, error) {
 		return createdFile{}, err
 	}
 
-	fmt.Println("extracting mime type and extension")
 	mimeType, extension, err := extractAndValidateMimeType(file.base64File)
 	if err != nil {
 		return createdFile{}, err
@@ -36,7 +35,6 @@ func uploadFile(projectId string, file tempFile) (createdFile, error) {
 		fileName,
 	)
 
-	fmt.Println("creating file on filesystem")
 	f, err := os.Create(filePath)
 
 	if err != nil {
@@ -45,12 +43,10 @@ func uploadFile(projectId string, file tempFile) (createdFile, error) {
 
 	defer f.Close()
 
-	fmt.Println("writing file")
 	if _, err := f.Write(dec); err != nil {
 		return createdFile{}, err
 	}
 
-	fmt.Println("syncing file")
 	if err := f.Sync(); err != nil {
 		return createdFile{}, err
 	}
@@ -95,11 +91,6 @@ func setJsonFields(value []byte, fileId string, file createdFile) ([]byte, error
 	return sjson.SetBytes(value, file.Path, paths)
 }
 
-func replacePath(path string) string {
-	if strings.Contains(path, ".") {
-		path = strings.Replace(path, ".", "/", -1)
-		return fmt.Sprintf("/%s", path)
-	}
-
-	return fmt.Sprintf("/%s", path)
+func isArrayPath(path string) bool {
+	return len(strings.Split(path, ".")) != 1
 }
