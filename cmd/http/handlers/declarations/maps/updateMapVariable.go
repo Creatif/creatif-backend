@@ -42,7 +42,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Groups:    model.Variable.Groups,
 			Behaviour: model.Variable.Behaviour,
 			Value:     []byte(model.Variable.Value),
-		}, references), authentication, l)
+		}, references, model.ImagePaths), authentication, l)
 
 		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {

@@ -25,6 +25,7 @@ type Model struct {
 	Name       string
 	ProjectID  string
 	References []shared.Reference
+	ImagePaths []string
 }
 
 type LogicModel struct {
@@ -33,12 +34,13 @@ type LogicModel struct {
 	Groups     []string
 }
 
-func NewModel(projectId, name string, entry VariableModel, references []shared.Reference) Model {
+func NewModel(projectId, name string, entry VariableModel, references []shared.Reference, imagePath []string) Model {
 	return Model{
 		Name:       name,
 		ProjectID:  projectId,
 		Entry:      entry,
 		References: references,
+		ImagePaths: imagePath,
 	}
 }
 

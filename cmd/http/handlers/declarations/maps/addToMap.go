@@ -37,7 +37,7 @@ func AddToMapHandler() func(e echo.Context) error {
 				StructureType: value.StructureType,
 				VariableID:    value.VariableID,
 			}
-		})), authentication, l)
+		}), model.ImagePaths), authentication, l)
 
 		return request.SendResponse[addToMap2.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {

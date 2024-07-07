@@ -10,6 +10,7 @@ type AddToMap struct {
 	Variable   MapVariableModel `json:"variable"`
 	Name       string           `json:"name"`
 	References []Reference      `json:"references"`
+	ImagePaths []string         `json:"imagePaths"`
 }
 
 type Reference struct {
@@ -29,6 +30,9 @@ func SanitizeAddToMap(model AddToMap) AddToMap {
 	variable.Behaviour = p.Sanitize(variable.Behaviour)
 	variable.Locale = p.Sanitize(variable.Locale)
 	variable.Groups = sdk.Map(variable.Groups, func(idx int, value string) string {
+		return p.Sanitize(value)
+	})
+	model.ImagePaths = sdk.Map(model.ImagePaths, func(idx int, value string) string {
 		return p.Sanitize(value)
 	})
 

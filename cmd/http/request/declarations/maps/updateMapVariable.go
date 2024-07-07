@@ -13,6 +13,7 @@ type UpdateMapVariable struct {
 	Fields     string            `query:"fields"`
 	Variable   MapVariableModel  `json:"variable"`
 	References []UpdateReference `json:"references"`
+	ImagePaths []string          `json:"imagePaths"`
 
 	ResolvedFields []string
 }
@@ -29,6 +30,10 @@ func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.Name = p.Sanitize(model.Name)
 	model.ItemID = p.Sanitize(model.ItemID)
+
+	model.ImagePaths = sdk.Map(model.ImagePaths, func(idx int, value string) string {
+		return p.Sanitize(value)
+	})
 
 	model.ResolvedFields = sdk.Map(strings.Split(model.Fields, "|"), func(idx int, value string) string {
 		trimmed := strings.Trim(value, " ")

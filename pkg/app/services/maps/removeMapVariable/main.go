@@ -3,6 +3,7 @@ package removeMapVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/events"
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -10,6 +11,7 @@ import (
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
+	"os"
 )
 
 type Main struct {
@@ -43,13 +45,29 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (interface{}, error) {
 	if err := storage.Transaction(func(tx *gorm.DB) error {
+		paths, err := getImagePaths(c.model.ProjectID, c.model.VariableName)
+		if err != nil {
+			return err
+		}
+
+		deleteImagesSql := fmt.Sprintf(
+			`DELETE FROM %s WHERE list_id = ? AND project_id = ?`,
+			(declarations.Image{}).TableName(),
+		)
+
+		res := tx.Exec(deleteImagesSql, c.model.VariableName, c.model.ProjectID)
+		if res.Error != nil {
+			c.logBuilder.Add("deleteListItemByID", res.Error.Error())
+			return appErrors.NewDatabaseError(res.Error).AddError("deleteListItemByID.Logic", nil)
+		}
+
 		sql := fmt.Sprintf(
 			`DELETE FROM %s AS mv USING %s AS m WHERE m.project_id = ? AND mv.map_id = m.id AND (mv.id = ? OR mv.short_id = ?) AND (m.id = ? OR m.short_id = ?)`,
 			(declarations.MapVariable{}).TableName(),
 			(declarations.Map{}).TableName(),
 		)
 
-		res := tx.Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name)
+		res = tx.Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name)
 		if res.Error != nil {
 			c.logBuilder.Add("removeMapVariable", res.Error.Error())
 			return res.Error
@@ -69,6 +87,12 @@ func (c Main) Logic() (interface{}, error) {
 		}
 		if err := shared.RemoveAsChild(c.model.VariableName, tx); err != nil {
 			return err
+		}
+
+		for _, path := range paths {
+			if err := os.Remove(path); err != nil {
+				events.DispatchEvent(events.NewFileNotRemoveEvent(path, "", c.model.ProjectID))
+			}
 		}
 
 		return nil

@@ -39,9 +39,10 @@ type Model struct {
 	VariableName string
 	ProjectID    string
 	References   []shared.UpdateReference
+	ImagePaths   []string
 }
 
-func NewModel(projectId, mapName, variableName string, fields []string, values VariableModel, reference []shared.UpdateReference) Model {
+func NewModel(projectId, mapName, variableName string, fields []string, values VariableModel, reference []shared.UpdateReference, imagePaths []string) Model {
 	return Model{
 		MapName:      mapName,
 		Fields:       fields,
@@ -49,6 +50,7 @@ func NewModel(projectId, mapName, variableName string, fields []string, values V
 		Values:       values,
 		VariableName: variableName,
 		References:   reference,
+		ImagePaths:   imagePaths,
 	}
 }
 

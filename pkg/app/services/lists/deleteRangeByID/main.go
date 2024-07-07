@@ -4,6 +4,7 @@ import "C"
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/events"
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -90,13 +91,14 @@ func (c Main) Logic() (*struct{}, error) {
 		}
 
 		for _, path := range paths {
-			// TODO: handle delete failure in goroutine cron job with a failure table
-			os.Remove(path)
+			if err := os.Remove(path); err != nil {
+				events.DispatchEvent(events.NewFileNotRemoveEvent(path, "", c.model.ProjectID))
+			}
 		}
 
 		return nil
 	}); transactionErr != nil {
-
+		return nil, appErrors.NewDatabaseError(transactionErr).AddError("deleteRangeByID.Lists", nil)
 	}
 
 	return nil, nil

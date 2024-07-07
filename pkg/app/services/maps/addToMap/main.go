@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -108,6 +109,36 @@ func (c Main) Logic() (LogicModel, error) {
 	variable.Index = highestIndex + 1024
 	var refs []declarations.Reference
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
+		if len(c.model.ImagePaths) != 0 {
+			newValue, err := fileProcessor.UploadFiles(
+				c.model.ProjectID,
+				c.model.Entry.Value,
+				c.model.ImagePaths,
+				func(fileSystemFilePath, path, mimeType, extension string) (string, error) {
+					image := declarations.NewImage(
+						c.model.ProjectID,
+						&variable.ID,
+						nil,
+						fileSystemFilePath,
+						path,
+						mimeType,
+						extension,
+					)
+
+					if res := tx.Create(&image); res.Error != nil {
+						return "", res.Error
+					}
+
+					return image.ID, nil
+				},
+			)
+
+			if err != nil {
+				return err
+			}
+
+			variable.Value = newValue
+		}
 		if res := tx.Create(&variable); res.Error != nil {
 			c.logBuilder.Add("addToMap", res.Error.Error())
 

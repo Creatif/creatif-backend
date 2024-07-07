@@ -5,12 +5,15 @@ import (
 	"context"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/published"
+	"creatif/pkg/app/services/events"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"github.com/google/uuid"
+	"fmt"
 	"gorm.io/gorm"
+	"os"
 	"time"
 )
 
@@ -51,12 +54,7 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (published.Version, error) {
-	name := c.model.Name
-	if name == "" {
-		name = uuid.NewString()
-	}
-
-	version := published.NewVersion(c.model.ProjectID, name, false)
+	version := published.NewVersion(c.model.ProjectID, c.model.Name, false)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&version); res.Error != nil {
 			return res.Error
@@ -76,6 +74,18 @@ func (c Main) Logic() (published.Version, error) {
 		}
 		if err := publishReferences(tx, c.model.ProjectID, version.ID, refCtx); err != nil {
 			return err
+		}
+
+		assetsPath := fmt.Sprintf("%s/%s", constants.AssetsDirectory, c.model.ProjectID)
+		publicPath := fmt.Sprintf("%s/%s/%s", constants.PublicDirectory, c.model.ProjectID, version.Name)
+		if err := os.MkdirAll(publicPath, 0755); err != nil {
+			return err
+		}
+
+		if err := copyDirectory(assetsPath, publicPath); err != nil {
+			if err := os.RemoveAll(publicPath); err != nil {
+				events.DispatchEvent(events.NewPublicDirectoryNotRemoved(publicPath, "", c.model.ProjectID))
+			}
 		}
 
 		return nil

@@ -45,6 +45,20 @@ func checkEvents() {
 					fmt.Errorf("Event system fail: %w\n", res.Error)
 				}
 			}
+
+			if evn.Type == constants.PublicDirectoryNotRemovedEvent {
+				var realEvent FileNotRemovedEvent
+				// TODO: log failure to future logging system
+				if err := json.Unmarshal(evn.Data, &realEvent); err != nil {
+					fmt.Errorf("Event system fail: %w\n", err)
+				}
+
+				// TODO: log failure to future logging system
+				if err := os.RemoveAll(realEvent.FilePath); err != nil {
+					fmt.Errorf("Event system fail: %w\n", err)
+					continue
+				}
+			}
 		}
 
 		offset += limit
