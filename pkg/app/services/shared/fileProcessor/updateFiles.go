@@ -4,8 +4,6 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/events"
 	"creatif/pkg/lib/sdk"
-	"errors"
-	"fmt"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"os"
@@ -96,8 +94,6 @@ func UpdateFiles(
 
 		if err := os.Remove(currentImage.Name); err != nil {
 			events.DispatchEvent(events.NewFileNotRemoveEvent(currentImage.Name, "", projectId))
-			processingError = err
-			return nil, processingError
 		}
 
 		uploadedPaths = append(uploadedPaths, uploadedFile.FileSystemFilePath)
@@ -115,8 +111,7 @@ func UpdateFiles(
 
 		raw := gjson.GetBytes(value, uploadingPath)
 		if raw.Type == gjson.Null {
-			processingError = errors.New(fmt.Sprintf("Uploading path %s does not exist", uploadingPath))
-			return nil, processingError
+			continue
 		}
 
 		base64Image := raw.Str

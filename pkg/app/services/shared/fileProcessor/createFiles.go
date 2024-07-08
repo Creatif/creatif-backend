@@ -29,8 +29,7 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 		pathValue := gjson.GetBytes(value, path)
 
 		if pathValue.Type == gjson.Null {
-			processingError = errors.New(fmt.Sprintf("Could not find path: %s", path))
-			return nil, processingError
+			continue
 		}
 
 		modifiedValue, err := sjson.SetBytes(value, path, nil)

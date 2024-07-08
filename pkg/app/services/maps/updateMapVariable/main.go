@@ -129,7 +129,7 @@ func (c Main) Logic() (LogicResult, error) {
 	var updated declarations.MapVariable
 	if err := storage.Transaction(func(tx *gorm.DB) error {
 		var images []declarations.Image
-		if res := tx.Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND list_id = ?", (declarations.Image{}).TableName()), c.model.ProjectID, c.model.VariableName).Scan(&images); res.Error != nil {
+		if res := tx.Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND map_id = ?", (declarations.Image{}).TableName()), c.model.ProjectID, c.model.VariableName).Scan(&images); res.Error != nil {
 			return res.Error
 		}
 
