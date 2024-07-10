@@ -35,12 +35,28 @@ func checkEvents() {
 					fmt.Errorf("Event system fail: %w\n", err)
 				}
 
+				// if the path does not exist, its a false event, remove the event
+				_, err := os.Stat(realEvent.FilePath)
+				if os.IsNotExist(err) {
+					if res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ?", (app.Event{}).TableName()), evn.ID); res.Error != nil {
+						fmt.Errorf("Event system fail: %w\n", res.Error)
+					}
+
+					continue
+				}
+
+				if err != nil {
+					// TODO: Unexpected error, log to somewhere
+				}
+
 				// TODO: log failure to future logging system
+				// remove the file associated with event
 				if err := os.Remove(realEvent.FilePath); err != nil {
 					fmt.Errorf("Event system fail: %w\n", err)
 					continue
 				}
 
+				// remove the event itself
 				if res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ?", (app.Event{}).TableName()), evn.ID); res.Error != nil {
 					fmt.Errorf("Event system fail: %w\n", res.Error)
 				}

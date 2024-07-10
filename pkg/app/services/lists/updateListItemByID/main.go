@@ -196,7 +196,15 @@ func (c Main) Logic() (LogicResult, error) {
 
 				return nil
 			},
-			func(imageId string) error {
+			func(imageId, fieldName string) error {
+				if fieldName != "" {
+					if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ? AND field_name = ?", (declarations.Image{}).TableName()), imageId, fieldName); res.Error != nil {
+						return res.Error
+					}
+
+					return nil
+				}
+
 				if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ?", (declarations.Image{}).TableName()), imageId); res.Error != nil {
 					return res.Error
 				}
