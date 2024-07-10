@@ -164,7 +164,7 @@ func createDatabase() {
 			log.Fatalln(err)
 		}
 
-		if err := storage2.Gorm().AutoMigrate(declarations.Image{}); err != nil {
+		if err := storage2.Gorm().AutoMigrate(declarations.File{}); err != nil {
 			log.Fatalln(err)
 		}
 

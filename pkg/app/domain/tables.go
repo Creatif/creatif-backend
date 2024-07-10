@@ -14,7 +14,7 @@ const (
 	PUBLISHED_LISTS_TABLE      = "published_lists"
 	PUBLISHED_MAPS_TABLE       = "published_maps"
 	VERSION_TABLE              = "versions"
-	IMAGE_TABLE                = "images"
+	FILE_TABLE                 = "files"
 	PUBLISHED_REFERENCES_TABLE = "published_references"
 	EVENTS_TABLE               = "events"
 )

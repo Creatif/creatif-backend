@@ -1,15 +1,15 @@
-package images
+package files
 
 import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type GetImage struct {
+type GetFile struct {
 	ProjectID   string `param:"projectID"`
 	StructureID string `param:"id"`
 }
 
-func SanitizeGetImage(model GetImage) GetImage {
+func SanitizeGetFile(model GetFile) GetFile {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.StructureID = p.Sanitize(model.StructureID)

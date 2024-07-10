@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type Image struct {
+type File struct {
 	ID        string    `gorm:"primarykey;type:text"`
 	ListID    *string   `gorm:"type:text;default null"`
 	MapID     *string   `gorm:"type:text;default null"`
@@ -20,8 +20,8 @@ type Image struct {
 	UpdatedAt time.Time
 }
 
-func NewImage(projectId string, listId *string, mapId *string, name, fieldName, mimeType, extension string) Image {
-	return Image{
+func NewFile(projectId string, listId *string, mapId *string, name, fieldName, mimeType, extension string) File {
+	return File{
 		ID:        ksuid.New().String(),
 		FieldName: fieldName,
 		ListID:    listId,
@@ -33,6 +33,6 @@ func NewImage(projectId string, listId *string, mapId *string, name, fieldName, 
 	}
 }
 
-func (Image) TableName() string {
-	return fmt.Sprintf("%s.%s", "declarations", domain.IMAGE_TABLE)
+func (File) TableName() string {
+	return fmt.Sprintf("%s.%s", "declarations", domain.FILE_TABLE)
 }

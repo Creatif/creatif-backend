@@ -153,8 +153,8 @@ func (c Main) Logic() (LogicResult, error) {
 
 	var updated declarations.ListVariable
 	if transactionErr := storage.Transaction(func(tx *gorm.DB) error {
-		var images []declarations.Image
-		if res := tx.Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND list_id = ?", (declarations.Image{}).TableName()), c.model.ProjectID, c.model.ItemID).Scan(&images); res.Error != nil {
+		var images []declarations.File
+		if res := tx.Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND list_id = ?", (declarations.File{}).TableName()), c.model.ProjectID, c.model.ItemID).Scan(&images); res.Error != nil {
 			return res.Error
 		}
 
@@ -164,7 +164,7 @@ func (c Main) Logic() (LogicResult, error) {
 			c.model.ImagePaths,
 			images,
 			func(fileSystemFilePath, path, mimeType, extension string) (string, error) {
-				image := declarations.NewImage(
+				image := declarations.NewFile(
 					c.model.ProjectID,
 					&c.model.ItemID,
 					nil,
@@ -181,7 +181,7 @@ func (c Main) Logic() (LogicResult, error) {
 				return image.ID, nil
 			},
 			func(imageId, fileSystemFilePath, path, mimeType, extension string) error {
-				if res := tx.Save(&declarations.Image{
+				if res := tx.Save(&declarations.File{
 					ID:        imageId,
 					ListID:    &c.model.ItemID,
 					MapID:     nil,
@@ -198,14 +198,14 @@ func (c Main) Logic() (LogicResult, error) {
 			},
 			func(imageId, fieldName string) error {
 				if fieldName != "" {
-					if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ? AND field_name = ?", (declarations.Image{}).TableName()), imageId, fieldName); res.Error != nil {
+					if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ? AND field_name = ?", (declarations.File{}).TableName()), imageId, fieldName); res.Error != nil {
 						return res.Error
 					}
 
 					return nil
 				}
 
-				if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ?", (declarations.Image{}).TableName()), imageId); res.Error != nil {
+				if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = ?", (declarations.File{}).TableName()), imageId); res.Error != nil {
 					return res.Error
 				}
 

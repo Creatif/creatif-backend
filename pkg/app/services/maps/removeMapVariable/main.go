@@ -52,7 +52,7 @@ func (c Main) Logic() (interface{}, error) {
 
 		deleteImagesSql := fmt.Sprintf(
 			`DELETE FROM %s WHERE list_id = ? AND project_id = ?`,
-			(declarations.Image{}).TableName(),
+			(declarations.File{}).TableName(),
 		)
 
 		res := tx.Exec(deleteImagesSql, c.model.VariableName, c.model.ProjectID)

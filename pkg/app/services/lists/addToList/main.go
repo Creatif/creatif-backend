@@ -115,7 +115,7 @@ func (c Main) Logic() (LogicModel, error) {
 				c.model.Entry.Value,
 				c.model.ImagePaths,
 				func(fileSystemFilePath, path, mimeType, extension string) (string, error) {
-					image := declarations.NewImage(
+					image := declarations.NewFile(
 						c.model.ProjectID,
 						&variable.ID,
 						nil,

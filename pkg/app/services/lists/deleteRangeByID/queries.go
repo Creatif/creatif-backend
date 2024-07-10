@@ -7,9 +7,9 @@ import (
 )
 
 func getImagePaths(projectId string, structureIds []string) ([]string, error) {
-	sql := fmt.Sprintf("SELECT name FROM %s WHERE list_id IN(?) AND project_id = ?", (declarations.Image{}).TableName())
+	sql := fmt.Sprintf("SELECT name FROM %s WHERE list_id IN(?) AND project_id = ?", (declarations.File{}).TableName())
 
-	var images []declarations.Image
+	var images []declarations.File
 	if res := storage.Gorm().Raw(sql, structureIds, projectId).Scan(&images); res.Error != nil {
 		return nil, res.Error
 	}

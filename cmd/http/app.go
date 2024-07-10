@@ -5,7 +5,7 @@ import (
 	"creatif/cmd/http/handlers/app/groups"
 	appHandlers "creatif/cmd/http/handlers/app/project"
 	"creatif/cmd/http/handlers/app/structures"
-	"creatif/cmd/http/handlers/declarations/images"
+	"creatif/cmd/http/handlers/declarations/files"
 	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
@@ -83,7 +83,7 @@ func app() {
 	appRoutes(srv.Group("/api/v1/app"))
 	publishingRoutes(srv.Group("/api/v1/publishing"))
 	publicRoutes(srv.Group("/api/v1/public"))
-	appImages(srv.Group("/api/v1/images"))
+	appImages(srv.Group("/api/v1/files"))
 	staticFiles(srv.Group("/api/v1/static"))
 
 	events.RunEvents()
@@ -112,7 +112,7 @@ func appRoutes(group *echo.Group) {
 }
 
 func appImages(group *echo.Group) {
-	group.GET("/image/:projectID/:id", images.GetImageHandler())
+	group.GET("/file/:projectID/:id", files.GetFileHandler())
 }
 
 func staticFiles(group *echo.Group) {

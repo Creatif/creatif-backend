@@ -15,7 +15,7 @@ func UpdateFiles(
 	projectId string,
 	value []byte,
 	imagePaths []string,
-	currentImages []declarations.Image,
+	currentImages []declarations.File,
 	createCallback callbackCreateFn,
 	updateCallback callbackUpdateFn,
 	deleteCallback callbackDeleteFn,
@@ -49,25 +49,21 @@ func UpdateFiles(
 	groupedFiles := createFileGrouping(currentImages)
 	uploadedPaths = make([]string, 0)
 
-	fmt.Println(groupedFiles)
-
 	for fieldName, files := range groupedFiles {
-		fmt.Println("processing field name: ", fieldName, len(files))
 		firstFile := files[0]
-		/*		shouldSkip, newValue, err := doDeleteIfNotExists(projectId, firstFile.ID, imagePaths, value, firstFile.Name, firstFile.FieldName, deleteCallback)
-				if err != nil {
-					return nil, err
-				}
+		shouldSkip, newValue, err := doDeleteIfNotExists(projectId, files, imagePaths, value, deleteCallback)
+		if err != nil {
+			return nil, err
+		}
 
-				if shouldSkip {
-					value = newValue
-					continue
-				}*/
+		if shouldSkip {
+			value = newValue
+			continue
+		}
 
 		pathValue := gjson.GetBytes(value, fieldName)
 
 		if pathValue.Type == gjson.String {
-			fmt.Println("path value string", fieldName)
 			for _, f := range files {
 				if err := deleteCallback(f.ID, f.FieldName); err != nil {
 					processingError = err
@@ -80,7 +76,6 @@ func UpdateFiles(
 			}
 
 			if pathValue.Str == "" {
-				fmt.Println("path value empty, continue: ", fieldName)
 				continue
 			}
 
@@ -90,7 +85,6 @@ func UpdateFiles(
 				return nil, processingError
 			}
 
-			fmt.Println("upload created for string", fieldName)
 			modifiedValue, err := setJsonFields(value, id, uploadedFile)
 			if err != nil {
 				processingError = err
@@ -102,12 +96,10 @@ func UpdateFiles(
 		}
 
 		if pathValue.Type == gjson.JSON {
-			fmt.Println("path value array", fieldName)
 			// checking that this field is cleared on the user end.
 			// this means that user pressed the X button or that no values have been uploaded on update
-			// either way, this code must delete all images and db entries associated with this field name
+			// either way, this code must delete all files and db entries associated with this field name
 			if len(pathValue.Array()) == 0 {
-				fmt.Println("array path value empty", fieldName)
 				for _, f := range files {
 					if err := deleteCallback(f.ID, f.FieldName); err != nil {
 						processingError = err
@@ -133,10 +125,8 @@ func UpdateFiles(
 				}
 			}
 
-			fmt.Println("created array paths", fieldName)
 			paths := make([]map[string]string, 0)
 			pathValue.ForEach(func(key, result gjson.Result) bool {
-				fmt.Println(key, "creating upload", fieldName)
 				id, uploadedFile, err := doCreateUpload(projectId, &result.Str, firstFile.FieldName, createCallback)
 				if err != nil {
 					processingError = err
@@ -153,7 +143,6 @@ func UpdateFiles(
 				return true
 			})
 
-			fmt.Println("creating paths", fieldName)
 			modifiedValue, err := sjson.SetBytes(value, firstFile.FieldName, paths)
 			if err != nil {
 				processingError = err
@@ -165,42 +154,36 @@ func UpdateFiles(
 	}
 
 	for _, uploadingPath := range imagePaths {
-		fmt.Println("upload path: ", uploadingPath)
 		// this check ensures that this path is already handled
 		// by the above code that makes a diff based on db files.
 		// no need to process in that case so its ok to skip
-		exists := sdk.IncludesFn(currentImages, func(item declarations.Image) bool {
+		exists := sdk.IncludesFn(currentImages, func(item declarations.File) bool {
 			return item.FieldName == uploadingPath
 		})
 
 		if exists {
-			fmt.Println("path already processed", uploadingPath)
 			continue
 		}
 
 		pathValue := gjson.GetBytes(value, uploadingPath)
 
 		if pathValue.Type == gjson.Null {
-			fmt.Println("path value is null", uploadingPath)
 			continue
 		}
 
 		if pathValue.Type == gjson.String && pathValue.Str != "" {
-			fmt.Println("path value is string", uploadingPath)
 			modifiedValue, err := sjson.SetBytes(value, uploadingPath, nil)
 			if err != nil {
 				processingError = errors.New(fmt.Sprintf("Could not nullify path: %s", uploadingPath))
 				return nil, processingError
 			}
 
-			fmt.Println("creating upload", uploadingPath)
 			id, uploadedFile, err := doCreateUpload(projectId, &pathValue.Str, uploadingPath, createCallback)
 			if err != nil {
 				processingError = err
 				return nil, processingError
 			}
 
-			fmt.Println("setting json fields", uploadingPath)
 			modifiedValue, err = setJsonFields(value, id, uploadedFile)
 			if err != nil {
 				processingError = err
@@ -214,7 +197,6 @@ func UpdateFiles(
 		}
 
 		if pathValue.Type == gjson.JSON && len(pathValue.Array()) != 0 {
-			fmt.Println("uploading path is json", uploadingPath)
 			// 1. upload files and create temp json fields
 			// 2. set json fields
 			paths := make([]map[string]string, 0)
@@ -237,14 +219,12 @@ func UpdateFiles(
 				return true
 			})
 
-			fmt.Println("nullify bytes", uploadingPath)
 			modifiedValue, err := sjson.SetBytes(value, uploadingPath, nil)
 			if err != nil {
 				processingError = errors.New(fmt.Sprintf("Could not nullify path: %s", uploadingPath))
 				return nil, processingError
 			}
 
-			fmt.Println("setting bytes", uploadingPath)
 			modifiedValue, err = sjson.SetBytes(modifiedValue, uploadingPath, paths)
 			if err != nil {
 				processingError = err
@@ -294,53 +274,57 @@ func doUpdateSingle(projectId, fileId, fieldName, filePath string, value []byte,
 Deletes files from db and []byte value if they don't exist in the current request value or they don't exist in path
 This happens if the user removes the field entirely on the frontend or renames the filed (name attribute).
 */
-func doDeleteIfNotExists(projectId, fileId string, filePaths []string, value []byte, filePath, fieldName string, deleteCallback callbackDeleteFn) (bool, []byte, error) {
-	raw := gjson.GetBytes(value, fieldName)
+func doDeleteIfNotExists(projectId string, files []declarations.File, filePaths []string, value []byte, deleteCallback callbackDeleteFn) (bool, []byte, error) {
+	firstFile := files[0]
+
+	raw := gjson.GetBytes(value, firstFile.FieldName)
 	existsInPath := sdk.IncludesFn(filePaths, func(item string) bool {
-		return fieldName == item
+		return firstFile.FieldName == item
 	})
 
 	// if the file has not been sent in request but exists in db, it means that it is removed. Remove it here
 	if raw.Type == gjson.Null {
-		if err := os.Remove(filePath); err != nil {
-			events.DispatchEvent(events.NewFileNotRemoveEvent(filePath, "", projectId))
-			return true, nil, nil
+		if err := os.Remove(firstFile.Name); err != nil {
+			events.DispatchEvent(events.NewFileNotRemoveEvent(firstFile.Name, "", projectId))
 		}
 
-		if err := deleteCallback(fileId, fieldName); err != nil {
-			return false, nil, err
+		for _, f := range files {
+			if err := deleteCallback(f.ID, ""); err != nil {
+				return false, nil, err
+			}
 		}
 
 		return true, nil, nil
 	}
 
 	if !existsInPath && raw.Type != gjson.Null {
-		newValue, err := sjson.DeleteBytes(value, fieldName)
+		newValue, err := sjson.DeleteBytes(value, firstFile.FieldName)
 		if err != nil {
 			return false, nil, err
 		}
 		value = newValue
 
-		if err := os.Remove(filePath); err != nil {
-			events.DispatchEvent(events.NewFileNotRemoveEvent(filePath, "", projectId))
-			return true, nil, nil
-		}
+		for _, f := range files {
+			if err := os.Remove(f.Name); err != nil {
+				events.DispatchEvent(events.NewFileNotRemoveEvent(f.Name, "", projectId))
+			}
 
-		if err := deleteCallback(fileId, fieldName); err != nil {
-			return false, nil, err
+			if err := deleteCallback(f.ID, ""); err != nil {
+				return false, nil, err
+			}
 		}
 	}
 
-	return true, value, nil
+	return false, value, nil
 }
 
-func createFileGrouping(dbFiles []declarations.Image) map[string][]declarations.Image {
-	m := make(map[string][]declarations.Image)
+func createFileGrouping(dbFiles []declarations.File) map[string][]declarations.File {
+	m := make(map[string][]declarations.File)
 
 	for _, f := range dbFiles {
 		_, ok := m[f.FieldName]
 		if !ok {
-			m[f.FieldName] = make([]declarations.Image, 0)
+			m[f.FieldName] = make([]declarations.File, 0)
 		}
 
 		m[f.FieldName] = append(m[f.FieldName], f)

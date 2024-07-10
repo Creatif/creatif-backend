@@ -1,4 +1,4 @@
-package getImage
+package getFile
 
 import (
 	"creatif/pkg/lib/sdk"

@@ -1,4 +1,4 @@
-package getImage
+package getFile
 
 import (
 	"creatif/pkg/app/domain/declarations"
@@ -12,7 +12,7 @@ type View struct {
 	Extension string `json:"extension"`
 }
 
-func newView(model declarations.Image) View {
+func newView(model declarations.File) View {
 	return View{
 		ID:        model.ID,
 		Name:      model.Name,
