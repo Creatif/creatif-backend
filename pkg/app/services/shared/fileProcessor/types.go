@@ -12,6 +12,7 @@ type createdFile struct {
 	MimeType           string
 	PublicFilePath     string
 	FileSystemFilePath string
+	FileName           string
 }
 
 type fileResult struct {
@@ -19,6 +20,6 @@ type fileResult struct {
 	error       error
 }
 
-type callbackCreateFn = func(fileSystemFilePath, path, mimeType, extension string) (string, error)
+type callbackCreateFn = func(fileSystemFilePath, path, mimeType, extension, fileName string) (string, error)
 type callbackUpdateFn = func(imageId, fileSystemFilePath, path, mimeType, extension string) error
 type callbackDeleteFn = func(imageId, fieldName string) error

@@ -163,7 +163,7 @@ func (c Main) Logic() (LogicResult, error) {
 			c.model.Values.Value,
 			c.model.ImagePaths,
 			images,
-			func(fileSystemFilePath, path, mimeType, extension string) (string, error) {
+			func(fileSystemFilePath, path, mimeType, extension, fileName string) (string, error) {
 				image := declarations.NewFile(
 					c.model.ProjectID,
 					&c.model.ItemID,
@@ -172,6 +172,7 @@ func (c Main) Logic() (LogicResult, error) {
 					path,
 					mimeType,
 					extension,
+					fileName,
 				)
 
 				if res := tx.Create(&image); res.Error != nil {
@@ -179,22 +180,6 @@ func (c Main) Logic() (LogicResult, error) {
 				}
 
 				return image.ID, nil
-			},
-			func(imageId, fileSystemFilePath, path, mimeType, extension string) error {
-				if res := tx.Save(&declarations.File{
-					ID:        imageId,
-					ListID:    &c.model.ItemID,
-					MapID:     nil,
-					ProjectID: c.model.ProjectID,
-					Name:      fileSystemFilePath,
-					FieldName: path,
-					MimeType:  mimeType,
-					Extension: extension,
-				}); res.Error != nil {
-					return res.Error
-				}
-
-				return nil
 			},
 			func(imageId, fieldName string) error {
 				if fieldName != "" {

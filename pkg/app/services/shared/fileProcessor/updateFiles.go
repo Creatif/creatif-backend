@@ -17,7 +17,6 @@ func UpdateFiles(
 	imagePaths []string,
 	currentImages []declarations.File,
 	createCallback callbackCreateFn,
-	updateCallback callbackUpdateFn,
 	deleteCallback callbackDeleteFn,
 ) ([]byte, error) {
 	uploadedPaths := make([]string, 0)
@@ -138,6 +137,7 @@ func UpdateFiles(
 					"path":      uploadedFile.PublicFilePath,
 					"mimeType":  uploadedFile.MimeType,
 					"extension": uploadedFile.Extension,
+					"fileName":  uploadedFile.FileName,
 				})
 
 				return true
@@ -212,6 +212,7 @@ func UpdateFiles(
 					"path":      uploadedFile.PublicFilePath,
 					"mimeType":  uploadedFile.MimeType,
 					"extension": uploadedFile.Extension,
+					"fileName":  uploadedFile.FileName,
 				})
 
 				uploadedPaths = append(uploadedPaths, uploadedFile.FileSystemFilePath)
@@ -236,37 +237,6 @@ func UpdateFiles(
 	}
 
 	return value, nil
-}
-
-func doUpdateSingle(projectId, fileId, fieldName, filePath string, value []byte, updateCallback callbackUpdateFn) ([]byte, string, error) {
-	base64Image := gjson.GetBytes(value, fieldName).Str
-	newValue, err := sjson.SetBytes(value, fieldName, nil)
-	if err != nil {
-		return nil, "", err
-	}
-	value = newValue
-
-	uploadedFile, err := uploadFile(projectId, tempFile{
-		path:       fieldName,
-		base64File: &base64Image,
-	})
-
-	if err != nil {
-		return nil, "", err
-	}
-
-	newValue, err = setJsonFields(value, fileId, uploadedFile)
-	value = newValue
-
-	if err := updateCallback(fileId, uploadedFile.FileSystemFilePath, uploadedFile.Path, uploadedFile.MimeType, uploadedFile.Extension); err != nil {
-		return nil, "", err
-	}
-
-	if err := os.Remove(filePath); err != nil {
-		events.DispatchEvent(events.NewFileNotRemoveEvent(filePath, "", projectId))
-	}
-
-	return value, uploadedFile.FileSystemFilePath, nil
 }
 
 /*

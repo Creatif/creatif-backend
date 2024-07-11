@@ -57,6 +57,7 @@ func uploadFile(projectId string, file tempFile) (createdFile, error) {
 		Extension:          extension,
 		PublicFilePath:     fmt.Sprintf("/api/v1/static/%s/%s", projectId, fileName),
 		FileSystemFilePath: filePath,
+		FileName:           fileName,
 	}, nil
 }
 
@@ -89,8 +90,4 @@ func setJsonFields(value []byte, fileId string, file createdFile) ([]byte, error
 	}
 
 	return sjson.SetBytes(value, file.Path, paths)
-}
-
-func isArrayPath(path string) bool {
-	return len(strings.Split(path, ".")) != 1
 }

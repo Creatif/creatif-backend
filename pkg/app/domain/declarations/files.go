@@ -13,6 +13,7 @@ type File struct {
 	MapID     *string   `gorm:"type:text;default null"`
 	ProjectID string    `gorm:"primarykey;type:text"`
 	Name      string    `gorm:"type:text"`
+	FileName  string    `gorm:"type:text"`
 	FieldName string    `gorm:"type:text"`
 	MimeType  string    `gorm:"type:text"`
 	Extension string    `gorm:"type:text"`
@@ -20,10 +21,11 @@ type File struct {
 	UpdatedAt time.Time
 }
 
-func NewFile(projectId string, listId *string, mapId *string, name, fieldName, mimeType, extension string) File {
+func NewFile(projectId string, listId *string, mapId *string, name, fieldName, mimeType, extension, fileName string) File {
 	return File{
 		ID:        ksuid.New().String(),
 		FieldName: fieldName,
+		FileName:  fileName,
 		ListID:    listId,
 		MapID:     mapId,
 		Name:      name,

@@ -10,6 +10,7 @@ import (
 	"creatif/cmd/http/handlers/declarations/locale"
 	"creatif/cmd/http/handlers/declarations/maps"
 	"creatif/cmd/http/handlers/declarations/references"
+	"creatif/cmd/http/handlers/publicApi/getFile"
 	"creatif/cmd/http/handlers/publicApi/getListItemByID"
 	"creatif/cmd/http/handlers/publicApi/getListItemsByName"
 	"creatif/cmd/http/handlers/publicApi/getMany"
@@ -30,7 +31,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"net/http"
-	"os"
 )
 
 func app() {
@@ -83,12 +83,10 @@ func app() {
 	appRoutes(srv.Group("/api/v1/app"))
 	publishingRoutes(srv.Group("/api/v1/publishing"))
 	publicRoutes(srv.Group("/api/v1/public"))
-	appImages(srv.Group("/api/v1/files"))
-	staticFiles(srv.Group("/api/v1/static"))
+	appFiles(srv.Group("/api/v1/files"))
 
 	events.RunEvents()
 	server.StartServer(srv)
-
 }
 
 func appRoutes(group *echo.Group) {
@@ -111,12 +109,8 @@ func appRoutes(group *echo.Group) {
 	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
 }
 
-func appImages(group *echo.Group) {
+func appFiles(group *echo.Group) {
 	group.GET("/file/:projectID/:id", files.GetFileHandler())
-}
-
-func staticFiles(group *echo.Group) {
-	group.Static("/", os.Getenv("PUBLIC_DIRECTORY"))
 }
 
 func declarationRoutes(group *echo.Group) {
@@ -165,6 +159,7 @@ func publicRoutes(group *echo.Group) {
 	group.GET("/:projectId/map/id/:id", getMapItemByID.GetMapItemByIDHandler())
 	group.GET("/:projectId/lists/:name", paginateListItems.PaginateListItemsHandler())
 	group.GET("/:projectId/maps/:name", paginateMapItems.PaginateMapItemsHandler())
+	group.GET("/:projectId/file/:version/:id", getFile.GetFileHandler())
 	group.Any("/:projectId/*", func(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{
 			"call": "unknown",

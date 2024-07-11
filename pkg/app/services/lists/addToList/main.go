@@ -114,7 +114,7 @@ func (c Main) Logic() (LogicModel, error) {
 				c.model.ProjectID,
 				c.model.Entry.Value,
 				c.model.ImagePaths,
-				func(fileSystemFilePath, path, mimeType, extension string) (string, error) {
+				func(fileSystemFilePath, path, mimeType, extension, fileName string) (string, error) {
 					image := declarations.NewFile(
 						c.model.ProjectID,
 						&variable.ID,
@@ -123,6 +123,7 @@ func (c Main) Logic() (LogicModel, error) {
 						path,
 						mimeType,
 						extension,
+						fileName,
 					)
 
 					if res := tx.Create(&image); res.Error != nil {

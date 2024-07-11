@@ -73,6 +73,7 @@ func UploadFiles(projectId string, value []byte, imagePaths []string, callback c
 					"path":      uploadedFile.PublicFilePath,
 					"mimeType":  uploadedFile.MimeType,
 					"extension": uploadedFile.Extension,
+					"fileName":  uploadedFile.FileName,
 				})
 
 				uploadedFiles = append(uploadedFiles, uploadedFile)
@@ -114,6 +115,7 @@ func doCreateUpload(projectId string, uploadingBase64 *string, path string, call
 		uploadedFile.Path,
 		uploadedFile.MimeType,
 		uploadedFile.Extension,
+		uploadedFile.FileName,
 	)
 
 	if err != nil {
