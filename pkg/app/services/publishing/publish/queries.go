@@ -132,6 +132,40 @@ INNER JOIN %s AS lv ON l.project_id = ? AND lv.list_id = l.id`,
 	return nil
 }
 
+func publishFiles(tx *gorm.DB, projectId, versionId string, ctx context.Context) error {
+	sql := fmt.Sprintf(`
+INSERT INTO %s (
+    id, 
+    version_id,
+    project_id, 
+    name, 
+    file_name, 
+    mime_type, 
+    created_at,
+    updated_at
+)
+SELECT
+    id,
+    '%s' AS version_id,
+    project_id,
+    name,
+    file_name,
+    mime_type,
+    created_at,
+    updated_at
+FROM %s AS l WHERE l.project_id = ?`,
+		(published.PublishedFile{}).TableName(),
+		versionId,
+		(declarations.File{}).TableName(),
+	)
+
+	if res := tx.WithContext(ctx).Exec(sql, projectId); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
+}
+
 func publishReferences(tx *gorm.DB, projectId, versionId string, ctx context.Context) error {
 	sql := fmt.Sprintf(`
 INSERT INTO %s (

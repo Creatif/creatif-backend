@@ -3,6 +3,7 @@ package getFile
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/domain/published"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/logger"
@@ -35,10 +36,15 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (declarations.File, error) {
-	var file declarations.File
-	sql := fmt.Sprintf("SELECT id, name, field_name, mime_type, extension FROM %s WHERE project_id = ? AND id = ?", (declarations.File{}).TableName())
+	version, err := getVersion(c.model.ProjectID, c.model.Version)
+	if err != nil {
+		return declarations.File{}, err
+	}
 
-	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.FileID).Scan(&file)
+	var file declarations.File
+	sql := fmt.Sprintf("SELECT id, name, mime_type FROM %s WHERE project_id = ? AND id = ? AND version_id = ?", (published.PublishedFile{}).TableName())
+
+	res := storage.Gorm().Raw(sql, c.model.ProjectID, c.model.FileID, version.ID).Scan(&file)
 
 	if res.Error != nil {
 		return declarations.File{}, appErrors.NewApplicationError(res.Error)

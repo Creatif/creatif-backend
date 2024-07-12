@@ -15,6 +15,7 @@ const (
 	PUBLISHED_MAPS_TABLE       = "published_maps"
 	VERSION_TABLE              = "versions"
 	FILE_TABLE                 = "files"
+	PUBLISHED_FILES_TABLE      = "published_files"
 	PUBLISHED_REFERENCES_TABLE = "published_references"
 	EVENTS_TABLE               = "events"
 )
