@@ -87,6 +87,7 @@ func setJsonFields(value []byte, fileId string, file createdFile) ([]byte, error
 		"path":      file.PublicFilePath,
 		"mimeType":  file.MimeType,
 		"extension": file.Extension,
+		"fileName":  file.FileName,
 	}
 
 	return sjson.SetBytes(value, file.Path, paths)
