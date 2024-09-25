@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -36,16 +35,6 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
 	GinkgoRunSpecs(t, "Maps pagination -> CRUD tests")
-}
-
-func runLogger() {
-	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
-	}
-
-	logger.Info("Health info logger health check... Ignore!")
-	logger.Warn("Health warning logger health check... Ignore!")
-	logger.Error("Health error logger health check... Ignore!")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -120,7 +109,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""))
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -195,7 +184,7 @@ func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {
 		entries = append(entries, variableModel)
 	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)

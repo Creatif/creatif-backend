@@ -2,7 +2,6 @@ package getMapItemById
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -12,7 +11,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		mapItem, _ := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, mapItem.ID, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, mapItem.ID, Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		model := m.(View)

@@ -4,7 +4,6 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/services/auth/createAdmin"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -18,9 +17,8 @@ func CreateAdminHandler() func(e echo.Context) error {
 
 		model = app.SanitizeRegisterEmail(model)
 
-		l := logger.NewLogBuilder()
-		handler := createAdmin.New(createAdmin.NewModel(model.Name, model.LastName, model.Email, model.Password), l)
+		handler := createAdmin.New(createAdmin.NewModel(model.Name, model.LastName, model.Email, model.Password))
 
-		return request.SendResponse[createAdmin.Model](handler, c, http.StatusCreated, l, nil, false)
+		return request.SendResponse[createAdmin.Model](handler, c, http.StatusCreated, nil, false)
 	}
 }

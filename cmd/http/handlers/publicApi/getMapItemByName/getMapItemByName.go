@@ -6,7 +6,6 @@ import (
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	getMapItemByNameService "creatif/pkg/app/services/publicApi/getMapItemByName"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -22,11 +21,10 @@ func GetMapItemByNameHandler() func(e echo.Context) error {
 		model.VersionName = versionName
 		model = publicApi.SanitizeGetMapItemByName(model)
 
-		l := logger.NewLogBuilder()
 		handler := getMapItemByNameService.New(getMapItemByNameService.NewModel(model.VersionName, model.ProjectID, model.StructureName, model.Name, model.Locale, getMapItemByNameService.Options{
 			ValueOnly: model.ResolvedOptions.ValueOnly,
-		}), auth.NewAnonymousAuthentication(), l)
+		}), auth.NewAnonymousAuthentication())
 
-		return request.SendPublicResponse[getMapItemByNameService.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[getMapItemByNameService.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

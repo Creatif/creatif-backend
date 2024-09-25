@@ -3,8 +3,6 @@ package request
 import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
-	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
@@ -19,7 +17,7 @@ type ErrorResponse[T any] struct {
 	Data T `json:"data"`
 }
 
-func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, lg logger.LogBuilder, callback func(c echo.Context, model interface{}) error, gracefulFail bool) error {
+func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Context, status int, callback func(c echo.Context, model interface{}) error, gracefulFail bool) error {
 	model, err := handler.Handle()
 
 	if err != nil {
@@ -32,9 +30,6 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 				}
 			}
 
-			if err := flushLogger(lg, "info", context); err != nil {
-				return err
-			}
 			return context.JSON(http.StatusUnprocessableEntity, ErrorResponse[map[string]string]{
 				Data: validationError.Data(),
 			})
@@ -43,36 +38,24 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 		otherError, ok := err.(appErrors.AppError[struct{}])
 		if ok {
 			if otherError.Type() == appErrors.AUTHENTICATION_ERROR {
-				if err := flushLogger(lg, "info", context); err != nil {
-					return err
-				}
 				return context.JSON(http.StatusForbidden, ErrorResponse[map[string]string]{
 					Data: map[string]string{
 						"unauthenticated": "You are not authenticated",
 					},
 				})
 			} else if otherError.Type() == appErrors.AUTHORIZATION_ERROR {
-				if err := flushLogger(lg, "info", context); err != nil {
-					return err
-				}
 				return context.JSON(http.StatusUnauthorized, ErrorResponse[map[string]string]{
 					Data: map[string]string{
 						"unauthorized": "You are not authorized",
 					},
 				})
 			} else if otherError.Type() == appErrors.NOT_FOUND_ERROR {
-				if err := flushLogger(lg, "info", context); err != nil {
-					return err
-				}
 				return context.JSON(http.StatusNotFound, ErrorResponse[map[string]string]{
 					Data: map[string]string{
 						"notExists": "The requested resource does not exist.",
 					},
 				})
 			} else if otherError.Type() == appErrors.USER_UNCOFIRMED {
-				if err := flushLogger(lg, "info", context); err != nil {
-					return err
-				}
 				return context.JSON(http.StatusNotFound, ErrorResponse[map[string]string]{
 					Data: map[string]string{
 						"userUnconfirmed": "The user is unconfirmed",
@@ -87,57 +70,27 @@ func SendResponse[T any, F any, K any](handler pkg.Job[T, F, K], context echo.Co
 						Error:      otherError.Error(),
 					},
 				}
-				lb, _ := json.Marshal(er)
-				lg.Add("Internal server error", string(lb))
-
-				if err := flushLogger(lg, "error", context); err != nil {
-					return err
-				}
 				return context.JSON(http.StatusInternalServerError, er)
 			}
 		}
 
-		if err := flushLogger(lg, "error", context); err != nil {
-			return err
-		}
 		return context.JSON(http.StatusInternalServerError, ErrorResponse[string]{
 			Data: "Internal server error",
 		})
 	}
 
 	if err := callCallback(context, model, callback); err != nil {
-		lg.Add("Callback error", err.Error())
-		if err := flushLogger(lg, "info", context); err != nil {
-			return err
-		}
-
 		if err := context.JSON(http.StatusInternalServerError, ErrorResponse[string]{
 			Data: "Internal server error",
 		}); err != nil {
-			logger.Error(err.Error())
 			return err
 		}
 
 		return nil
 	}
 
-	if err := flushLogger(lg, "info", context); err != nil {
-		return err
-	}
-
 	if err := context.JSON(status, model); err != nil {
-		logger.Error(err.Error())
 		return err
-	}
-
-	return nil
-}
-
-func flushLogger(logger logger.LogBuilder, t string, context echo.Context) error {
-	if err := logger.Flush(t); err != nil {
-		return context.JSON(http.StatusInternalServerError, ErrorResponse[string]{
-			Data: "Internal server error",
-		})
 	}
 
 	return nil

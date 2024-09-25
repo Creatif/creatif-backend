@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -20,7 +19,7 @@ var _ = ginkgo.Describe("Removing structures", func() {
 			testAddToMap(p, m.ID, fmt.Sprintf("map-%d", i), []shared.Reference{}, []string{})
 		}
 
-		handler := New(NewModel(p, m.ID, "map"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(p, m.ID, "map"), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -61,7 +60,7 @@ SELECT COUNT(id) FROM %s WHERE project_id = ? AND (parent_structure_id = ? OR ch
 			testAddToList(p, m.ID, fmt.Sprintf("list-%d", i), []shared.Reference{}, []string{})
 		}
 
-		handler := New(NewModel(p, m.ID, "list"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(p, m.ID, "list"), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())

@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/updateList"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,16 +18,15 @@ func UpdateListHandler() func(e echo.Context) error {
 
 		model = lists.SanitizeUpdateList(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := updateList.New(updateList.NewModel(
 			model.ProjectID,
 			model.Fields,
 			model.Name,
 			model.Values.Name,
-		), authentication, l)
+		), authentication)
 
-		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[updateList.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

@@ -4,12 +4,10 @@ import (
 	"creatif/pkg/app/auth"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 )
 
 type Main struct {
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	auth auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -54,7 +52,6 @@ func (c Main) Handle() (interface{}, error) {
 	return nil, nil
 }
 
-func New(auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[interface{}, interface{}, interface{}] {
-	logBuilder.Add("isFrontendAuthenticated", "Created")
-	return Main{logBuilder: logBuilder, auth: auth}
+func New(auth auth.Authentication) pkg.Job[interface{}, interface{}, interface{}] {
+	return Main{auth: auth}
 }

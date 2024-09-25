@@ -5,14 +5,12 @@ import (
 	"creatif/pkg/app/domain/app"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
 )
 
 type Main struct {
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	auth auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -69,7 +67,6 @@ func (c Main) Handle() (bool, error) {
 	return projectExists, nil
 }
 
-func New(auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[interface{}, bool, bool] {
-	logBuilder.Add("createAdmin", "Created")
-	return Main{logBuilder: logBuilder, auth: auth}
+func New(auth auth.Authentication) pkg.Job[interface{}, bool, bool] {
+	return Main{auth: auth}
 }

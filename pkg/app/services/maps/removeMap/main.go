@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -13,17 +12,14 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("removeMap", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("removeMap", "Validated")
 	return nil
 }
 
@@ -42,7 +38,6 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (interface{}, error) {
 	res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (name = ? OR id = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Delete(&declarations.Map{})
 	if res.Error != nil {
-		c.logBuilder.Add("removeMap", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("removeMap.Logic", nil)
 		}
@@ -51,7 +46,6 @@ func (c Main) Logic() (interface{}, error) {
 	}
 
 	if res.RowsAffected == 0 {
-		c.logBuilder.Add("removeMap", "No rows found. Returning 404.")
 		return nil, appErrors.NewNotFoundError(errors.New(fmt.Sprintf("Map with name '%s' not found.", c.model.Name))).AddError("removeMap.Logic", nil)
 	}
 
@@ -80,7 +74,6 @@ func (c Main) Handle() (interface{}, error) {
 	return nil, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
-	logBuilder.Add("removeMap", "Created.")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, interface{}, interface{}] {
+	return Main{model: model, auth: auth}
 }

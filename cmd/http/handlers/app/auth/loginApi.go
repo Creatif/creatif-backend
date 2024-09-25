@@ -4,7 +4,6 @@ import (
 	"creatif/cmd/http/request"
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/services/auth/loginApi"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -18,10 +17,9 @@ func LoginHandler() func(e echo.Context) error {
 
 		model = app.SanitizeLoginApi(model)
 
-		l := logger.NewLogBuilder()
-		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password), nil, l)
+		handler := loginApi.New(loginApi.NewModel(model.Email, model.Password), nil)
 
-		return request.SendResponse[loginApi.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[loginApi.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			c.SetCookie(request.EncryptApiAuthenticationCookie(model.(string)))
 
 			return nil

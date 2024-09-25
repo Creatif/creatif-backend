@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
@@ -48,7 +47,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, mapView.Name, ids), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapView.Name, ids), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -76,7 +75,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, mapView.ID, ids), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapView.ID, ids), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -99,7 +98,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 			return value.ID
 		})
 
-		handler := New(NewModel(projectId, mapView.ShortID, ids), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapView.ShortID, ids), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

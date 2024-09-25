@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	getStructuresService "creatif/pkg/app/services/publicApi/getStructures"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,9 +18,8 @@ func GetStructuresHandler() func(e echo.Context) error {
 
 		model = publicApi.SanitizeGetStructures(model)
 
-		l := logger.NewLogBuilder()
-		handler := getStructuresService.New(getStructuresService.NewModel(model.ProjectID), auth.NewAnonymousAuthentication(), l)
+		handler := getStructuresService.New(getStructuresService.NewModel(model.ProjectID), auth.NewAnonymousAuthentication())
 
-		return request.SendPublicResponse[getStructuresService.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[getStructuresService.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

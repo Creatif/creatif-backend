@@ -7,7 +7,6 @@ import (
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -16,13 +15,11 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("deleteListItemByID", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
@@ -34,7 +31,6 @@ func (c Main) Validate() error {
 		})
 	}
 
-	c.logBuilder.Add("deleteListItemByID", "Validated")
 	return nil
 }
 
@@ -64,7 +60,6 @@ func (c Main) Logic() (*struct{}, error) {
 
 		res := tx.Exec(deleteImagesSql, c.model.ItemID, c.model.ProjectID)
 		if res.Error != nil {
-			c.logBuilder.Add("deleteListItemByID", res.Error.Error())
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteListItemByID.Logic", nil)
 		}
 
@@ -76,7 +71,6 @@ func (c Main) Logic() (*struct{}, error) {
 
 		res = tx.Exec(sql, c.model.Name, c.model.Name, c.model.ProjectID, c.model.ItemID, c.model.ItemID)
 		if res.Error != nil {
-			c.logBuilder.Add("deleteListItemByID", res.Error.Error())
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteListItemByID.Logic", nil)
 		}
 
@@ -131,7 +125,6 @@ func (c Main) Handle() (*struct{}, error) {
 	return nil, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
-	logBuilder.Add("deleteListItemByID", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, *struct{}, *struct{}] {
+	return Main{model: model, auth: auth}
 }

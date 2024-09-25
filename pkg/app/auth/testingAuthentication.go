@@ -15,6 +15,7 @@ var testSessionUser AuthenticatedUser
 type testingAuthentication struct {
 	shouldCreateUser bool
 	projectId        string
+	TestSessionUser  *AuthenticatedUser
 }
 
 func (a *testingAuthentication) Authenticate() error {
@@ -22,23 +23,25 @@ func (a *testingAuthentication) Authenticate() error {
 }
 
 func (a *testingAuthentication) User() AuthenticatedUser {
-	if a.shouldCreateUser && testSessionUser.ID == "" {
-		user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true)
-		res := storage2.Gorm().Create(&user)
-		if res.Error != nil {
-			ginkgo.Fail(res.Error.Error())
-		}
+	if a.TestSessionUser != nil {
+		return *a.TestSessionUser
+	}
 
-		testSessionUser = AuthenticatedUser{
-			ID:        user.ID,
-			ProjectID: a.projectId,
-			Name:      user.Name,
-			LastName:  user.LastName,
-			Email:     user.Email,
-			Refresh:   time.Time{},
-			CreatedAt: time.Time{},
-			UpdatedAt: time.Time{},
-		}
+	user := app.NewUser(uuid.NewString(), uuid.NewString(), fmt.Sprintf("%s@gmail.com", uuid.New().String()), "password", auth2.EmailProvider, true, true)
+	res := storage2.Gorm().Create(&user)
+	if res.Error != nil {
+		ginkgo.Fail(res.Error.Error())
+	}
+
+	testSessionUser = AuthenticatedUser{
+		ID:        user.ID,
+		ProjectID: a.projectId,
+		Name:      user.Name,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Refresh:   time.Time{},
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
 	}
 
 	return testSessionUser

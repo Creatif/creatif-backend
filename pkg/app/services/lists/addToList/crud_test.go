@@ -3,7 +3,6 @@ package addToList
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -48,7 +47,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 				StructureType: "list",
 				VariableID:    listVariables[2].ID,
 			},
-		}, []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -96,7 +95,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 				StructureType: "list",
 				VariableID:    listVariables[2].ID,
 			},
-		}, []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
@@ -119,7 +118,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -142,7 +141,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/updateListItemByID"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -34,8 +33,7 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			})
 		}
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := updateListItemByID.New(updateListItemByID.NewModel(
 			model.ProjectID,
 			model.Values.Locale,
@@ -49,9 +47,9 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			[]byte(model.Values.Value),
 			references,
 			model.ImagePaths,
-		), authentication, l)
+		), authentication)
 
-		res := request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		res := request.SendResponse[updateListItemByID.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

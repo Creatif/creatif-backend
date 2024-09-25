@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/createList"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -20,8 +19,7 @@ func CreateListHandler() func(e echo.Context) error {
 
 		model = lists.SanitizeCreateList(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := createList.New(createList.NewModel(
 			model.ProjectID,
 			model.Name,
@@ -35,9 +33,9 @@ func CreateListHandler() func(e echo.Context) error {
 					Value:     []byte(value.Value),
 				}
 			}),
-		), authentication, l)
+		), authentication)
 
-		return request.SendResponse[createList.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[createList.Model](handler, c, http.StatusCreated, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

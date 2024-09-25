@@ -9,7 +9,6 @@ import (
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
@@ -20,13 +19,11 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("updateListItemByID", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
@@ -67,7 +64,6 @@ INNER JOIN %s AS l ON (l.id = ? OR l.short_id = ?) AND l.project_id = ? AND l.id
 
 	if res.Error != nil || res.RowsAffected == 0 {
 		if res.Error != nil {
-			c.logBuilder.Add("updateListItemByID", res.Error.Error())
 		}
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", c.model.ItemID),
@@ -104,7 +100,6 @@ func (c Main) Logic() (LogicResult, error) {
 		c.model.ListName,
 		c.model.ProjectID).
 		Select("id").First(&list); res.Error != nil {
-		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByID.Logic", nil)
@@ -119,7 +114,6 @@ func (c Main) Logic() (LogicResult, error) {
 		c.model.ItemID,
 		list.ID).
 		First(&existing); res.Error != nil {
-		c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateListItemByID.Logic", nil)
@@ -214,7 +208,6 @@ func (c Main) Logic() (LogicResult, error) {
 			{Name: "created_at"},
 			{Name: "updated_at"},
 		}}).Where("id = ?", existing.ID).Updates(&existing); res.Error != nil {
-			c.logBuilder.Add("updateListItemByID", res.Error.Error())
 
 			return appErrors.NewApplicationError(res.Error).AddError("updateListItemByID.Logic", nil)
 		}
@@ -289,7 +282,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
-	logBuilder.Add("updateListItemByID", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, View, LogicResult] {
+	return Main{model: model, auth: auth}
 }

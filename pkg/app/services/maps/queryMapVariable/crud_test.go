@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -19,7 +18,7 @@ var _ = ginkgo.Describe("Declaration maps variable tests", func() {
 			return value.ID
 		}))
 
-		handler := New(NewModel(projectId, mapView.ID, variable.Variable.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, mapView.ID, variable.Variable.ID), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)

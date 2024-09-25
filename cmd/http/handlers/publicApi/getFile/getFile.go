@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/publicApi/getFile"
 	"creatif/pkg/lib/constants"
-	"creatif/pkg/lib/logger"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -21,8 +20,7 @@ func GetFileHandler() func(e echo.Context) error {
 
 		model = publicApi.SanitizeGetFile(model)
 
-		l := logger.NewLogBuilder()
-		handler := getFile.New(getFile.NewModel(model.ProjectID, model.FileID, model.Version), auth.NewAnonymousAuthentication(), l)
+		handler := getFile.New(getFile.NewModel(model.ProjectID, model.FileID, model.Version), auth.NewAnonymousAuthentication())
 
 		file, err := handler.Handle()
 		if err != nil {

@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/projects/paginateProjects"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,15 +18,14 @@ func PaginateProjectsHandler() func(e echo.Context) error {
 
 		model = app.SanitizePaginateProjects(model)
 
-		l := logger.NewLogBuilder()
 		handler := paginateProjects.New(paginateProjects.NewModel(
 			model.OrderBy,
 			model.Search,
 			model.OrderDirection,
 			model.Limit,
 			model.Page,
-		), auth.NewFrontendAuthentication(request.GetAuthenticationCookie(c), l), l)
+		), auth.NewFrontendAuthentication(request.GetAuthenticationCookie(c)))
 
-		return request.SendResponse[paginateProjects.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[paginateProjects.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

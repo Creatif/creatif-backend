@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/auth"
 	removeStructure "creatif/pkg/app/services/structures/deleteStructure"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,15 +18,13 @@ func RemoveStructureHandler() func(e echo.Context) error {
 
 		model = app.SanitizeRemoveStructure(model)
 
-		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := removeStructure.New(
 			removeStructure.NewModel(model.ProjectID, model.ID, model.Type),
 			a,
-			l,
 		)
 
-		return request.SendResponse(handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse(handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if a.ShouldRefresh() {
 				session, err := a.Refresh()
 				if err != nil {

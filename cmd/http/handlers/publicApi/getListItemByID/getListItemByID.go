@@ -6,7 +6,6 @@ import (
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	getListItemByIDService "creatif/pkg/app/services/publicApi/getListItemById"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -23,11 +22,10 @@ func GetListItemByIDHandler() func(e echo.Context) error {
 
 		model = publicApi.SanitizeGetListItemByID(model)
 
-		l := logger.NewLogBuilder()
 		handler := getListItemByIDService.New(getListItemByIDService.NewModel(model.VersionName, model.ProjectID, model.ItemID, getListItemByIDService.Options{
 			ValueOnly: model.ResolvedOptions.ValueOnly,
-		}), auth.NewAnonymousAuthentication(), l)
+		}), auth.NewAnonymousAuthentication())
 
-		return request.SendPublicResponse[getListItemByIDService.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[getListItemByIDService.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

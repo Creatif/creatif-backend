@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -13,9 +12,8 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -90,7 +88,6 @@ func (c Main) Logic() (sdk.LogicView[declarations.List], error) {
 	var items []declarations.List
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {
-		c.logBuilder.Add("paginateLists", res.Error.Error())
 		return sdk.LogicView[declarations.List]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
 	}
 
@@ -108,7 +105,6 @@ func (c Main) Logic() (sdk.LogicView[declarations.List], error) {
 	var count int64
 	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
 	if res.Error != nil {
-		c.logBuilder.Add("paginateLists", res.Error.Error())
 		return sdk.LogicView[declarations.List]{}, appErrors.NewDatabaseError(res.Error).AddError("ListItems.Paginate.Logic", nil)
 	}
 
@@ -149,7 +145,6 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 	}, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[declarations.List]] {
-	logBuilder.Add("paginateLists", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[declarations.List]] {
+	return Main{model: model, auth: auth}
 }

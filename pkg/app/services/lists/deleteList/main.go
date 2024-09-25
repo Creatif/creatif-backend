@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -14,18 +13,15 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("deleteList", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
-	c.logBuilder.Add("deleteList", "Validated")
 	return nil
 }
 
@@ -46,7 +42,6 @@ func (c Main) Logic() (*struct{}, error) {
 	var list declarations.List
 	res := storage.Gorm().Where(fmt.Sprintf("%s AND project_id = ?", id), val, c.model.ProjectID).Delete(&list)
 	if res.Error != nil {
-		c.logBuilder.Add("deleteList", res.Error.Error())
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteList.Logic", nil)
 		}
@@ -55,7 +50,6 @@ func (c Main) Logic() (*struct{}, error) {
 	}
 
 	if res.RowsAffected == 0 {
-		c.logBuilder.Add("deleteList", "No rows found. That means 404")
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteList.Logic", nil)
 	}
 
@@ -84,7 +78,6 @@ func (c Main) Handle() (*struct{}, error) {
 	return nil, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
-	logBuilder.Add("deleteList", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, *struct{}, *struct{}] {
+	return Main{model: model, auth: auth}
 }

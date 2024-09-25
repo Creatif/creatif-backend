@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/projects/getProject"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,9 +18,8 @@ func GetProjectHandler() func(e echo.Context) error {
 
 		model = app.SanitizeGetProject(model)
 
-		l := logger.NewLogBuilder()
-		handler := getProject.New(getProject.NewModel(model.ProjectID), auth.NewApiAuthentication(request.GetAuthenticationCookie(c), l), l)
+		handler := getProject.New(getProject.NewModel(model.ProjectID), auth.NewApiAuthentication(request.GetAuthenticationCookie(c)))
 
-		return request.SendResponse[getProject.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendResponse[getProject.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

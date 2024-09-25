@@ -6,7 +6,6 @@ import (
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/publicApi/getManyItems"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,12 +20,10 @@ func GetManyHandler() func(e echo.Context) error {
 		versionName := c.Request().Header.Get(publicApi2.CreatifVersionHeader)
 		model.VersionName = versionName
 		model = publicApi.SanitizeGetMany(model)
-
-		l := logger.NewLogBuilder()
 		handler := getManyItems.New(getManyItems.NewModel(model.VersionName, model.ProjectID, model.ResolvedIds, getManyItems.Options{
 			ValueOnly: model.ResolvedOptions.ValueOnly,
-		}), auth.NewAnonymousAuthentication(), l)
+		}), auth.NewAnonymousAuthentication())
 
-		return request.SendPublicResponse[getManyItems.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[getManyItems.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

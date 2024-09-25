@@ -6,26 +6,20 @@ import (
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("queryMapVariable", "Validating...")
-
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-
-	c.logBuilder.Add("queryMapVariable", "Validated")
 
 	return nil
 }
@@ -65,12 +59,10 @@ func (c Main) Logic() (LogicModel, error) {
 		Scan(&variable)
 
 	if res.Error != nil {
-		c.logBuilder.Add("queryMapVariable", res.Error.Error())
 		return LogicModel{}, appErrors.NewDatabaseError(res.Error).AddError("queryMapVariable.Logic", nil)
 	}
 
 	if res.RowsAffected == 0 {
-		c.logBuilder.Add("queryMapVariable", "No rows returned. 404 status code.")
 		return LogicModel{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
 	}
 
@@ -107,7 +99,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
-	logBuilder.Add("queryMapVariable", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, View, LogicModel] {
+	return Main{model: model, auth: auth}
 }

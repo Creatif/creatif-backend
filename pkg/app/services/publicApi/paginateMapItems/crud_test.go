@@ -3,7 +3,6 @@ package paginateMapItems
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/maps/addToMap"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -14,7 +13,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -41,7 +40,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 3, "desc", "index", "", []string{}, []string{}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, "paginationMap", 3, "desc", "index", "", []string{}, []string{}, Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -53,7 +52,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -80,7 +79,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{"eng"}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{"eng"}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -107,7 +106,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		items, _ := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "0", []string{"eng"}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "0", []string{"eng"}, []string{"group-0"}, Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())

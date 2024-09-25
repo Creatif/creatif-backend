@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/addToList"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -21,8 +20,7 @@ func AddToListHandler() func(e echo.Context) error {
 
 		model = lists.SanitizeAddToList(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := addToList.New(addToList.NewModel(model.ProjectID, model.Name, addToList.VariableModel{
 			Name:      model.Variable.Name,
 			Metadata:  []byte(model.Variable.Metadata),
@@ -37,9 +35,9 @@ func AddToListHandler() func(e echo.Context) error {
 				StructureType: value.StructureType,
 				VariableID:    value.VariableID,
 			}
-		}), model.ImagePaths), authentication, l)
+		}), model.ImagePaths), authentication)
 
-		return request.SendResponse[addToList.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[addToList.Model](handler, c, http.StatusCreated, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -37,19 +36,8 @@ func TestApi(t *testing.T) {
 	GinkgoRunSpecs(t, "Groups -> CRUD tests")
 }
 
-func runLogger() {
-	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
-	}
-
-	logger.Info("Health info logger health check... Ignore!")
-	logger.Warn("Health warning logger health check... Ignore!")
-	logger.Error("Health error logger health check... Ignore!")
-}
-
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
-	runLogger()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
@@ -120,7 +108,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""))
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -142,9 +130,7 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 		}
 	}
 
-	l := logger.NewLogBuilder()
-
-	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId), l)
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId))
 	model, err := handler.Handle()
 	testAssertErrNil(err)
 

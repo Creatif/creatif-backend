@@ -3,7 +3,6 @@ package deleteList
 import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -14,7 +13,7 @@ var _ = ginkgo.Describe("Declaration list delete tests", func() {
 		projectId := testCreateProject("project")
 		listName, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, listName, "", ""), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, listName, "", ""), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -29,7 +28,7 @@ var _ = ginkgo.Describe("Declaration list delete tests", func() {
 		projectId := testCreateProject("project")
 		_, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "", listId, ""), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "", listId, ""), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -44,7 +43,7 @@ var _ = ginkgo.Describe("Declaration list delete tests", func() {
 		projectId := testCreateProject("project")
 		_, listID, shortID := testCreateListAndReturnNameAndID(projectId, "name", 100)
 
-		handler := New(NewModel(projectId, "", "", shortID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "", "", shortID), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

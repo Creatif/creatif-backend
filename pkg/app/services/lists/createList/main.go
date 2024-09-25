@@ -6,19 +6,16 @@ import (
 	"creatif/pkg/app/services/locales"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"gorm.io/gorm"
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("createList", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
@@ -27,7 +24,6 @@ func (c Main) Validate() error {
 		return err
 	}
 
-	c.logBuilder.Add("createList", "Validated")
 	return nil
 }
 
@@ -74,7 +70,6 @@ func (c Main) Logic() (declarations.List, error) {
 
 		return nil
 	}); err != nil {
-		c.logBuilder.Add("createList", err.Error())
 		return declarations.List{}, appErrors.NewDatabaseError(err).AddError("createList.Logic", nil)
 	}
 
@@ -103,7 +98,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {
-	logBuilder.Add("createList", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, View, declarations.List] {
+	return Main{model: model, auth: auth}
 }

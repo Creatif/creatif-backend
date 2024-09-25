@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -25,7 +24,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, mapView.ID, "created_at", "", "desc", 10, 1, []string{groups[0].ID}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, mapView.ID, "created_at", "", "desc", 10, 1, []string{groups[0].ID}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -43,7 +42,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 			}))
 		}
 
-		handler := New(NewModel(projectId, []string{}, mapView.ID, "created_at", "", "desc", 10, 50, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, mapView.ID, "created_at", "", "desc", 10, 50, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -59,7 +58,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, mapView.ShortID, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, mapView.ShortID, "created_at", "", "desc", 10, 1, []string{"not_exists"}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -77,7 +76,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 			}))
 		}
 
-		handler := New(NewModel(projectId, []string{}, mapView.ID, "created_at", "", "desc", 50, 1, []string{groups[0].ID, groups[1].ID}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, mapView.ID, "created_at", "", "desc", 50, 1, []string{groups[0].ID, groups[1].ID}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -92,7 +91,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, []string{})
 		}
 
-		handler := New(NewModel(projectId, []string{}, mapView.ID, "created_at", "1", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{}, mapView.ID, "created_at", "1", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
@@ -111,7 +110,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
-		handler := New(NewModel(projectId, []string{localeId}, mapView.ID, "created_at", "1", "desc", 10, 1, []string{groups[0].ID, groups[1].ID}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, []string{localeId}, mapView.ID, "created_at", "1", "desc", 10, 1, []string{groups[0].ID, groups[1].ID}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""))
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 

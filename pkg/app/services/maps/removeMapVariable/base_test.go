@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -39,20 +38,8 @@ func TestApi(t *testing.T) {
 	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
 }
 
-func runLogger() {
-	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
-	}
-
-	logger.Info("Health info logger health check... Ignore!")
-	logger.Warn("Health warning logger health check... Ignore!")
-	logger.Error("Health error logger health check... Ignore!")
-}
-
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
-	runLogger()
-
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
 		os.Getenv("DATABASE_HOST"),
@@ -122,7 +109,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""))
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -136,7 +123,7 @@ func testCreateProject(name string) string {
 func testCreateMap(projectId, name string) mapCreate.View {
 	entries := make([]mapCreate.VariableModel, 0)
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -157,8 +144,8 @@ func testAddToMap(projectId, name string, references []shared.Reference) addToMa
 		Behaviour: "modifiable",
 	}
 
-	model := addToMap.NewModel(projectId, name, variableModel, references)
-	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	model := addToMap.NewModel(projectId, name, variableModel, references, []string{})
+	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Logic()
 	gomega.Expect(err).Should(gomega.BeNil())

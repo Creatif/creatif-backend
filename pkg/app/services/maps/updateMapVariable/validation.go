@@ -4,14 +4,13 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/constants"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
 )
 
-func validateBehaviour(mapName, projectId, variableName string, groups []string, logBuilder logger.LogBuilder) error {
+func validateBehaviour(mapName, projectId, variableName string, groups []string) error {
 	type GroupBehaviourCheck struct {
 		Count     int    `gorm:"column:count"`
 		Behaviour string `gorm:"column:behaviour"`
@@ -34,9 +33,7 @@ INNER JOIN %s AS m ON (m.name = ? OR m.id = ? OR m.short_id = ?) AND m.project_i
 
 	if res.Error != nil || res.RowsAffected == 0 {
 		if res.Error != nil {
-			logBuilder.Add("updateMapVariable", res.Error.Error())
 		} else {
-			logBuilder.Add("updateMapVariable", "No rows returned. Might be a bug")
 		}
 		return appErrors.NewValidationError(map[string]string{
 			"groups": fmt.Sprintf("Invalid number of groups for '%s'. Maximum number of groups per variable is 20.", variableName),

@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
@@ -19,9 +18,8 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -51,7 +49,7 @@ func (c Main) Validate() error {
 	}
 
 	if sdk.Includes(c.model.Fields, "behaviour") {
-		if err := validateBehaviour(c.model.MapName, c.model.ProjectID, c.model.VariableName, c.model.Values.Groups, c.logBuilder); err != nil {
+		if err := validateBehaviour(c.model.MapName, c.model.ProjectID, c.model.VariableName, c.model.Values.Groups); err != nil {
 			return err
 		}
 	}
@@ -79,7 +77,6 @@ func (c Main) Logic() (LogicResult, error) {
 		c.model.MapName,
 		c.model.ProjectID).
 		Select("id", "name").First(&m); res.Error != nil {
-		c.logBuilder.Add("updateMapVariable", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
@@ -94,7 +91,6 @@ func (c Main) Logic() (LogicResult, error) {
 		c.model.VariableName,
 		m.ID).
 		First(&existing); res.Error != nil {
-		c.logBuilder.Add("updateMapVariable", res.Error.Error())
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return LogicResult{}, appErrors.NewNotFoundError(res.Error).AddError("updateMapVariable.Logic", nil)
@@ -189,8 +185,6 @@ func (c Main) Logic() (LogicResult, error) {
 			{Name: "created_at"},
 			{Name: "updated_at"},
 		}}).Where("id = ?", existing.ID).Updates(existing); res.Error != nil {
-			c.logBuilder.Add("updateMapVariable", res.Error.Error())
-
 			return res.Error
 		}
 
@@ -265,7 +259,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicResult] {
-	logBuilder.Add("updateMapVariable", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, View, LogicResult] {
+	return Main{model: model, auth: auth}
 }

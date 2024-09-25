@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/maps/getMapGroups"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,15 +18,14 @@ func GetMapGroupsHandler() func(e echo.Context) error {
 
 		model = maps.SanitizeGetMapGroups(model)
 
-		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := getMapGroups.New(getMapGroups.NewModel(
 			model.Name,
 			model.ItemID,
 			model.ProjectID,
-		), a, l)
+		), a)
 
-		return request.SendResponse(handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse(handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if a.ShouldRefresh() {
 				session, err := a.Refresh()
 				if err != nil {

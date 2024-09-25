@@ -6,25 +6,20 @@ import (
 	connections2 "creatif/pkg/app/services/publicApi/connections"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("getListItemsByName", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return publicApiError.NewError("paginateMapItems", errs, publicApiError.ValidationError)
 	}
-
-	c.logBuilder.Add("getListItemsByName", "Validated")
 	return nil
 }
 
@@ -140,7 +135,6 @@ func (c Main) Handle() (interface{}, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, LogicModel] {
-	logBuilder.Add("getListItemsByName", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, interface{}, LogicModel] {
+	return Main{model: model, auth: auth}
 }

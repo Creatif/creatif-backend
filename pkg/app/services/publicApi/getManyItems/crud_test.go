@@ -2,7 +2,6 @@ package getManyItems
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -18,7 +17,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		ids = append(ids, part1...)
 		ids = append(ids, part2...)
 
-		handler := New(NewModel(version.Name, projectId, ids, Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(version.Name, projectId, ids, Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		models := m.([]View)

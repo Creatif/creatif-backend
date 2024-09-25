@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/domain/app"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -14,18 +13,15 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("loginApi", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
-	c.logBuilder.Add("loginApi", "Validated.")
 	return nil
 }
 
@@ -55,7 +51,6 @@ FROM %s AS u WHERE u.email = ?
 `, (app.User{}).TableName()), c.model.Email).Scan(&user)
 
 	if res.Error != nil {
-		c.logBuilder.Add("apiLogin.getUser", res.Error.Error())
 		return "", appErrors.NewAuthenticationError(errors.New("Unauthenticated"))
 	}
 
@@ -65,7 +60,6 @@ FROM %s AS u WHERE u.email = ?
 	}
 
 	if !user.Confirmed {
-		c.logBuilder.Add("apiLogin.notConfirmed", "User not confirmed")
 		return "", appErrors.NewAuthenticationError(errors.New("The user is not confirmed"))
 	}
 
@@ -75,7 +69,7 @@ FROM %s AS u WHERE u.email = ?
 	}
 
 	authenticatedUser := auth.NewAuthenticatedUser(user.ID, user.Name, user.LastName, user.Email, user.CreatedAt, user.UpdatedAt, time.Now())
-	return auth.NewApiLogin(authenticatedUser, key, c.logBuilder).Login()
+	return auth.NewApiLogin(authenticatedUser, key).Login()
 }
 
 func (c Main) Handle() (string, error) {
@@ -100,7 +94,6 @@ func (c Main) Handle() (string, error) {
 	return model, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, string, string] {
-	logBuilder.Add("loginApi", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, string, string] {
+	return Main{model: model, auth: auth}
 }

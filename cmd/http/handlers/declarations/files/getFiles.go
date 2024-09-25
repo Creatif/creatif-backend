@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/files"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/files/getFile"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,9 +18,8 @@ func GetFileHandler() func(e echo.Context) error {
 
 		model = files.SanitizeGetFile(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
-		handler := getFile.New(getFile.NewModel(model.ProjectID, model.StructureID), authentication, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
+		handler := getFile.New(getFile.NewModel(model.ProjectID, model.StructureID), authentication)
 
 		img, err := handler.Handle()
 		if err != nil {

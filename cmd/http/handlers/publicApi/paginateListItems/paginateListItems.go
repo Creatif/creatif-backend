@@ -6,7 +6,6 @@ import (
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/publicApi/paginateListItems"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -22,7 +21,6 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 		model.VersionName = versionName
 		model = publicApi.SanitizePaginateListItems(model)
 
-		l := logger.NewLogBuilder()
 		handler := paginateListItems.New(paginateListItems.NewModel(
 			model.VersionName,
 			model.ProjectID,
@@ -36,8 +34,8 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			paginateListItems.Options{
 				ValueOnly: model.ResolvedOptions.ValueOnly,
 			},
-		), auth.NewAnonymousAuthentication(), l)
+		), auth.NewAnonymousAuthentication())
 
-		return request.SendPublicResponse[paginateListItems.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[paginateListItems.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

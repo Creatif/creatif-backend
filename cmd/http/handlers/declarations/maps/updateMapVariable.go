@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/auth"
 	updateMapVariable2 "creatif/pkg/app/services/maps/updateMapVariable"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -33,8 +32,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			})
 		}
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := updateMapVariable2.New(updateMapVariable2.NewModel(model.ProjectID, model.Name, model.ItemID, model.ResolvedFields, updateMapVariable2.VariableModel{
 			Name:      model.Variable.Name,
 			Metadata:  []byte(model.Variable.Metadata),
@@ -42,9 +40,9 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Groups:    model.Variable.Groups,
 			Behaviour: model.Variable.Behaviour,
 			Value:     []byte(model.Variable.Value),
-		}, references, model.ImagePaths), authentication, l)
+		}, references, model.ImagePaths), authentication)
 
-		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

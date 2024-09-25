@@ -6,7 +6,6 @@ import (
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/publicApi/paginateMapItems"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -22,7 +21,6 @@ func PaginateMapItemsHandler() func(e echo.Context) error {
 		model.VersionName = versionName
 		model = publicApi.SanitizePaginateMapItems(model)
 
-		l := logger.NewLogBuilder()
 		handler := paginateMapItems.New(paginateMapItems.NewModel(
 			model.VersionName,
 			model.ProjectID,
@@ -36,8 +34,8 @@ func PaginateMapItemsHandler() func(e echo.Context) error {
 			paginateMapItems.Options{
 				ValueOnly: model.ResolvedOptions.ValueOnly,
 			},
-		), auth.NewAnonymousAuthentication(), l)
+		), auth.NewAnonymousAuthentication())
 
-		return request.SendPublicResponse[paginateMapItems.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[paginateMapItems.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

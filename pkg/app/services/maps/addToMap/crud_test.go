@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/services/groups/addGroups"
 	getMap2 "creatif/pkg/app/services/maps/getMap"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
@@ -51,12 +50,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 				StructureType: "map",
 				VariableID:    reference.Variables[2].ID,
 			},
-		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name), auth.NewTestingAuthentication(false, ""))
 		maps, err := getMapHandler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(maps.ID)
@@ -99,7 +98,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 				StructureType: "map",
 				VariableID:    reference.Variables[2].ID,
 			},
-		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
@@ -116,12 +115,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.Name), auth.NewTestingAuthentication(false, ""))
 		maps, err := getMapHandler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(maps.ID)
@@ -139,12 +138,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.ShortID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		getMapHandler := getMap2.New(getMap2.NewModel(projectId, m.ShortID), auth.NewTestingAuthentication(false, ""))
 		maps, err := getMapHandler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(maps.ID)

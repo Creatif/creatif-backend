@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/paginateListItems"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -20,8 +19,7 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 
 		model = lists.SanitizePaginateListItems(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := paginateListItems.New(paginateListItems.NewModel(
 			model.ProjectID,
 			model.SanitizedLocales,
@@ -35,9 +33,9 @@ func PaginateListItemsHandler() func(e echo.Context) error {
 			sdk.ParseFilters(model.Filters),
 			model.Behaviour,
 			model.SanitizedFields,
-		), authentication, l)
+		), authentication)
 
-		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[paginateListItems.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/maps/paginateMaps"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,8 +18,7 @@ func PaginateMapsHandler() func(e echo.Context) error {
 
 		model = maps.SanitizePaginateMaps(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := paginateMaps.New(paginateMaps.NewModel(
 			model.ProjectID,
 			model.OrderBy,
@@ -28,9 +26,9 @@ func PaginateMapsHandler() func(e echo.Context) error {
 			model.OrderDirection,
 			model.Limit,
 			model.Page,
-		), authentication, l)
+		), authentication)
 
-		return request.SendResponse[paginateMaps.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[paginateMaps.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

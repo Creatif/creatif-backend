@@ -7,7 +7,6 @@ import (
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
@@ -15,9 +14,8 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
@@ -57,7 +55,6 @@ func (c Main) Logic() (interface{}, error) {
 
 		res := tx.Exec(deleteImagesSql, c.model.VariableName, c.model.ProjectID)
 		if res.Error != nil {
-			c.logBuilder.Add("deleteListItemByID", res.Error.Error())
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteListItemByID.Logic", nil)
 		}
 
@@ -69,12 +66,10 @@ func (c Main) Logic() (interface{}, error) {
 
 		res = tx.Exec(sql, c.model.ProjectID, c.model.VariableName, c.model.VariableName, c.model.Name, c.model.Name)
 		if res.Error != nil {
-			c.logBuilder.Add("removeMapVariable", res.Error.Error())
 			return res.Error
 		}
 
 		if res.RowsAffected == 0 {
-			c.logBuilder.Add("removeMapVariable", "No rows returned. Returning 404 status.")
 			return res.Error
 		}
 
@@ -125,7 +120,6 @@ func (c Main) Handle() (interface{}, error) {
 	return nil, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
-	logBuilder.Add("removeMapVariable", "Created.")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, interface{}, interface{}] {
+	return Main{model: model, auth: auth}
 }

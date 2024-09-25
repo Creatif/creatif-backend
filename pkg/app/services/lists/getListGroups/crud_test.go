@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/addToList"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -21,8 +20,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 			listVariables = append(listVariables, testAddToList(projectId, view.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
 		}
 
-		l := logger.NewLogBuilder()
-		handler := New(NewModel(view.ID, listVariables[0].ID, projectId), auth.NewTestingAuthentication(true, ""), l)
+		handler := New(NewModel(view.ID, listVariables[0].ID, projectId), auth.NewTestingAuthentication(true, ""))
 		createdGroups, err := handler.Handle()
 		testAssertErrNil(err)
 

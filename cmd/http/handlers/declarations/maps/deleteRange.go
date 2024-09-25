@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/maps/deleteRangeByID"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,15 +18,14 @@ func DeleteRange() func(e echo.Context) error {
 
 		model = maps.SanitizeDeleteRange(model)
 
-		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := deleteRangeByID.New(deleteRangeByID.NewModel(
 			model.ProjectID,
 			model.Name,
 			model.Items,
-		), a, l)
+		), a)
 
-		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[deleteRangeByID.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if a.ShouldRefresh() {
 				session, err := a.Refresh()
 				if err != nil {

@@ -35,7 +35,6 @@ import (
 
 func app() {
 	loadEnv()
-	runLogger()
 	runAssets()
 	runPublic()
 	runDb()

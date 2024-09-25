@@ -5,20 +5,17 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("switchByID", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
@@ -41,13 +38,10 @@ func (c Main) Logic() (float64, error) {
 	var chosenMap declarations.Map
 	res := storage.Gorm().Raw(fmt.Sprintf("SELECT id FROM %s WHERE project_id = ? AND (id = ? OR name = ? OR short_id = ?)", (declarations.Map{}).TableName()), c.model.ProjectID, c.model.Name, c.model.Name, c.model.Name).Scan(&chosenMap)
 	if res.Error != nil {
-		c.logBuilder.Add("switchByID.Map", fmt.Sprintf("Update: Invalid query: %s", res.Error.Error()))
-
 		return 0, appErrors.NewApplicationError(res.Error)
 	}
 
 	if res.RowsAffected == 0 {
-		c.logBuilder.Add("switchByID", fmt.Sprintf("Update: Map variable not found: %s", "Rows affected: 0"))
 		return 0, appErrors.NewNotFoundError(errors.New("Could not find map"))
 	}
 
@@ -106,13 +100,10 @@ SET index = round(((coalesce(?, 1000) + (SELECT index FROM declarations.map_vari
 	), realIndex, c.model.Destination, c.model.Source, chosenMap.ID)
 
 	if res.Error != nil {
-		c.logBuilder.Add("switchByID", fmt.Sprintf("Update: Invalid query: %s", res.Error.Error()))
-
 		return 0, appErrors.NewApplicationError(res.Error)
 	}
 
 	if res.RowsAffected == 0 {
-		c.logBuilder.Add("switchByID", fmt.Sprintf("Update: Not found: %s", "Rows affected: 0"))
 		return 0, appErrors.NewNotFoundError(errors.New("Could not switch map variables."))
 	}
 
@@ -147,7 +138,6 @@ func (c Main) Handle() (float64, error) {
 	return changedIndex, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, float64, float64] {
-	logBuilder.Add("switchByID", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, float64, float64] {
+	return Main{model: model, auth: auth}
 }

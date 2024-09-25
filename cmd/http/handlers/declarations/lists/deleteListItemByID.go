@@ -6,7 +6,6 @@ import (
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/deleteListItemByID"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -23,15 +22,14 @@ func DeleteListItemByIDHandler() func(e echo.Context) error {
 			model.Locale = declarations2.DefaultLocale
 		}
 
-		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := deleteListItemByID.New(deleteListItemByID.NewModel(
 			model.ProjectID,
 			model.Name,
 			model.ItemID,
-		), a, l)
+		), a)
 
-		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[deleteListItemByID.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if a.ShouldRefresh() {
 				session, err := a.Refresh()
 				if err != nil {

@@ -2,15 +2,13 @@ package auth
 
 import (
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"encoding/base64"
 	"encoding/json"
 )
 
 type EmailLogin struct {
-	key        [32]byte
-	user       AuthenticatedUser
-	logBuilder logger.LogBuilder
+	key  [32]byte
+	user AuthenticatedUser
 }
 
 func (e EmailLogin) Login() (string, error) {
@@ -22,7 +20,6 @@ func (e EmailLogin) Login() (string, error) {
 	encryptedUser, err := encrypt(serializedUser, &e.key)
 	if err != nil {
 		// TODO: send immediate slack message here
-		e.logBuilder.Add("login.cannotEncryptKey", "Key should have length of 32 characters.")
 		return "", appErrors.NewUnexpectedError(err)
 	}
 
@@ -32,17 +29,15 @@ func (e EmailLogin) Login() (string, error) {
 	b, err := json.Marshal(session)
 	if err != nil {
 		// TODO: send immediate slack message here
-		e.logBuilder.Add("login.cannotEncryptKey", "Key should have length of 32 characters.")
 		return "", appErrors.NewUnexpectedError(err)
 	}
 
 	return base64.StdEncoding.EncodeToString(b), nil
 }
 
-func NewEmailLogin(user AuthenticatedUser, key [32]byte, logger logger.LogBuilder) Loginer {
+func NewEmailLogin(user AuthenticatedUser, key [32]byte) Loginer {
 	return EmailLogin{
-		user:       user,
-		key:        key,
-		logBuilder: logger,
+		user: user,
+		key:  key,
 	}
 }

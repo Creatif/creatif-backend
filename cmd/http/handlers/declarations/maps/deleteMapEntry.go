@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/maps/removeMapVariable"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,11 +18,10 @@ func DeleteMapEntry() func(e echo.Context) error {
 
 		model = maps.SanitizeDeleteMapEntry(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
-		handler := removeMapVariable.New(removeMapVariable.NewModel(model.ProjectID, model.Name, model.VariableName), authentication, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
+		handler := removeMapVariable.New(removeMapVariable.NewModel(model.ProjectID, model.Name, model.VariableName), authentication)
 
-		return request.SendResponse[removeMapVariable.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[removeMapVariable.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/publishing/toggleProduction"
 	"creatif/pkg/app/auth"
 	toggleProductionService "creatif/pkg/app/services/publishing/toggleProduction"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,11 +18,10 @@ func ToggleProductionHandler() func(e echo.Context) error {
 
 		model = toggleProduction.SanitizeToggleProduction(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
-		handler := toggleProductionService.New(toggleProductionService.NewModel(model.ProjectID, model.ID), authentication, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
+		handler := toggleProductionService.New(toggleProductionService.NewModel(model.ProjectID, model.ID), authentication)
 
-		return request.SendResponse[toggleProductionService.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[toggleProductionService.Model](handler, c, http.StatusCreated, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

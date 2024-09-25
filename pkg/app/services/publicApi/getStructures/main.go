@@ -5,24 +5,20 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("getStructures", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return publicApiError.NewError("getStructures", errs, publicApiError.ValidationError)
 	}
 
-	c.logBuilder.Add("getStructures", "Validated")
 	return nil
 }
 
@@ -84,7 +80,6 @@ func (c Main) Handle() ([]View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, LogicModel] {
-	logBuilder.Add("getStructures", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, []View, LogicModel] {
+	return Main{model: model, auth: auth}
 }

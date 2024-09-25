@@ -5,25 +5,18 @@ import (
 	"creatif/pkg/app/domain/app"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
-	"fmt"
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("projectService", "Validating...")
-
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-
-	c.logBuilder.Add("projectService", "Validated")
 
 	return nil
 }
@@ -44,8 +37,6 @@ func (c Main) Logic() (app.Project, error) {
 	model := app.NewProject(c.model.Name, c.auth.User().ID)
 
 	if err := storage.Create((app.Project{}).TableName(), &model, false); err != nil {
-		c.logBuilder.Add("error", err.Error())
-
 		return app.Project{}, appErrors.NewApplicationError(err).AddError("createProject", nil)
 	}
 
@@ -57,7 +48,6 @@ func (c Main) Logic() (app.Project, error) {
 		return app.Project{}, err
 	}
 
-	c.logBuilder.Add("projectService", fmt.Sprintf("Project %s created", c.model.Name))
 	return model, nil
 }
 
@@ -83,7 +73,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, builder logger.LogBuilder) pkg.Job[Model, View, app.Project] {
-	builder.Add("projectService", "Created")
-	return Main{model: model, logBuilder: builder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, View, app.Project] {
+	return Main{model: model, auth: auth}
 }

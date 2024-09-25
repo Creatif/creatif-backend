@@ -7,7 +7,6 @@ import (
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -39,19 +38,8 @@ func TestApi(t *testing.T) {
 	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
 }
 
-func runLogger() {
-	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
-	}
-
-	logger.Info("Health info logger health check... Ignore!")
-	logger.Warn("Health warning logger health check... Ignore!")
-	logger.Error("Health error logger health check... Ignore!")
-}
-
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
-	runLogger()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
@@ -121,7 +109,7 @@ func testAssertIDValid(id string) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""))
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -145,7 +133,7 @@ func testCreateList(projectId, name string, varNum int) string {
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""))
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)
@@ -169,7 +157,7 @@ func testCreateListAndReturnIdsAndIndexes(projectId, name string, varNum int) []
 		}
 	}
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""))
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)

@@ -5,24 +5,19 @@ import (
 	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("getVersions", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return publicApiError.NewError("getVersions", errs, publicApiError.ValidationError)
 	}
-
-	c.logBuilder.Add("getVersions", "Validated")
 	return nil
 }
 
@@ -73,7 +68,6 @@ func (c Main) Handle() ([]View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, []View, []published.Version] {
-	logBuilder.Add("getVersions", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, []View, []published.Version] {
+	return Main{model: model, auth: auth}
 }

@@ -2,14 +2,13 @@ package createProject
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
 
 var _ = ginkgo.Describe("Create project tests", func() {
-	ginkgo.It("should create a new project", func() {
-		handler := New(NewModel("project name"), auth.NewTestingAuthentication(true, ""), logger.NewLogBuilder())
+	ginkgo.It("should create a new project", ginkgo.Label("project"), func() {
+		handler := New(NewModel("project name"), auth.NewTestingAuthentication(true, ""))
 
 		model, err := handler.Handle()
 		testAssertErrNil(err)
@@ -18,9 +17,9 @@ var _ = ginkgo.Describe("Create project tests", func() {
 		gomega.Expect(model.Name).Should(gomega.Equal("project name"))
 	})
 
-	ginkgo.It("should fail if project already exists", func() {
+	ginkgo.It("should fail if project already exists", ginkgo.Label("project"), func() {
 		testCreateProject("project name")
-		handler := New(NewModel("project name"), auth.NewTestingAuthentication(true, ""), logger.NewLogBuilder())
+		handler := New(NewModel("project name"), auth.NewTestingAuthentication(true, ""))
 
 		_, err := handler.Handle()
 

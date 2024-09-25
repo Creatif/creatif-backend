@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/lib/logger"
 	storage2 "creatif/pkg/lib/storage"
 	"database/sql"
 	"errors"
@@ -43,16 +42,6 @@ func runDb() {
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("Cannot connect to database: %s", err.Error()))
 	}
-}
-
-func runLogger() {
-	if err := logger.BuildLoggers("/app/var/log"); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
-	}
-
-	logger.Info("Health info logger health check... Ignore!")
-	logger.Warn("Health warning logger health check... Ignore!")
-	logger.Error("Health error logger health check... Ignore!")
 }
 
 func runPublic() {

@@ -5,7 +5,6 @@ import (
 	getVersionsRequest "creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	publicApiGetVersions "creatif/pkg/app/services/publicApi/getVersions"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,9 +18,8 @@ func GetVersionsHandler() func(e echo.Context) error {
 
 		model = getVersionsRequest.SanitizeGetVersions(model)
 
-		l := logger.NewLogBuilder()
-		handler := publicApiGetVersions.New(publicApiGetVersions.NewModel(model.ProjectID), auth.NewAnonymousAuthentication(), l)
+		handler := publicApiGetVersions.New(publicApiGetVersions.NewModel(model.ProjectID), auth.NewAnonymousAuthentication())
 
-		return request.SendPublicResponse[publicApiGetVersions.Model](handler, c, http.StatusOK, l, nil, false)
+		return request.SendPublicResponse[publicApiGetVersions.Model](handler, c, http.StatusOK, nil, false)
 	}
 }

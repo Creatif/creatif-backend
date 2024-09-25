@@ -2,7 +2,6 @@ package removeVersion
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -13,7 +12,7 @@ var _ = ginkgo.Describe("Publishing", func() {
 		projectId := testCreateProject("project")
 		_, version := publishFullProject(projectId)
 
-		handler := New(NewModel(projectId, version.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, version.ID), auth.NewTestingAuthentication(false, ""))
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 

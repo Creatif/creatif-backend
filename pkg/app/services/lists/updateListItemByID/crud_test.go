@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
@@ -45,7 +44,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			[]byte{},
 			v,
 			[]shared.UpdateReference{},
-		), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+			[]string{},
+		), auth.NewTestingAuthentication(false, ""))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -83,7 +83,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ID, singleItem.ID, "newName", "readonly", []string{g[0], g[1], g[2]}, []byte{}, v, []shared.UpdateReference{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ID, singleItem.ID, "newName", "readonly", []string{g[0], g[1], g[2]}, []byte{}, v, []shared.UpdateReference{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -132,7 +132,8 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			[]byte{},
 			v,
 			[]shared.UpdateReference{},
-		), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+			[]string{},
+		), auth.NewTestingAuthentication(false, ""))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -178,9 +179,9 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			[]byte{},
 			v,
 			[]shared.UpdateReference{},
+			[]string{},
 		),
 			auth.NewTestingAuthentication(false, ""),
-			logger.NewLogBuilder(),
 		)
 
 		_, err = handler.Handle()
@@ -220,9 +221,9 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			[]byte{},
 			v,
 			[]shared.UpdateReference{},
+			[]string{},
 		),
 			auth.NewTestingAuthentication(false, ""),
-			logger.NewLogBuilder(),
 		)
 
 		_, err = handler.Handle()

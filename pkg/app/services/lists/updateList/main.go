@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -14,18 +13,14 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("updateList", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("updateList", "Validated")
-
 	return nil
 }
 
@@ -44,8 +39,6 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (declarations.List, error) {
 	var existing declarations.List
 	if res := storage.Gorm().Where(fmt.Sprintf("(name = ? OR id = ? OR short_id = ?) AND project_id = ?"), c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID).First(&existing); res.Error != nil {
-		c.logBuilder.Add("updateList", res.Error.Error())
-
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			return declarations.List{}, appErrors.NewNotFoundError(res.Error).AddError("updateList.Logic", nil)
 		}
@@ -68,7 +61,6 @@ func (c Main) Logic() (declarations.List, error) {
 		{Name: "created_at"},
 		{Name: "updated_at"},
 	}}).Where("id = ?", existing.ID).Select(c.model.Fields).Updates(existing); res.Error != nil {
-		c.logBuilder.Add("updateList", res.Error.Error())
 		return declarations.List{}, appErrors.NewApplicationError(res.Error).AddError("updateList.Logic", nil)
 	}
 
@@ -97,7 +89,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, declarations.List] {
-	logBuilder.Add("updateList", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, View, declarations.List] {
+	return Main{model: model, auth: auth}
 }

@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/domain/app"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -13,17 +12,14 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("paginateVariables", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("paginateVariables", "Validated")
 	return nil
 }
 
@@ -91,7 +87,6 @@ OFFSET @offset LIMIT @limit
 	var items []QueryModel
 	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
 	if res.Error != nil {
-		c.logBuilder.Add("paginateVariables", res.Error.Error())
 		return sdk.LogicView[QueryModel]{}, appErrors.NewDatabaseError(res.Error).AddError("Projects.Paginate.Logic", nil)
 	}
 
@@ -104,7 +99,6 @@ WHERE v.user_id = @user
 `, (app.Project{}).TableName(), search)
 	res = storage.Gorm().Raw(countSql, countPlaceholders).Scan(&count)
 	if res.Error != nil {
-		c.logBuilder.Add("paginateVariables", res.Error.Error())
 		return sdk.LogicView[QueryModel]{}, appErrors.NewDatabaseError(res.Error).AddError("Projects.Paginate.Logic", nil)
 	}
 
@@ -140,7 +134,6 @@ func (c Main) Handle() (sdk.PaginationView[View], error) {
 	}, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[QueryModel]] {
-	logBuilder.Add("paginateProjects", "Created.")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[QueryModel]] {
+	return Main{model: model, auth: auth}
 }

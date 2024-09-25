@@ -2,7 +2,6 @@ package getListItemsByName
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -12,7 +11,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		item, structure, _ := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, structure.Name, item.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel("", projectId, structure.Name, item.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		models := m.([]View)

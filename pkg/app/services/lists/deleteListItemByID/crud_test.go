@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -36,7 +35,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 			},
 		}, groups)
 
-		handler := New(NewModel(projectId, listId, addToListVariable.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, listId, addToListVariable.ID), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())
@@ -61,7 +60,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		res := storage.Gorm().Where("list_id = ?", listID).Select("short_id").First(&listItem)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
-		handler := New(NewModel(projectId, listShortID, listItem.ShortID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, listShortID, listItem.ShortID), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		testAssertErrNil(err)
 		gomega.Expect(model).Should(gomega.BeNil())

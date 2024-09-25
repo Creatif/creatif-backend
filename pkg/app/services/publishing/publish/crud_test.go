@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -103,7 +102,7 @@ var _ = ginkgo.Describe("Publishing", func() {
 			}))
 		}
 
-		handler := New(NewModel(projectId, "version name"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "version name"), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())

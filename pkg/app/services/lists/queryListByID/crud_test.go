@@ -2,7 +2,6 @@ package queryListByID
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -14,7 +13,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariable := variableIds[3]
 
-		handler := New(NewModel(projectId, listId, selectedVariable["id"]), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, listId, selectedVariable["id"]), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)

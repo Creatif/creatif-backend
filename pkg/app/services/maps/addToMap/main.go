@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -17,17 +16,14 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("addToMap", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
-	c.logBuilder.Add("addToMap", "Validated.")
 
 	if len(c.model.Entry.Groups) > 0 {
 		count, err := shared.ValidateGroupsExist(c.model.ProjectID, c.model.Entry.Groups)
@@ -85,13 +81,11 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (LogicModel, error) {
 	localeID, err := locales.GetIDWithAlpha(c.model.Entry.Locale)
 	if err != nil {
-		c.logBuilder.Add("addToMap", err.Error())
 		return LogicModel{}, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
 
 	var m declarations.Map
 	if res := storage.Gorm().Where(fmt.Sprintf("project_id = ? AND (id = ? OR short_id = ?)"), c.model.ProjectID, c.model.Name, c.model.Name).Select("ID", "name").First(&m); res.Error != nil {
-		c.logBuilder.Add("addToMap", res.Error.Error())
 		return LogicModel{}, appErrors.NewNotFoundError(res.Error).AddError("addToMap.Logic", nil)
 	}
 
@@ -101,7 +95,6 @@ func (c Main) Logic() (LogicModel, error) {
 
 	highestIndex, err := getHighestIndex(m.ID)
 	if err != nil {
-		c.logBuilder.Add("addToMap", err.Error())
 		return LogicModel{}, appErrors.NewApplicationError(err).AddError("addToMap.Logic", nil)
 	}
 
@@ -141,8 +134,6 @@ func (c Main) Logic() (LogicModel, error) {
 			variable.Value = newValue
 		}
 		if res := tx.Create(&variable); res.Error != nil {
-			c.logBuilder.Add("addToMap", res.Error.Error())
-
 			return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
 		}
 
@@ -212,7 +203,6 @@ func (c Main) Handle() (View, error) {
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, View, LogicModel] {
-	logBuilder.Add("addToMap", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, View, LogicModel] {
+	return Main{model: model, auth: auth}
 }

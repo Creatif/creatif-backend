@@ -5,7 +5,6 @@ import (
 	auth2 "creatif/pkg/app/services/auth"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -13,12 +12,10 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
+	model Model
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("createAdmin", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
@@ -30,11 +27,10 @@ func (c Main) Validate() error {
 				"admin": fmt.Sprintf("There is already an admin for this site"),
 			})
 		} else if res.Error != nil {
-			c.logBuilder.Add("adminExists", res.Error.Error())
+			// blank
 		}
 	}
 
-	c.logBuilder.Add("createAdmin", "Validated.")
 	return nil
 }
 
@@ -49,7 +45,6 @@ func (c Main) Authorize() error {
 func (c Main) Logic() (interface{}, error) {
 	pass, err := hashPassword(c.model.Password)
 	if err != nil {
-		c.logBuilder.Add("createAdmin.hashPasswordError", err.Error())
 		return nil, appErrors.NewUnexpectedError(err)
 	}
 
@@ -84,7 +79,6 @@ func (c Main) Handle() (interface{}, error) {
 	return nil, nil
 }
 
-func New(model Model, logBuilder logger.LogBuilder) pkg.Job[Model, interface{}, interface{}] {
-	logBuilder.Add("createAdmin", "Created")
-	return Main{model: model, logBuilder: logBuilder}
+func New(model Model) pkg.Job[Model, interface{}, interface{}] {
+	return Main{model: model}
 }

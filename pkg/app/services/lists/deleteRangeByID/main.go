@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"gorm.io/gorm"
@@ -16,18 +15,15 @@ import (
 )
 
 type Main struct {
-	model      Model
-	logBuilder logger.LogBuilder
-	auth       auth.Authentication
+	model Model
+	auth  auth.Authentication
 }
 
 func (c Main) Validate() error {
-	c.logBuilder.Add("deleteRangeByID", "Validating...")
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
 	}
 
-	c.logBuilder.Add("deleteRangeByID", "Validated")
 	return nil
 }
 
@@ -58,7 +54,6 @@ func (c Main) Logic() (*struct{}, error) {
 
 		res := tx.Exec(deleteImagesSql, c.model.Items, c.model.ProjectID)
 		if res.Error != nil {
-			c.logBuilder.Add("deleteListItemByID", res.Error.Error())
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
 		}
 
@@ -70,7 +65,6 @@ func (c Main) Logic() (*struct{}, error) {
 
 		res = tx.Exec(sql, c.model.Name, c.model.Name, c.model.Name, c.model.ProjectID, c.model.Items)
 		if res.Error != nil {
-			c.logBuilder.Add("deleteRangeByID", res.Error.Error())
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteRangeByID.Logic", nil)
 		}
 
@@ -126,7 +120,6 @@ func (c Main) Handle() (*struct{}, error) {
 	return nil, nil
 }
 
-func New(model Model, auth auth.Authentication, logBuilder logger.LogBuilder) pkg.Job[Model, *struct{}, *struct{}] {
-	logBuilder.Add("deleteRangeByID", "Created")
-	return Main{model: model, logBuilder: logBuilder, auth: auth}
+func New(model Model, auth auth.Authentication) pkg.Job[Model, *struct{}, *struct{}] {
+	return Main{model: model, auth: auth}
 }

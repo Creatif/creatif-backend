@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"github.com/onsi/ginkgo/v2"
@@ -36,7 +35,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 			},
 		})
 
-		handler := New(NewModel(projectId, view.ID, addToMapVariable.Variable.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, view.ID, addToMapVariable.Variable.ID), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)

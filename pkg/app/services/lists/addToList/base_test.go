@@ -8,7 +8,6 @@ import (
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -40,19 +39,8 @@ func TestApi(t *testing.T) {
 	GinkgoRunSpecs(t, "Declaration -> CRUD tests")
 }
 
-func runLogger() {
-	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
-	}
-
-	logger.Info("Health info logger health check... Ignore!")
-	logger.Warn("Health warning logger health check... Ignore!")
-	logger.Error("Health error logger health check... Ignore!")
-}
-
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
-	runLogger()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
@@ -122,7 +110,7 @@ func testAssertIDValid(id string) {
 	gomega.Expect(err).Should(gomega.BeNil())
 }
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""))
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -134,7 +122,7 @@ func testCreateProject(name string) string {
 }
 
 func testCreateList(projectId, name string) createList2.View {
-	handler := createList2.New(createList2.NewModel(projectId, name, []createList2.Variable{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, []createList2.Variable{}), auth.NewTestingAuthentication(false, ""))
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)
@@ -156,9 +144,7 @@ func testCreateGroups(projectId string, numOfGroups int) []string {
 		}
 	}
 
-	l := logger.NewLogBuilder()
-
-	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId), l)
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId))
 	model, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 
@@ -177,8 +163,8 @@ func testAddToList(projectId, name, variableName string, references []shared.Ref
 		Behaviour: "modifiable",
 	}
 
-	model := NewModel(projectId, name, variableModel, references)
-	handler := New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	model := NewModel(projectId, name, variableModel, references, []string{})
+	handler := New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())

@@ -13,7 +13,6 @@ import (
 	"creatif/pkg/app/services/publishing/publish"
 	"creatif/pkg/app/services/publishing/toggleProduction"
 	"creatif/pkg/app/services/shared"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -43,16 +42,6 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
 	GinkgoRunSpecs(t, "Publishing tests")
-}
-
-func runLogger() {
-	if err := logger.BuildLoggers(os.Getenv("LOG_DIRECTORY")); err != nil {
-		log.Fatalln(fmt.Sprintf("Cannot createProject logger: %s", err.Error()))
-	}
-
-	logger.Info("Health info logger health check... Ignore!")
-	logger.Warn("Health warning logger health check... Ignore!")
-	logger.Error("Health error logger health check... Ignore!")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -127,7 +116,7 @@ func testAssertIDValid(id string) {
 }
 
 func testCreateProject(name string) string {
-	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createProject2.New(createProject2.NewModel(name), auth.NewTestingAuthentication(false, ""))
 
 	model, err := handler.Handle()
 	testAssertErrNil(err)
@@ -141,7 +130,7 @@ func testCreateProject(name string) string {
 func testCreateMap(projectId, name string) mapCreate.View {
 	entries := make([]mapCreate.VariableModel, 0)
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
 	testAssertErrNil(err)
@@ -153,7 +142,7 @@ func testCreateMap(projectId, name string) mapCreate.View {
 }
 
 func testCreateList(projectId, name string) createList2.View {
-	handler := createList2.New(createList2.NewModel(projectId, name, []createList2.Variable{}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := createList2.New(createList2.NewModel(projectId, name, []createList2.Variable{}), auth.NewTestingAuthentication(false, ""))
 
 	list, err := handler.Handle()
 	testAssertErrNil(err)
@@ -175,9 +164,7 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 		}
 	}
 
-	l := logger.NewLogBuilder()
-
-	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId), l)
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId))
 	model, err := handler.Handle()
 	testAssertErrNil(err)
 
@@ -194,8 +181,8 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 		Behaviour: "modifiable",
 	}
 
-	model := addToMap.NewModel(projectId, name, variableModel, references)
-	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	model := addToMap.NewModel(projectId, name, variableModel, references, []string{})
+	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -213,8 +200,8 @@ func testAddToList(projectId, name, variableName string, references []shared.Ref
 		Behaviour: "modifiable",
 	}
 
-	model := addToList.NewModel(projectId, name, variableModel, references)
-	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	model := addToList.NewModel(projectId, name, variableModel, references, []string{})
+	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -272,13 +259,13 @@ func publishFullProject(projectId string) (addToMap.View, publish.View) {
 		return value.ID
 	}))
 
-	handler := publish.New(publish.NewModel(projectId, "v1"), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	handler := publish.New(publish.NewModel(projectId, "v1"), auth.NewTestingAuthentication(false, ""))
 	model, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
 	gomega.Expect(model.Name).ShouldNot(gomega.BeEmpty())
 
-	toggleHandler := toggleProduction.New(toggleProduction.NewModel(projectId, model.ID), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+	toggleHandler := toggleProduction.New(toggleProduction.NewModel(projectId, model.ID), auth.NewTestingAuthentication(false, ""))
 	_, err = toggleHandler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 

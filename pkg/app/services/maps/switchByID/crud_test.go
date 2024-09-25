@@ -2,7 +2,6 @@ package switchByID
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"math/rand"
 	"sync"
@@ -17,7 +16,7 @@ var _ = ginkgo.Describe("Declaration map variable tests", func() {
 		source := idsAndIndexes[0]
 		destination := idsAndIndexes[5]
 
-		handler := New(NewModel(projectId, "list", source["id"], destination["id"]), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId, "list", source["id"], destination["id"]), auth.NewTestingAuthentication(false, ""))
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 	})
@@ -36,7 +35,7 @@ var _ = ginkgo.Describe("Declaration map variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "list", source["id"], destination["id"]), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+				handler := New(NewModel(projectId, "list", source["id"], destination["id"]), auth.NewTestingAuthentication(false, ""))
 				_, err := handler.Handle()
 				testAssertErrNil(err)
 			}()
@@ -75,7 +74,7 @@ var _ = ginkgo.Describe("Declaration map variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "list", ids[sourceIdx]["id"], ids[destinationIdx]["id"]), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+				handler := New(NewModel(projectId, "list", ids[sourceIdx]["id"], ids[destinationIdx]["id"]), auth.NewTestingAuthentication(false, ""))
 				_, err := handler.Handle()
 				testAssertErrNil(err)
 			}()

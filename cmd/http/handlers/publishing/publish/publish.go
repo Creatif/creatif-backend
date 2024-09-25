@@ -5,7 +5,6 @@ import (
 	publishRequest "creatif/cmd/http/request/publishing/publish"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/publishing/publish"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,11 +18,10 @@ func PublishHandler() func(e echo.Context) error {
 
 		model = publishRequest.SanitizePublish(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
-		handler := publish.New(publish.NewModel(model.ProjectID, model.Name), authentication, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
+		handler := publish.New(publish.NewModel(model.ProjectID, model.Name), authentication)
 
-		return request.SendResponse[publish.Model](handler, c, http.StatusCreated, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[publish.Model](handler, c, http.StatusCreated, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

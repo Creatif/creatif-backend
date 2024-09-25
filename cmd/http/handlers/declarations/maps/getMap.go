@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	getMap2 "creatif/pkg/app/services/maps/getMap"
-	"creatif/pkg/lib/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,11 +18,10 @@ func GetMapHandler() func(e echo.Context) error {
 
 		model = maps.SanitizeGetMap(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
-		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Name), authentication, l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
+		handler := getMap2.New(getMap2.NewModel(model.ProjectID, model.Name), authentication)
 
-		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[getMap2.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

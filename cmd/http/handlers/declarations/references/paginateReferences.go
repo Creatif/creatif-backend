@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/declarations/references"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/shared/paginateReferences"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -20,8 +19,7 @@ func PaginateReferencesHandler() func(e echo.Context) error {
 
 		model = references.SanitizePaginateReferences(model)
 
-		l := logger.NewLogBuilder()
-		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		authentication := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := paginateReferences.New(paginateReferences.NewModel(
 			model.ProjectID,
 			model.ParentID,
@@ -40,9 +38,9 @@ func PaginateReferencesHandler() func(e echo.Context) error {
 			sdk.ParseFilters(model.Filters),
 			model.Behaviour,
 			model.SanitizedFields,
-		), authentication, l)
+		), authentication)
 
-		return request.SendResponse[paginateReferences.Model](handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[paginateReferences.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {
 				session, err := authentication.Refresh()
 				if err != nil {

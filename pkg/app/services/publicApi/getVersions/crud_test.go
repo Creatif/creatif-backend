@@ -2,7 +2,6 @@ package getVersions
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -12,7 +11,7 @@ var _ = ginkgo.Describe("Public API", func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
-		handler := New(NewModel(projectId), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(len(model)).Should(gomega.Equal(1))

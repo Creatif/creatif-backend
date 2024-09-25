@@ -2,21 +2,18 @@ package auth
 
 import (
 	"creatif/pkg/app/domain/app"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 )
 
 type apiAuthentication struct {
-	session    string
-	logBuilder logger.LogBuilder
-	user       AuthenticatedUser
-	key        [32]byte
-	doRefresh  bool
+	session   string
+	user      AuthenticatedUser
+	key       [32]byte
+	doRefresh bool
 }
 
 func (a *apiAuthentication) Authenticate() error {
@@ -26,13 +23,11 @@ func (a *apiAuthentication) Authenticate() error {
 
 	jsonToken, err := base64.StdEncoding.DecodeString(a.session)
 	if err != nil {
-		a.logBuilder.Add("authentication.base64DecodeSession", err.Error())
 		return errors.New("Failed to decode session cookie")
 	}
 
 	var session AuthenticatedApiSession
 	if err := json.Unmarshal(jsonToken, &session); err != nil {
-		a.logBuilder.Add("authentication.sessionDecode", err.Error())
 		return errors.New("Failed to decode API session object")
 	}
 
@@ -42,13 +37,11 @@ func (a *apiAuthentication) Authenticate() error {
 
 	var user app.User
 	if res := storage.Gorm().Where("id = ?", session.ID).Select("key", "email").First(&user); res.Error != nil {
-		a.logBuilder.Add("authentication.userNotFound", res.Error.Error())
 		return errors.New("User not found")
 	}
 
 	encrypedUser, err := base64.StdEncoding.DecodeString(session.Token)
 	if err != nil {
-		a.logBuilder.Add("authentication.base64DecodeToken", err.Error())
 		return errors.New("Failed to decode token.")
 	}
 
@@ -59,18 +52,15 @@ func (a *apiAuthentication) Authenticate() error {
 
 	jsonAuthenticatedUser, err := decrypt(encrypedUser, &key)
 	if err != nil {
-		a.logBuilder.Add("authentication.decryptUser", err.Error())
 		return errors.New("Failed to decrypt decoded user.")
 	}
 
 	var authenticatedUser AuthenticatedUser
 	if err := json.Unmarshal(jsonAuthenticatedUser, &authenticatedUser); err != nil {
-		a.logBuilder.Add("authentication.tokenDecode", err.Error())
 		return errors.New("Failed to decode authenticated user.")
 	}
 
 	if authenticatedUser.Email != user.Email {
-		a.logBuilder.Add("authentication.differentEmails", fmt.Sprintf("Provided email %s did not match the user email %s", authenticatedUser.Email, user.Email))
 		return errors.New("Failed email")
 	}
 
@@ -109,17 +99,16 @@ func (a *apiAuthentication) Logout(cb func()) {
 
 func (a *apiAuthentication) Refresh() (string, error) {
 	if a.doRefresh {
-		loginer := NewApiLogin(a.user, a.key, a.logBuilder)
+		loginer := NewApiLogin(a.user, a.key)
 		return loginer.Login()
 	}
 
 	return a.session, nil
 }
 
-func NewApiAuthentication(session string, builder logger.LogBuilder) Authentication {
+func NewApiAuthentication(session string) Authentication {
 	return &apiAuthentication{
-		session:    session,
-		doRefresh:  false,
-		logBuilder: builder,
+		session:   session,
+		doRefresh: false,
 	}
 }

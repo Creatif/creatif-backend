@@ -5,7 +5,6 @@ import (
 	"creatif/cmd/http/request/app"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/structures/createAndDiff"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -20,16 +19,15 @@ func GetStructureMetadataHandler() func(e echo.Context) error {
 
 		model = app.SanitizeGetStructureMetadata(model)
 
-		l := logger.NewLogBuilder()
-		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c), l)
+		a := auth.NewApiAuthentication(request.GetApiAuthenticationCookie(c))
 		handler := createAndDiff.New(createAndDiff.NewModel(model.ID, sdk.Map(model.Config, func(idx int, value app.GetStructureMetadataConfig) createAndDiff.Structure {
 			return createAndDiff.Structure{
 				Name: value.Name,
 				Type: value.Type,
 			}
-		})), a, l)
+		})), a)
 
-		return request.SendResponse(handler, c, http.StatusOK, l, func(c echo.Context, model interface{}) error {
+		return request.SendResponse(handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if a.ShouldRefresh() {
 				session, err := a.Refresh()
 				if err != nil {

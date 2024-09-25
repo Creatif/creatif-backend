@@ -2,7 +2,6 @@ package getProject
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/lib/logger"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -10,7 +9,7 @@ import (
 var _ = ginkgo.Describe("Get project tests", func() {
 	ginkgo.It("should get a project by ID", func() {
 		projectId := testCreateProject("project")
-		handler := New(NewModel(projectId), auth.NewTestingAuthentication(true, ""), logger.NewLogBuilder())
+		handler := New(NewModel(projectId), auth.NewTestingAuthentication(true, ""))
 
 		model, err := handler.Handle()
 		testAssertErrNil(err)

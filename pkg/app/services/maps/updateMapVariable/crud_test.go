@@ -6,7 +6,6 @@ import (
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -75,7 +74,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 				StructureType: "map",
 				VariableID:    referenceVar5.ID,
 			},
-		}), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		view, err := handler.Handle()
 
@@ -127,7 +126,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"},
 			Behaviour: "readonly",
 			Value:     v,
-		}, nil), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, nil, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
@@ -160,7 +159,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{groups[0], groups[1]},
 			Behaviour: "readonly",
 			Value:     v,
-		}, nil), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, nil, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
@@ -194,7 +193,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{groups[0]},
 			Behaviour: "modifiable",
 			Value:     v,
-		}, nil), auth.NewTestingAuthentication(false, ""), logger.NewLogBuilder())
+		}, nil, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err = handler.Handle()
 		gomega.Expect(err).ShouldNot(gomega.BeNil())
