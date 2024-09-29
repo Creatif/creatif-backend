@@ -83,7 +83,6 @@ func app() {
 	publishingRoutes(srv.Group("/api/v1/publishing"))
 	publicRoutes(srv.Group("/api/v1/public"))
 	appFiles(srv.Group("/api/v1/files"))
-	publicFiles(srv)
 
 	events.RunEvents()
 	server.StartServer(srv)
@@ -107,10 +106,6 @@ func appRoutes(group *echo.Group) {
 	group.POST("/auth/login", authHandlers.LoginHandler())
 
 	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
-}
-
-func publicFiles(e *echo.Echo) {
-	e.Static("/public", "public")
 }
 
 func appFiles(group *echo.Group) {
