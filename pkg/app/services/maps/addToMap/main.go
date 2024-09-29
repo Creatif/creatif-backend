@@ -133,6 +133,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 			variable.Value = newValue
 		}
+
 		if res := tx.Create(&variable); res.Error != nil {
 			return errors.New(fmt.Sprintf("Map with name '%s' already exists.", c.model.Entry.Name))
 		}

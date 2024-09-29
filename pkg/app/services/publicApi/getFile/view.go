@@ -1,7 +1,7 @@
 package getFile
 
 import (
-	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/domain/published"
 )
 
 type View struct {
@@ -12,12 +12,11 @@ type View struct {
 	Extension string `json:"extension"`
 }
 
-func newView(model declarations.File) View {
+func newView(model published.PublishedFile) View {
 	return View{
-		ID:        model.ID,
-		Name:      model.Name,
-		MimeType:  model.MimeType,
-		FilePath:  model.Name,
-		Extension: model.Extension,
+		ID:       model.ID,
+		Name:     model.Name,
+		MimeType: model.MimeType,
+		FilePath: model.Name,
 	}
 }

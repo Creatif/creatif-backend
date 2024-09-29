@@ -27,6 +27,7 @@ func GetFileHandler() func(e echo.Context) error {
 			return c.NoContent(http.StatusNotFound)
 		}
 
+		fmt.Println(fmt.Sprintf("%s/%s/%s/%s", constants.PublicDirectory, model.ProjectID, model.Version, filepath.Base(file.Name)))
 		c.Set("Content-Type", file.MimeType)
 		return c.File(fmt.Sprintf("%s/%s/%s/%s", constants.PublicDirectory, model.ProjectID, model.Version, filepath.Base(file.Name)))
 	}
