@@ -54,7 +54,7 @@ type ConnectionItem struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql(structureIdentifier string, page int, order, sortBy, search string, lcls, groups []string) (string, map[string]interface{}) {
+func getItemSql(structureIdentifier string, page int, order, sortBy, search string, lcls, groups []string, query []Query) (string, map[string]interface{}) {
 	offset := (page - 1) * 100
 	placeholders := make(map[string]interface{})
 	placeholders["offset"] = offset
@@ -80,6 +80,28 @@ func getItemSql(structureIdentifier string, page int, order, sortBy, search stri
 		localesSql = fmt.Sprintf("AND lv.locale_id IN (@locales)")
 	}
 
+	var querySql string
+	if len(query) != 0 {
+		// where (json->'attribute') is not null
+
+		sql := ""
+		for _, q := range query {
+			if q.Operator == "equal" {
+				sql += fmt.Sprintf("(lv.value->>'%s') = '%s'", q.Column, q.Value)
+			}
+
+			if q.Operator == "unequal" {
+				sql += fmt.Sprintf("(lv.value->>'%s') != %s", q.Column, q.Value)
+			}
+
+			if q.Operator == "greaterThan" {
+				sql += fmt.Sprintf("(lv.value->>'%s') != %s", q.Column, q.Value)
+			}
+		}
+
+		querySql = fmt.Sprintf("AND %s", sql)
+	}
+
 	return fmt.Sprintf(`
 SELECT 
     v.project_id,
@@ -102,6 +124,7 @@ AND (lv.name = @structureIdentifier OR lv.id = @structureIdentifier OR lv.short_
 %s
 %s
 %s
+%s
 ORDER BY %s %s
 OFFSET @offset
 LIMIT 100
@@ -111,6 +134,7 @@ LIMIT 100
 		searchSql,
 		groupsSql,
 		localesSql,
+		querySql,
 		sortBy,
 		order,
 	), placeholders

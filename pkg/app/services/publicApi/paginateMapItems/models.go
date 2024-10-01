@@ -2,6 +2,7 @@ package paginateMapItems
 
 import (
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared/queryProcessor"
 	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	"errors"
@@ -23,13 +24,14 @@ type Model struct {
 	Search  string
 	Locales []string
 	Groups  []string
+	Query   []queryProcessor.Query
 }
 
 type Options struct {
 	ValueOnly bool
 }
 
-func NewModel(versionName, projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string, options Options) Model {
+func NewModel(versionName, projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string, options Options, query []queryProcessor.Query) Model {
 	return Model{
 		VersionName:   versionName,
 		StructureName: structureName,
@@ -41,6 +43,7 @@ func NewModel(versionName, projectId, structureName string, page int, order stri
 		Search:        search,
 		Locales:       lcls,
 		Groups:        groups,
+		Query:         query,
 	}
 }
 
@@ -51,6 +54,7 @@ func (a Model) Validate() map[string]string {
 		"sortBy":      a.SortBy,
 		"locales":     a.Locales,
 		"versionName": a.VersionName,
+		"query":       a.Query,
 	}
 
 	if err := validation.Validate(v,
@@ -78,6 +82,25 @@ func (a Model) Validate() map[string]string {
 						return errors.New(fmt.Sprintf("Locale %s does not exist.", l))
 					}
 				}
+				return nil
+			})),
+			validation.Key("query", validation.By(func(value interface{}) error {
+				query := value.([]queryProcessor.Query)
+
+				for _, q := range query {
+					if q.Column == "" {
+						return errors.New("Query 'column' cannot be empty")
+					}
+
+					if q.Value == "" {
+						return errors.New("Query 'value' cannot be empty")
+					}
+
+					if q.Operator == "" {
+						return errors.New("Query 'operator' cannot be empty")
+					}
+				}
+
 				return nil
 			})),
 		),

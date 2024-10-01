@@ -60,7 +60,7 @@ func (c Main) Logic() (LogicModel, error) {
 		lcls[i] = alpha
 	}
 
-	itemsSql, placeholders := getItemSql(c.model.StructureName, c.model.Page, order, sortBy, c.model.Search, lcls, c.model.Groups)
+	itemsSql, placeholders := getItemSql(c.model.StructureName, c.model.Page, order, sortBy, c.model.Search, lcls, c.model.Groups, c.model.Query)
 	placeholders["projectId"] = c.model.ProjectID
 	placeholders["versionName"] = version.Name
 	res := storage.Gorm().Raw(itemsSql, placeholders).Scan(&items)

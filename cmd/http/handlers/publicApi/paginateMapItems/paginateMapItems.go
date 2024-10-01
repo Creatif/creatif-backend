@@ -6,6 +6,8 @@ import (
 	"creatif/cmd/http/request/publicApi"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/publicApi/paginateMapItems"
+	"creatif/pkg/app/services/shared/queryProcessor"
+	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,7 +21,12 @@ func PaginateMapItemsHandler() func(e echo.Context) error {
 
 		versionName := c.Request().Header.Get(publicApi2.CreatifVersionHeader)
 		model.VersionName = versionName
-		model = publicApi.SanitizePaginateMapItems(model)
+		model, err := publicApi.SanitizePaginateMapItems(model)
+		if err != nil {
+			return c.JSON(http.StatusUnprocessableEntity, map[string]string{
+				"query": "'query' data is invalid and cannot be unpacked",
+			})
+		}
 
 		handler := paginateMapItems.New(paginateMapItems.NewModel(
 			model.VersionName,
@@ -34,6 +41,13 @@ func PaginateMapItemsHandler() func(e echo.Context) error {
 			paginateMapItems.Options{
 				ValueOnly: model.ResolvedOptions.ValueOnly,
 			},
+			sdk.Map(model.SanitizedQuery, func(idx int, value publicApi.Query) queryProcessor.Query {
+				return queryProcessor.Query{
+					Column:   value.Column,
+					Value:    value.Value,
+					Operator: value.Operator,
+				}
+			}),
 		), auth.NewAnonymousAuthentication())
 
 		return request.SendPublicResponse[paginateMapItems.Model](handler, c, http.StatusOK, nil, false)
