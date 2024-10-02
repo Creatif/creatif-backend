@@ -3,6 +3,7 @@ package paginateMapItems
 import (
 	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/publicApi/publicApiError"
+	"creatif/pkg/app/services/shared/queryProcessor"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/lib/pq"
@@ -54,7 +55,7 @@ type ConnectionItem struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql(structureIdentifier string, page int, order, sortBy, search string, lcls, groups []string, query []Query) (string, map[string]interface{}) {
+func getItemSql(structureIdentifier string, page int, order, sortBy, search string, lcls, groups []string, query []queryProcessor.Query) (string, map[string]interface{}, error) {
 	offset := (page - 1) * 100
 	placeholders := make(map[string]interface{})
 	placeholders["offset"] = offset
@@ -82,24 +83,11 @@ func getItemSql(structureIdentifier string, page int, order, sortBy, search stri
 
 	var querySql string
 	if len(query) != 0 {
-		// where (json->'attribute') is not null
-
-		sql := ""
-		for _, q := range query {
-			if q.Operator == "equal" {
-				sql += fmt.Sprintf("(lv.value->>'%s') = '%s'", q.Column, q.Value)
-			}
-
-			if q.Operator == "unequal" {
-				sql += fmt.Sprintf("(lv.value->>'%s') != %s", q.Column, q.Value)
-			}
-
-			if q.Operator == "greaterThan" {
-				sql += fmt.Sprintf("(lv.value->>'%s') != %s", q.Column, q.Value)
-			}
+		s, err := queryProcessor.CreateSql(query)
+		if err != nil {
+			return "", nil, err
 		}
-
-		querySql = fmt.Sprintf("AND %s", sql)
+		querySql = fmt.Sprintf("AND %s", s)
 	}
 
 	return fmt.Sprintf(`
@@ -137,7 +125,7 @@ LIMIT 100
 		querySql,
 		sortBy,
 		order,
-	), placeholders
+	), placeholders, nil
 }
 
 func getConnectionsSql() string {

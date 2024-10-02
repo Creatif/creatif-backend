@@ -24,7 +24,7 @@ func CreateSql(queries []Query) (string, error) {
 					return "", errors.New("invalid data type. Expected an integer, got something else")
 				}
 
-				return fmt.Sprintf("(lv.value->>'%s') != %d", q.Column, v), nil
+				return fmt.Sprintf("(lv.value->>'%s') > %d", q.Column, v), nil
 			}
 
 			if q.Type == "float" {
@@ -33,10 +33,76 @@ func CreateSql(queries []Query) (string, error) {
 					return "", errors.New("invalid data type. Expected an integer, got something else")
 				}
 
-				return fmt.Sprintf("(lv.value->>'%s') != %d", q.Column, v), nil
+				return fmt.Sprintf("(lv.value->>'%s') > %d", q.Column, v), nil
 			}
 
-			return fmt.Sprintf("(lv.value->>'%s') != %s", q.Column, q.Value), nil
+			return fmt.Sprintf("(lv.value->>'%s') > %s", q.Column, q.Value), nil
+		}
+
+		if q.Operator == "greaterThanOrEqual" {
+			if q.Type == "int" {
+				v, err := strconv.ParseInt(q.Value, 10, 64)
+				if err != nil {
+					return "", errors.New("invalid data type. Expected an integer, got something else")
+				}
+
+				return fmt.Sprintf("(lv.value->>'%s') >= %d", q.Column, v), nil
+			}
+
+			if q.Type == "float" {
+				v, err := strconv.ParseInt(q.Value, 10, 64)
+				if err != nil {
+					return "", errors.New("invalid data type. Expected an integer, got something else")
+				}
+
+				return fmt.Sprintf("(lv.value->>'%s') >= %d", q.Column, v), nil
+			}
+
+			return fmt.Sprintf("(lv.value->>'%s') >= %s", q.Column, q.Value), nil
+		}
+
+		if q.Operator == "lessThan" {
+			if q.Type == "int" {
+				v, err := strconv.ParseInt(q.Value, 10, 64)
+				if err != nil {
+					return "", errors.New("invalid data type. Expected an integer, got something else")
+				}
+
+				return fmt.Sprintf("(lv.value->>'%s') < %d", q.Column, v), nil
+			}
+
+			if q.Type == "float" {
+				v, err := strconv.ParseInt(q.Value, 10, 64)
+				if err != nil {
+					return "", errors.New("invalid data type. Expected an integer, got something else")
+				}
+
+				return fmt.Sprintf("(lv.value->>'%s') < %d", q.Column, v), nil
+			}
+
+			return fmt.Sprintf("(lv.value->>'%s') < %s", q.Column, q.Value), nil
+		}
+
+		if q.Operator == "lessThanOrEqual" {
+			if q.Type == "int" {
+				v, err := strconv.ParseInt(q.Value, 10, 64)
+				if err != nil {
+					return "", errors.New("invalid data type. Expected an integer, got something else")
+				}
+
+				return fmt.Sprintf("(lv.value->>'%s') <= %d", q.Column, v), nil
+			}
+
+			if q.Type == "float" {
+				v, err := strconv.ParseInt(q.Value, 10, 64)
+				if err != nil {
+					return "", errors.New("invalid data type. Expected an integer, got something else")
+				}
+
+				return fmt.Sprintf("(lv.value->>'%s') <= %d", q.Column, v), nil
+			}
+
+			return fmt.Sprintf("(lv.value->>'%s') <= %s", q.Column, q.Value), nil
 		}
 	}
 
