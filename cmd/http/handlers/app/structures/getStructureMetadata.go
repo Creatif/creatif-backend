@@ -27,7 +27,7 @@ func GetStructureMetadataHandler() func(e echo.Context) error {
 			}
 		})), a)
 
-		return request.SendResponse(handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[createAndDiff.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if a.ShouldRefresh() {
 				session, err := a.Refresh()
 				if err != nil {

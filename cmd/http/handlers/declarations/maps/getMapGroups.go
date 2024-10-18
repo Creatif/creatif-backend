@@ -25,7 +25,7 @@ func GetMapGroupsHandler() func(e echo.Context) error {
 			model.ProjectID,
 		), a)
 
-		return request.SendResponse(handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
+		return request.SendResponse[getMapGroups.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if a.ShouldRefresh() {
 				session, err := a.Refresh()
 				if err != nil {

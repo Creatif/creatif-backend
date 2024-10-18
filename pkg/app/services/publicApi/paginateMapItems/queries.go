@@ -88,6 +88,7 @@ func getItemSql(structureIdentifier string, page int, order, sortBy, search stri
 			return "", nil, err
 		}
 		querySql = fmt.Sprintf("AND %s", s)
+
 	}
 
 	return fmt.Sprintf(`
