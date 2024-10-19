@@ -87,8 +87,8 @@ func getItemSql(structureIdentifier string, page int, order, sortBy, search stri
 		if err != nil {
 			return "", nil, err
 		}
-		querySql = fmt.Sprintf("AND %s", s)
 
+		querySql = fmt.Sprintf("AND %s", s)
 	}
 
 	return fmt.Sprintf(`
@@ -173,14 +173,14 @@ func getVersion(projectId, versionName string) (published.Version, error) {
 	}
 
 	if res.Error != nil {
-		return published.Version{}, publicApiError.NewError("getListItemById", map[string]string{
+		return published.Version{}, publicApiError.NewError("paginateMapItems", map[string]string{
 			"internalError": res.Error.Error(),
 		}, publicApiError.DatabaseError)
 	}
 
 	if res.RowsAffected == 0 {
-		return published.Version{}, publicApiError.NewError("getListItemById", map[string]string{
-			"notFound": "This list item does not exist",
+		return published.Version{}, publicApiError.NewError("paginateMapItems", map[string]string{
+			"notFound": "This version does not exist",
 		}, publicApiError.NotFoundError)
 	}
 
