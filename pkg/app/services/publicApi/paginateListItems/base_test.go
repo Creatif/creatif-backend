@@ -15,6 +15,7 @@ import (
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
+	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/onsi/ginkgo/v2"
@@ -191,11 +192,20 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 }
 
 func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) addToList.View {
+	b, err := json.Marshal(map[string]interface{}{
+		"one":   "one",
+		"two":   []string{"one", "two", "three"},
+		"three": []int{1, 2, 3},
+		"four":  453,
+		"five":  456.43,
+	})
+	gomega.Expect(err).Should(gomega.BeNil())
+
 	variableModel := addToList.VariableModel{
 		Name:      variableName,
 		Metadata:  nil,
 		Groups:    groups,
-		Value:     nil,
+		Value:     b,
 		Locale:    "eng",
 		Behaviour: "modifiable",
 	}

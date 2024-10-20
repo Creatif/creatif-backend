@@ -180,7 +180,6 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 		"four":  453,
 		"five":  456.43,
 	})
-
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	variableModel := addToMap.VariableModel{

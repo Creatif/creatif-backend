@@ -55,6 +55,7 @@ func (a Model) Validate() map[string]string {
 		"structureName": a.StructureName,
 		"locales":       a.Locales,
 		"versionName":   a.VersionName,
+		"query":         a.Query,
 	}
 
 	if err := validation.Validate(v,
@@ -83,6 +84,63 @@ func (a Model) Validate() map[string]string {
 						return errors.New(fmt.Sprintf("Locale %s does not exist.", l))
 					}
 				}
+				return nil
+			})),
+			validation.Key("query", validation.By(func(value interface{}) error {
+				query := value.([]queryProcessor.Query)
+
+				for _, q := range query {
+					if q.Column == "" {
+						return errors.New("Query 'column' cannot be empty")
+					}
+
+					if q.Operator == "" {
+						return errors.New("Query 'operator' cannot be empty")
+					}
+
+					validateOperators := func() error {
+						validOperators := []string{"equal", "unequal", "greaterThan", "lessThan", "greaterThanOrEqual", "lessThanOrEqual"}
+						found := false
+						for _, v := range validOperators {
+							if v == q.Operator {
+								found = true
+								break
+							}
+						}
+
+						if !found {
+							return errors.New(fmt.Sprintf("Invalid operator. Operators can be only %s", strings.Join(validOperators, ", ")))
+						}
+
+						return nil
+					}
+
+					validateTypes := func() error {
+						validTypes := []string{"int", "float", "string"}
+						found := false
+						for _, v := range validTypes {
+							if v == q.Type {
+								found = true
+								break
+							}
+						}
+
+						if !found {
+							return errors.New(fmt.Sprintf("Invalid data type. Data type can be only %s", strings.Join(validTypes, ", ")))
+						}
+
+						return nil
+					}
+
+					if err := validateOperators(); err != nil {
+						return err
+					}
+
+					if err := validateTypes(); err != nil {
+						return err
+					}
+				}
+
 				return nil
 			})),
 		),
