@@ -177,4 +177,3 @@ func getMapConnections(
 
 	return nil
 }
-

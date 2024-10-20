@@ -6,15 +6,15 @@ import (
 )
 
 type SingleGroup struct {
-	ID string `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
 	Action string `json:"action"`
 }
 
 type AddGroups struct {
 	Groups    []SingleGroup `json:"groups"`
-	ProjectID string   `param:"projectId"`
+	ProjectID string        `param:"projectId"`
 }
 
 func SanitizeAddGroups(model AddGroups) AddGroups {

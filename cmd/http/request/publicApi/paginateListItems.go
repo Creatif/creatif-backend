@@ -2,6 +2,7 @@ package publicApi
 
 import (
 	"creatif/pkg/lib/sdk"
+	"encoding/json"
 	"github.com/microcosm-cc/bluemonday"
 	"strings"
 )
@@ -17,14 +18,16 @@ type PaginateListItems struct {
 	OrderDirection string `query:"direction"`
 	Options        string `query:"options"`
 	VersionName    string
+	Query          string `query:"query"`
 
 	SanitizedGroups  []string
 	SanitizedLocales []string
 	SanitizedFields  []string
 	ResolvedOptions  GetListItemByIDOptions
+	SanitizedQuery   []Query
 }
 
-func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
+func SanitizePaginateListItems(model PaginateListItems) (PaginateListItems, error) {
 	p := bluemonday.StrictPolicy()
 	model.ProjectID = p.Sanitize(model.ProjectID)
 	model.OrderBy = p.Sanitize(model.OrderBy)
@@ -49,5 +52,20 @@ func SanitizePaginateListItems(model PaginateListItems) PaginateListItems {
 		model.ResolvedOptions = resolveListOptions(model.Options)
 	}
 
-	return model
+	if model.Query != "" {
+		var q []Query
+		if err := json.Unmarshal([]byte(model.Query), &q); err != nil {
+			return model, err
+		}
+
+		model.SanitizedQuery = sdk.Map(q, func(idx int, value Query) Query {
+			return Query{
+				Column:   p.Sanitize(value.Column),
+				Value:    p.Sanitize(value.Value),
+				Operator: p.Sanitize(value.Operator),
+			}
+		})
+	}
+
+	return model, nil
 }

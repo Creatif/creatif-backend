@@ -14,7 +14,7 @@ func determineIDPlaceholder(alias, fieldName, name, id, shortId string, namedPla
 		if namedPlaceholder {
 			v = "@name"
 		}
-		
+
 		if fieldName != "" {
 			v = fmt.Sprintf("@%s", fieldName)
 		}

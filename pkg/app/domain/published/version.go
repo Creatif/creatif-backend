@@ -24,7 +24,7 @@ type Version struct {
 
 func (u *Version) BeforeCreate(tx *gorm.DB) (err error) {
 	u.ID = ksuid.New().String()
-	
+
 	return nil
 }
 

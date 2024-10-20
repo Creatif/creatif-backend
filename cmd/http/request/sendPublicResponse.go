@@ -39,7 +39,7 @@ func SendPublicResponse[T any, F any, K any](handler pkg.Job[T, F, K], context e
 
 		return nil
 	}
-	
+
 	if err := context.JSON(status, model); err != nil {
 		return err
 	}

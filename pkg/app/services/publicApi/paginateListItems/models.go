@@ -2,6 +2,7 @@ package paginateListItems
 
 import (
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/shared/queryProcessor"
 	"creatif/pkg/lib/sdk"
 	"encoding/json"
 	"errors"
@@ -23,13 +24,14 @@ type Model struct {
 	Search  string
 	Locales []string
 	Groups  []string
+	Query   []queryProcessor.Query
 }
 
 type Options struct {
 	ValueOnly bool
 }
 
-func NewModel(versionName, projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string, options Options) Model {
+func NewModel(versionName, projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string, options Options, query []queryProcessor.Query) Model {
 	return Model{
 		StructureName: structureName,
 		Options:       options,
@@ -41,6 +43,7 @@ func NewModel(versionName, projectId, structureName string, page int, order stri
 		Search:        search,
 		Locales:       lcls,
 		Groups:        groups,
+		Query:         query,
 	}
 }
 
