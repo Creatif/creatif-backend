@@ -40,10 +40,39 @@ func createAdmin(client *http.Client, email, password string) httpResult {
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	bd, _ := io.ReadAll(response.Body)
-	defer response.Body.Close()
-
-	fmt.Println(string(bd))
-
 	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
+}
+
+func adminExists(client *http.Client) httpResult {
+	url := fmt.Sprintf("%s%s", URL, "/app/auth/admin/exists")
+	req, err := newRequest(request{
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+		Url:    url,
+		Method: "GET",
+		Body:   nil,
+	})
+	if err != nil {
+		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+	}
+
+	response, err := Make(req, client)
+
+	if err != nil {
+		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+	}
+
+	b, err := io.ReadAll(response.Body)
+	defer response.Body.Close()
+	if err != nil {
+		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+	}
+	var doesExist bool
+	err = json.Unmarshal(b, &doesExist)
+	if err != nil {
+		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+	}
+
+	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299 && doesExist, Can_Continue)
 }

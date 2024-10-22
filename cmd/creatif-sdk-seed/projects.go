@@ -6,10 +6,9 @@ import (
 	"net/http"
 )
 
-func login(client *http.Client, email, password string) httpResult {
+func createProject(client *http.Client, name string) httpResult {
 	body := map[string]string{
-		"email":    email,
-		"password": password,
+		"name": name,
 	}
 
 	b, err := json.Marshal(body)
@@ -17,13 +16,13 @@ func login(client *http.Client, email, password string) httpResult {
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	url := fmt.Sprintf("%s%s", URL, "/app/auth/login")
+	url := fmt.Sprintf("%s%s", URL, "/app/project")
 	req, err := newRequest(request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
 		Url:    url,
-		Method: "POST",
+		Method: "PUT",
 		Body:   b,
 	})
 	if err != nil {
@@ -36,18 +35,5 @@ func login(client *http.Client, email, password string) httpResult {
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
-}
-
-func extractAuthenticationCookie(httpResult httpResult) string {
-	response := httpResult.Response()
-	cookies := response.Cookies()
-
-	for _, c := range cookies {
-		if c.Name == "api_authentication" {
-			return c.Value
-		}
-	}
-
-	return ""
+	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Can_Continue)
 }

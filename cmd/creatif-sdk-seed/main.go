@@ -1,40 +1,67 @@
 package main
 
 import (
-	"crypto/tls"
+	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
+	"io"
 	"net/http"
+	"os"
 )
 
 func main() {
 	loadEnv()
 	runDb()
 
-	client := newClient(newClientParams(&http.Transport{
-		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
-		MaxConnsPerHost:     1024,
-		TLSHandshakeTimeout: 0,
-	}, nil, nil, 0))
+	shouldJustCleanup := len(os.Args) == 2 && os.Args[1] == "cleanup"
+	if shouldJustCleanup {
+		doOrderedCleanup()
+		os.Exit(0)
+	}
 
+	successColor := color.New(color.FgGreen).Add(color.Bold)
+
+	anonymousClient := createAnonymousClient()
 	email := "email@gmail.com"
 	password := "password"
 
-	handleError(createAdmin(client, email, password))
+	if adminExists(anonymousClient).Ok() {
+		printNewlineSandwich(successColor, "Admin already exists which means that the seed is there.\nIf it is not and this is a mistake, just delete the docker volume and try again.\nThis is fine and OK since this is a seed program to test the SDK.\nFeel free to abuse it.")
+		return
+	}
 
-	loginResult := login(client, email, password)
-	fmt.Println(loginResult)
+	printers["info"].Println("Creating admin and logging in...")
+	handleError(createAdmin(anonymousClient, email, password), nil)
 
-	/*	fmt.Println("created admin")
-		projects := []string{"Warsaw Brokers", "London Brokers", "Paris Brokers", "Berlin Brokers", "Barcelona Brokers"}
-		projectIds := make([]string, len(projects))
-		for i, p := range projects {
-			projectIds[i] = createProject(p, login())
-		}
-		fmt.Println("created projects")
+	authToken := extractAuthenticationCookie(handleError(login(anonymousClient, email, password), nil))
 
-		for _, p := range projectIds {
-			createAccountStructure(p, "Accounts")
-			createPropertiesStructure(p, "Properties")
-		}
-	*/
+	authenticatedClient := createAuthenticatedClient(authToken)
+
+	printers["info"].Println("Creating projects...")
+
+	projectNames := []string{"Warsaw Brokers", "London Brokers", "Paris Brokers", "Berlin Brokers", "Barcelona Brokers"}
+	projects := make([]map[string]string, len(projectNames))
+	for i, p := range projectNames {
+		handleError(createProject(authenticatedClient, p), func(res *http.Response) error {
+			var m map[string]interface{}
+			b, err := io.ReadAll(res.Body)
+			if err != nil {
+				return err
+			}
+
+			if err := json.Unmarshal(b, &m); err != nil {
+				return err
+			}
+
+			// interface conversion is ok here since I know that it will be a string
+			projects[i] = map[string]string{
+				"id":   m["id"].(string),
+				"name": m["name"].(string),
+			}
+
+			return nil
+		})
+	}
+
+	fmt.Println(projects)
 }
