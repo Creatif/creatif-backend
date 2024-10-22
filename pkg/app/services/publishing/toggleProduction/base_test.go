@@ -40,7 +40,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Publishing tests")
+	GinkgoRunSpecs(t, "Publishing - Toggle production")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

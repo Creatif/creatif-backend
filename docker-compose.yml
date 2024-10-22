@@ -6,8 +6,11 @@ services:
       dockerfile: ./Dockerfile
     env_file: ./.env
     restart: no
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -i http://api:3002/api/v1/health/full-health || { echo 'Health check failed with code $?'; exit 1; }" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     ports:
       - 3002:3002
     volumes:
@@ -17,11 +20,17 @@ services:
       - .:/var/log:/app/var/log
       - .:/var/assets:/app/var/assets
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     image: "postgres"
-#    build:
-#      dockerfile: ./pgx_ulid/Dockerfile
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U app" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    #    build:
+    #      dockerfile: ./pgx_ulid/Dockerfile
     container_name: "db"
     ports:
       - "54333:5432"
@@ -33,4 +42,3 @@ services:
 #      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 volumes:
   app:
-

@@ -27,6 +27,7 @@ func (a Model) Validate() map[string]string {
 		"name":     a.Name,
 		"lastName": a.LastName,
 		"email":    a.Email,
+		"password": a.Password,
 	}
 
 	if err := validation.Validate(v,
@@ -34,6 +35,7 @@ func (a Model) Validate() map[string]string {
 			validation.Key("name", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("lastName", validation.Required, validation.RuneLength(1, 200)),
 			validation.Key("email", is.EmailFormat, is.Email),
+			validation.Key("password", validation.Required, validation.RuneLength(8, 20)),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

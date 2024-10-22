@@ -34,7 +34,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration -> GET map tests")
+	GinkgoRunSpecs(t, "Maps - Get map")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

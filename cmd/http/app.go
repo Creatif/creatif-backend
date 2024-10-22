@@ -27,6 +27,7 @@ import (
 	"creatif/pkg/app/services/events"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	"creatif/pkg/lib/storage"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -78,6 +79,7 @@ func app() {
 		AllowMethods: []string{echo.POST, echo.GET, echo.PUT, echo.DELETE},
 	}))
 
+	healthRoutes(srv.Group("/api/v1/health"))
 	declarationRoutes(srv.Group("/api/v1/declarations"))
 	appRoutes(srv.Group("/api/v1/app"))
 	publishingRoutes(srv.Group("/api/v1/publishing"))
@@ -86,6 +88,23 @@ func app() {
 
 	events.RunEvents()
 	server.StartServer(srv)
+}
+
+func healthRoutes(group *echo.Group) {
+	group.GET("/full-health", func(c echo.Context) error {
+		db, err := storage.Gorm().DB()
+		if err != nil {
+			fmt.Println("Cannot get db", err)
+			return c.String(http.StatusServiceUnavailable, err.Error())
+		}
+
+		if err := db.Ping(); err != nil {
+			fmt.Println("Cannot ping", err)
+			return c.String(http.StatusServiceUnavailable, err.Error())
+		}
+
+		return c.String(http.StatusOK, "HEALTHY")
+	})
 }
 
 func appRoutes(group *echo.Group) {

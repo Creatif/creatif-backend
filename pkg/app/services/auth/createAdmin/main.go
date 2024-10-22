@@ -26,9 +26,13 @@ func (c Main) Validate() error {
 			return appErrors.NewValidationError(map[string]string{
 				"admin": fmt.Sprintf("There is already an admin for this site"),
 			})
-		} else if res.Error != nil {
-			// blank
 		}
+	}
+
+	if user.ID != "" {
+		return appErrors.NewValidationError(map[string]string{
+			"admin": fmt.Sprintf("There is already an admin for this site"),
+		})
 	}
 
 	return nil

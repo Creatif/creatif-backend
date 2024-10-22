@@ -11,10 +11,10 @@ import (
 var _ = ginkgo.Describe("Has admin tests", func() {
 	ginkgo.It("should check if the admin user exists", func() {
 		handler := createAdmin.New(createAdmin.NewModel(
-			"name",
+			"otherName",
 			"lastName",
 			fmt.Sprintf("%s@gmail.com", uuid.NewString()),
-			"password",
+			"sfdsafdsafdsafdsa",
 		))
 
 		_, err := handler.Handle()

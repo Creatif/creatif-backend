@@ -36,7 +36,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Variable paginateVariables -> CRUD tests")
+	GinkgoRunSpecs(t, "Lists - Paginate list items")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

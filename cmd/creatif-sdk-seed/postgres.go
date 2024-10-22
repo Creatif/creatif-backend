@@ -1,4 +1,4 @@
-package storage
+package main
 
 import (
 	"gorm.io/driver/postgres"
@@ -29,10 +29,6 @@ func Connect(dsn string) error {
 	}
 
 	if err := d.Ping(); err != nil {
-		return err
-	}
-
-	if err := initShortId(); err != nil {
 		return err
 	}
 

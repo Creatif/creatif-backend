@@ -37,7 +37,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Declaration Lists -> CRUD tests")
+	GinkgoRunSpecs(t, "Lists - Delete range by ID")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

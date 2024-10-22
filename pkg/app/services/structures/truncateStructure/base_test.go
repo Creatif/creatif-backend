@@ -38,7 +38,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Structure tests")
+	GinkgoRunSpecs(t, "Structures - Truncate structure")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

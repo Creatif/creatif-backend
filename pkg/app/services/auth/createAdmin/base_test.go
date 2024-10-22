@@ -30,7 +30,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Create admin")
+	GinkgoRunSpecs(t, "AUTH Create admin")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

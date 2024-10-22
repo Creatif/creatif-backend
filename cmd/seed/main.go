@@ -12,7 +12,6 @@ import (
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/logger"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -26,7 +25,6 @@ var fake faker.Person
 func main() {
 	loadEnv()
 	runDb()
-	runLogger()
 
 	fake = faker.New().Person()
 
@@ -131,7 +129,6 @@ func addBatch(projectId, englishId, frenchId, mapStructureId string) {
 }
 
 func createGroups(projectId string) {
-	l := logger.NewLogBuilder()
 	groups := make([]addGroups.GroupModel, 0)
 	for i := 0; i < 100; i++ {
 		groups = append(groups, addGroups.GroupModel{
@@ -142,41 +139,35 @@ func createGroups(projectId string) {
 		})
 	}
 
-	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewNoopAuthentication(), l)
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewNoopAuthentication())
 
 	_, err := handler.Handle()
-	l.Flush("")
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
 
 func createMap(projectId, name string) mapCreate.View {
-	l := logger.NewLogBuilder()
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, []mapCreate.VariableModel{}), auth.NewNoopAuthentication(), l)
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, []mapCreate.VariableModel{}), auth.NewNoopAuthentication())
 	m, err := handler.Handle()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	l.Flush("")
 
 	return m
 }
 
 func listCreate(projectId, name string) createList.View {
-	l := logger.NewLogBuilder()
-	handler := createList.New(createList.NewModel(projectId, name, []createList.Variable{}), auth.NewNoopAuthentication(), l)
+	handler := createList.New(createList.NewModel(projectId, name, []createList.Variable{}), auth.NewNoopAuthentication())
 	m, err := handler.Handle()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	l.Flush("")
 
 	return m
 }
 
 func addToMap(projectId, structureId, variableName string, references []shared.Reference) string {
-	l := logger.NewLogBuilder()
 	value := map[string]interface{}{
 		"name": variableName,
 	}
@@ -193,7 +184,7 @@ func addToMap(projectId, structureId, variableName string, references []shared.R
 		Groups:    []string{},
 		Behaviour: "modifiable",
 		Value:     v,
-	}, references), auth.NewNoopAuthentication(), l)
+	}, references, []string{}), auth.NewNoopAuthentication())
 
 	entry, err := handler.Handle()
 	if err != nil {
@@ -203,15 +194,11 @@ func addToMap(projectId, structureId, variableName string, references []shared.R
 		}
 		log.Fatalln(err)
 	}
-	l.Flush("")
 
 	return entry.ID
 }
 
 func listAdd(projectId, structureId, variableName string, references []shared.Reference) string {
-	l := logger.NewLogBuilder()
-	defer l.Flush("")
-
 	value := map[string]interface{}{
 		"name": variableName,
 	}
@@ -228,7 +215,7 @@ func listAdd(projectId, structureId, variableName string, references []shared.Re
 		Groups:    []string{},
 		Behaviour: "modifiable",
 		Value:     v,
-	}, references), auth.NewNoopAuthentication(), l)
+	}, references, []string{}), auth.NewNoopAuthentication())
 
 	entry, err := handler.Handle()
 	if err != nil {
@@ -243,9 +230,7 @@ func listAdd(projectId, structureId, variableName string, references []shared.Re
 }
 
 func createAdmin() {
-	l := logger.NewLogBuilder()
-	defer l.Flush("")
-	handler := createAdmin2.New(createAdmin2.NewModel("Mario", "Škrlec", "marioskrlec222@gmail.com", "password"), l)
+	handler := createAdmin2.New(createAdmin2.NewModel("Mario", "Škrlec", "marioskrlec222@gmail.com", "password"))
 
 	_, err := handler.Handle()
 	if err != nil {
@@ -254,9 +239,7 @@ func createAdmin() {
 }
 
 func login() string {
-	l := logger.NewLogBuilder()
-	defer l.Flush("")
-	handler := loginApi.New(loginApi.NewModel("marioskrlec222@gmail.com", "password"), nil, l)
+	handler := loginApi.New(loginApi.NewModel("marioskrlec222@gmail.com", "password"), nil)
 
 	token, err := handler.Handle()
 	if err != nil {
@@ -267,11 +250,8 @@ func login() string {
 }
 
 func createProject(name, token string) string {
-	l := logger.NewLogBuilder()
-	defer l.Flush("")
-
-	auth := auth.NewApiAuthentication(token, l)
-	handler := createProject2.New(createProject2.NewModel(name), auth, l)
+	auth := auth.NewApiAuthentication(token)
+	handler := createProject2.New(createProject2.NewModel(name), auth)
 
 	project, err := handler.Handle()
 	if err != nil {

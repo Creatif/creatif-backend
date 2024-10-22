@@ -15,7 +15,7 @@ func createProjectInPublicDirectory(id string) error {
 	}
 
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(projectPublicDir, os.ModePerm)
+		err := os.MkdirAll(projectPublicDir, os.ModeDir)
 
 		if err != nil {
 			return appErrors.NewApplicationError(err).AddError("createProject", nil)

@@ -30,7 +30,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Admin exists")
+	GinkgoRunSpecs(t, "Projects - Has projects")
 }
 
 var _ = ginkgo.BeforeSuite(func() {

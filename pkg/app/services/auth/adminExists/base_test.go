@@ -8,7 +8,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"github.com/segmentio/ksuid"
 	"log"
 	"os"
 	"testing"
@@ -30,7 +29,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Admin exists")
+	GinkgoRunSpecs(t, "AUTH Admin exists")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -93,13 +92,3 @@ var _ = GinkgoAfterHandler(func() {
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_REFERENCES_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
-
-func testAssertErrNil(err error) {
-	gomega.Expect(err).Should(gomega.BeNil())
-}
-
-func testAssertIDValid(id string) {
-	gomega.Expect(id).ShouldNot(gomega.BeEmpty())
-	_, err := ksuid.Parse(id)
-	gomega.Expect(err).Should(gomega.BeNil())
-}

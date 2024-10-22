@@ -32,7 +32,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Groups -> CRUD tests")
+	GinkgoRunSpecs(t, "Groups -> Add groups")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
