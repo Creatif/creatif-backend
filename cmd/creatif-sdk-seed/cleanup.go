@@ -18,7 +18,7 @@ func completeCleanup() {
 	Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", PUBLISHED_MAPS_TABLE))
 	Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", VERSION_TABLE))
 	Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", PUBLISHED_REFERENCES_TABLE))
-	Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", FILE_TABLE))
+	Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", FILE_TABLE))
 	Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", PUBLISHED_FILES_TABLE))
 }
 

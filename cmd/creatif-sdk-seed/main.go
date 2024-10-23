@@ -13,7 +13,7 @@ func main() {
 	loadEnv()
 	runDb()
 
-	shouldJustCleanup := len(os.Args) == 2 && os.Args[1] == "cleanup"
+	shouldJustCleanup := len(os.Args) == 2 && os.Args[1] == "--cleanup"
 	if shouldJustCleanup {
 		doOrderedCleanup()
 		os.Exit(0)
@@ -30,14 +30,14 @@ func main() {
 		return
 	}
 
-	printers["info"].Println("Creating admin and logging in...")
+	printers["info"].Println("Creating admin and logging in")
 	handleError(createAdmin(anonymousClient, email, password), nil)
 
 	authToken := extractAuthenticationCookie(handleError(login(anonymousClient, email, password), nil))
 
 	authenticatedClient := createAuthenticatedClient(authToken)
 
-	printers["info"].Println("Creating projects...")
+	printers["info"].Println("Creating projects")
 
 	projectNames := []string{"Warsaw Brokers", "London Brokers", "Paris Brokers", "Berlin Brokers", "Barcelona Brokers"}
 	projects := make([]map[string]string, len(projectNames))
@@ -63,5 +63,18 @@ func main() {
 		})
 	}
 
-	fmt.Println(projects)
+	printers["info"].Println("Creating project data with groups, Account(s) and Property(s)")
+	for _, p := range projects {
+		projectId := p["id"]
+
+		go func(projectId string) {
+			handleError(createGroups(authenticatedClient, projectId), nil)
+			handleError(createMapStructure(authenticatedClient, projectId, "Accounts"), nil)
+			handleError(createListStructure(authenticatedClient, projectId, "Properties"), nil)
+
+		}(projectId)
+	}
+
+	fmt.Println("")
+	printers["success"].Println("Seed is successful!")
 }
