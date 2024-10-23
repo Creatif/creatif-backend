@@ -6,14 +6,23 @@ import (
 	"strings"
 )
 
+type UpdateMapVariableModel struct {
+	Name      string   `json:"name"`
+	Metadata  string   `json:"metadata"`
+	Locale    string   `json:"locale"`
+	Value     string   `json:"value"`
+	Groups    []string `json:"groups"`
+	Behaviour string   `json:"behaviour"`
+}
+
 type UpdateMapVariable struct {
-	ProjectID  string            `param:"projectID"`
-	Name       string            `param:"name"`
-	ItemID     string            `param:"itemId"`
-	Fields     string            `query:"fields"`
-	Variable   MapVariableModel  `json:"variable"`
-	References []UpdateReference `json:"references"`
-	ImagePaths []string          `json:"imagePaths"`
+	ProjectID  string                 `param:"projectID"`
+	Name       string                 `param:"name"`
+	ItemID     string                 `param:"itemId"`
+	Fields     string                 `query:"fields"`
+	Variable   UpdateMapVariableModel `json:"variable"`
+	References []UpdateReference      `json:"references"`
+	ImagePaths []string               `json:"imagePaths"`
 
 	ResolvedFields []string
 }

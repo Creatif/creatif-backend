@@ -4,7 +4,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type MapVariableModel struct {
+type CreateMapVariableModel struct {
 	Name      string   `json:"name"`
 	Metadata  string   `json:"metadata"`
 	Locale    string   `json:"locale"`
@@ -19,9 +19,9 @@ type Entry struct {
 }
 
 type CreateMap struct {
-	Variables []MapVariableModel `json:"variables"`
-	Name      string             `json:"name"`
-	ProjectID string             `param:"projectID"`
+	Variables []CreateMapVariableModel `json:"variables"`
+	Name      string                   `json:"name"`
+	ProjectID string                   `param:"projectID"`
 }
 
 func SanitizeMapModel(model CreateMap) CreateMap {
@@ -30,7 +30,7 @@ func SanitizeMapModel(model CreateMap) CreateMap {
 	model.ProjectID = p.Sanitize(model.ProjectID)
 
 	variables := model.Variables
-	newVariables := make([]MapVariableModel, len(variables))
+	newVariables := make([]CreateMapVariableModel, len(variables))
 	for i := 0; i < len(model.Variables); i++ {
 		m := variables[i]
 		m.Name = p.Sanitize(m.Name)

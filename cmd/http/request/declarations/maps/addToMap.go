@@ -6,11 +6,11 @@ import (
 )
 
 type AddToMap struct {
-	ProjectID  string           `param:"projectID"`
-	Variable   MapVariableModel `json:"variable"`
-	Name       string           `json:"name"`
-	References []Reference      `json:"references"`
-	ImagePaths []string         `json:"imagePaths"`
+	ProjectID  string                 `param:"projectID"`
+	Variable   CreateMapVariableModel `json:"variable"`
+	Name       string                 `json:"name"`
+	References []Reference            `json:"references"`
+	ImagePaths []string               `json:"imagePaths"`
 }
 
 type Reference struct {
