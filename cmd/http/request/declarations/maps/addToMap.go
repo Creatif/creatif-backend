@@ -7,6 +7,7 @@ import (
 
 type AddToMap struct {
 	ProjectID  string                 `param:"projectID"`
+	Locale     string                 `param:"locale"`
 	Variable   CreateMapVariableModel `json:"variable"`
 	Name       string                 `json:"name"`
 	References []Reference            `json:"references"`

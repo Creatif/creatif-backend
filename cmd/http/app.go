@@ -145,7 +145,7 @@ func declarationRoutes(group *echo.Group) {
 	group.POST("/list/update/:projectID/:name", lists.UpdateListHandler())
 	group.POST("/list/update-item-by-id/:projectID/:name/:itemID", lists.UpdateListItemByIDHandler())
 
-	group.PUT("/map/add/:projectID/:locale", maps.AddToMapHandler())
+	group.PUT("/map/add/:projectID", maps.AddToMapHandler())
 	group.POST("/map/update/:projectID/:name/:itemId", maps.UpdateMapVariableHandler())
 	group.DELETE("/map/entry/:projectID/:name/:variableName", maps.DeleteMapEntry())
 	group.DELETE("/map/:projectID/:name/:locale", maps.DeleteMap())
