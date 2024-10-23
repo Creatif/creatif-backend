@@ -1,13 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
-	"io"
-	"net/http"
 	"os"
+	"sync"
 )
+
+/**
+WARNING: THIS IS A DESTRUCTIVE COMMAND. IN CASE OF CERTAIN ERRORS, IT MIGHT DESTROY ALL THE DATA THAT YOU HAVE
+		 IN THE DATABASE. USE WITH CAUTION!!!
+*/
 
 func main() {
 	loadEnv()
@@ -31,49 +34,41 @@ func main() {
 	}
 
 	printers["info"].Println("Creating admin and logging in")
-	handleError(createAdmin(anonymousClient, email, password), nil)
+	handleHttpError(createAdmin(anonymousClient, email, password), nil)
 
-	authToken := extractAuthenticationCookie(handleError(login(anonymousClient, email, password), nil))
+	authToken := extractAuthenticationCookie(handleHttpError(login(anonymousClient, email, password), nil))
 
 	authenticatedClient := createAuthenticatedClient(authToken)
 
 	printers["info"].Println("Creating projects")
-
-	projectNames := []string{"Warsaw Brokers", "London Brokers", "Paris Brokers", "Berlin Brokers", "Barcelona Brokers"}
-	projects := make([]map[string]string, len(projectNames))
-	for i, p := range projectNames {
-		handleError(createProject(authenticatedClient, p), func(res *http.Response) error {
-			var m map[string]interface{}
-			b, err := io.ReadAll(res.Body)
-			if err != nil {
-				return err
-			}
-
-			if err := json.Unmarshal(b, &m); err != nil {
-				return err
-			}
-
-			// interface conversion is ok here since I know that it will be a string
-			projects[i] = map[string]string{
-				"id":   m["id"].(string),
-				"name": m["name"].(string),
-			}
-
-			return nil
-		})
-	}
+	projects := generateProjects(authenticatedClient)
 
 	printers["info"].Println("Creating project data with groups, Account(s) and Property(s)")
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(projects))
 	for _, p := range projects {
-		projectId := p["id"]
+		projectId := p.id
 
 		go func(projectId string) {
-			handleError(createGroups(authenticatedClient, projectId), nil)
-			handleError(createMapStructure(authenticatedClient, projectId, "Accounts"), nil)
-			handleError(createListStructure(authenticatedClient, projectId, "Properties"), nil)
+			defer wg.Done()
 
+			handleHttpError(createGroups(authenticatedClient, projectId), nil)
+			handleHttpError(createMapStructure(authenticatedClient, projectId, "Accounts"), nil)
+			handleHttpError(createListStructure(authenticatedClient, projectId, "Properties"), nil)
+
+			generatedAccounts, err := generateAccountStructureData("Accounts")
+			if err != nil {
+				handleAppError(err, Cannot_Continue_Procedure)
+			}
+
+			for _, genAccount := range generatedAccounts {
+				handleHttpError(addToMap(authenticatedClient, projectId, genAccount.name, genAccount.variable, genAccount.references, genAccount.imagePaths), nil)
+			}
 		}(projectId)
 	}
+
+	wg.Wait()
 
 	fmt.Println("")
 	printers["success"].Println("Seed is successful!")

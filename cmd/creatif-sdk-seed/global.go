@@ -53,7 +53,7 @@ error and the response is available.
 
 In any case, if you return an error from this function, CLEANUP OF THE SYSTEM WILL HAPPEN.
 */
-func handleError(result httpResult, responseFn func(res *http.Response) error) httpResult {
+func handleHttpError(result httpResult, responseFn func(res *http.Response) error) httpResult {
 	// result is ok (>=200 <= 299). If the result is OK, then nothing else
 	// matters and there is no error or no need to check the procedure
 	if result.Ok() {
@@ -124,4 +124,16 @@ func handleError(result httpResult, responseFn func(res *http.Response) error) h
 	}
 
 	return result
+}
+
+func handleAppError(err error, flag string) {
+	if flag == Cannot_Continue_Procedure {
+		printNewlineSandwich(printers["error"], fmt.Sprintf("An app error occurred: %s. The program is forced to quit.", err.Error()))
+		printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
+		printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
+		completeCleanup()
+		os.Exit(1)
+	}
+
+	// ignore the error, it is not serious enough
 }

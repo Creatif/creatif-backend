@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bxcodec/faker/v4"
+	"github.com/go-faker/faker/v4"
+	"math/rand/v2"
 	"net/http"
 )
 
-func addToMap(client *http.Client, projectId, name string, variable map[string]interface{}, references []map[string]string, imagePaths []string) httpResult {
+func addToMap(client *http.Client, projectId, name string, variable accountVariable, references []map[string]string, imagePaths []string) httpResult {
 	body := map[string]interface{}{
 		"name":       name,
 		"variable":   variable,
@@ -42,7 +43,7 @@ func addToMap(client *http.Client, projectId, name string, variable map[string]i
 	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func addToList(client *http.Client, projectId, name string, variable map[string]interface{}, references []map[string]string, imagePaths []string) httpResult {
+func addToList(client *http.Client, projectId, name string, variable map[string]interface{}, references []map[string]interface{}, imagePaths []string) httpResult {
 	body := map[string]interface{}{
 		"name":       name,
 		"variable":   variable,
@@ -77,20 +78,45 @@ func addToList(client *http.Client, projectId, name string, variable map[string]
 	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func preCreateAccountStructureData(structureName string) []map[string]interface{} {
-	maps := make([]map[string]interface{}, 200)
-
+func pickRandomUniqueGroups(numOfGroups int) []string {
+	picked := 0
+	groups := make([]string, 3)
 	for {
-		if len(maps) == 200 {
-			return maps
+		if picked == numOfGroups {
+			return groups
 		}
 
-		m := make(map[string]interface{})
-		name := fmt.Sprintf("%s-%s", faker.FirstName(), faker.LastName())
+		g := fmt.Sprintf("group-%d", rand.IntN(100))
 
 		isDuplicate := false
-		for _, p := range maps {
-			if p["name"] == name {
+		for _, pickedGroup := range groups {
+			if pickedGroup == g {
+				isDuplicate = true
+			}
+		}
+
+		if !isDuplicate {
+			groups = append(groups, g)
+			picked++
+		}
+	}
+}
+
+func generateAccountStructureData(structureName string) ([]account, error) {
+	accounts := make([]account, 200)
+	successIterations := 0
+	for {
+		if successIterations == 200 {
+			return accounts, nil
+		}
+
+		firstName := faker.FirstName()
+		lastName := faker.LastName()
+		name := fmt.Sprintf("%s-%s", firstName, lastName)
+
+		isDuplicate := false
+		for _, p := range accounts {
+			if p.name == name {
 				isDuplicate = true
 				break
 			}
@@ -100,11 +126,20 @@ func preCreateAccountStructureData(structureName string) []map[string]interface{
 			continue
 		}
 
-		m["name"] = structureName
-		m["references"] = nil
-		m["imagePaths"] = nil
-		m["variable"] = map[string]interface{}{
-			"name": name,
+		b, err := json.Marshal(map[string]string{
+			"name":       firstName,
+			"lastName":   lastName,
+			"address":    faker.GetRealAddress().Address,
+			"city":       faker.GetRealAddress().City,
+			"postalCode": faker.GetRealAddress().PostalCode,
+		})
+		if err != nil {
+			return nil, err
 		}
+
+		acc := newAccount(name, nil, nil, newAccountVariable(name, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(3)))
+
+		accounts[successIterations] = acc
+		successIterations += 1
 	}
 }
