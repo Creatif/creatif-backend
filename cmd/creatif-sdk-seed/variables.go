@@ -143,3 +143,7 @@ func generateAccountStructureData(structureName string) ([]account, error) {
 		successIterations += 1
 	}
 }
+
+func generatePropertiesStructureData(client *http.Client) {
+
+}

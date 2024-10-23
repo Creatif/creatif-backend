@@ -1,6 +1,6 @@
 /**
 WARNING: THIS IS A DESTRUCTIVE COMMAND. IN CASE OF CERTAIN ERRORS, IT MIGHT DESTROY ALL THE DATA THAT YOU HAVE
-		 IN THE DATABASE. USE WITH CAUTION!!!
+		 IN THE DATABASE. USE WITH CAUTION!!! IT SHOULD NOT BE USED TO SEED THE APP FOR USE IN THE creatif-ui-sdk.
 
 This command seeds the initial application with seed data from real estate project. It has two structures: Accounts and
 Properties. Accounts is a map and Properties is a list. It generates five projects with those structure. Each project has
