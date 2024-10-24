@@ -51,6 +51,22 @@ func processFlags() (int, error) {
 		return defaultNumberOfProjects, nil
 	}
 
+	// validation first
+	for i := 0; i < len(os.Args[0:]); i++ {
+		re := regexp.MustCompile(`^--projects=(\d+)$`)
+		matches := re.FindStringSubmatch(os.Args[i])
+		if len(matches) > 1 {
+			numOfProjects, err := strconv.ParseInt(matches[1], 10, 32)
+			if err != nil {
+				return 0, err
+			}
+
+			if numOfProjects < 1 || numOfProjects > 10 {
+				return 0, errors.New("Number of projects must be minimal 1 and below 10")
+			}
+		}
+	}
+
 	operations := []string{}
 	for i := 0; i < len(os.Args[0:]); i++ {
 		// just cleanup the system and exit
@@ -79,10 +95,6 @@ func processFlags() (int, error) {
 			numOfProjects, err := strconv.ParseInt(matches[1], 10, 32)
 			if err != nil {
 				return 0, err
-			}
-
-			if numOfProjects < 1 || numOfProjects > 10 {
-				return 0, errors.New("Number of projects must be minimal 1 and below 10")
 			}
 
 			doOperations(operations)
