@@ -10,8 +10,15 @@ import (
 
 func addToMap(client *http.Client, projectId, name string, variable accountVariable, references []map[string]string, imagePaths []string) httpResult {
 	body := map[string]interface{}{
-		"name":       name,
-		"variable":   variable,
+		"name": name,
+		"variable": map[string]interface{}{
+			"name":      variable.name,
+			"locale":    variable.locale,
+			"behaviour": variable.behaviour,
+			"groups":    variable.groups,
+			"metadata":  "",
+			"value":     variable.value,
+		},
 		"references": references,
 		"imagePaths": imagePaths,
 	}
@@ -21,7 +28,7 @@ func addToMap(client *http.Client, projectId, name string, variable accountVaria
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	url := fmt.Sprintf("%s%s%s", URL, "/declarations/map/", projectId)
+	url := fmt.Sprintf("%s%s%s", URL, "/declarations/map/add/", projectId)
 	req, err := newRequest(request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
@@ -65,6 +72,7 @@ func addToList(client *http.Client, projectId, name string, variable map[string]
 		Method: "PUT",
 		Body:   b,
 	})
+
 	if err != nil {
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
@@ -78,7 +86,7 @@ func addToList(client *http.Client, projectId, name string, variable map[string]
 	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func pickRandomUniqueGroups(numOfGroups int) []string {
+func pickRandomUniqueGroups(groupIds []string, numOfGroups int) []string {
 	picked := 0
 	groups := make([]string, 3)
 	for {
@@ -86,7 +94,7 @@ func pickRandomUniqueGroups(numOfGroups int) []string {
 			return groups
 		}
 
-		g := fmt.Sprintf("group-%d", rand.IntN(100))
+		g := groupIds[rand.IntN(100)]
 
 		isDuplicate := false
 		for _, pickedGroup := range groups {
@@ -96,13 +104,18 @@ func pickRandomUniqueGroups(numOfGroups int) []string {
 		}
 
 		if !isDuplicate {
-			groups = append(groups, g)
+			groups[picked] = g
 			picked++
 		}
 	}
 }
 
-func generateAccountStructureData(structureName string) ([]account, error) {
+func generateAccountStructureData(groupIds []string) ([]account, error) {
+	_, err := generateBase64Images("images/profileImages", 1)
+	if err != nil {
+		printers["warning"].Printf("Unable to generate base64 image in Accounts generator %s\n", err.Error())
+	}
+
 	accounts := make([]account, 200)
 	successIterations := 0
 	for {
@@ -126,24 +139,26 @@ func generateAccountStructureData(structureName string) ([]account, error) {
 			continue
 		}
 
-		b, err := json.Marshal(map[string]string{
+		accountValueData := map[string]string{
 			"name":       firstName,
 			"lastName":   lastName,
 			"address":    faker.GetRealAddress().Address,
 			"city":       faker.GetRealAddress().City,
 			"postalCode": faker.GetRealAddress().PostalCode,
-		})
+		}
+		/*
+			if len(images) == 1 {
+				accountValueData["profileImage"] = images[0]
+			}*/
+
+		b, err := json.Marshal(accountValueData)
 		if err != nil {
 			return nil, err
 		}
 
-		acc := newAccount(name, nil, nil, newAccountVariable(name, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(3)))
+		acc := newAccount(name, nil, nil, newAccountVariable(name, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)))
 
 		accounts[successIterations] = acc
 		successIterations += 1
 	}
-}
-
-func generatePropertiesStructureData(client *http.Client) {
-
 }

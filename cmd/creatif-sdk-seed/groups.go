@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -46,4 +47,27 @@ func createGroups(client *http.Client, projectId string) httpResult {
 	}
 
 	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
+}
+
+func createGroupsAndGetGroupIds(client *http.Client, projectId string) []string {
+	groupIds := make([]string, 0)
+	handleHttpError(createGroups(client, projectId), func(res *http.Response) error {
+		b, _ := io.ReadAll(res.Body)
+		var groups []map[string]string
+		if err := json.Unmarshal(b, &groups); err != nil {
+			return err
+		}
+
+		if err := res.Body.Close(); err != nil {
+			return err
+		}
+
+		for _, g := range groups {
+			groupIds = append(groupIds, g["id"])
+		}
+
+		return nil
+	})
+
+	return groupIds
 }

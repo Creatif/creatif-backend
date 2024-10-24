@@ -8,5 +8,4 @@ import (
 func printNewlineSandwich(printer *color.Color, print string) {
 	fmt.Println("")
 	printer.Println(print)
-	fmt.Println("")
 }

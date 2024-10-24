@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -44,6 +45,7 @@ func generateProjects(client *http.Client) []project {
 	projects := make([]project, len(projectNames))
 	for i, p := range projectNames {
 		handleHttpError(createProject(client, p), func(res *http.Response) error {
+
 			var m project
 			b, err := io.ReadAll(res.Body)
 			if err != nil {
@@ -52,6 +54,10 @@ func generateProjects(client *http.Client) []project {
 
 			if err := json.Unmarshal(b, &m); err != nil {
 				return err
+			}
+
+			if res.StatusCode < 200 && res.StatusCode > 299 {
+				return errors.New(fmt.Sprintf("Creating project failed with status %d and body %s", res.StatusCode, string(b)))
 			}
 
 			projects[i] = m

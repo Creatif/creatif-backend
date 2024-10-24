@@ -53,22 +53,22 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(len(projects))
 	for _, p := range projects {
-		projectId := p.id
+		projectId := p.ID
 
 		go func(projectId string) {
 			defer wg.Done()
 
-			handleHttpError(createGroups(authenticatedClient, projectId), nil)
-			handleHttpError(createMapStructure(authenticatedClient, projectId, "Accounts"), nil)
-			handleHttpError(createListStructure(authenticatedClient, projectId, "Properties"), nil)
+			groupIds := createGroupsAndGetGroupIds(authenticatedClient, projectId)
+			accountId := createAccountStructureAndReturnID(authenticatedClient, projectId)
+			createPropertiesStructureAndReturnID(authenticatedClient, projectId)
 
-			generatedAccounts, err := generateAccountStructureData("Accounts")
+			generatedAccounts, err := generateAccountStructureData(groupIds)
 			if err != nil {
 				handleAppError(err, Cannot_Continue_Procedure)
 			}
 
 			for _, genAccount := range generatedAccounts {
-				handleHttpError(addToMap(authenticatedClient, projectId, genAccount.name, genAccount.variable, genAccount.references, genAccount.imagePaths), nil)
+				handleHttpError(addToMap(authenticatedClient, projectId, accountId, genAccount.variable, genAccount.references, genAccount.imagePaths), nil)
 				progressBarNotifier <- true
 			}
 		}(projectId)

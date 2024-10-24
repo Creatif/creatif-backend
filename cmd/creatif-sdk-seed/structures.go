@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -68,4 +69,48 @@ func createListStructure(client *http.Client, projectId, name string) httpResult
 	}
 
 	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
+}
+
+func createAccountStructureAndReturnID(client *http.Client, projectId string) string {
+	var id string
+	handleHttpError(createMapStructure(client, projectId, "Accounts"), func(res *http.Response) error {
+		defer res.Body.Close()
+		var m map[string]interface{}
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(b, &m); err != nil {
+			return err
+		}
+
+		id = m["id"].(string)
+
+		return nil
+	})
+
+	return id
+}
+
+func createPropertiesStructureAndReturnID(client *http.Client, projectId string) string {
+	var id string
+	handleHttpError(createListStructure(client, projectId, "Properties"), func(res *http.Response) error {
+		defer res.Body.Close()
+		var m map[string]interface{}
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(b, &m); err != nil {
+			return err
+		}
+
+		id = m["id"].(string)
+
+		return nil
+	})
+
+	return id
 }

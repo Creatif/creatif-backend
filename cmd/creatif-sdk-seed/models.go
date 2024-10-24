@@ -10,8 +10,8 @@ type accountVariable struct {
 }
 
 type project struct {
-	name string
-	id   string
+	Name string `json:"name"`
+	ID   string `json:"id"`
 }
 
 type account struct {
@@ -38,12 +38,5 @@ func newAccount(name string, references []map[string]string, imagePaths []string
 		references: references,
 		imagePaths: imagePaths,
 		variable:   variable,
-	}
-}
-
-func newProject(id, name string) project {
-	return project{
-		name: name,
-		id:   id,
 	}
 }
