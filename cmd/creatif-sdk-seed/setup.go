@@ -1,11 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 func loadEnv() {
@@ -33,12 +37,60 @@ func runDb() {
 	}
 }
 
-func reactToFlags() {
-	shouldJustCleanup := len(os.Args) == 2 && os.Args[1] == "--cleanup"
-	if shouldJustCleanup {
-		doOrderedCleanup()
-		os.Exit(0)
+func doOperations(operations []string) {
+	for _, op := range operations {
+		if op == "--regenerate" {
+			doOrderedCleanup()
+		}
 	}
+}
+
+func processFlags() (int, error) {
+	defaultNumberOfProjects := 5
+	if len(os.Args) == 1 {
+		return defaultNumberOfProjects, nil
+	}
+
+	operations := []string{}
+	for i := 0; i < len(os.Args[0:]); i++ {
+		// just cleanup the system and exit
+		shouldJustCleanup := os.Args[i] == "--cleanup"
+		if shouldJustCleanup {
+			doOrderedCleanup()
+			os.Exit(0)
+		}
+
+		// just cleanup the system and start all over without existing
+		shouldRegenerate := os.Args[i] == "--regenerate"
+		if shouldRegenerate {
+			operations = append(operations, "--regenerate")
+		}
+
+		optionalArgs := strings.Split(os.Args[i], "=")
+		// if there are no optional flags, just continue
+		if len(optionalArgs) == 0 {
+			doOperations(operations)
+			return defaultNumberOfProjects, nil
+		}
+
+		re := regexp.MustCompile(`^--projects=(\d+)$`)
+		matches := re.FindStringSubmatch(os.Args[i])
+		if len(matches) > 1 {
+			numOfProjects, err := strconv.ParseInt(matches[1], 10, 32)
+			if err != nil {
+				return 0, err
+			}
+
+			if numOfProjects < 1 || numOfProjects > 10 {
+				return 0, errors.New("Number of projects must be minimal 1 and below 10")
+			}
+
+			doOperations(operations)
+			return int(numOfProjects), nil
+		}
+	}
+
+	return defaultNumberOfProjects, nil
 }
 
 func preSeedAuthAndSetup(client *http.Client) *http.Client {

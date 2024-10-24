@@ -77,6 +77,7 @@ func createAccountStructureAndReturnID(client *http.Client, projectId string) st
 		defer res.Body.Close()
 		var m map[string]interface{}
 		b, err := io.ReadAll(res.Body)
+		defer res.Body.Close()
 		if err != nil {
 			return err
 		}

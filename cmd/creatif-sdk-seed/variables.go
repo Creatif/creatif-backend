@@ -42,6 +42,7 @@ func addToMap(client *http.Client, projectId, name string, variable accountVaria
 	}
 
 	response, err := Make(req, client)
+	defer response.Body.Close()
 
 	if err != nil {
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
@@ -78,6 +79,7 @@ func addToList(client *http.Client, projectId, name string, variable map[string]
 	}
 
 	response, err := Make(req, client)
+	response.Body.Close()
 
 	if err != nil {
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)

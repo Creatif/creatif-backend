@@ -4,17 +4,22 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-func generateProgressBar(num int64) chan bool {
-	bar := progressbar.Default(num)
+func generateProgressBar(num int) (chan bool, chan bool) {
+	bar := progressbar.Default(int64(num))
 	notifier := make(chan bool)
+	done := make(chan bool)
 
 	go func() {
 		for {
-			bar.Add(1)
-			<-notifier
+			select {
+			case <-notifier:
+				bar.Add(1)
+			case <-done:
+				bar.Close()
+			}
 		}
 
 	}()
 
-	return notifier
+	return notifier, done
 }

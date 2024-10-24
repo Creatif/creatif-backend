@@ -40,11 +40,23 @@ func createProject(client *http.Client, name string) httpResult {
 	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Can_Continue)
 }
 
-func generateProjects(client *http.Client) []project {
-	projectNames := []string{"Warsaw Brokers", "London Brokers", "Paris Brokers", "Berlin Brokers", "Barcelona Brokers"}
-	projects := make([]project, len(projectNames))
-	for i, p := range projectNames {
-		handleHttpError(createProject(client, p), func(res *http.Response) error {
+func generateProjects(client *http.Client, numOfProjects int) []project {
+	projectNames := []string{
+		"Warsaw Brokers",
+		"London Brokers",
+		"Paris Brokers",
+		"Berlin Brokers",
+		"Barcelona Brokers",
+		"Zagreb Brokers",
+		"Belgrade Brokers",
+		"Prag Brokers",
+		"Rome Brokers",
+		"Athens Brokers",
+	}
+	projects := make([]project, numOfProjects)
+	for i := 0; i < numOfProjects; i++ {
+		projectName := projectNames[i]
+		handleHttpError(createProject(client, projectName), func(res *http.Response) error {
 
 			var m project
 			b, err := io.ReadAll(res.Body)

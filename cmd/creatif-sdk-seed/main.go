@@ -30,28 +30,34 @@ but until then, this is just fine.
 package main
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
+	"os"
 	"sync"
 )
 
 func main() {
 	loadEnv()
 	runDb()
-	reactToFlags()
+	numOfProjects, err := processFlags()
+	if err != nil {
+		printNewlineSandwich(printers["error"], err.Error())
+		os.Exit(1)
+	}
 
 	anonymousClient := createAnonymousClient()
 	authenticatedClient := preSeedAuthAndSetup(anonymousClient)
 
 	printers["info"].Println("Creating projects")
-	projects := generateProjects(authenticatedClient)
+	projects := generateProjects(authenticatedClient, numOfProjects)
 
 	printers["info"].Println("Creating project data with groups, Account(s) and Property(s)")
 	fmt.Println("")
 
-	progressBarNotifier := generateProgressBar(1000)
-
 	wg := sync.WaitGroup{}
 	wg.Add(len(projects))
+	progressBarNotifier, progressBarDone := generateProgressBar(len(projects) * 200)
 	for _, p := range projects {
 		projectId := p.ID
 
@@ -68,7 +74,14 @@ func main() {
 			}
 
 			for _, genAccount := range generatedAccounts {
-				handleHttpError(addToMap(authenticatedClient, projectId, accountId, genAccount.variable, genAccount.references, genAccount.imagePaths), nil)
+				handleHttpError(addToMap(authenticatedClient, projectId, accountId, genAccount.variable, genAccount.references, genAccount.imagePaths), func(res *http.Response) error {
+					if res.StatusCode < 200 || res.StatusCode > 299 {
+						return errors.New(fmt.Sprintf("Generating one of the accounts return a status code %d", res.StatusCode))
+					}
+
+					return nil
+				})
+
 				progressBarNotifier <- true
 			}
 		}(projectId)
@@ -76,6 +89,8 @@ func main() {
 
 	wg.Wait()
 	close(progressBarNotifier)
+	progressBarDone <- true
+	close(progressBarDone)
 
 	fmt.Println("")
 	printers["success"].Println("Seed is successful!")
