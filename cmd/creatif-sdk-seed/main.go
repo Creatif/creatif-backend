@@ -30,9 +30,7 @@ but until then, this is just fine.
 package main
 
 import (
-	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"sync"
 )
@@ -57,7 +55,7 @@ func main() {
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(projects))
-	progressBarNotifier, progressBarDone := generateProgressBar(len(projects) * 200)
+	//progressBarNotifier, progressBarDone := generateProgressBar((len(projects) * 200) + 6000)
 	for _, p := range projects {
 		projectId := p.ID
 
@@ -66,7 +64,7 @@ func main() {
 
 			groupIds := createGroupsAndGetGroupIds(authenticatedClient, projectId)
 			accountId := createAccountStructureAndReturnID(authenticatedClient, projectId)
-			createPropertiesStructureAndReturnID(authenticatedClient, projectId)
+			propertyId := createPropertiesStructureAndReturnID(authenticatedClient, projectId)
 
 			generatedAccounts, err := generateAccountStructureData(groupIds)
 			if err != nil {
@@ -74,23 +72,23 @@ func main() {
 			}
 
 			for _, genAccount := range generatedAccounts {
-				handleHttpError(addToMap(authenticatedClient, projectId, accountId, genAccount.variable, genAccount.references, genAccount.imagePaths), func(res *http.Response) error {
-					if res.StatusCode < 200 || res.StatusCode > 299 {
-						return errors.New(fmt.Sprintf("Generating one of the accounts return a status code %d", res.StatusCode))
-					}
+				genAccountId := addToMapAndGetAccountId(authenticatedClient, projectId, accountId, genAccount)
+				generatedPropertiesData, err := generatePropertiesStructureData(genAccountId, groupIds)
+				if err != nil {
+					handleAppError(err, Cannot_Continue_Procedure)
+				}
 
-					return nil
-				})
-
-				progressBarNotifier <- true
+				for _, genProperty := range generatedPropertiesData {
+					handleHttpError(addToList(authenticatedClient, projectId, propertyId, genProperty.variable, genProperty.references, genProperty.imagePaths), nil)
+				}
 			}
 		}(projectId)
 	}
 
 	wg.Wait()
-	close(progressBarNotifier)
-	progressBarDone <- true
-	close(progressBarDone)
+	//close(progressBarNotifier)
+	//progressBarDone <- true
+	//close(progressBarDone)
 
 	fmt.Println("")
 	printers["success"].Println("Seed is successful!")

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -94,6 +95,7 @@ func handleHttpError(result httpResult, responseFn func(res *http.Response) erro
 		printNewlineSandwich(printers["error"], fmt.Sprintf("Something wrong happened here: %s. The program is forced to quit.", err.Error()))
 		printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
 		printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
+		fmt.Println("")
 
 		res := result.Response()
 		if res != nil {
@@ -107,6 +109,7 @@ func handleHttpError(result httpResult, responseFn func(res *http.Response) erro
 					printNewlineSandwich(printers["error"], fmt.Sprintf("Your callback produced an error: %s. The program is forced to quit.", err.Error()))
 					printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
 					printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
+					fmt.Println("")
 					completeCleanup()
 					os.Exit(1)
 				}
@@ -131,6 +134,16 @@ func handleHttpError(result httpResult, responseFn func(res *http.Response) erro
 		printNewlineSandwich(printers["error"], "The response is not OK and the program is forced to quit. There is nothing else to do.")
 		printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
 		printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
+
+		if result.Response() != nil {
+			printNewlineSandwich(printers["error"], "There seems to be a response in this error. Dumping the response below...")
+			res := result.Response()
+			b, _ := io.ReadAll(res.Body)
+			defer res.Body.Close()
+			printNewlineSandwich(printers["error"], "Path: "+res.Request.URL.Path)
+			printNewlineSandwich(printers["error"], string(b))
+		}
+		fmt.Println("")
 		completeCleanup()
 		os.Exit(1)
 	}
@@ -143,6 +156,7 @@ func handleAppError(err error, flag string) {
 		printNewlineSandwich(printers["error"], fmt.Sprintf("An app error occurred: %s. The program is forced to quit.", err.Error()))
 		printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
 		printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
+		fmt.Println("")
 		completeCleanup()
 		os.Exit(1)
 	}
@@ -151,8 +165,16 @@ func handleAppError(err error, flag string) {
 		printNewlineSandwich(printers["error"], fmt.Sprintf("An app error occurred: %s. The program is forced to quit.", err.Error()))
 		printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
 		printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
+		fmt.Println("")
 		completeCleanup()
 		os.Exit(1)
 	}
 	// ignore the error, it is not serious enough
+}
+
+func randomBetween(min, max int) int {
+	// Seed the random number generator
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	// Generate a random number between min and max
+	return rand.Intn(max-min+1) + min
 }

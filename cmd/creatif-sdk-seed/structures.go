@@ -49,7 +49,7 @@ func createListStructure(client *http.Client, projectId, name string) httpResult
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	url := fmt.Sprintf("%s%s%s", URL, "/declarations/map/", projectId)
+	url := fmt.Sprintf("%s%s%s", URL, "/declarations/list/", projectId)
 	req, err := newRequest(request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",

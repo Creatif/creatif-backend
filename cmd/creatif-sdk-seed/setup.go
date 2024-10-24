@@ -64,6 +64,8 @@ func processFlags() (int, error) {
 			if numOfProjects < 1 || numOfProjects > 10 {
 				return 0, errors.New("Number of projects must be minimal 1 and below 10")
 			}
+
+			defaultNumberOfProjects = int(numOfProjects)
 		}
 	}
 
@@ -85,23 +87,11 @@ func processFlags() (int, error) {
 		optionalArgs := strings.Split(os.Args[i], "=")
 		// if there are no optional flags, just continue
 		if len(optionalArgs) == 0 {
-			doOperations(operations)
 			return defaultNumberOfProjects, nil
-		}
-
-		re := regexp.MustCompile(`^--projects=(\d+)$`)
-		matches := re.FindStringSubmatch(os.Args[i])
-		if len(matches) > 1 {
-			numOfProjects, err := strconv.ParseInt(matches[1], 10, 32)
-			if err != nil {
-				return 0, err
-			}
-
-			doOperations(operations)
-			return int(numOfProjects), nil
 		}
 	}
 
+	doOperations(operations)
 	return defaultNumberOfProjects, nil
 }
 

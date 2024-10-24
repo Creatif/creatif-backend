@@ -9,6 +9,15 @@ type accountVariable struct {
 	value     string
 }
 
+type propertyVariable struct {
+	name      string
+	locale    string
+	behaviour string
+	groups    []string
+	metadata  string
+	value     string
+}
+
 type project struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
@@ -19,6 +28,13 @@ type account struct {
 	references []map[string]string
 	imagePaths []string
 	variable   accountVariable
+}
+
+type property struct {
+	name       string
+	references []map[string]string
+	imagePaths []string
+	variable   propertyVariable
 }
 
 func newAccountVariable(name, locale, behaviour, metadata, value string, groups []string) accountVariable {
@@ -38,5 +54,25 @@ func newAccount(name string, references []map[string]string, imagePaths []string
 		references: references,
 		imagePaths: imagePaths,
 		variable:   variable,
+	}
+}
+
+func newProperty(name string, references []map[string]string, imagePaths []string, variable propertyVariable) property {
+	return property{
+		name:       name,
+		references: references,
+		imagePaths: imagePaths,
+		variable:   variable,
+	}
+}
+
+func newPropertyVariable(name, locale, behaviour, metadata, value string, groups []string) propertyVariable {
+	return propertyVariable{
+		name:      name,
+		locale:    locale,
+		behaviour: behaviour,
+		groups:    groups,
+		metadata:  metadata,
+		value:     value,
 	}
 }
