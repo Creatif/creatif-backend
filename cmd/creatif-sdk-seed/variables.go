@@ -154,32 +154,14 @@ func generateAccountStructureData(groupIds []string) ([]account, error) {
 		printers["warning"].Printf("Unable to generate base64 image in Accounts generator %s\n", err.Error())
 	}
 
-	accounts := make([]account, 200)
-	successIterations := 0
-	for {
-		if successIterations == 200 {
-			return accounts, nil
-		}
+	accountsToGenerate := 10
 
-		firstName := faker.FirstName()
-		lastName := faker.LastName()
-		name := fmt.Sprintf("%s-%s", firstName, lastName)
+	accounts := make([]account, accountsToGenerate)
 
-		isDuplicate := false
-		for _, p := range accounts {
-			if p.name == name {
-				isDuplicate = true
-				break
-			}
-		}
-
-		if isDuplicate {
-			continue
-		}
-
+	for i := 0; i < accountsToGenerate; i++ {
 		accountValueData := map[string]string{
-			"name":       firstName,
-			"lastName":   lastName,
+			"name":       faker.FirstName(),
+			"lastName":   faker.LastName(),
 			"address":    faker.GetRealAddress().Address,
 			"city":       faker.GetRealAddress().City,
 			"postalCode": faker.GetRealAddress().PostalCode,
@@ -194,11 +176,12 @@ func generateAccountStructureData(groupIds []string) ([]account, error) {
 			return nil, err
 		}
 
-		acc := newAccount(name, nil, nil, newAccountVariable(name, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)))
-
-		accounts[successIterations] = acc
-		successIterations += 1
+		uniqueName := uuid.New().String()
+		acc := newAccount(uniqueName, nil, nil, newAccountVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)))
+		accounts[i] = acc
 	}
+
+	return accounts, nil
 }
 
 func generatePropertiesStructureData(accountId string, groupIds []string) ([]property, error) {
@@ -216,7 +199,7 @@ func generatePropertiesStructureData(accountId string, groupIds []string) ([]pro
 
 		for _, ps := range propertyStatutes {
 			for _, pt := range propertyTypes {
-				for i := 0; i < 100; i++ {
+				for i := 0; i < 10; i++ {
 					p := generateSinglePropertyData(pt)
 					//p["propertyImages"] = images
 					p["propertyStatus"] = ps

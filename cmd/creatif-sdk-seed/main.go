@@ -32,7 +32,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"sync"
 )
 
 func main() {
@@ -47,48 +46,32 @@ func main() {
 	anonymousClient := createAnonymousClient()
 	authenticatedClient := preSeedAuthAndSetup(anonymousClient)
 
-	printers["info"].Println("Creating projects")
-	projects := generateProjects(authenticatedClient, numOfProjects)
+	propertiesWorkQueue := newListWorkQueue(50, 10)
+	propertyWorkQueueDone := propertiesWorkQueue.start()
 
-	printers["info"].Println("Creating project data with groups, Account(s) and Property(s)")
+	accountWorkQueue := newMapWorkQueue(50, 10, propertiesWorkQueue)
+	accountWorkQueueDone := accountWorkQueue.start()
+
+	fmt.Println("Seeding...")
 	fmt.Println("")
 
-	wg := sync.WaitGroup{}
-	wg.Add(len(projects))
-	//progressBarNotifier, progressBarDone := generateProgressBar((len(projects) * 200) + 6000)
-	for _, p := range projects {
-		projectId := p.ID
+	numOfAllOperations := (numOfProjects * 10) * 300
+	progressBarNotifier, progressBarDone := generateProgressBar(numOfAllOperations)
 
-		go func(projectId string) {
-			defer wg.Done()
+	projectProducerListeners := projectProducer(authenticatedClient, numOfProjects)
+	accountProducer(authenticatedClient, projectProducerListeners, accountWorkQueue)
 
-			groupIds := createGroupsAndGetGroupIds(authenticatedClient, projectId)
-			accountId := createAccountStructureAndReturnID(authenticatedClient, projectId)
-			propertyId := createPropertiesStructureAndReturnID(authenticatedClient, projectId)
+	concurrencyCoordinator(
+		propertiesWorkQueue,
+		accountWorkQueue,
+		progressBarNotifier,
+		numOfAllOperations,
+		propertyWorkQueueDone,
+		accountWorkQueueDone,
+	)
 
-			generatedAccounts, err := generateAccountStructureData(groupIds)
-			if err != nil {
-				handleAppError(err, Cannot_Continue_Procedure)
-			}
-
-			for _, genAccount := range generatedAccounts {
-				genAccountId := addToMapAndGetAccountId(authenticatedClient, projectId, accountId, genAccount)
-				generatedPropertiesData, err := generatePropertiesStructureData(genAccountId, groupIds)
-				if err != nil {
-					handleAppError(err, Cannot_Continue_Procedure)
-				}
-
-				for _, genProperty := range generatedPropertiesData {
-					handleHttpError(addToList(authenticatedClient, projectId, propertyId, genProperty.variable, genProperty.references, genProperty.imagePaths), nil)
-				}
-			}
-		}(projectId)
-	}
-
-	wg.Wait()
-	//close(progressBarNotifier)
-	//progressBarDone <- true
-	//close(progressBarDone)
+	<-mergeDoneQueues(accountWorkQueueDone, propertyWorkQueueDone)
+	progressBarDone <- true
 
 	fmt.Println("")
 	printers["success"].Println("Seed is successful!")

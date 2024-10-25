@@ -2,9 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -38,45 +36,4 @@ func createProject(client *http.Client, name string) httpResult {
 	}
 
 	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Can_Continue)
-}
-
-func generateProjects(client *http.Client, numOfProjects int) []project {
-	projectNames := []string{
-		"Warsaw Brokers",
-		"London Brokers",
-		"Paris Brokers",
-		"Berlin Brokers",
-		"Barcelona Brokers",
-		"Zagreb Brokers",
-		"Belgrade Brokers",
-		"Prag Brokers",
-		"Rome Brokers",
-		"Athens Brokers",
-	}
-	projects := make([]project, numOfProjects)
-	for i := 0; i < numOfProjects; i++ {
-		projectName := projectNames[i]
-		handleHttpError(createProject(client, projectName), func(res *http.Response) error {
-
-			var m project
-			b, err := io.ReadAll(res.Body)
-			if err != nil {
-				return err
-			}
-
-			if err := json.Unmarshal(b, &m); err != nil {
-				return err
-			}
-
-			if res.StatusCode < 200 && res.StatusCode > 299 {
-				return errors.New(fmt.Sprintf("Creating project failed with status %d and body %s", res.StatusCode, string(b)))
-			}
-
-			projects[i] = m
-
-			return nil
-		})
-	}
-
-	return projects
 }

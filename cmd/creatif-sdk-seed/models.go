@@ -18,11 +18,6 @@ type propertyVariable struct {
 	value     string
 }
 
-type project struct {
-	Name string `json:"name"`
-	ID   string `json:"id"`
-}
-
 type account struct {
 	name       string
 	references []map[string]string

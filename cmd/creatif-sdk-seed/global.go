@@ -138,8 +138,11 @@ func handleHttpError(result httpResult, responseFn func(res *http.Response) erro
 		if result.Response() != nil {
 			printNewlineSandwich(printers["error"], "There seems to be a response in this error. Dumping the response below...")
 			res := result.Response()
-			b, _ := io.ReadAll(res.Body)
+			b, err := io.ReadAll(res.Body)
 			defer res.Body.Close()
+			if err != nil {
+				printNewlineSandwich(printers["error"], "Cannot read response because of an error: "+err.Error())
+			}
 			printNewlineSandwich(printers["error"], "Path: "+res.Request.URL.Path)
 			printNewlineSandwich(printers["error"], string(b))
 		}
