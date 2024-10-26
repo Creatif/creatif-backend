@@ -2,6 +2,9 @@
 WARNING: THIS IS A DESTRUCTIVE COMMAND. IN CASE OF CERTAIN ERRORS, IT MIGHT DESTROY ALL THE DATA THAT YOU HAVE
 		 IN THE DATABASE. USE WITH CAUTION!!!
 
+This program cannot start if you don't have the server up, so make sure that you open up a new terminal tab, hit 'docker compose up' on the main project
+and only then execute this command.
+
 This command seeds the initial application with seed data from real estate project. It has two structures: Accounts and
 Properties. Accounts is a map and Properties is a list. It generates five projects with those structure. Each project has
 200 Account maps and 1000 (one thousand) Properties in 5 different locales. That means that this command will generate 5200

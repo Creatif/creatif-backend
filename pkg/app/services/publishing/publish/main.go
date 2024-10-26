@@ -49,7 +49,12 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (published.Version, error) {
-	version := published.NewVersion(c.model.ProjectID, c.model.Name, false)
+	numOfVersions, err := getNumberOfVersions(c.model.ProjectID)
+	if err != nil {
+		return published.Version{}, appErrors.NewApplicationError(err)
+	}
+	
+	version := published.NewVersion(c.model.ProjectID, c.model.Name, numOfVersions == 0)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&version); res.Error != nil {
 			return res.Error
