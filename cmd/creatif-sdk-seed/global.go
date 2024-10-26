@@ -15,7 +15,7 @@ const Cannot_Continue_Procedure = "cannot_continue"
 const User_Error_Procedure = "user_error_can_continue"
 const Can_Continue = "Everything is OK"
 
-const Email = "skrlecmario88@gmail.com"
+const Email = "mariofake@gmail.com"
 const Password = "password"
 
 const (
