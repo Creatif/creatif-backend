@@ -88,7 +88,9 @@ func addToList(client *http.Client, projectId, name string, variable propertyVar
 	}
 
 	response, err := Make(req, client)
-	response.Body.Close()
+	if response.Body != nil {
+		response.Body.Close()
+	}
 
 	if err != nil {
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
@@ -103,6 +105,10 @@ func addToMapAndGetAccountId(client *http.Client, projectId string, accountId st
 		if res.StatusCode < 200 || res.StatusCode > 299 {
 			res.Body.Close()
 			return errors.New(fmt.Sprintf("Generating one of the accounts return a status code %d", res.StatusCode))
+		}
+
+		if res.Body == nil {
+			return errors.New("Trying to read on a nil body in addToMapAndGetAccountId")
 		}
 
 		b, err := io.ReadAll(res.Body)
@@ -189,7 +195,7 @@ func generatePropertiesStructureData(accountId string, groupIds []string) ([]pro
 
 	properties := make([]property, 0)
 	for _, locale := range locales {
-		_, err := generateBase64Images("images/propertyImages", 3)
+		images, err := generateBase64Images("images/propertyImages", 3)
 		if err != nil {
 			printers["warning"].Printf("Unable to generate base64 image in Accounts generator %s\n", err.Error())
 		}
@@ -201,7 +207,7 @@ func generatePropertiesStructureData(accountId string, groupIds []string) ([]pro
 			for _, pt := range propertyTypes {
 				for i := 0; i < 10; i++ {
 					p := generateSinglePropertyData(pt)
-					//p["propertyImages"] = images
+					p["propertyImages"] = images
 					p["propertyStatus"] = ps
 
 					uniqueName := uuid.New().String()
@@ -213,8 +219,15 @@ func generatePropertiesStructureData(accountId string, groupIds []string) ([]pro
 
 					properties = append(properties, newProperty(
 						uniqueName,
-						nil,
-						nil,
+						[]map[string]string{
+							{
+								"name":          "accounts",
+								"structureName": "Accounts",
+								"structureType": "map",
+								"variableId":    accountId,
+							},
+						},
+						[]string{"propertyImages"},
 						newPropertyVariable(
 							uniqueName,
 							locale,

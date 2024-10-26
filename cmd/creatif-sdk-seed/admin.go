@@ -64,7 +64,9 @@ func adminExists(client *http.Client) httpResult {
 	}
 
 	b, err := io.ReadAll(response.Body)
-	defer response.Body.Close()
+	if response.Body != nil {
+		defer response.Body.Close()
+	}
 	if err != nil {
 		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
