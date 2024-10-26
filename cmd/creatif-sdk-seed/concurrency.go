@@ -125,10 +125,11 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 	return producers
 }
 
-func accountProducer(client *http.Client, projectProducers []chan projectProduct, wq mapWorkQueue) {
+func accountProducer(client *http.Client, projectProducers []chan projectProduct, wq mapWorkQueue, reporter *reporter) {
 	allAccounts := make([]joinedStructureAccount, 0)
 	for _, projectProducer := range projectProducers {
 		projectProductResult := <-projectProducer
+		reporter.AddProjectID(projectProductResult.projectId)
 		groupIds := projectProductResult.groupIds
 		projectId := projectProductResult.projectId
 		accountStructureId := projectProductResult.accountStructureId
@@ -171,6 +172,7 @@ func concurrencyCoordinator(
 	numOfAllOperations int,
 	propertyWorkQueueDone chan bool,
 	accountWorkQueueDone chan bool,
+	reporter *reporter,
 ) {
 	go func() {
 		operations := 0
@@ -179,8 +181,10 @@ func concurrencyCoordinator(
 			case <-propertiesWorkQueue.jobDoneQueue:
 				progressBarNotifier <- true
 				operations++
+				reporter.AddProperty()
 			case <-accountWorkQueue.jobDoneQueue:
 				progressBarNotifier <- true
+				reporter.AddAccount()
 				operations++
 			default:
 				if numOfAllOperations == operations {

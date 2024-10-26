@@ -1,8 +1,8 @@
-package main
+package http
 
 import "net/http"
 
-type httpResult interface {
+type HttpResult interface {
 	Response() *http.Response
 	// this tells the program if the error, success or any other situation requires special attention.
 	// an http call might be 200, but should not be, therefor a special procedure must be created to handle it.

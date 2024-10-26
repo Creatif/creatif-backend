@@ -1,6 +1,6 @@
 /**
 WARNING: THIS IS A DESTRUCTIVE COMMAND. IN CASE OF CERTAIN ERRORS, IT MIGHT DESTROY ALL THE DATA THAT YOU HAVE
-		 IN THE DATABASE. USE WITH CAUTION!!! IT SHOULD NOT BE USED TO SEED THE APP FOR USE IN THE creatif-ui-sdk.
+		 IN THE DATABASE. USE WITH CAUTION!!!
 
 This command seeds the initial application with seed data from real estate project. It has two structures: Accounts and
 Properties. Accounts is a map and Properties is a list. It generates five projects with those structure. Each project has
@@ -16,11 +16,20 @@ There is nothing special about this program. Just cd into this directory and run
 
 Flags:
 --cleanup
-    This flag will completely destroy all data in the database. USE WITH CAUTION!!!
+    This flag will completely destroy all data in the database. USE WITH CAUTION!!! If you use
+    this flag is the only thing that will be done even if you used other flags i.e. it will ignore all other flags.
+--regenerate
+    This will do what --cleanup does but will run other commands. Basically, you tell the program to wipe
+    the database out start over
+--projects={\d}
+    For how many projects should it seed the application. More will be slower.
+--help
+    If used, will output help. If used with any other flags, it will ignore them and just print help, i.e. it will
+    ignore all other flags.
 
+Credentials:
 
-
-Email: skrlecmario88@gmail.com
+Email: mariofake@gmail.com
 Password: password
 
 I know that password is weak, but there is a plan to put a password strength into effect in the application
@@ -43,6 +52,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	report := newReporter()
+
 	anonymousClient := createAnonymousClient()
 	authenticatedClient := preSeedAuthAndSetup(anonymousClient)
 
@@ -52,14 +63,14 @@ func main() {
 	accountWorkQueue := newMapWorkQueue(50, 10, propertiesWorkQueue)
 	accountWorkQueueDone := accountWorkQueue.start()
 
-	fmt.Println("Seeding...")
+	fmt.Printf("Seeding... If the progress bar is full but the program does not exit on its own,\nit is OK to press Ctrl + C to quit. Nothing bad will happen.\n")
 	fmt.Println("")
 
 	numOfAllOperations := (numOfProjects * 10) * 300
 	progressBarNotifier, progressBarDone := generateProgressBar(numOfAllOperations)
 
 	projectProducerListeners := projectProducer(authenticatedClient, numOfProjects)
-	accountProducer(authenticatedClient, projectProducerListeners, accountWorkQueue)
+	accountProducer(authenticatedClient, projectProducerListeners, accountWorkQueue, report)
 
 	concurrencyCoordinator(
 		propertiesWorkQueue,
@@ -68,6 +79,7 @@ func main() {
 		numOfAllOperations,
 		propertyWorkQueueDone,
 		accountWorkQueueDone,
+		report,
 	)
 
 	<-mergeDoneQueues(accountWorkQueueDone, propertyWorkQueueDone)
@@ -75,5 +87,6 @@ func main() {
 
 	fmt.Println("")
 	printers["success"].Println("Seed is successful!")
+	report.Report()
 	fmt.Println("")
 }

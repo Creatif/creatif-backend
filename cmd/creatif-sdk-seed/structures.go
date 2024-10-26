@@ -1,6 +1,7 @@
 package main
 
 import (
+	http2 "creatif-sdk-seed/http"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,18 +9,18 @@ import (
 	"net/http"
 )
 
-func createMapStructure(client *http.Client, projectId, name string) httpResult {
+func createMapStructure(client *http.Client, projectId, name string) http2.HttpResult {
 	body := map[string]string{
 		"name": name,
 	}
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
 	url := fmt.Sprintf("%s%s%s", URL, "/declarations/map/", projectId)
-	req, err := newRequest(request{
+	req, err := http2.NewRequest(http2.Request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
@@ -28,30 +29,30 @@ func createMapStructure(client *http.Client, projectId, name string) httpResult 
 		Body:   b,
 	})
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	response, err := Make(req, client)
+	response, err := http2.Make(req, client)
 
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
+	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func createListStructure(client *http.Client, projectId, name string) httpResult {
+func createListStructure(client *http.Client, projectId, name string) http2.HttpResult {
 	body := map[string]string{
 		"name": name,
 	}
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
 	url := fmt.Sprintf("%s%s%s", URL, "/declarations/list/", projectId)
-	req, err := newRequest(request{
+	req, err := http2.NewRequest(http2.Request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
@@ -60,16 +61,16 @@ func createListStructure(client *http.Client, projectId, name string) httpResult
 		Body:   b,
 	})
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	response, err := Make(req, client)
+	response, err := http2.Make(req, client)
 
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
+	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
 func createAccountStructureAndReturnID(client *http.Client, projectId string) string {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	http2 "creatif-sdk-seed/http"
 	"encoding/json"
 	"fmt"
 	"github.com/bxcodec/faker/v4"
@@ -8,7 +9,7 @@ import (
 	"net/http"
 )
 
-func createAdmin(client *http.Client, email, password string) httpResult {
+func createAdmin(client *http.Client, email, password string) http2.HttpResult {
 	body := map[string]string{
 		"name":     faker.Name(),
 		"lastName": faker.LastName(),
@@ -18,11 +19,11 @@ func createAdmin(client *http.Client, email, password string) httpResult {
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
 	url := fmt.Sprintf("%s%s", URL, "/app/auth/admin/create")
-	req, err := newRequest(request{
+	req, err := http2.NewRequest(http2.Request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
@@ -31,21 +32,21 @@ func createAdmin(client *http.Client, email, password string) httpResult {
 		Body:   b,
 	})
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	response, err := Make(req, client)
+	response, err := http2.Make(req, client)
 
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
+	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func adminExists(client *http.Client) httpResult {
+func adminExists(client *http.Client) http2.HttpResult {
 	url := fmt.Sprintf("%s%s", URL, "/app/auth/admin/exists")
-	req, err := newRequest(request{
+	req, err := http2.NewRequest(http2.Request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
@@ -54,13 +55,13 @@ func adminExists(client *http.Client) httpResult {
 		Body:   nil,
 	})
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	response, err := Make(req, client)
+	response, err := http2.Make(req, client)
 
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
 	b, err := io.ReadAll(response.Body)
@@ -68,13 +69,13 @@ func adminExists(client *http.Client) httpResult {
 		defer response.Body.Close()
 	}
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 	var doesExist bool
 	err = json.Unmarshal(b, &doesExist)
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299 && doesExist, Can_Continue)
+	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299 && doesExist, Can_Continue)
 }

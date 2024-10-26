@@ -78,6 +78,12 @@ func processFlags() (int, error) {
 			os.Exit(0)
 		}
 
+		shouldJustOutputHelp := os.Args[i] == "--help"
+		if shouldJustOutputHelp {
+			fmt.Print(help)
+			os.Exit(0)
+		}
+
 		// just cleanup the system and start all over without existing
 		shouldRegenerate := os.Args[i] == "--regenerate"
 		if shouldRegenerate {

@@ -1,6 +1,15 @@
-package main
+package http
 
-import "net/http"
+import (
+	"net/http"
+)
+
+type Request struct {
+	Headers map[string]string
+	Url     string
+	Method  string
+	Body    []byte
+}
 
 type result struct {
 	response  *http.Response
@@ -30,7 +39,7 @@ func (r result) Ok() bool {
 	return r.ok
 }
 
-func newHttpResult(response *http.Response, error error, status int, ok bool, procedure string) httpResult {
+func NewHttpResult(response *http.Response, error error, status int, ok bool, procedure string) HttpResult {
 	return result{
 		response:  response,
 		error:     error,

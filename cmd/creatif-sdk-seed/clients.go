@@ -1,6 +1,7 @@
 package main
 
 import (
+	http2 "creatif-sdk-seed/http"
 	"crypto/tls"
 	"net/http"
 	"net/http/cookiejar"
@@ -9,7 +10,7 @@ import (
 )
 
 func createAnonymousClient() *http.Client {
-	return newClient(newClientParams(&http.Transport{
+	return http2.NewClient(http2.NewClientParams(&http.Transport{
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 		MaxConnsPerHost:     1024,
 		TLSHandshakeTimeout: 0,
@@ -19,7 +20,7 @@ func createAnonymousClient() *http.Client {
 func createAuthenticatedClient(authToken string) *http.Client {
 	cookieJar, err := cookiejar.New(nil)
 	if err != nil {
-		handleHttpError(newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure))
+		handleHttpError(http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure))
 	}
 
 	var cookies []*http.Cookie
@@ -35,7 +36,7 @@ func createAuthenticatedClient(authToken string) *http.Client {
 	u, _ := url.Parse("http://localhost:3002")
 	cookieJar.SetCookies(u, cookies)
 
-	return newClient(newClientParams(&http.Transport{
+	return http2.NewClient(http2.NewClientParams(&http.Transport{
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 		MaxConnsPerHost:     1024,
 		TLSHandshakeTimeout: 0,

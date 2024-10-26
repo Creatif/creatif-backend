@@ -1,6 +1,7 @@
 package main
 
 import (
+	http2 "creatif-sdk-seed/http"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,7 +12,7 @@ import (
 	"net/http"
 )
 
-func addToMap(client *http.Client, projectId, name string, variable accountVariable, references []map[string]string, imagePaths []string) httpResult {
+func addToMap(client *http.Client, projectId, name string, variable accountVariable, references []map[string]string, imagePaths []string) http2.HttpResult {
 	body := map[string]interface{}{
 		"name": name,
 		"variable": map[string]interface{}{
@@ -28,11 +29,11 @@ func addToMap(client *http.Client, projectId, name string, variable accountVaria
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
 	url := fmt.Sprintf("%s%s%s", URL, "/declarations/map/add/", projectId)
-	req, err := newRequest(request{
+	req, err := http2.NewRequest(http2.Request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
@@ -41,19 +42,19 @@ func addToMap(client *http.Client, projectId, name string, variable accountVaria
 		Body:   b,
 	})
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	response, err := Make(req, client)
+	response, err := http2.Make(req, client)
 
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
+	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func addToList(client *http.Client, projectId, name string, variable propertyVariable, references []map[string]string, imagePaths []string) httpResult {
+func addToList(client *http.Client, projectId, name string, variable propertyVariable, references []map[string]string, imagePaths []string) http2.HttpResult {
 	body := map[string]interface{}{
 		"name": name,
 		"variable": map[string]interface{}{
@@ -70,11 +71,11 @@ func addToList(client *http.Client, projectId, name string, variable propertyVar
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
 	url := fmt.Sprintf("%s%s%s", URL, "/declarations/list/add/", projectId)
-	req, err := newRequest(request{
+	req, err := http2.NewRequest(http2.Request{
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
@@ -84,19 +85,19 @@ func addToList(client *http.Client, projectId, name string, variable propertyVar
 	})
 
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	response, err := Make(req, client)
+	response, err := http2.Make(req, client)
 	if response != nil && response.Body != nil {
 		response.Body.Close()
 	}
 
 	if err != nil {
-		return newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
+		return http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure)
 	}
 
-	return newHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
+	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
 func addToMapAndGetAccountId(client *http.Client, projectId string, accountId string, account account) string {
