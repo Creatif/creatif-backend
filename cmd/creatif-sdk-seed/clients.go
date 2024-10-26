@@ -19,7 +19,7 @@ func createAnonymousClient() *http.Client {
 func createAuthenticatedClient(authToken string) *http.Client {
 	cookieJar, err := cookiejar.New(nil)
 	if err != nil {
-		handleHttpError(newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure), nil)
+		handleHttpError(newHttpResult(nil, err, 0, false, Cannot_Continue_Procedure))
 	}
 
 	var cookies []*http.Cookie

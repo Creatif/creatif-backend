@@ -90,32 +90,35 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 		for i := 0; i < numOfProjects; i++ {
 			projectName := projectNames[i]
 			var projectId string
-			handleHttpError(createProject(client, projectName), func(res *http.Response) error {
-				var m map[string]interface{}
-				b, err := io.ReadAll(res.Body)
-				defer res.Body.Close()
-				if err != nil {
-					return err
-				}
+			result := handleHttpError(createProject(client, projectName))
+			res := result.Response()
 
-				if err := json.Unmarshal(b, &m); err != nil {
-					return err
-				}
+			if res.Body == nil {
+				handleAppError(errors.New("projectProducer() is trying to work on a nil body"), Cannot_Continue_Procedure)
+			}
 
-				if res.StatusCode < 200 && res.StatusCode > 299 {
-					return errors.New(fmt.Sprintf("Creating project failed with status %d and body %s", res.StatusCode, string(b)))
-				}
+			defer res.Body.Close()
+			var m map[string]interface{}
+			b, err := io.ReadAll(res.Body)
+			if err != nil {
+				handleAppError(err, Cannot_Continue_Procedure)
+			}
 
-				projectId = m["id"].(string)
+			if err := json.Unmarshal(b, &m); err != nil {
+				handleAppError(err, Cannot_Continue_Procedure)
+			}
 
-				groupIds := createGroupsAndGetGroupIds(client, projectId)
-				accountStructureId := createAccountStructureAndReturnID(client, projectId)
-				propertyStructureId := createPropertiesStructureAndReturnID(client, projectId)
+			if res.StatusCode < 200 && res.StatusCode > 299 {
+				handleAppError(errors.New(fmt.Sprintf("Creating project failed with status %d and body %s", res.StatusCode, string(b))), Cannot_Continue_Procedure)
+			}
 
-				producers[i] <- newProjectProduct(projectId, accountStructureId, propertyStructureId, groupIds)
+			projectId = m["id"].(string)
 
-				return nil
-			})
+			groupIds := createGroupsAndGetGroupIds(client, projectId)
+			accountStructureId := createAccountStructureAndReturnID(client, projectId)
+			propertyStructureId := createPropertiesStructureAndReturnID(client, projectId)
+
+			producers[i] <- newProjectProduct(projectId, accountStructureId, propertyStructureId, groupIds)
 		}
 	}()
 

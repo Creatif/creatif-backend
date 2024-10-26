@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -73,45 +74,50 @@ func createListStructure(client *http.Client, projectId, name string) httpResult
 
 func createAccountStructureAndReturnID(client *http.Client, projectId string) string {
 	var id string
-	handleHttpError(createMapStructure(client, projectId, "Accounts"), func(res *http.Response) error {
-		defer res.Body.Close()
-		var m map[string]interface{}
-		b, err := io.ReadAll(res.Body)
-		defer res.Body.Close()
-		if err != nil {
-			return err
-		}
+	result := handleHttpError(createMapStructure(client, projectId, "Accounts"))
+	res := result.Response()
 
-		if err := json.Unmarshal(b, &m); err != nil {
-			return err
-		}
+	if res.Body == nil {
+		handleAppError(errors.New("createPropertiesStructureAndReturnID() does not have a body"), Cannot_Continue_Procedure)
+	}
 
-		id = m["id"].(string)
+	defer res.Body.Close()
+	var m map[string]interface{}
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		handleAppError(err, Cannot_Continue_Procedure)
+	}
 
-		return nil
-	})
+	if err := json.Unmarshal(b, &m); err != nil {
+		handleAppError(err, Cannot_Continue_Procedure)
+	}
+
+	id = m["id"].(string)
 
 	return id
 }
 
 func createPropertiesStructureAndReturnID(client *http.Client, projectId string) string {
 	var id string
-	handleHttpError(createListStructure(client, projectId, "Properties"), func(res *http.Response) error {
-		defer res.Body.Close()
-		var m map[string]interface{}
-		b, err := io.ReadAll(res.Body)
-		if err != nil {
-			return err
-		}
+	result := handleHttpError(createListStructure(client, projectId, "Properties"))
+	res := result.Response()
 
-		if err := json.Unmarshal(b, &m); err != nil {
-			return err
-		}
+	if res.Body == nil {
+		handleAppError(errors.New("createPropertiesStructureAndReturnID() does not have a body"), Cannot_Continue_Procedure)
+	}
 
-		id = m["id"].(string)
+	defer res.Body.Close()
+	var m map[string]interface{}
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		handleAppError(err, Cannot_Continue_Procedure)
+	}
 
-		return nil
-	})
+	if err := json.Unmarshal(b, &m); err != nil {
+		handleAppError(err, Cannot_Continue_Procedure)
+	}
+
+	id = m["id"].(string)
 
 	return id
 }

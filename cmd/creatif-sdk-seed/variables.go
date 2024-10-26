@@ -88,7 +88,7 @@ func addToList(client *http.Client, projectId, name string, variable propertyVar
 	}
 
 	response, err := Make(req, client)
-	if response.Body != nil {
+	if response != nil && response.Body != nil {
 		response.Body.Close()
 	}
 
@@ -101,31 +101,32 @@ func addToList(client *http.Client, projectId, name string, variable propertyVar
 
 func addToMapAndGetAccountId(client *http.Client, projectId string, accountId string, account account) string {
 	var genAccountId string
-	handleHttpError(addToMap(client, projectId, accountId, account.variable, account.references, account.imagePaths), func(res *http.Response) error {
-		if res.StatusCode < 200 || res.StatusCode > 299 {
+	httpResult := handleHttpError(addToMap(client, projectId, accountId, account.variable, account.references, account.imagePaths))
+	res := httpResult.Response()
+
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		if res.Body != nil {
 			res.Body.Close()
-			return errors.New(fmt.Sprintf("Generating one of the accounts return a status code %d", res.StatusCode))
 		}
+		handleAppError(errors.New(fmt.Sprintf("Generating one of the accounts return a status code %d", res.StatusCode)), Cannot_Continue_Procedure)
+	}
 
-		if res.Body == nil {
-			return errors.New("Trying to read on a nil body in addToMapAndGetAccountId")
-		}
+	if res.Body == nil {
+		handleAppError(errors.New("addToMapAndGetAccountId() was trying to get a response body on a nil body"), Cannot_Continue_Procedure)
+	}
 
-		b, err := io.ReadAll(res.Body)
-		defer res.Body.Close()
-		if err != nil {
-			return err
-		}
+	b, err := io.ReadAll(res.Body)
+	defer res.Body.Close()
+	if err != nil {
+		handleAppError(err, Cannot_Continue_Procedure)
+	}
 
-		var m map[string]interface{}
-		if err := json.Unmarshal(b, &m); err != nil {
-			return err
-		}
+	var m map[string]interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		handleAppError(err, Cannot_Continue_Procedure)
+	}
 
-		genAccountId = m["id"].(string)
-
-		return nil
-	})
+	genAccountId = m["id"].(string)
 
 	return genAccountId
 }

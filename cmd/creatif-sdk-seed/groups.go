@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -51,23 +52,27 @@ func createGroups(client *http.Client, projectId string) httpResult {
 
 func createGroupsAndGetGroupIds(client *http.Client, projectId string) []string {
 	groupIds := make([]string, 0)
-	handleHttpError(createGroups(client, projectId), func(res *http.Response) error {
-		b, _ := io.ReadAll(res.Body)
-		var groups []map[string]string
-		if err := json.Unmarshal(b, &groups); err != nil {
-			return err
-		}
+	result := handleHttpError(createGroups(client, projectId))
+	res := result.Response()
 
-		if err := res.Body.Close(); err != nil {
-			return err
-		}
+	if res == nil || res.Body == nil {
+		handleAppError(errors.New("createGroupsAndGetGroupIds() is trying to work on nil body"), Cannot_Continue_Procedure)
+	}
 
-		for _, g := range groups {
-			groupIds = append(groupIds, g["id"])
-		}
+	defer res.Body.Close()
+	b, _ := io.ReadAll(res.Body)
+	var groups []map[string]string
+	if err := json.Unmarshal(b, &groups); err != nil {
+		handleAppError(err, Cannot_Continue_Procedure)
+	}
 
-		return nil
-	})
+	if err := res.Body.Close(); err != nil {
+		handleAppError(err, Cannot_Continue_Procedure)
+	}
+
+	for _, g := range groups {
+		groupIds = append(groupIds, g["id"])
+	}
 
 	return groupIds
 }

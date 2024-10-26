@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+/*
+*
+Since gorm made incorrect foreign keys that cannot CASCADE DELETE, I have to do this shit.
+*/
 func completeCleanup() {
 	Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", PROJECT_TABLE))
 	Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", MAP_VARIABLES))

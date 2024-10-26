@@ -69,7 +69,7 @@ func (wq listWorkQueue) start() chan bool {
 						j.propertyVariable,
 						j.references,
 						j.imagePaths,
-					), nil)
+					))
 
 					wq.jobDoneQueue <- true
 				}

@@ -8,10 +8,6 @@ import (
 
 var gormHandle *gorm.DB
 
-type postgresDb struct {
-	db *gorm.DB
-}
-
 func Connect(dsn string) error {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		SkipDefaultTransaction: true,

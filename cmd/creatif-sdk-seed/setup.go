@@ -102,9 +102,9 @@ func preSeedAuthAndSetup(client *http.Client) *http.Client {
 	}
 
 	printers["info"].Println("Creating admin and logging in")
-	handleHttpError(createAdmin(client, Email, Password), nil)
+	handleHttpError(createAdmin(client, Email, Password))
 
-	authToken := extractAuthenticationCookie(handleHttpError(login(client, Email, Password), nil))
+	authToken := extractAuthenticationCookie(handleHttpError(login(client, Email, Password)))
 
 	return createAuthenticatedClient(authToken)
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/fatih/color"
 	"io"
 	"math/rand"
-	"net/http"
 	"os"
 	"time"
 )
@@ -58,20 +57,10 @@ error and the response is available.
 
 In any case, if you return an error from this function, CLEANUP OF THE SYSTEM WILL HAPPEN.
 */
-func handleHttpError(result httpResult, responseFn func(res *http.Response) error) httpResult {
+func handleHttpError(result httpResult) httpResult {
 	// result is ok (>=200 <= 299). If the result is OK, then nothing else
 	// matters and there is no error or no need to check the procedure
 	if result.Ok() {
-		if responseFn != nil {
-			if err := responseFn(result.Response()); err != nil {
-				printNewlineSandwich(printers["error"], fmt.Sprintf("Your callback produced an error: %s. The program is forced to quit.", err.Error()))
-				printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
-				printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
-				completeCleanup()
-				os.Exit(1)
-			}
-		}
-
 		return result
 	}
 
@@ -99,30 +88,14 @@ func handleHttpError(result httpResult, responseFn func(res *http.Response) erro
 
 		res := result.Response()
 		if res != nil {
-			/**
-			If there is a responseFn callback, that callback will be called for you to determine
-			what to do with the response. If it is not provided, the response will be dumped to stdout
-			for debug purposes and a cleanup will be made
-			*/
-			if responseFn != nil {
-				if err := responseFn(result.Response()); err != nil {
-					printNewlineSandwich(printers["error"], fmt.Sprintf("Your callback produced an error: %s. The program is forced to quit.", err.Error()))
-					printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
-					printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
-					fmt.Println("")
-					completeCleanup()
-					os.Exit(1)
-				}
+			printNewlineSandwich(printers["info"], "There seems to be a response in this error. This program will print the first 128 characters of it just for the sake of debugging")
+			bd, _ := io.ReadAll(result.Response().Body)
+			defer result.Response().Body.Close()
+			strBd := string(bd)
+			if strBd == "" {
+				printers["info"].Println("The response is empty")
 			} else {
-				printNewlineSandwich(printers["info"], "There seems to be a response in this error. This program will print the first 128 characters of it just for the sake of debugging")
-				bd, _ := io.ReadAll(result.Response().Body)
-				defer result.Response().Body.Close()
-				strBd := string(bd)
-				if strBd == "" {
-					printers["info"].Println("The response is empty")
-				} else {
-					fmt.Println(strBd)
-				}
+				fmt.Println(strBd)
 			}
 		}
 
