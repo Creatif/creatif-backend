@@ -12,9 +12,9 @@ import (
 var _ = ginkgo.Describe("Public API query tests", func() {
 	ginkgo.It("should return a paginated list of list items based on EQUAL query, the result should not be empty", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -55,9 +55,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on EQUAL query, the result should not be empty and decimal should be used", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -98,9 +98,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on EQUAL query, the result should be empty", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		publishFullProject(projectId)
+		_, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -126,9 +126,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on UNEQUAL query, the result should be empty", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		publishFullProject(projectId)
+		_, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -154,9 +154,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on UNEQUAL query, the result should be empty", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		publishFullProject(projectId)
+		_, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -176,9 +176,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on UNEQUAL query, the result should be empty when using decimal numbers", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		publishFullProject(projectId)
+		_, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "five",
 				Value:    "456.4345",
@@ -198,9 +198,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on GREATER THAN query, the result should not be empty,", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -241,9 +241,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on GREATER THAN query with double precision value, the result should not be empty,", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -284,9 +284,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on GREATER THAN OR EQUAL with both numeric values, the result should not be empty,", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "four",
 				Value:    "453",
@@ -327,9 +327,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on LESS THAN query with double precision value, the result should not be empty,", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -370,9 +370,9 @@ var _ = ginkgo.Describe("Public API query tests", func() {
 
 	ginkgo.It("should return a paginated list of map items based on LESS THAN OR EQUAL with both numeric values, the result should not be empty,", ginkgo.Label("public_api", "map_query"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel(publishView.Name, projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "four",
 				Value:    "600",

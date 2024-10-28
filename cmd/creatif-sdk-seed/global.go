@@ -22,6 +22,9 @@ const Password = "password"
 var help = `
 WARNING: THIS IS A DESTRUCTIVE COMMAND. IN CASE OF CERTAIN ERRORS, IT MIGHT DESTROY ALL THE DATA THAT YOU HAVE IN THE DATABASE. USE WITH CAUTION!!!
 
+IMPORTANT:
+This seed actually uploads images. Every account gets one image and every property gets 3 images. It would be wise to from time to time, just delete the 'var' and 'public' directories because they might get very large if you execute this function over and over again.
+
 This program cannot start if you don't have the server up, so make sure that you open up a new terminal tab, hit 'docker compose up' on the main project
 and only then execute this command.
 
@@ -29,7 +32,7 @@ This command seeds the initial application with seed data from real estate proje
 
 This command will be used to test public SDKs. For now, there is only javascript SDK but hopefully, there will be more.
 
-If you try to execute this command more than once, it not allow you to do that. Since the application can have a single admin (for now), you cannot create another admin, therefor the program will tell you that the app is already seeded.
+If you try to execute this command more than once, it not allow you to do that. Since the application can have a single admin (for now), you cannot create another admin, therefor the program will tell you that the app is already seeded.Calling this program without any flags will create five projects by default.
 
 USAGE:
 

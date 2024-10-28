@@ -14,7 +14,7 @@ func createAnonymousClient() *http.Client {
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 		MaxConnsPerHost:     1024,
 		TLSHandshakeTimeout: 0,
-	}, nil, nil, 20*time.Second))
+	}, nil, nil, 20*time.Minute))
 }
 
 func createAuthenticatedClient(authToken string) *http.Client {
@@ -40,5 +40,5 @@ func createAuthenticatedClient(authToken string) *http.Client {
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 		MaxConnsPerHost:     1024,
 		TLSHandshakeTimeout: 0,
-	}, nil, cookieJar, 20*time.Second))
+	}, nil, cookieJar, 20*time.Minute))
 }

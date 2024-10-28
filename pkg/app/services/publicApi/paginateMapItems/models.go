@@ -19,6 +19,7 @@ type Model struct {
 	Options       Options
 
 	Page    int
+	Limit   int
 	Order   string
 	SortBy  string
 	Search  string
@@ -31,13 +32,14 @@ type Options struct {
 	ValueOnly bool
 }
 
-func NewModel(versionName, projectId, structureName string, page int, order string, sortBy, search string, lcls, groups []string, options Options, query []queryProcessor.Query) Model {
+func NewModel(versionName, projectId, structureName string, page, limit int, order string, sortBy, search string, lcls, groups []string, options Options, query []queryProcessor.Query) Model {
 	return Model{
 		VersionName:   versionName,
 		StructureName: structureName,
 		Options:       options,
 		ProjectID:     projectId,
 		Page:          page,
+		Limit:         limit,
 		Order:         order,
 		SortBy:        sortBy,
 		Search:        search,
@@ -51,6 +53,7 @@ func (a Model) Validate() map[string]string {
 	v := map[string]interface{}{
 		"projectID":   a.ProjectID,
 		"order":       a.Order,
+		"limit":       a.Limit,
 		"sortBy":      a.SortBy,
 		"locales":     a.Locales,
 		"versionName": a.VersionName,
@@ -82,6 +85,15 @@ func (a Model) Validate() map[string]string {
 						return errors.New(fmt.Sprintf("Locale %s does not exist.", l))
 					}
 				}
+				return nil
+			})),
+			validation.Key("limit", validation.By(func(value interface{}) error {
+				limit := value.(int)
+
+				if limit > 1000 {
+					return errors.New("Limit cannot be bigger than 1000")
+				}
+
 				return nil
 			})),
 			validation.Key("query", validation.By(func(value interface{}) error {

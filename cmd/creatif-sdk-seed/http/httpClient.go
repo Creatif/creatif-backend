@@ -50,5 +50,6 @@ func NewRequest(request Request) (*http.Request, error) {
 }
 
 func Make(request *http.Request, client *http.Client) (*http.Response, error) {
+	request.Close = true
 	return client.Do(request)
 }

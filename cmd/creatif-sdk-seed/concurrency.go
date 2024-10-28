@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 type joinedStructureAccount struct {
@@ -93,7 +94,7 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 			result := handleHttpError(createProject(client, projectName))
 			res := result.Response()
 
-			if res.Body == nil {
+			if res != nil && res.Body == nil {
 				handleAppError(errors.New("projectProducer() is trying to work on a nil body"), Cannot_Continue_Procedure)
 			}
 
@@ -119,16 +120,20 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 			propertyStructureId := createPropertiesStructureAndReturnID(client, projectId)
 
 			producers[i] <- newProjectProduct(projectId, accountStructureId, propertyStructureId, groupIds)
+			close(producers[i])
 		}
 	}()
 
 	return producers
 }
 
-func accountProducer(client *http.Client, projectProducers []chan projectProduct, wq mapWorkQueue, reporter *reporter) {
+func accountProducer(client *http.Client, projectProducers []chan projectProduct, wq mapWorkQueue, reporter *reporter) []projectProduct {
 	allAccounts := make([]joinedStructureAccount, 0)
-	for _, projectProducer := range projectProducers {
-		projectProductResult := <-projectProducer
+	publishingListeners := make([]projectProduct, len(projectProducers))
+	for i, producer := range projectProducers {
+		projectProductResult := <-producer
+		publishingListeners[i] = projectProductResult
+
 		reporter.AddProjectID(projectProductResult.projectId)
 		groupIds := projectProductResult.groupIds
 		projectId := projectProductResult.projectId
@@ -163,35 +168,37 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 			joinedAccount.account,
 		))
 	}
+
+	return publishingListeners
 }
 
 func concurrencyCoordinator(
 	propertiesWorkQueue listWorkQueue,
 	accountWorkQueue mapWorkQueue,
 	progressBarNotifier chan bool,
-	numOfAllOperations int,
 	propertyWorkQueueDone chan bool,
 	accountWorkQueueDone chan bool,
 	reporter *reporter,
 ) {
 	go func() {
 		operations := 0
+		workQueueTimeout := time.After(2 * time.Second)
 		for {
 			select {
 			case <-propertiesWorkQueue.jobDoneQueue:
 				progressBarNotifier <- true
 				operations++
 				reporter.AddProperty()
+				workQueueTimeout = time.After(5 * time.Second)
 			case <-accountWorkQueue.jobDoneQueue:
 				progressBarNotifier <- true
 				reporter.AddAccount()
 				operations++
-			default:
-				if numOfAllOperations == operations {
-					close(propertyWorkQueueDone)
-					close(accountWorkQueueDone)
-					return
-				}
+				workQueueTimeout = time.After(5 * time.Second)
+			case <-workQueueTimeout:
+				close(propertyWorkQueueDone)
+				close(accountWorkQueueDone)
+				return
 			}
 		}
 	}()

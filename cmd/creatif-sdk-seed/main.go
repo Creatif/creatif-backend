@@ -2,6 +2,11 @@
 WARNING: THIS IS A DESTRUCTIVE COMMAND. IN CASE OF CERTAIN ERRORS, IT MIGHT DESTROY ALL THE DATA THAT YOU HAVE
 		 IN THE DATABASE. USE WITH CAUTION!!!
 
+IMPORTANT:
+This seed actually uploads images. Every account gets one image and every property gets 3 images. It would be wise
+to from time to time, just delete the 'var' and 'public' directories because they might get very large if you execute
+this function over and over again.
+
 This program cannot start if you don't have the server up, so make sure that you open up a new terminal tab, hit 'docker compose up' on the main project
 and only then execute this command.
 
@@ -15,7 +20,8 @@ This command will be used to test public SDKs. For now, there is only javascript
 If you try to execute this command more than once, it will not give that to you. Since the application can have a single admin (for now),
 you cannot create another admin, therefor the program will tell you that the app is already seeded.
 
-There is nothing special about this program. Just cd into this directory and run 'go run .' and that is it.
+There is nothing special about this program. Just cd into this directory and run 'go run .' and that is it. Calling this program without
+any flags will create five projects by default.
 
 Flags:
 --cleanup
@@ -24,7 +30,7 @@ Flags:
 --regenerate
     This will do what --cleanup does but will run other commands. Basically, you tell the program to wipe
     the database out start over
---projects={\d}
+--projects={\d} (default is 5)
     For how many projects should it seed the application. More will be slower.
 --help
     If used, will output help. If used with any other flags, it will ignore them and just print help, i.e. it will
@@ -66,20 +72,19 @@ func main() {
 	accountWorkQueue := newMapWorkQueue(50, 10, propertiesWorkQueue)
 	accountWorkQueueDone := accountWorkQueue.start()
 
-	fmt.Printf("Seeding... If the progress bar is full but the program does not exit on its own,\nit is OK to press Ctrl + C to quit. Nothing bad will happen.\n")
+	fmt.Printf("Seeding...\n")
 	fmt.Println("")
 
-	numOfAllOperations := (numOfProjects * 10) * 300
+	numOfAllOperations := (numOfProjects * 10) * 600
 	progressBarNotifier, progressBarDone := generateProgressBar(numOfAllOperations)
 
 	projectProducerListeners := projectProducer(authenticatedClient, numOfProjects)
-	accountProducer(authenticatedClient, projectProducerListeners, accountWorkQueue, report)
+	projectPublishingListeners := accountProducer(authenticatedClient, projectProducerListeners, accountWorkQueue, report)
 
 	concurrencyCoordinator(
 		propertiesWorkQueue,
 		accountWorkQueue,
 		progressBarNotifier,
-		numOfAllOperations,
 		propertyWorkQueueDone,
 		accountWorkQueueDone,
 		report,
@@ -87,6 +92,11 @@ func main() {
 
 	<-mergeDoneQueues(accountWorkQueueDone, propertyWorkQueueDone)
 	progressBarDone <- true
+
+	fmt.Println("")
+	printers["info"].Println("Publishing projects...")
+	publishProjects(authenticatedClient, projectPublishingListeners)
+	printers["info"].Println("Projects published")
 
 	fmt.Println("")
 	printers["success"].Println("Seed is successful!")

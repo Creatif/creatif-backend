@@ -55,8 +55,8 @@ type ConnectionItem struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql(structureIdentifier string, page int, order, sortBy, search string, lcls, groups []string, query []queryProcessor.Query) (string, map[string]interface{}, error) {
-	offset := (page - 1) * 100
+func getItemSql(structureIdentifier string, page, limit int, order, sortBy, search string, lcls, groups []string, query []queryProcessor.Query) (string, map[string]interface{}, error) {
+	offset := (page - 1) * limit
 	placeholders := make(map[string]interface{})
 	placeholders["offset"] = offset
 	placeholders["structureIdentifier"] = structureIdentifier
@@ -116,7 +116,7 @@ AND (lv.name = @structureIdentifier OR lv.id = @structureIdentifier OR lv.short_
 %s
 ORDER BY %s %s
 OFFSET @offset
-LIMIT 100
+LIMIT %d
 `,
 		(published.PublishedMap{}).TableName(),
 		(published.Version{}).TableName(),
@@ -126,6 +126,7 @@ LIMIT 100
 		querySql,
 		sortBy,
 		order,
+		limit,
 	), placeholders, nil
 }
 

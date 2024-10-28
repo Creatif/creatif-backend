@@ -9,9 +9,9 @@ import (
 var _ = ginkgo.Describe("Public API", func() {
 	ginkgo.It("should get public map item by name and default locale (getMapItemByName)", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
-		mapItem, structure, _ := publishFullProject(projectId)
+		mapItem, structure, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, structure.Name, mapItem.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(publishView.Name, projectId, structure.Name, mapItem.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		model := m.(View)
@@ -30,9 +30,9 @@ var _ = ginkgo.Describe("Public API", func() {
 
 	ginkgo.It("should get public map item by name and eng locale (getMapItemByName)", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
-		mapItem, structure, _ := publishFullProject(projectId)
+		mapItem, structure, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, structure.Name, mapItem.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(publishView.Name, projectId, structure.Name, mapItem.Name, "eng", Options{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		model := m.(View)

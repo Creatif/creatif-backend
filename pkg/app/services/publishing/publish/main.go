@@ -53,16 +53,16 @@ func (c Main) Logic() (published.Version, error) {
 	if err != nil {
 		return published.Version{}, appErrors.NewApplicationError(err)
 	}
-	
+
 	version := published.NewVersion(c.model.ProjectID, c.model.Name, numOfVersions == 0)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if res := tx.Create(&version); res.Error != nil {
 			return res.Error
 		}
 
-		listCtx, listCancel := context.WithTimeout(context.Background(), 45*time.Second)
-		mapCtx, mapCancel := context.WithTimeout(context.Background(), 45*time.Second)
-		refCtx, refCancel := context.WithTimeout(context.Background(), 45*time.Second)
+		listCtx, listCancel := context.WithTimeout(context.Background(), 1*time.Hour)
+		mapCtx, mapCancel := context.WithTimeout(context.Background(), 1*time.Hour)
+		refCtx, refCancel := context.WithTimeout(context.Background(), 1*time.Hour)
 		defer listCancel()
 		defer mapCancel()
 		defer refCancel()

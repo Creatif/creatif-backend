@@ -163,7 +163,6 @@ func generateAccountStructureData(groupIds []string) ([]account, error) {
 	}
 
 	accountsToGenerate := 10
-
 	accounts := make([]account, accountsToGenerate)
 
 	for i := 0; i < accountsToGenerate; i++ {

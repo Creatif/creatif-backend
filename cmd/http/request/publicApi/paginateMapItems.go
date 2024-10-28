@@ -18,6 +18,7 @@ type PaginateMapItems struct {
 	ListName       string `param:"name"`
 	Locales        string `query:"locales"`
 	Page           int    `query:"page"`
+	Limit          int    `query:"limit"`
 	Groups         string `query:"groups"`
 	Search         string `query:"search"`
 	OrderBy        string `query:"orderBy"`

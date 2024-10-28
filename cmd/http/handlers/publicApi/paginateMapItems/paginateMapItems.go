@@ -33,6 +33,7 @@ func PaginateMapItemsHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.ListName,
 			model.Page,
+			model.Limit,
 			model.OrderDirection,
 			model.OrderBy,
 			model.Search,

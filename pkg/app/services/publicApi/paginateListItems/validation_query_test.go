@@ -12,7 +12,7 @@ var _ = ginkgo.Describe("Public API query validation tests", func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel("", projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "",
 				Value:    "one",
@@ -35,7 +35,7 @@ var _ = ginkgo.Describe("Public API query validation tests", func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel("", projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -58,7 +58,7 @@ var _ = ginkgo.Describe("Public API query validation tests", func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel("", projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",
@@ -81,7 +81,7 @@ var _ = ginkgo.Describe("Public API query validation tests", func() {
 		projectId := testCreateProject("project")
 		publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationMap", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
+		handler := New(NewModel("", projectId, "paginationMap", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{
 			{
 				Column:   "one",
 				Value:    "one",

@@ -12,9 +12,9 @@ import (
 var _ = ginkgo.Describe("Public API", func() {
 	ginkgo.It("should get paginated list of list items", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationList", 1, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(publishView.Name, projectId, "paginationList", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		models := m.([]View)
@@ -37,11 +37,52 @@ var _ = ginkgo.Describe("Public API", func() {
 		}
 	})
 
+	ginkgo.It("should get paginated list of list items with a custom limit and fetch a different set of items", ginkgo.Label("public_api"), func() {
+		projectId := testCreateProject("project")
+		items, publishView := publishFullProject(projectId)
+
+		handler := New(NewModel(publishView.Name, projectId, "paginationList", 1, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
+		m, err := handler.Handle()
+		gomega.Expect(err).Should(gomega.BeNil())
+		models := m.([]View)
+
+		gomega.Expect(len(models)).Should(gomega.Equal(100))
+
+		modelIds := make([]string, len(models))
+		for i, model := range models {
+			modelIds[i] = model.ID
+
+			gomega.Expect(model.ProjectID).Should(gomega.Equal(projectId))
+			gomega.Expect(model.Behaviour).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(model.Name).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(model.Groups).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(model.StructureShortID).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(model.StructureID).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(model.StructureName).ShouldNot(gomega.BeEmpty())
+			gomega.Expect(model.ShortID).ShouldNot(gomega.BeEmpty())
+
+			sdk.IncludesFn(items, func(item addToList.View) bool {
+				return item.ID == model.ID
+			})
+		}
+
+		handler = New(NewModel(publishView.Name, projectId, "paginationMap", 2, 10, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
+		m, err = handler.Handle()
+		models = m.([]View)
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		for _, model := range models {
+			for _, id := range modelIds {
+				gomega.Expect(model.ID).ShouldNot(gomega.Equal(id))
+			}
+		}
+	})
+
 	ginkgo.It("should return empty result when there aren't enough items in page", func() {
 		projectId := testCreateProject("project")
-		publishFullProject(projectId)
+		_, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationList", 3, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(publishView.Name, projectId, "paginationList", 3, 100, "desc", "index", "", []string{}, []string{}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		models := m.([]View)
@@ -51,9 +92,9 @@ var _ = ginkgo.Describe("Public API", func() {
 
 	ginkgo.It("should get paginated list of list items based on group", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationList", 1, "desc", "index", "", []string{}, []string{"group-0"}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(publishView.Name, projectId, "paginationList", 1, 100, "desc", "index", "", []string{}, []string{"group-0"}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		models := m.([]View)
@@ -78,9 +119,9 @@ var _ = ginkgo.Describe("Public API", func() {
 
 	ginkgo.It("should get paginated list of list items based on group and locale", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationList", 1, "desc", "index", "", []string{"eng"}, []string{"group-0"}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(publishView.Name, projectId, "paginationList", 1, 100, "desc", "index", "", []string{"eng"}, []string{"group-0"}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		models := m.([]View)
@@ -105,9 +146,9 @@ var _ = ginkgo.Describe("Public API", func() {
 
 	ginkgo.It("should get paginated list of list items based on group, locale and search", ginkgo.Label("public_api"), func() {
 		projectId := testCreateProject("project")
-		items, _ := publishFullProject(projectId)
+		items, publishView := publishFullProject(projectId)
 
-		handler := New(NewModel("", projectId, "paginationList", 1, "desc", "index", "0", []string{"eng"}, []string{"group-0"}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(publishView.Name, projectId, "paginationList", 1, 100, "desc", "index", "0", []string{"eng"}, []string{"group-0"}, Options{}, []queryProcessor.Query{}), auth.NewTestingAuthentication(false, ""))
 		m, err := handler.Handle()
 		models := m.([]View)
 		gomega.Expect(err).Should(gomega.BeNil())
