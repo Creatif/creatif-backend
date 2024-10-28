@@ -59,12 +59,16 @@ func publishProjects(client *http.Client, projectProducts []projectProduct) {
 	progressbar.NewOptions(-1, progressbar.OptionSetDescription(fmt.Sprintf("Publishing project version %s")))
 	wg := sync.WaitGroup{}
 	wg.Add(len(projectProducts))
+	/**
+	No matter which project it is, it will always have a single published version and that versions name
+	will be v1.
+	*/
 	for i, projectListener := range projectProducts {
 		go func(product projectProduct, versionIdx int) {
 			defer wg.Done()
-			fmt.Println(fmt.Sprintf("Publishing project version v%d", versionIdx))
+			fmt.Println("Publishing project version v1")
 
-			handleHttpError(publish(client, product.projectId, fmt.Sprintf("v%d", versionIdx)))
+			handleHttpError(publish(client, product.projectId, "v1"))
 		}(projectListener, i)
 	}
 

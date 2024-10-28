@@ -3,6 +3,7 @@ package request
 import (
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -12,6 +13,7 @@ func SendPublicResponse[T any, F any, K any](handler pkg.Job[T, F, K], context e
 
 	if err != nil {
 		appError, ok := err.(publicApiError.PublicApiError)
+		fmt.Println(appError)
 		if ok {
 			s := http.StatusInternalServerError
 			if appError.Status() == publicApiError.ValidationError {

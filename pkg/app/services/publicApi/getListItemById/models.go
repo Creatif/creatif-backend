@@ -71,9 +71,9 @@ type View struct {
 	StructureShortID string `json:"structureShortId,omitempty"`
 	StructureName    string `json:"structureName,omitempty"`
 
-	Name    string `json:"name,omitempty"`
-	ID      string `json:"id,omitempty"`
-	ShortID string `json:"shortId,omitempty"`
+	Name    string `json:"itemName,omitempty"`
+	ID      string `json:"itemId,omitempty"`
+	ShortID string `json:"itemShortId,omitempty"`
 
 	ProjectID string      `json:"projectId,omitempty"`
 	Locale    string      `json:"locale,omitempty"`

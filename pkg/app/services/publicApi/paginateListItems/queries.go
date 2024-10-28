@@ -116,7 +116,7 @@ AND (lv.name = @structureIdentifier OR lv.id = @structureIdentifier OR lv.short_
 %s
 ORDER BY %s %s
 OFFSET @offset
-LIMIT 100
+LIMIT %d
 `,
 		(published.PublishedList{}).TableName(),
 		(published.Version{}).TableName(),
@@ -126,6 +126,7 @@ LIMIT 100
 		querySql,
 		sortBy,
 		order,
+		limit,
 	), placeholders, nil
 }
 
