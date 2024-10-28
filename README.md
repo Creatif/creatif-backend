@@ -18,5 +18,3 @@ and created in your `var` and `public` directories. These directories are safe t
 Note that you will have to use `sudo` to do so since these are docker volumes:
 
 `sudo rm -rf var && sudo rm -rf public`
-
-I do not believe in mocking. 
