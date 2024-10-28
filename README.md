@@ -12,6 +12,7 @@ you will need this command since testing in those projects will not work unless 
 up and running with seed data. 
 
 **IMPORTANT**
+
 Since the seed program also uploads a lot of images, if you use this program a lot, there could be a lot of images uploaded
 and created in your `var` and `public` directories. These directories are safe to delete and are recreated if they do not exist.
 Not that you will have to use `sudo` to do so since these are docker volumes:
