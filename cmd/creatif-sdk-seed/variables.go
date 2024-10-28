@@ -184,7 +184,7 @@ func generateAccountStructureData(groupIds []string) ([]account, error) {
 		}
 
 		uniqueName := uuid.New().String()
-		acc := newAccount(uniqueName, nil, nil, newAccountVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)))
+		acc := newAccount(uniqueName, nil, []string{"profileImage"}, newAccountVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)))
 		accounts[i] = acc
 	}
 

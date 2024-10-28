@@ -11,6 +11,7 @@ type Query struct {
 	Column   string `json:"column"`
 	Value    string `json:"value"`
 	Operator string `json:"operator"`
+	Type     string `json:"type"`
 }
 
 type PaginateMapItems struct {
@@ -70,6 +71,7 @@ func SanitizePaginateMapItems(model PaginateMapItems) (PaginateMapItems, error) 
 				Column:   p.Sanitize(value.Column),
 				Value:    p.Sanitize(value.Value),
 				Operator: p.Sanitize(value.Operator),
+				Type:     p.Sanitize(value.Type),
 			}
 		})
 	}

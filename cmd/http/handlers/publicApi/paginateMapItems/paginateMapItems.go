@@ -47,6 +47,7 @@ func PaginateMapItemsHandler() func(e echo.Context) error {
 					Column:   value.Column,
 					Value:    value.Value,
 					Operator: value.Operator,
+					Type:     value.Type,
 				}
 			}),
 		), auth.NewAnonymousAuthentication())

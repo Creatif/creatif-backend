@@ -64,6 +64,7 @@ func SanitizePaginateListItems(model PaginateListItems) (PaginateListItems, erro
 				Column:   p.Sanitize(value.Column),
 				Value:    p.Sanitize(value.Value),
 				Operator: p.Sanitize(value.Operator),
+				Type:     p.Sanitize(value.Type),
 			}
 		})
 	}
