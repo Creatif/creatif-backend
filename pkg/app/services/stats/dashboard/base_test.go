@@ -3,7 +3,6 @@ package dashboard
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/lists/addToList"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
@@ -148,24 +147,6 @@ func testCreateList(projectId, name string) createList2.View {
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
 	return list
-}
-
-func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
-	groups := make([]addGroups.GroupModel, numOfGroups)
-	for i := 0; i < numOfGroups; i++ {
-		groups[i] = addGroups.GroupModel{
-			ID:     "",
-			Name:   fmt.Sprintf("group-%d", i),
-			Type:   "new",
-			Action: "create",
-		}
-	}
-
-	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId))
-	model, err := handler.Handle()
-	testAssertErrNil(err)
-
-	return model
 }
 
 func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.LogicModel {

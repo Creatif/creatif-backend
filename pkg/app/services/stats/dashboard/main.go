@@ -36,44 +36,52 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() ([]LogicModel, error) {
-	lists, err := getLists()
+func (c Main) Logic() (LogicModel, error) {
+	lists, err := getLists(c.model.ProjectID)
 	if err != nil {
-		return nil, appErrors.NewApplicationError(err)
+		return LogicModel{}, appErrors.NewApplicationError(err)
 	}
 
-	maps, err := getMaps()
+	maps, err := getMaps(c.model.ProjectID)
 	if err != nil {
-		return nil, appErrors.NewApplicationError(err)
+		return LogicModel{}, appErrors.NewApplicationError(err)
 	}
 
-	lists = append(lists, maps...)
+	structures := append(lists, maps...)
 
-	return lists, nil
+	versions, err := getVersions(c.model.ProjectID)
+	if err != nil {
+		return LogicModel{}, appErrors.NewApplicationError(err)
+	}
+
+	return LogicModel{
+		Structures: structures,
+		Versions:   versions,
+	}, nil
 }
 
-func (c Main) Handle() ([]View, error) {
+func (c Main) Handle() (View, error) {
 	if err := c.Validate(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	model, err := c.Logic()
 
 	if err != nil {
-		return nil, err
+		return View{}, err
 	}
 
 	return newView(model), nil
 }
 
-func New(model Model, auth auth.Authentication) pkg.Job[Model, []View, []LogicModel] {
+func New(model Model, auth auth.Authentication) pkg.Job[Model, View, LogicModel] {
 	return Main{model: model, auth: auth}
 }
