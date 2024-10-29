@@ -4,6 +4,7 @@ import (
 	authHandlers "creatif/cmd/http/handlers/app/auth"
 	"creatif/cmd/http/handlers/app/groups"
 	appHandlers "creatif/cmd/http/handlers/app/project"
+	"creatif/cmd/http/handlers/app/stats"
 	"creatif/cmd/http/handlers/app/structures"
 	"creatif/cmd/http/handlers/declarations/files"
 	"creatif/cmd/http/handlers/declarations/lists"
@@ -119,6 +120,7 @@ func appRoutes(group *echo.Group) {
 	group.GET("/project/single/:id", appHandlers.GetProjectHandler())
 	group.PUT("/groups/:projectId", groups.AddGroupsHandler())
 	group.GET("/groups/:projectId", groups.GetGroupsHandler())
+	group.GET("/stats/dashboard/:projectId", stats.GetDashboardStatsHandler())
 
 	group.PUT("/auth/admin/create", authHandlers.CreateAdminHandler())
 	group.GET("/auth/admin/exists", authHandlers.AdminExistsHandler())

@@ -24,7 +24,7 @@ type Reference struct {
 	ChildID string `gorm:"index;type:text"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
-	UpdatedAt time.Time `gorm:"<-:update"`
+	UpdatedAt time.Time
 }
 
 func NewReference(name, parentType, childType, parentId, childId, parentStructureId, childStructureId, projectId string) Reference {

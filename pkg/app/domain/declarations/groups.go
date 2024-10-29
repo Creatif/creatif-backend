@@ -16,7 +16,7 @@ type Group struct {
 	VariableGroups []VariableGroup `gorm:"foreignKey:GroupID;references:ID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
-	UpdatedAt time.Time `gorm:"<-:update"`
+	UpdatedAt time.Time
 }
 
 func NewGroup(projectId, name string) Group {

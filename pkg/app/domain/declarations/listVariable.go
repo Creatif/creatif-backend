@@ -24,8 +24,8 @@ type ListVariable struct {
 	ListID   string `gorm:"uniqueIndex:unique_variable;type:text"`
 	List     List   `gorm:"foreignKey:ListID"`
 
-	CreatedAt time.Time `gorm:"autoCreateTime;index"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+	CreatedAt time.Time `gorm:"<-:create;index"`
+	UpdatedAt time.Time
 }
 
 func NewListVariable(listId, localeID, name, behaviour string, metadata datatypes.JSON, value datatypes.JSON) ListVariable {
