@@ -1,9 +1,10 @@
-package paginateMapVariables
+package create
 
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/app/services/groups/addGroups"
+	"creatif/pkg/app/services/lists/addToList"
+	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
@@ -36,7 +37,7 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Maps - Paginate map variables")
+	GinkgoRunSpecs(t, "Activities")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
@@ -124,22 +125,30 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
-	groups := make([]addGroups.GroupModel, numOfGroups)
-	for i := 0; i < numOfGroups; i++ {
-		groups[i] = addGroups.GroupModel{
-			ID:     "",
-			Name:   fmt.Sprintf("group-%d", i),
-			Type:   "new",
-			Action: "create",
-		}
-	}
+func testCreateMap(projectId, name string) mapCreate.View {
+	entries := make([]mapCreate.VariableModel, 0)
 
-	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId))
-	model, err := handler.Handle()
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""))
+
+	view, err := handler.Handle()
 	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
 
-	return model
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
+
+	return view
+}
+
+func testCreateList(projectId, name string) createList2.View {
+	handler := createList2.New(createList2.NewModel(projectId, name, []createList2.Variable{}), auth.NewTestingAuthentication(false, ""))
+
+	list, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
+
+	return list
 }
 
 func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.LogicModel {
@@ -161,15 +170,21 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 	return view
 }
 
-func testCreateMap(projectId, name string) mapCreate.View {
-	entries := make([]mapCreate.VariableModel, 0)
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""))
+func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) addToList.View {
+	variableModel := addToList.VariableModel{
+		Name:      variableName,
+		Metadata:  nil,
+		Groups:    groups,
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToList.NewModel(projectId, name, variableModel, references, []string{})
+	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	gomega.Expect(name).Should(gomega.Equal(view.Name))
+	gomega.Expect(err).Should(gomega.BeNil())
 
 	return view
 }

@@ -9,16 +9,18 @@ import (
 )
 
 type Activity struct {
-	ID   string         `gorm:"primarykey;type:text"`
-	Data datatypes.JSON `gorm:"type:jsonb"`
+	ID        string         `gorm:"primarykey;type:text"`
+	ProjectID string         `gorm:"type:text"`
+	Data      datatypes.JSON `gorm:"type:jsonb"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 }
 
-func NewActivity(data datatypes.JSON) Activity {
+func NewActivity(projectId string, data datatypes.JSON) Activity {
 	return Activity{
-		ID:   ksuid.New().String(),
-		Data: data,
+		ID:        ksuid.New().String(),
+		ProjectID: projectId,
+		Data:      data,
 	}
 }
 

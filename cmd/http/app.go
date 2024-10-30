@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif/cmd/http/handlers/app/activity"
 	authHandlers "creatif/cmd/http/handlers/app/auth"
 	"creatif/cmd/http/handlers/app/groups"
 	appHandlers "creatif/cmd/http/handlers/app/project"
@@ -125,6 +126,8 @@ func appRoutes(group *echo.Group) {
 	group.PUT("/auth/admin/create", authHandlers.CreateAdminHandler())
 	group.GET("/auth/admin/exists", authHandlers.AdminExistsHandler())
 	group.POST("/auth/login", authHandlers.LoginHandler())
+
+	group.PUT("/activity", activity.AddActivityHandler())
 
 	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
 }

@@ -243,7 +243,7 @@ func isMigrationPerformed() (bool, error) {
 		return false, res.Error
 	}
 
-	return count == 17, nil
+	return count == 18, nil
 }
 
 func createSchemas() *sql.DB {
