@@ -197,6 +197,10 @@ func createDatabase() {
 			log.Fatalln(err)
 		}
 
+		if err := storage2.Gorm().AutoMigrate(app2.Activity{}); err != nil {
+			log.Fatalln(err)
+		}
+
 		if err := storage2.Gorm().AutoMigrate(app2.User{}); err != nil {
 			log.Fatalln(err)
 		}
