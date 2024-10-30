@@ -1,15 +1,16 @@
-package create
+package get
 
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
+	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/lists/addToList"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/maps/addToMap"
-	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -37,12 +38,11 @@ var GinkgoAfterSuite = ginkgo.AfterSuite
 
 func TestApi(t *testing.T) {
 	GomegaRegisterFailHandler(GinkgoFail)
-	GinkgoRunSpecs(t, "Activities - Create")
+	GinkgoRunSpecs(t, "Activity - Get all activities")
 }
 
 var _ = ginkgo.BeforeSuite(func() {
 	loadEnv()
-
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
 		os.Getenv("DATABASE_HOST"),
@@ -99,6 +99,8 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_REFERENCES_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_REFERENCES_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE app.%s CASCADE", domain.ACTIVITY))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
@@ -125,54 +127,60 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateMap(projectId, name string) mapCreate.View {
-	entries := make([]mapCreate.VariableModel, 0)
+func testCreateListAndReturnIds(projectId, name string, varNum int) (string, []map[string]string) {
+	variables := make([]createList2.Variable, varNum)
+	for i := 0; i < varNum; i++ {
+		variables[i] = createList2.Variable{
+			Name:      fmt.Sprintf("one-%d", i),
+			Metadata:  nil,
+			Groups:    nil,
+			Locale:    "eng",
+			Behaviour: "readonly",
+			Value:     nil,
+		}
+	}
 
-	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""))
-
-	view, err := handler.Handle()
-	testAssertErrNil(err)
-	testAssertIDValid(view.ID)
-
-	gomega.Expect(name).Should(gomega.Equal(view.Name))
-
-	return view
-}
-
-func testCreateList(projectId, name string) createList2.View {
-	handler := createList2.New(createList2.NewModel(projectId, name, []createList2.Variable{}), auth.NewTestingAuthentication(false, ""))
+	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""))
 
 	list, err := handler.Handle()
-	testAssertErrNil(err)
+	gomega.Expect(err).Should(gomega.BeNil())
 	testAssertIDValid(list.ID)
 
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
-	return list
+	var savedVariables []declarations.ListVariable
+	res := storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
+	gomega.Expect(res.Error).Should(gomega.BeNil())
+
+	return list.ID, sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) map[string]string {
+		return map[string]string{
+			"id":   value.ID,
+			"name": value.Name,
+		}
+	})
 }
 
-func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.LogicModel {
-	variableModel := addToMap.VariableModel{
-		Name:      variableName,
-		Metadata:  nil,
-		Groups:    groups,
-		Value:     nil,
-		Locale:    "eng",
-		Behaviour: "modifiable",
+func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
+	groups := make([]addGroups.GroupModel, numOfGroups)
+	for i := 0; i < numOfGroups; i++ {
+		groups[i] = addGroups.GroupModel{
+			ID:     "",
+			Name:   fmt.Sprintf("group-%d", i),
+			Type:   "new",
+			Action: "create",
+		}
 	}
 
-	model := addToMap.NewModel(projectId, name, variableModel, references, []string{})
-	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
-
-	view, err := handler.Logic()
+	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId))
+	model, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	return view
+	return model
 }
 
-func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) addToList.View {
+func testAddToList(projectId, name string, references []shared.Reference, groups []string) addToList.View {
 	variableModel := addToList.VariableModel{
-		Name:      variableName,
+		Name:      fmt.Sprintf("new add variable"),
 		Metadata:  nil,
 		Groups:    groups,
 		Value:     nil,

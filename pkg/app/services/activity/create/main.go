@@ -43,13 +43,13 @@ func (c Main) Logic() (LogicModel, error) {
 			return err
 		}
 
-		dataQuery, err := getLastActivityDataQuery(c.model.ProjectID)
+		dataQueries, err := getActivities(c.model.ProjectID)
 		if err != nil {
 			return err
 		}
 
-		if dataQuery.ID != "" {
-			shouldWriteNewActivity, err := decideToCreateNewActivity(dataQuery.Data, c.model.Data)
+		if len(dataQueries) != 0 {
+			shouldWriteNewActivity, err := decideToCreateNewActivity(dataQueries, c.model.Data)
 			if err != nil {
 				return appErrors.NewApplicationError(err)
 			}
@@ -60,6 +60,11 @@ func (c Main) Logic() (LogicModel, error) {
 		}
 
 		if count >= 10 {
+			dataQuery, err := getLastActivityDataQuery(c.model.ProjectID)
+			if err != nil {
+				return appErrors.NewApplicationError(err)
+			}
+
 			if err := deleteActivity(c.model.ProjectID, dataQuery.ID); err != nil {
 				return err
 			}

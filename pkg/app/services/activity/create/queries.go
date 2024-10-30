@@ -23,6 +23,17 @@ func getActivityCount(projectId string) (int64, error) {
 	return count, nil
 }
 
+func getActivities(projectId string) ([]DataQuery, error) {
+	sql := fmt.Sprintf("SELECT id, data FROM %s WHERE project_id = ? ORDER BY created_at DESC", (app.Activity{}).TableName())
+
+	var dataQuery []DataQuery
+	if res := storage.Gorm().Raw(sql, projectId).Scan(&dataQuery); res.Error != nil {
+		return nil, res.Error
+	}
+
+	return dataQuery, nil
+}
+
 func getLastActivityDataQuery(projectId string) (DataQuery, error) {
 	sql := fmt.Sprintf("SELECT id, data FROM %s WHERE project_id = ? ORDER BY created_at DESC LIMIT 1", (app.Activity{}).TableName())
 

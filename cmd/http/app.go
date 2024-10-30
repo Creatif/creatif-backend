@@ -128,6 +128,7 @@ func appRoutes(group *echo.Group) {
 	group.POST("/auth/login", authHandlers.LoginHandler())
 
 	group.PUT("/activity", activity.AddActivityHandler())
+	group.GET("/activity/:projectId", activity.GetActivityHandler())
 
 	group.POST("/auth/logout", authHandlers.LogoutApiHandler())
 }
