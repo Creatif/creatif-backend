@@ -62,7 +62,7 @@ func (wq *mapWorkQueue) start() chan bool {
 			for {
 				select {
 				case <-done:
-					break
+					return
 				case j := <-wq.listeners[i]:
 					accountId := addToMapAndGetAccountId(
 						j.client,
@@ -79,7 +79,7 @@ func (wq *mapWorkQueue) start() chan bool {
 						if !ok {
 							break
 						}
-						
+
 						for a := 0; a < 10; a++ {
 							singleProperty, err := generateSingleProperty(accountId, newSequence.locale, newSequence.propertyStatus, newSequence.propertyType, j.groupIds)
 							if err != nil {

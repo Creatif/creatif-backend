@@ -60,7 +60,7 @@ func (wq listWorkQueue) start() chan bool {
 			for {
 				select {
 				case <-done:
-					break
+					return
 				case j := <-wq.listeners[i]:
 					handleHttpError(addToList(
 						j.client,

@@ -176,19 +176,16 @@ func concurrencyCoordinator(
 	reporter *reporter,
 ) {
 	go func() {
-		operations := 0
 		workQueueTimeout := time.After(2 * time.Second)
 		for {
 			select {
 			case <-propertiesWorkQueue.jobDoneQueue:
 				progressBarNotifier <- true
-				operations++
 				reporter.AddProperty()
 				workQueueTimeout = time.After(5 * time.Second)
 			case <-accountWorkQueue.jobDoneQueue:
 				progressBarNotifier <- true
 				reporter.AddAccount()
-				operations++
 				workQueueTimeout = time.After(5 * time.Second)
 			case <-workQueueTimeout:
 				close(propertyWorkQueueDone)

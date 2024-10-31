@@ -66,9 +66,23 @@ func main() {
 	anonymousClient := createAnonymousClient()
 	authenticatedClient := preSeedAuthAndSetup(anonymousClient)
 
+	/**
+		These are the work queues where Accounts and Properties are created. Each of them has 50 workers that produce
+		50 workers and each of them produce 50 channels that others can send work to. Very important thing to note is that
+		these are not generic work queues. Both of them are specialized to produce either Account or a Property.
+
+		Below, accountProducer sends a job to mapWorkQueue for a Account to be created. After that, it creates a job for
+		the listWorkQueue for a property to be created. That way, they do not block each other. Every worker has its own
+		channel that is buffered. That is the second argument.
+
+		These queues can be started before any job is sent to them.
+
+	    start() function returns a to be closed when all work is done. These workers will ALWAYS have work to be done. It
+		is important to know that. For more information how these are used, take a look below to the comment above
+		concurrencyCoordinator() function.
+	*/
 	propertiesWorkQueue := newListWorkQueue(50, 50)
 	propertyWorkQueueDone := propertiesWorkQueue.start()
-
 	accountWorkQueue := newMapWorkQueue(50, 50, propertiesWorkQueue)
 	accountWorkQueueDone := accountWorkQueue.start()
 
@@ -78,9 +92,31 @@ func main() {
 	numOfAllOperations := (numOfProjects * 10) * 600
 	progressBarNotifier, progressBarDone := generateProgressBar(numOfAllOperations)
 
+	/**
+	projectProducer produces as many producer channels as numOfProjects. You can listen to these
+	producer channels when a project has been created. This is of course done in 1 goroutine per
+	project. For example, if numOfProjects is 5, there will be 5 goroutines that will create projects
+	and this function will return 5 producer channels to listen to when a project has been created.
+	*/
 	projectProducerListeners := projectProducer(authenticatedClient, numOfProjects)
+	/**
+	accountProducer listens to when a project is created and sends it to mapWorkQueue. More on mapWorkQueue, just scroll
+	up. Not complicated, for every project, there are 10 Accounts created and send to mapWorkQueue which is just another
+	work queue.
+	*/
 	projectPublishingListeners := accountProducer(authenticatedClient, projectProducerListeners, accountWorkQueue, report)
 
+	/**
+	    This function blocks until all work queues are done with their jobs. But this is not the join point. Every work queue exposes
+		a channel that signals when a job is done. A reporter is here just to write to stdout to the user of this program
+		a user-friendly message how many jobs have been done.
+
+	    propertyWorkQueueDone and accountWorkQueueDone are channels that signal to these work queues that their job is done,
+		and they can be garbage collected. The way they know that is a timeout. If any of the worker has nothing to do
+		for more than 2 seconds, the queues are closed and garbage collected. This is OK because the program is made so that,
+		if there is work to be done, there will always be work. If there is not work in both queues, that means that we have
+		seeded everything that needs to be seeded and work queues can be closed.
+	*/
 	concurrencyCoordinator(
 		propertiesWorkQueue,
 		accountWorkQueue,
@@ -90,6 +126,10 @@ func main() {
 		report,
 	)
 
+	/**
+	This is the join point to block the work queues until they are finished. close() function on these two channels
+	is called in concurrencyCoordinator() after all the work is done.
+	*/
 	<-mergeDoneQueues(accountWorkQueueDone, propertyWorkQueueDone)
 	progressBarDone <- true
 
