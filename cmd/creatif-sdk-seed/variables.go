@@ -234,7 +234,7 @@ func generatePropertiesStructureData(accountId string, groupIds []string) ([]pro
 		for _, ps := range propertyStatutes {
 			for _, pt := range propertyTypes {
 				for i := 0; i < 10; i++ {
-					p := generateSinglePropertyData(pt)
+					p := generateSinglePropertyVariable(pt)
 					p["propertyImages"] = images
 					p["propertyStatus"] = ps
 
@@ -273,7 +273,46 @@ func generatePropertiesStructureData(accountId string, groupIds []string) ([]pro
 	return properties, nil
 }
 
-func generateSinglePropertyData(pt string) map[string]interface{} {
+func generateSingleProperty(accountId, locale, propertyStatus, propertyType string, groupIds []string) (property, error) {
+	images, err := generateBase64Images("images/propertyImages", 3)
+	if err != nil {
+		printers["warning"].Printf("Unable to generate base64 image in Accounts generator %s\n", err.Error())
+	}
+
+	p := generateSinglePropertyVariable(propertyType)
+	p["propertyImages"] = images
+	p["propertyStatus"] = propertyStatus
+
+	uniqueName := uuid.New().String()
+
+	b, err := json.Marshal(p)
+	if err != nil {
+		return property{}, err
+	}
+
+	return newProperty(
+		uniqueName,
+		[]map[string]string{
+			{
+				"name":          "accounts",
+				"structureName": "Accounts",
+				"structureType": "map",
+				"variableId":    accountId,
+			},
+		},
+		[]string{"propertyImages"},
+		newPropertyVariable(
+			uniqueName,
+			locale,
+			"modifiable",
+			"",
+			string(b),
+			pickRandomUniqueGroups(groupIds, 3),
+		),
+	), nil
+}
+
+func generateSinglePropertyVariable(pt string) map[string]interface{} {
 	propertyValueData := make(map[string]interface{})
 	propertyValueData["address"] = faker.GetRealAddress().Address
 	propertyValueData["city"] = faker.GetRealAddress().City
