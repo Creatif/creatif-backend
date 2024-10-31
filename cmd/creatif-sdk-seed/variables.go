@@ -191,6 +191,33 @@ func generateAccountStructureData(groupIds []string) ([]account, error) {
 	return accounts, nil
 }
 
+func generateSingleAccount(groupIds []string) (account, error) {
+	images, err := generateBase64Images("images/profileImages", 1)
+	if err != nil {
+		printers["warning"].Printf("Unable to generate base64 image in Accounts generator %s\n", err.Error())
+	}
+
+	accountValueData := map[string]string{
+		"name":       faker.FirstName(),
+		"lastName":   faker.LastName(),
+		"address":    faker.GetRealAddress().Address,
+		"city":       faker.GetRealAddress().City,
+		"postalCode": faker.GetRealAddress().PostalCode,
+	}
+
+	if len(images) == 1 {
+		accountValueData["profileImage"] = images[0]
+	}
+
+	b, err := json.Marshal(accountValueData)
+	if err != nil {
+		return account{}, err
+	}
+
+	uniqueName := uuid.New().String()
+	return newAccount(uniqueName, nil, []string{"profileImage"}, newAccountVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3))), nil
+}
+
 func generatePropertiesStructureData(accountId string, groupIds []string) ([]property, error) {
 	locales := []string{"eng", "afh", "kam", "ota", "oto"}
 

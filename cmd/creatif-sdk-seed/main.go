@@ -66,10 +66,10 @@ func main() {
 	anonymousClient := createAnonymousClient()
 	authenticatedClient := preSeedAuthAndSetup(anonymousClient)
 
-	propertiesWorkQueue := newListWorkQueue(50, 10)
+	propertiesWorkQueue := newListWorkQueue(50, 50)
 	propertyWorkQueueDone := propertiesWorkQueue.start()
 
-	accountWorkQueue := newMapWorkQueue(50, 10, propertiesWorkQueue)
+	accountWorkQueue := newMapWorkQueue(50, 50, propertiesWorkQueue)
 	accountWorkQueueDone := accountWorkQueue.start()
 
 	fmt.Printf("Seeding...\n")

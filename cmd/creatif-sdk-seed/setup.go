@@ -46,7 +46,7 @@ func doOperations(operations []string) {
 }
 
 func processFlags() (int, error) {
-	defaultNumberOfProjects := 5
+	defaultNumberOfProjects := 1
 	if len(os.Args) == 1 {
 		return defaultNumberOfProjects, nil
 	}

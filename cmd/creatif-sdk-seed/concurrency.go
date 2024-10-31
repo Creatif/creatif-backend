@@ -128,7 +128,6 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 }
 
 func accountProducer(client *http.Client, projectProducers []chan projectProduct, wq mapWorkQueue, reporter *reporter) []projectProduct {
-	allAccounts := make([]joinedStructureAccount, 0)
 	publishingListeners := make([]projectProduct, len(projectProducers))
 	for i, producer := range projectProducers {
 		projectProductResult := <-producer
@@ -139,34 +138,30 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 		projectId := projectProductResult.projectId
 		accountStructureId := projectProductResult.accountStructureId
 		propertyStructureId := projectProductResult.propertyStructureId
-		generatedAccounts, err := generateAccountStructureData(groupIds)
-		if err != nil {
-			handleAppError(err, Cannot_Continue_Procedure)
-		}
 
-		joinedAccounts := make([]joinedStructureAccount, 0)
-		for _, genAccount := range generatedAccounts {
-			joinedAccounts = append(joinedAccounts, newJoinedStructureAccount(
+		for a := 0; a < 10; a++ {
+			genAccount, err := generateSingleAccount(groupIds)
+			if err != nil {
+				handleAppError(err, Cannot_Continue_Procedure)
+			}
+
+			joinedAccount := newJoinedStructureAccount(
 				projectId,
 				accountStructureId,
 				propertyStructureId,
 				groupIds,
 				genAccount,
+			)
+
+			wq.addJob(newMapWorkQueueJob(
+				client,
+				joinedAccount.projectId,
+				joinedAccount.accountStructureId,
+				joinedAccount.propertyStructureId,
+				joinedAccount.groupIds,
+				joinedAccount.account,
 			))
 		}
-
-		allAccounts = append(allAccounts, joinedAccounts...)
-	}
-
-	for _, joinedAccount := range allAccounts {
-		wq.addJob(newMapWorkQueueJob(
-			client,
-			joinedAccount.projectId,
-			joinedAccount.accountStructureId,
-			joinedAccount.propertyStructureId,
-			joinedAccount.groupIds,
-			joinedAccount.account,
-		))
 	}
 
 	return publishingListeners
