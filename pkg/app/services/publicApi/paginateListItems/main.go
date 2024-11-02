@@ -49,6 +49,10 @@ func (c Main) Logic() (LogicModel, error) {
 		sortBy = fmt.Sprintf("lv.%s", c.model.SortBy)
 	}
 
+	if c.model.Limit == 0 {
+		c.model.Limit = 100
+	}
+
 	order := "desc"
 	if c.model.Order != "" {
 		order = c.model.Order
@@ -60,6 +64,7 @@ func (c Main) Logic() (LogicModel, error) {
 		lcls[i] = alpha
 	}
 
+	fmt.Println(c.model.StructureName, c.model.Page, c.model.Limit, order, sortBy, c.model.Search)
 	itemsSql, placeholders, err := getItemSql(c.model.StructureName, c.model.Page, c.model.Limit, order, sortBy, c.model.Search, lcls, c.model.Groups, c.model.Query)
 	if err != nil {
 		return LogicModel{}, publicApiError.NewError("paginateListItems", map[string]string{
