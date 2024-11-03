@@ -64,7 +64,6 @@ func (c Main) Logic() (LogicModel, error) {
 		lcls[i] = alpha
 	}
 
-	fmt.Println(c.model.StructureName, c.model.Page, c.model.Limit, order, sortBy, c.model.Search)
 	itemsSql, placeholders, err := getItemSql(c.model.StructureName, c.model.Page, c.model.Limit, order, sortBy, c.model.Search, lcls, c.model.Groups, c.model.Query)
 	if err != nil {
 		return LogicModel{}, publicApiError.NewError("paginateListItems", map[string]string{

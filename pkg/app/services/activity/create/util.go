@@ -2,7 +2,6 @@ package create
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 func isOrdinaryVisit(existing map[string]string, incoming map[string]string) bool {
@@ -51,24 +50,18 @@ func isOrdinaryVisit(existing map[string]string, incoming map[string]string) boo
 	}
 
 	if isGroupVisit(existing, incoming) {
-		fmt.Println("is group visit last")
 		return true
 	}
 
 	if isApiVisit(existing, incoming) {
-		fmt.Println("is api visit last")
 		return true
 	}
 
 	if isMapStructureVisit(existing, incoming) {
-		fmt.Println("is map structure visit last")
-
 		return true
 	}
 
 	if isListStructureVisit(existing, incoming) {
-		fmt.Println("is list structure visit last")
-
 		return true
 	}
 

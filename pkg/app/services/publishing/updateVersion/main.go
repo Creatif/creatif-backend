@@ -1,4 +1,4 @@
-package publish
+package updateVersion
 
 import "C"
 import (
@@ -56,6 +56,16 @@ func (c Main) Logic() (published.Version, error) {
 
 	version := published.NewVersion(c.model.ProjectID, c.model.Name, numOfVersions == 0)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
+
+		publicPath := fmt.Sprintf("%s/%s/%s", constants.PublicDirectory, c.model.ProjectID, version.Name)
+		if err := deleteFilesFromProject(publicPath); err != nil {
+			return err
+		}
+
+		if err := deleteVersion(c.model.ProjectID); err != nil {
+			return err
+		}
+
 		if res := tx.Create(&version); res.Error != nil {
 			return res.Error
 		}
@@ -80,8 +90,7 @@ func (c Main) Logic() (published.Version, error) {
 		}
 
 		assetsPath := fmt.Sprintf("%s/%s", constants.AssetsDirectory, c.model.ProjectID)
-		publicPath := fmt.Sprintf("%s/%s/%s", constants.PublicDirectory, c.model.ProjectID, version.Name)
-		if err := os.MkdirAll(publicPath, 0777); err != nil {
+		if err := os.MkdirAll(publicPath, 0755); err != nil {
 			return err
 		}
 

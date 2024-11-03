@@ -139,6 +139,10 @@ func main() {
 	printers["info"].Println("Projects published")
 
 	fmt.Println("")
+	fmt.Println(fmt.Sprintf("Email: %s", Email))
+	fmt.Println(fmt.Sprintf("Password: %s", Password))
+
+	fmt.Println("")
 	printers["success"].Println("Seed is successful!")
 	report.Report()
 	fmt.Println("")

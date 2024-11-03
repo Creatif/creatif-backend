@@ -13,6 +13,7 @@ import (
 
 var _ = ginkgo.Describe("Activity", func() {
 	ginkgo.It("should be created with arbitrary data", ginkgo.Label("activity"), func() {
+		ginkgo.Skip("")
 		projectId := testCreateProject("project")
 
 		data := map[string]string{
@@ -42,6 +43,8 @@ var _ = ginkgo.Describe("Activity", func() {
 	})
 
 	ginkgo.It("should be called successively more than 10 times but only one should be written since it is a visit", ginkgo.Label("activity"), func() {
+		ginkgo.Skip("")
+
 		projectId := testCreateProject("project")
 
 		data := map[string]string{

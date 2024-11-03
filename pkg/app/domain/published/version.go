@@ -19,7 +19,7 @@ type Version struct {
 	References []PublishedReference `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
-	UpdatedAt time.Time `gorm:"<-:update"`
+	UpdatedAt time.Time
 }
 
 func (u *Version) BeforeCreate(tx *gorm.DB) (err error) {

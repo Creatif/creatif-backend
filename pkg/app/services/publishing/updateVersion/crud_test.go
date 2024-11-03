@@ -1,8 +1,9 @@
-package publish
+package updateVersion
 
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
+	"creatif/pkg/app/services/publishing/publish"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
@@ -12,8 +13,8 @@ import (
 	"os"
 )
 
-var _ = ginkgo.Describe("Publishing", func() {
-	ginkgo.It("Should publish all lists and maps", ginkgo.Label("publish", "create"), func() {
+var _ = ginkgo.Describe("Publish updating", func() {
+	ginkgo.It("Should publish all lists and maps and then update the version", ginkgo.Label("publish", "update"), func() {
 		projectId := testCreateProject("project")
 		groups := testCreateGroups(projectId, 5)
 
@@ -103,19 +104,14 @@ var _ = ginkgo.Describe("Publishing", func() {
 			}))
 		}
 
-		handler := New(NewModel(projectId, "version name"), auth.NewTestingAuthentication(false, ""))
+		handler := publish.New(publish.NewModel(projectId, "version name"), auth.NewTestingAuthentication(false, ""))
 		model, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
 		gomega.Expect(model.Name).Should(gomega.Equal("version name"))
 
-		var versionCount int64
-		res := storage.Gorm().Raw("SELECT count(*) FROM published.versions").Scan(&versionCount)
-		gomega.Expect(res.Error).Should(gomega.BeNil())
-		gomega.Expect(versionCount).Should(gomega.Equal(int64(1)))
-
 		var listsCount int64
-		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_lists").Scan(&listsCount)
+		res := storage.Gorm().Raw("SELECT count(*) FROM published.published_lists").Scan(&listsCount)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(listsCount).Should(gomega.Equal(int64(302)))
 
@@ -125,6 +121,24 @@ var _ = ginkgo.Describe("Publishing", func() {
 		gomega.Expect(mapsCount).Should(gomega.Equal(int64(302)))
 
 		var referenceCount int64
+		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_references").Scan(&referenceCount)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
+		gomega.Expect(referenceCount).Should(gomega.Equal(int64(400)))
+
+		updateHandler := New(NewModel(projectId, "version name"), auth.NewTestingAuthentication(false, ""))
+		updateModel, err := updateHandler.Handle()
+		gomega.Expect(err).Should(gomega.BeNil())
+		gomega.Expect(updateModel.ID).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(updateModel.Name).Should(gomega.Equal("version name"))
+
+		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_lists").Scan(&listsCount)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
+		gomega.Expect(listsCount).Should(gomega.Equal(int64(302)))
+
+		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_maps").Scan(&mapsCount)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
+		gomega.Expect(mapsCount).Should(gomega.Equal(int64(302)))
+
 		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_references").Scan(&referenceCount)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(referenceCount).Should(gomega.Equal(int64(400)))
