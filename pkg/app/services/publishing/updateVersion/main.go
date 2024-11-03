@@ -49,12 +49,11 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (published.Version, error) {
-	numOfVersions, err := getNumberOfVersions(c.model.ProjectID)
+	existingVersion, err := getVersion(c.model.ProjectID, c.model.Name)
 	if err != nil {
 		return published.Version{}, appErrors.NewApplicationError(err)
 	}
-
-	version := published.NewVersion(c.model.ProjectID, c.model.Name, numOfVersions == 0)
+	version := published.NewVersion(c.model.ProjectID, existingVersion.Name, false)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 
 		publicPath := fmt.Sprintf("%s/%s/%s", constants.PublicDirectory, c.model.ProjectID, version.Name)
@@ -62,7 +61,7 @@ func (c Main) Logic() (published.Version, error) {
 			return err
 		}
 
-		if err := deleteVersion(c.model.ProjectID); err != nil {
+		if err := deleteVersion(c.model.ProjectID, existingVersion.ID); err != nil {
 			return err
 		}
 

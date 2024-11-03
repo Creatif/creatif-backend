@@ -208,21 +208,21 @@ FROM %s AS r WHERE r.project_id = ?`,
 	return nil
 }
 
-func getNumberOfVersions(projectId string) (int64, error) {
-	sql := fmt.Sprintf("SELECT COUNT(id) AS count FROM %s WHERE project_id = ?", (published.Version{}).TableName())
+func getVersion(projectId, versionName string) (published.Version, error) {
+	sql := fmt.Sprintf("SELECT id, name, created_at FROM %s WHERE project_id = ? AND name = ?", (published.Version{}).TableName())
 
-	var count int64
-	if res := storage.Gorm().Raw(sql, projectId).Scan(&count); res.Error != nil {
-		return 0, res.Error
+	var version published.Version
+	if res := storage.Gorm().Raw(sql, projectId, versionName).Scan(&version); res.Error != nil {
+		return published.Version{}, res.Error
 	}
 
-	return count, nil
+	return version, nil
 }
 
-func deleteVersion(projectId string) error {
-	sql := fmt.Sprintf("DELETE FROM %s WHERE project_id = ?", (published.Version{}).TableName())
+func deleteVersion(projectId, versionId string) error {
+	sql := fmt.Sprintf("DELETE FROM %s WHERE project_id = ? AND id = ?", (published.Version{}).TableName())
 
-	if res := storage.Gorm().Exec(sql, projectId); res.Error != nil {
+	if res := storage.Gorm().Exec(sql, projectId, versionId); res.Error != nil {
 		return res.Error
 	}
 
