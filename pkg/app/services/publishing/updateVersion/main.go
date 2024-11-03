@@ -53,7 +53,7 @@ func (c Main) Logic() (published.Version, error) {
 	if err != nil {
 		return published.Version{}, appErrors.NewApplicationError(err)
 	}
-	version := published.NewVersion(c.model.ProjectID, existingVersion.Name, false)
+	version := published.NewVersion(c.model.ProjectID, existingVersion.Name)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 
 		publicPath := fmt.Sprintf("%s/%s/%s", constants.PublicDirectory, c.model.ProjectID, version.Name)

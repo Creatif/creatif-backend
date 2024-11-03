@@ -9,10 +9,9 @@ import (
 )
 
 type Version struct {
-	ID                  string `gorm:"primarykey;type:text"`
-	ProjectID           string `gorm:"uniqueIndex:unique_version;type:text"`
-	Name                string `gorm:"uniqueIndex:unique_version;type:text"`
-	IsProductionVersion bool
+	ID        string `gorm:"primarykey;type:text"`
+	ProjectID string `gorm:"uniqueIndex:unique_version;type:text"`
+	Name      string `gorm:"uniqueIndex:unique_version;type:text"`
 
 	Lists      []PublishedList      `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
 	Maps       []PublishedMap       `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
@@ -28,11 +27,10 @@ func (u *Version) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func NewVersion(projectId, name string, isProduction bool) Version {
+func NewVersion(projectId, name string) Version {
 	return Version{
-		ProjectID:           projectId,
-		Name:                name,
-		IsProductionVersion: isProduction,
+		ProjectID: projectId,
+		Name:      name,
 	}
 }
 

@@ -30,7 +30,7 @@ func getMaps(projectId string) ([]StructureLogicModel, error) {
 }
 
 func getVersions(projectId string) ([]VersionLogicModel, error) {
-	sql := fmt.Sprintf("SELECT id, name, project_id, created_at, updated_at, is_production_version FROM %s WHERE project_id = ? ORDER BY created_at DESC", (published.Version{}).TableName())
+	sql := fmt.Sprintf("SELECT id, name, project_id, created_at, updated_at FROM %s WHERE project_id = ? ORDER BY created_at DESC", (published.Version{}).TableName())
 
 	var versions []VersionLogicModel
 	if res := storage.Gorm().Raw(sql, projectId).Scan(&versions); res.Error != nil {

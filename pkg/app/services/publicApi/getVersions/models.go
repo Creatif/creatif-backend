@@ -46,12 +46,11 @@ type View struct {
 func newView(model []published.Version) []View {
 	return sdk.Map(model, func(idx int, value published.Version) View {
 		return View{
-			ID:                  value.ID,
-			Name:                value.Name,
-			IsProductionVersion: value.IsProductionVersion,
-			ProjectID:           value.ProjectID,
-			CreatedAt:           value.CreatedAt,
-			UpdatedAt:           value.UpdatedAt,
+			ID:        value.ID,
+			Name:      value.Name,
+			ProjectID: value.ProjectID,
+			CreatedAt: value.CreatedAt,
+			UpdatedAt: value.UpdatedAt,
 		}
 	})
 }

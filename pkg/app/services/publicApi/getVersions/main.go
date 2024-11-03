@@ -37,7 +37,7 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() ([]published.Version, error) {
 	var version []published.Version
-	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name, project_id, created_at, updated_at, is_production_version FROM %s WHERE project_id = ? ORDER BY created_at DESC", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version); res.Error != nil {
+	if res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name, project_id, created_at, updated_at FROM %s WHERE project_id = ? ORDER BY created_at DESC", (published.Version{}).TableName()), c.model.ProjectID).Scan(&version); res.Error != nil {
 		return []published.Version{}, publicApiError.NewError("getVersions", map[string]string{
 			"internalError": res.Error.Error(),
 		}, publicApiError.DatabaseError)
