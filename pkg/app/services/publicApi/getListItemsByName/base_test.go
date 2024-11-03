@@ -11,7 +11,6 @@ import (
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/publishing/publish"
-	"creatif/pkg/app/services/publishing/toggleProduction"
 	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
@@ -266,10 +265,6 @@ func publishFullProject(projectId string) (addToList.View, createList2.View, pub
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(model.ID).ShouldNot(gomega.BeEmpty())
 	gomega.Expect(model.Name).ShouldNot(gomega.BeEmpty())
-
-	toggleHandler := toggleProduction.New(toggleProduction.NewModel(projectId, model.ID), auth.NewTestingAuthentication(false, ""))
-	_, err = toggleHandler.Handle()
-	gomega.Expect(err).Should(gomega.BeNil())
 
 	return addToListModel, map1, model
 }

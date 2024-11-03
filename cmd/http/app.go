@@ -24,7 +24,6 @@ import (
 	"creatif/cmd/http/handlers/publicApi/paginateMapItems"
 	"creatif/cmd/http/handlers/publishing/publish"
 	"creatif/cmd/http/handlers/publishing/removeVersion"
-	"creatif/cmd/http/handlers/publishing/toggleProduction"
 	"creatif/cmd/http/handlers/publishing/updatePublished"
 	"creatif/cmd/server"
 	"creatif/pkg/app/services/events"
@@ -172,7 +171,6 @@ func publishingRoutes(group *echo.Group) {
 	group.PUT("/publish/:projectId", publish.PublishHandler())
 	group.POST("/publish/:projectId", updatePublished.PublishUpdateHandler())
 	group.DELETE("/publish/version/:projectId/:id", removeVersion.RemoveVersionHandler())
-	group.POST("/publish/toggle-production/:projectId/:id", toggleProduction.ToggleProductionHandler())
 }
 
 func publicRoutes(group *echo.Group) {
