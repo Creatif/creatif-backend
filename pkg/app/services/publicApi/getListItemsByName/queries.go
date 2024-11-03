@@ -135,7 +135,7 @@ func getVersion(projectId, versionName string) (published.Version, error) {
 	var res *gorm.DB
 	if versionName == "" {
 		res = storage.Gorm().Raw(
-			fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND is_production_version = true",
+			fmt.Sprintf("SELECT id, name FROM %s WHERE project_id = ? ORDER BY created_at DESC LIMIT 1",
 				(published.Version{}).TableName()),
 			projectId).
 			Scan(&version)
