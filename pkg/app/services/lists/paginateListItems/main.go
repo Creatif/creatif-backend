@@ -83,10 +83,12 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 
 		resultsOfPagination := paginationResult.result
 		for _, g := range groups {
-			for _, p := range resultsOfPagination {
+			for i, p := range resultsOfPagination {
 				if grps, ok := g[p.ID]; ok {
 					p.Groups = grps
 				}
+
+				resultsOfPagination[i] = p
 			}
 		}
 	}

@@ -2,13 +2,9 @@ package paginateMapVariables
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/domain/declarations"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/sdk"
-	"creatif/pkg/lib/storage"
-	"fmt"
-	"strings"
 )
 
 type Main struct {
@@ -37,113 +33,68 @@ func (c Main) Authorize() error {
 
 func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 	offset := (c.model.Page - 1) * c.model.Limit
-	placeholders := make(map[string]interface{})
-	placeholders["projectID"] = c.model.ProjectID
-	placeholders["offset"] = offset
-	placeholders["name"] = c.model.MapName
-	placeholders["limit"] = c.model.Limit
-	placeholders["groups"] = c.model.Groups
+	queryPlaceholders := createQueryPlaceholders(
+		c.model.ProjectID,
+		c.model.MapName,
+		offset,
+		c.model.Limit,
+		c.model.Groups,
+		c.model.Behaviour,
+		c.model.Search,
+	)
 
-	countPlaceholders := make(map[string]interface{})
-	countPlaceholders["projectID"] = c.model.ProjectID
-	countPlaceholders["name"] = c.model.MapName
-	countPlaceholders["groups"] = c.model.Groups
+	countPlaceholders := createCountPlaceholders(
+		c.model.ProjectID,
+		c.model.MapName,
+		c.model.Groups,
+		c.model.Behaviour,
+		c.model.Search,
+	)
 
-	if c.model.OrderBy == "" {
-		c.model.OrderBy = "index"
+	defs := createDefaults(c.model.OrderBy, c.model.OrderDirection)
+	sq := createSubQueries(
+		c.model.Behaviour,
+		c.model.Locales,
+		c.model.Groups,
+		c.model.Search,
+		c.model.Fields,
+	)
+
+	paginationResult, countResult := runQueriesConcurrently(queryPlaceholders, countPlaceholders, sq, defs)
+
+	if paginationResult.error != nil {
+		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(paginationResult.error).AddError("ListItems.Paginate.Logic", nil)
 	}
 
-	var behaviour string
-	if c.model.Behaviour != "" {
-		behaviour = fmt.Sprintf("AND lv.behaviour = @behaviour")
-		placeholders["behaviour"] = c.model.Behaviour
-		countPlaceholders["behaviour"] = c.model.Behaviour
+	if countResult.error != nil {
+		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(countResult.error).AddError("ListItems.Paginate.Logic", nil)
 	}
 
-	var locale string
-	if len(c.model.Locales) != 0 {
-		resolvedLocales := sdk.Map(c.model.Locales, func(idx int, value string) string {
-			return fmt.Sprintf("'%s'", value)
-		})
-		locale = fmt.Sprintf("AND lv.locale_id IN(%s)", strings.Join(resolvedLocales, ","))
-	}
+	ids := sdk.Map(paginationResult.result, func(idx int, value QueryVariable) string {
+		return value.ID
+	})
 
-	if c.model.OrderDirection == "" {
-		c.model.OrderDirection = "ASC"
-	}
-
-	c.model.OrderDirection = strings.ToUpper(c.model.OrderDirection)
-
-	var groupsWhereClause string
-	if len(c.model.Groups) != 0 {
-		searchForGroups := strings.Join(c.model.Groups, ",")
-		groupsWhereClause = fmt.Sprintf("INNER JOIN LATERAL (SELECT g.variable_id, g.group_id, g.groups FROM %s AS g WHERE lv.id = g.variable_id ORDER BY g.variable_id LIMIT 1) AS g ON '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), searchForGroups)
-	}
-
-	var search string
-	if c.model.Search != "" {
-		search = fmt.Sprintf("AND (%s ILIKE @searchOne OR %s ILIKE @searchTwo OR %s ILIKE @searchThree OR %s ILIKE @searchFour)", "lv.name", "lv.name", "lv.name", "lv.name")
-		placeholders["searchOne"] = fmt.Sprintf("%%%s", c.model.Search)
-		placeholders["searchTwo"] = fmt.Sprintf("%s%%", c.model.Search)
-		placeholders["searchThree"] = fmt.Sprintf("%%%s%%", c.model.Search)
-		placeholders["searchFour"] = c.model.Search
-
-		countPlaceholders["searchOne"] = fmt.Sprintf("%%%s", c.model.Search)
-		countPlaceholders["searchTwo"] = fmt.Sprintf("%s%%", c.model.Search)
-		countPlaceholders["searchThree"] = fmt.Sprintf("%%%s%%", c.model.Search)
-		countPlaceholders["searchFour"] = c.model.Search
-	}
-
-	returnableFields := ""
-	groupsSubquery := ""
-	if len(c.model.Fields) != 0 {
-		if sdk.Includes(c.model.Fields, "groups") {
-			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id)) AS groups")
+	if sdk.Includes(c.model.Fields, "groups") {
+		groups, err := getItemGroups(ids)
+		if err != nil {
+			return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(err).AddError("ListItems.Paginate.Logic", nil)
 		}
 
-		returnableFields = strings.Join(sdk.Filter(c.model.Fields, func(idx int, value string) bool {
-			return value != "groups"
-		}), ",") + ","
-	}
+		resultsOfPagination := paginationResult.result
+		for _, g := range groups {
+			for i, p := range resultsOfPagination {
+				if grps, ok := g[p.ID]; ok {
+					p.Groups = grps
+				}
 
-	sql := fmt.Sprintf(`SELECT 
-    	lv.id, 
-    	lv.short_id, 
-    	lv.locale_id,
-    	lv.index,
-    	lv.name, 
-    	lv.behaviour, 
-    	%s
-    	%s
-    	lv.created_at, 
-    	lv.updated_at 
-			FROM %s AS lv
-			INNER JOIN %s AS l
-		ON l.project_id = @projectID AND (l.id = @name OR l.short_id = @name) AND l.id = lv.map_id %s %s
-		%s
-		%s
-		ORDER BY lv.%s %s
-		OFFSET @offset LIMIT @limit`,
-		groupsSubquery,
-		returnableFields,
-		(declarations.MapVariable{}).TableName(),
-		(declarations.Map{}).TableName(),
-		locale,
-		search,
-		groupsWhereClause,
-		behaviour,
-		c.model.OrderBy,
-		c.model.OrderDirection)
-
-	var items []QueryVariable
-	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
-	if res.Error != nil {
-		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("Maps.Paginate.Logic", nil)
+				resultsOfPagination[i] = p
+			}
+		}
 	}
 
 	return sdk.LogicView[QueryVariable]{
-		Total: 0,
-		Data:  items,
+		Total: countResult.result,
+		Data:  paginationResult.result,
 	}, nil
 }
 

@@ -10,7 +10,9 @@ type GroupsQuery struct {
 	GroupName  string `gorm:"column:name"`
 }
 
-func getItemGroups(ids []string) ([]map[string][]string, error) {
+type groupsReturnType = []map[string][]string
+
+func getItemGroups(ids []string) (groupsReturnType, error) {
 	sql := fmt.Sprintf("SELECT g.name, vg.variable_id FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.id AND vg.variable_id IN(?) GROUP BY vg.variable_id, g.name")
 
 	var m []GroupsQuery
