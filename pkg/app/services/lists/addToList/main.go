@@ -135,7 +135,6 @@ func (c Main) Logic() (LogicModel, error) {
 		}
 
 		if res := tx.Create(&variable); res.Error != nil {
-
 			return errors.New(fmt.Sprintf("List item with name '%s' already exists.", c.model.Entry.Name))
 		}
 

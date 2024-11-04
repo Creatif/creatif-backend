@@ -53,7 +53,9 @@ func app() {
 		}
 	}
 
+	fmt.Println("Starts creating a database")
 	createDatabase()
+	fmt.Println("Ends creating a database")
 
 	if err := loadLocales(); err != nil {
 		sqlDB, err := storage.SQLDB()

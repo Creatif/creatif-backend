@@ -189,6 +189,13 @@ func createDatabase() {
 			log.Fatalln(err)
 		}
 
+		/**
+		I have to manually create an index since gorm is not doing it.
+		*/
+		if res := storage2.Gorm().Exec(fmt.Sprintf("CREATE INDEX idx_variable_groups_gin ON %s USING GIN (groups)", (declarations.VariableGroup{}).TableName())); res.Error != nil {
+			log.Fatalln(res.Error)
+		}
+
 		if _, err := sqlDb.Exec("ALTER DATABASE app SET search_path TO app;"); err != nil {
 			log.Fatalln(err)
 		}

@@ -119,7 +119,7 @@ func createSubQueries(behaviour string, locales, groups []string, search string,
 
 	if len(groups) != 0 {
 		searchForGroups := strings.Join(groups, ",")
-		sq.groups = fmt.Sprintf("INNER JOIN LATERAL (SELECT g.variable_id, g.group_id, g.groups FROM %s AS g WHERE lv.id = g.variable_id ORDER BY g.variable_id LIMIT 1) AS g ON '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), searchForGroups)
+		sq.groups = fmt.Sprintf("INNER JOIN %s AS g ON lv.id = g.variable_id AND '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), searchForGroups)
 	}
 
 	if search != "" {
