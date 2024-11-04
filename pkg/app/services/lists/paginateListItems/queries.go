@@ -1,191 +1,49 @@
 package paginateListItems
 
 import (
-	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/lib/sdk"
+	"creatif/pkg/lib/storage"
 	"fmt"
-	"github.com/lib/pq"
-	"gorm.io/datatypes"
-	"strings"
-	"time"
 )
 
-type defaults struct {
-	orderBy         string
-	orderDirections string
+type GroupsQuery struct {
+	VariableID string `gorm:"column:variable_id"`
+	GroupName  string `gorm:"column:name"`
 }
 
-type subQueries struct {
-	behaviour        string
-	locale           string
-	groups           string
-	search           string
-	returnableFields string
-	groupsSubQuery   string
-}
+func getItemGroups(ids []string) ([]map[string][]string, error) {
+	sql := fmt.Sprintf("SELECT g.name, vg.variable_id FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.id AND vg.variable_id IN(?) GROUP BY vg.variable_id, g.name")
 
-type QueryVariable struct {
-	ID      string  `gorm:"primarykey;type:text"`
-	ShortID string  `gorm:"uniqueIndex:unique_map_variable;type:text;not null"`
-	Index   float64 `gorm:"type:float"`
-
-	Name      string         `gorm:"uniqueIndex:unique_map_variable;not null"`
-	Behaviour string         `gorm:"not null"`
-	Metadata  datatypes.JSON `gorm:"type:jsonb"`
-	Value     datatypes.JSON `gorm:"type:jsonb"`
-	Groups    pq.StringArray `gorm:"type:text[];column:groups"`
-
-	MapID    string `gorm:"uniqueIndex:unique_map_variable;type:text"`
-	LocaleID string `gorm:"type:text"`
-
-	CreatedAt time.Time `gorm:"<-:create;index"`
-	UpdatedAt time.Time
-}
-
-func createQueryPlaceholders(projectId, listName string, offset int, limit int, groups []string, behaviour, search string) map[string]interface{} {
-	placeholders := make(map[string]interface{})
-
-	placeholders["projectID"] = projectId
-	placeholders["offset"] = offset
-	placeholders["name"] = listName
-	placeholders["limit"] = limit
-	placeholders["groups"] = groups
-
-	if behaviour != "" {
-		placeholders["behaviour"] = behaviour
+	var m []GroupsQuery
+	if res := storage.Gorm().Raw(sql, ids).Scan(&m); res.Error != nil {
+		return nil, res.Error
 	}
 
-	if search != "" {
-		placeholders["searchOne"] = fmt.Sprintf("%%%s", search)
-		placeholders["searchTwo"] = fmt.Sprintf("%s%%", search)
-		placeholders["searchThree"] = fmt.Sprintf("%%%s%%", search)
-		placeholders["searchFour"] = search
-	}
-
-	return placeholders
-}
-
-func createCountPlaceholders(projectId, listName string, groups []string, behaviour, search string) map[string]interface{} {
-	placeholders := make(map[string]interface{})
-
-	placeholders["projectID"] = projectId
-	placeholders["name"] = listName
-	placeholders["groups"] = groups
-
-	if behaviour != "" {
-		placeholders["behaviour"] = behaviour
-	}
-
-	if search != "" {
-		placeholders["searchOne"] = fmt.Sprintf("%%%s", search)
-		placeholders["searchTwo"] = fmt.Sprintf("%s%%", search)
-		placeholders["searchThree"] = fmt.Sprintf("%%%s%%", search)
-		placeholders["searchFour"] = search
-	}
-
-	return placeholders
-}
-
-func createDefaults(orderBy, orderDirection string) defaults {
-	var def defaults
-	def.orderBy = "index"
-
-	if orderBy != "" {
-		def.orderBy = orderBy
-	}
-
-	if orderDirection == "" {
-		orderDirection = "ASC"
-	}
-
-	def.orderDirections = strings.ToUpper(orderDirection)
-
-	return def
-}
-
-func createSubQueries(behaviour string, locales, groups []string, search string, fields []string) subQueries {
-	var sq subQueries
-
-	if behaviour != "" {
-		sq.behaviour = fmt.Sprintf("AND lv.behaviour = @behaviour")
-	}
-
-	if len(locales) != 0 {
-		resolvedLocales := sdk.Map(locales, func(idx int, value string) string {
-			return fmt.Sprintf("'%s'", value)
-		})
-		sq.locale = fmt.Sprintf("AND lv.locale_id IN(%s)", strings.Join(resolvedLocales, ","))
-	}
-
-	if len(groups) != 0 {
-		searchForGroups := strings.Join(groups, ",")
-		sq.groups = fmt.Sprintf("INNER JOIN LATERAL (SELECT g.variable_id, g.group_id, g.groups FROM %s AS g WHERE lv.id = g.variable_id ORDER BY g.variable_id LIMIT 1) AS g ON '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), searchForGroups)
-	}
-
-	if search != "" {
-		sq.search = fmt.Sprintf("AND (%s ILIKE @searchOne OR %s ILIKE @searchTwo OR %s ILIKE @searchThree OR %s ILIKE @searchFour)", "lv.name", "lv.name", "lv.name", "lv.name")
-	}
-
-	if len(fields) != 0 {
-		if sdk.Includes(fields, "groups") {
-			sq.groupsSubQuery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id)) AS groups")
+	results := make([]map[string][]string, 0)
+	visited := make([]string, 0)
+	for _, v := range m {
+		id := v.VariableID
+		alreadyPopulated := false
+		for _, visit := range visited {
+			if visit == id {
+				alreadyPopulated = true
+				break
+			}
 		}
 
-		sq.returnableFields = strings.Join(sdk.Filter(fields, func(idx int, value string) bool {
-			return value != "groups"
-		}), ",") + ","
+		visited = append(visited, id)
+		if !alreadyPopulated {
+			result := make(map[string][]string)
+			result[id] = make([]string, 0)
+
+			for _, p := range m {
+				if id == p.VariableID {
+					result[id] = append(result[id], p.GroupName)
+				}
+			}
+
+			results = append(results, result)
+		}
 	}
 
-	return sq
-}
-
-func createPaginationSql(sq subQueries, defs defaults) string {
-	return fmt.Sprintf(`SELECT 
-    	lv.id, 
-    	lv.index, 
-    	lv.short_id, 
-    	lv.locale_id,
-    	lv.name, 
-    	lv.behaviour,
-    	%s
-    	%s
-    	lv.created_at, 
-    	lv.updated_at 
-			FROM %s AS lv
-			INNER JOIN %s AS l
-		ON l.project_id = @projectID AND (l.id = @name OR l.short_id = @name) AND l.id = lv.list_id %s %s
-		%s
-		%s
-		ORDER BY lv.%s %s
-		OFFSET @offset LIMIT @limit`,
-		sq.groupsSubQuery,
-		sq.returnableFields,
-		(declarations.ListVariable{}).TableName(),
-		(declarations.List{}).TableName(),
-		sq.locale,
-		sq.search,
-		sq.groups,
-		sq.behaviour,
-		defs.orderBy,
-		defs.orderDirections,
-	)
-}
-
-func createCountSql(sq subQueries) string {
-	return fmt.Sprintf(`
-    	SELECT 
-    	    count(lv.id) AS count
-		FROM %s AS lv
-		INNER JOIN %s AS l
-		ON l.project_id = @projectID AND (l.short_id = @name OR l.id = @name) AND l.id = lv.list_id %s %s
-    	%s
-    	%s
-	`,
-		(declarations.ListVariable{}).TableName(),
-		(declarations.List{}).TableName(),
-		sq.locale,
-		sq.search,
-		sq.behaviour,
-		sq.groups,
-	)
+	return results, nil
 }

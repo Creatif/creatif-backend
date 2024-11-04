@@ -60,7 +60,7 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 		c.model.Search,
 		c.model.Fields,
 	)
-	
+
 	paginationResult, countResult := runQueriesConcurrently(queryPlaceholders, countPlaceholders, sq, defs)
 
 	if paginationResult.error != nil {
@@ -69,6 +69,26 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 
 	if countResult.error != nil {
 		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(countResult.error).AddError("ListItems.Paginate.Logic", nil)
+	}
+
+	ids := sdk.Map(paginationResult.result, func(idx int, value QueryVariable) string {
+		return value.ID
+	})
+
+	if sdk.Includes(c.model.Fields, "groups") {
+		groups, err := getItemGroups(ids)
+		if err != nil {
+			return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(err).AddError("ListItems.Paginate.Logic", nil)
+		}
+
+		resultsOfPagination := paginationResult.result
+		for _, g := range groups {
+			for _, p := range resultsOfPagination {
+				if grps, ok := g[p.ID]; ok {
+					p.Groups = grps
+				}
+			}
+		}
 	}
 
 	return sdk.LogicView[QueryVariable]{
