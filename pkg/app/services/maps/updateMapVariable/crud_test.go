@@ -9,6 +9,7 @@ import (
 	"creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
+	"github.com/lib/pq"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	"gorm.io/datatypes"
@@ -97,11 +98,15 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		testAssertErrNil(res.Error)
 		gomega.Expect(count).Should(gomega.Equal(3))
 
-		var groupCount int
-		res = storage.Gorm().Raw(fmt.Sprintf("SELECT COUNT(variable_id) FROM %s WHERE variable_id = ? GROUP BY variable_id", (declarations2.VariableGroup{}).TableName()), addToMapView.ID).Scan(&groupCount)
+		type SelectedGroups struct {
+			Groups pq.StringArray `gorm:"column:groups;type:text[]"`
+		}
+
+		var selGroups SelectedGroups
+		res = storage.Gorm().Raw(fmt.Sprintf("SELECT groups::text[] FROM %s WHERE variable_id = ?", (declarations2.VariableGroup{}).TableName()), addToMapView.ID).Scan(&selGroups)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
-		gomega.Expect(groupCount).Should(gomega.Equal(2))
+		gomega.Expect(len(selGroups.Groups)).Should(gomega.Equal(2))
 	})
 
 	ginkgo.It("should fail updating a map variable because of invalid number of groups", ginkgo.Label("map"), func() {

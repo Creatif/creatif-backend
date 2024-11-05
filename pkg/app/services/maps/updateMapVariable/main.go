@@ -195,12 +195,8 @@ func (c Main) Logic() (LogicResult, error) {
 			}
 
 			if c.model.Values.Groups != nil && len(c.model.Values.Groups) > 0 {
-				variablesGroups := make([]declarations.VariableGroup, 0)
-				for _, g := range c.model.Values.Groups {
-					variablesGroups = append(variablesGroups, declarations.NewVariableGroup(g, c.model.VariableName, c.model.Values.Groups))
-				}
-
-				if res := tx.Create(&variablesGroups); res.Error != nil {
+				newGroup := declarations.NewVariableGroup(c.model.VariableName, c.model.Values.Groups)
+				if res := tx.Create(&newGroup); res.Error != nil {
 					return res.Error
 				}
 			}
@@ -226,7 +222,7 @@ func (c Main) Logic() (LogicResult, error) {
 	}
 
 	groups := make([]declarations.Group, 0)
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name, g.id FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = ?", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.VariableName).Scan(&groups)
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT g.name, g.id FROM %s AS g INNER JOIN %s AS vg ON vg.variable_id = ? AND g.id = ANY(vg.groups)", (declarations.Group{}).TableName(), (declarations.VariableGroup{}).TableName()), c.model.VariableName).Scan(&groups)
 	if res.Error != nil {
 		return LogicResult{}, appErrors.NewDatabaseError(res.Error)
 	}

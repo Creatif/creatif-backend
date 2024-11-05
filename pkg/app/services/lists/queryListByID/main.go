@@ -45,7 +45,7 @@ func (c Main) Logic() (LogicModel, error) {
 			    lv.behaviour, 
 			    lv.short_id, 
 			    lv.metadata, 
-			       ARRAY((SELECT g.name FROM %s AS vg INNER JOIN %s AS g ON vg.group_id = g.id AND vg.variable_id = lv.id)) AS groups,
+			       ARRAY((SELECT g.name FROM %s AS vg INNER JOIN %s AS g ON vg.variable_id = lv.id AND g.id = ANY(vg.groups))) AS groups,
 				lv.value, 
 			    lv.created_at, 
 			    lv.updated_at, 

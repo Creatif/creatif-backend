@@ -59,7 +59,7 @@ SELECT
     l.short_id AS short_id,
     l.name AS name,
     (
-		ARRAY((SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id))
+		ARRAY((SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.variable_id = lv.id AND g.id = ANY(vg.groups)))
     ) AS groups,
     lv.created_at,
     lv.updated_at
@@ -111,7 +111,7 @@ SELECT
     l.short_id AS short_id,
     l.name AS name,
     (
-		ARRAY((SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.group_id = g.id AND vg.variable_id = lv.id))
+		ARRAY((SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.variable_id = lv.id AND g.id = ANY(vg.groups)))
     ) AS groups,
     lv.created_at,
     lv.updated_at

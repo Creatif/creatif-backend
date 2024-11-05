@@ -13,7 +13,7 @@ type GroupsQuery struct {
 type groupsReturnType = []map[string][]string
 
 func getItemGroups(ids []string) (groupsReturnType, error) {
-	sql := fmt.Sprintf("SELECT g.name, vg.variable_id FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.id AND vg.variable_id IN(?) GROUP BY vg.variable_id, g.name")
+	sql := fmt.Sprintf("SELECT g.name, vg.variable_id FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.variable_id IN(?) AND g.id = ANY(vg.groups) GROUP BY vg.variable_id, g.name")
 
 	var m []GroupsQuery
 	if res := storage.Gorm().Raw(sql, ids).Scan(&m); res.Error != nil {

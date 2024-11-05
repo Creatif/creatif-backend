@@ -36,7 +36,7 @@ func (c Main) Authorize() error {
 func (c Main) Logic() ([]declarations2.Group, error) {
 	sql := fmt.Sprintf(`
 	SELECT g.name, g.id FROM %s AS g
-	INNER JOIN %s AS vg ON g.id = vg.group_id AND vg.variable_id = ? AND g.project_id = ?
+	INNER JOIN %s AS vg ON vg.variable_id = ? AND g.project_id = ? AND g.id = ANY(vg.groups)
 `, (declarations2.Group{}).TableName(), (declarations2.VariableGroup{}).TableName())
 
 	var groups []declarations2.Group

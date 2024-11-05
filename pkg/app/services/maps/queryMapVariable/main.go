@@ -48,7 +48,7 @@ func (c Main) Logic() (LogicModel, error) {
 			    lv.created_at, 
 			    lv.updated_at, 
 			    lv.locale_id,
-			       ARRAY((SELECT g.name FROM %s AS vg INNER JOIN %s AS g ON vg.group_id = g.id AND vg.variable_id = lv.id)) AS groups
+			       ARRAY((SELECT g.name FROM %s AS vg INNER JOIN %s AS g ON vg.variable_id = lv.id AND g.id = ANY(vg.groups))) AS groups
 			FROM %s AS lv INNER JOIN %s AS l
 			ON l.project_id = ? AND (l.short_id = ? OR l.id = ?) AND lv.map_id = l.id AND (lv.id = ? OR lv.short_id = ?)`,
 		(declarations.VariableGroup{}).TableName(), (declarations.Group{}).TableName(), (declarations.MapVariable{}).TableName(), (declarations.Map{}).TableName())

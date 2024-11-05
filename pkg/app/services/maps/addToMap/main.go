@@ -139,12 +139,8 @@ func (c Main) Logic() (LogicModel, error) {
 		}
 
 		if len(c.model.Entry.Groups) > 0 {
-			groups := make([]declarations.VariableGroup, len(c.model.Entry.Groups))
-			for i, g := range c.model.Entry.Groups {
-				groups[i] = declarations.NewVariableGroup(g, variable.ID, c.model.Entry.Groups)
-			}
-
-			if res := tx.Create(groups); res.Error != nil {
+			newGroup := declarations.NewVariableGroup(variable.ID, c.model.Entry.Groups)
+			if res := tx.Create(&newGroup); res.Error != nil {
 				return res.Error
 			}
 		}

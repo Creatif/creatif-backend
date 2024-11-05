@@ -13,8 +13,6 @@ type Group struct {
 	Name      string `gorm:"uniqueIndex:unique_group;type:text"`
 	ProjectID string `gorm:"uniqueIndex:unique_group;type:text"`
 
-	VariableGroups []VariableGroup `gorm:"foreignKey:GroupID;references:ID;constraint:OnDelete:CASCADE;"`
-
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 }

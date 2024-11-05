@@ -7,14 +7,12 @@ import (
 )
 
 type VariableGroup struct {
-	GroupID    string         `gorm:"type:text"`
 	VariableID string         `gorm:"type:text"`
 	Groups     pq.StringArray `gorm:"type:text[];not_null"`
 }
 
-func NewVariableGroup(groupId, variableId string, groups pq.StringArray) VariableGroup {
+func NewVariableGroup(variableId string, groups pq.StringArray) VariableGroup {
 	return VariableGroup{
-		GroupID:    groupId,
 		VariableID: variableId,
 		Groups:     groups,
 	}
