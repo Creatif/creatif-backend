@@ -58,7 +58,6 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 		c.model.Locales,
 		c.model.Groups,
 		c.model.Search,
-		c.model.Fields,
 	)
 
 	paginationResult, countResult := runQueriesConcurrently(queryPlaceholders, countPlaceholders, sq, defs)

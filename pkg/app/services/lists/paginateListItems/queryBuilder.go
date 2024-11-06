@@ -103,7 +103,7 @@ func createDefaults(orderBy, orderDirection string) defaults {
 	return def
 }
 
-func createSubQueries(behaviour string, locales, groups []string, search string, fields []string) subQueries {
+func createSubQueries(behaviour string, locales, groups []string, search string) subQueries {
 	var sq subQueries
 
 	if behaviour != "" {

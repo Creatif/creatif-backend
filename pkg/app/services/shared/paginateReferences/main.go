@@ -45,6 +45,28 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(res.Error).AddError("Maps.Paginate.Logic", nil)
 	}
 
+	ids := sdk.Map(items, func(idx int, value QueryVariable) string {
+		return value.ID
+	})
+
+	if sdk.Includes(c.model.Fields, "groups") {
+		groups, err := getItemGroups(ids)
+		if err != nil {
+			return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(err).AddError("ListItems.Paginate.Logic", nil)
+		}
+
+		resultsOfPagination := items
+		for _, g := range groups {
+			for i, p := range resultsOfPagination {
+				if grps, ok := g[p.ID]; ok {
+					p.Groups = grps
+				}
+
+				resultsOfPagination[i] = p
+			}
+		}
+	}
+
 	return sdk.LogicView[QueryVariable]{
 		Total: 0,
 		Data:  items,

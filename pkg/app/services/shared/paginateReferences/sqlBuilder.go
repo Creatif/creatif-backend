@@ -8,18 +8,6 @@ import (
 )
 
 func createSql(model Model, tables [2]string, orderBy, direction, relationshipType string) string {
-	returnableFields := ""
-	groupsSubquery := ""
-	if len(model.Fields) != 0 {
-		if sdk.Includes(model.Fields, "groups") {
-			groupsSubquery = fmt.Sprintf("ARRAY((SELECT g.name FROM declarations.groups AS g INNER JOIN declarations.variable_groups AS vg ON vg.group_id = g.name AND vg.variable_id = lv.id)) AS groups")
-		}
-
-		returnableFields = strings.Join(sdk.Filter(model.Fields, func(idx int, value string) bool {
-			return value != "groups"
-		}), ",") + ","
-	}
-
 	var behaviour string
 	if model.Behaviour != "" {
 		behaviour = fmt.Sprintf("AND lv.behaviour = @behaviour")
@@ -62,8 +50,6 @@ func createSql(model Model, tables [2]string, orderBy, direction, relationshipTy
     	lv.index,
     	lv.name, 
     	lv.behaviour,
-    	%s
-    	%s
     	lv.created_at,
     	lv.updated_at
 			FROM %s AS r
@@ -72,8 +58,6 @@ func createSql(model Model, tables [2]string, orderBy, direction, relationshipTy
 		%s %s %s %s
 		ORDER BY lv.%s %s
 		OFFSET @offset LIMIT @limit`,
-		groupsSubquery,
-		returnableFields,
 		(declarations.Reference{}).TableName(),
 		tables[0],
 		relationshipSql["innerJoinOne"],
