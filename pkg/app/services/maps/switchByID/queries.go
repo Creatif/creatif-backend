@@ -103,10 +103,37 @@ SET index = ? WHERE id = ? AND map_id = ?
 
 /*
 *
-Gets the index the one before the destination with ORDER BY DESC
+Gets the index the one before the destination.
 */
-func getIndexBeforeDestination(mapId string, destinationIndex float64) (float64, error) {
+func getIndexDesc(mapId string, destinationIndex float64) (float64, error) {
 	sql := fmt.Sprintf("SELECT index FROM %s AS vg WHERE vg.map_id = ? AND vg.index > ? ORDER BY vg.index ASC LIMIT 1", (declarations.MapVariable{}).TableName())
+	var idx float64
+	res := storage.Gorm().Raw(sql, mapId, destinationIndex).Scan(&idx)
+
+	if res.Error != nil {
+		return 0, res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		return 0, errors.New("Destination upper index not found")
+	}
+
+	return idx, nil
+}
+
+func getIndexAsc(mapId string, destinationIndex float64) (float64, error) {
+	sql := fmt.Sprintf(`
+SELECT index 
+FROM (
+    SELECT index 
+    FROM %s AS vg 
+    WHERE vg.map_id = ?
+      AND vg.index < ?
+    ORDER BY vg.index ASC
+) AS sorted_results
+ORDER BY index DESC 
+LIMIT 1;
+`, (declarations.MapVariable{}).TableName())
 	var idx float64
 	res := storage.Gorm().Raw(sql, mapId, destinationIndex).Scan(&idx)
 

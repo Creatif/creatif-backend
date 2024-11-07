@@ -4,23 +4,27 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/lib/sdk"
+	"errors"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"strings"
 )
 
 type Model struct {
 	// this can be project name
-	Name        string
-	Source      string
-	Destination string
-	ProjectID   string
+	Name           string
+	Source         string
+	Destination    string
+	ProjectID      string
+	OrderDirection string
 }
 
-func NewModel(projectId, name, source, destination string) Model {
+func NewModel(projectId, name, source, destination, orderDirection string) Model {
 	return Model{
-		ProjectID:   projectId,
-		Source:      source,
-		Destination: destination,
-		Name:        name,
+		ProjectID:      projectId,
+		Source:         source,
+		Destination:    destination,
+		Name:           name,
+		OrderDirection: orderDirection,
 	}
 }
 
@@ -66,10 +70,11 @@ func newView(model LogicResult) View {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"name":        a.Name,
-		"projectID":   a.ProjectID,
-		"source":      a.Source,
-		"destination": a.Destination,
+		"name":           a.Name,
+		"projectID":      a.ProjectID,
+		"source":         a.Source,
+		"destination":    a.Destination,
+		"orderDirection": a.OrderDirection,
 	}
 
 	if err := validation.Validate(v,
@@ -78,6 +83,14 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
 			validation.Key("source", validation.Required, validation.RuneLength(27, 27)),
 			validation.Key("destination", validation.Required, validation.RuneLength(27, 27)),
+			validation.Key("orderDirection", validation.Required, validation.By(func(value interface{}) error {
+				direction := strings.ToLower(value.(string))
+
+				if direction != "asc" && direction != "desc" {
+					return errors.New("Invalid order direction. Order direction can be either 'DESC' or 'ASC'")
+				}
+				return nil
+			})),
 		),
 	); err != nil {
 		return sdk.ErrorToResponseError(err)

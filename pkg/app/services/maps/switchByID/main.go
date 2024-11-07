@@ -67,12 +67,24 @@ func (c Main) Logic() (float64, error) {
 		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Lowest-1024, sdVariables.source.ID, chosenMap.ID)
 	}
 
-	upperIndex, err := getIndexBeforeDestination(chosenMap.ID, sdVariables.destination.Index)
-	if err != nil {
-		return 0, appErrors.NewApplicationError(err)
+	var upperIndex float64
+	if c.model.OrderDirection == "desc" {
+		idx, err := getIndexDesc(chosenMap.ID, sdVariables.destination.Index)
+		if err != nil {
+			return 0, appErrors.NewApplicationError(err)
+		}
+
+		upperIndex = idx
+	} else if c.model.OrderDirection == "asc" {
+		idx, err := getIndexAsc(chosenMap.ID, sdVariables.destination.Index)
+		if err != nil {
+			return 0, appErrors.NewApplicationError(err)
+		}
+
+		upperIndex = idx
 	}
 
-	fmt.Println("Found index should be be 6144: ", upperIndex)
+	fmt.Println("Upper index should be be 4096: ", upperIndex)
 	fmt.Println("Destination index should be: 5120", sdVariables.destination.Index)
 
 	newIndex := (sdVariables.destination.Index + upperIndex) / 2
