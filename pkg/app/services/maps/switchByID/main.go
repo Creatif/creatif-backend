@@ -57,14 +57,14 @@ func (c Main) Logic() (float64, error) {
 		return 0, appErrors.NewApplicationError(err)
 	}
 
-	// these if statements are only here if the destination is the first item
-	if idxRange.Highest == sdVariables.destination.Index {
-		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Highest+1024, sdVariables.source.ID, chosenMap.ID)
-	}
-
-	// this if statement is here only if the destination is the last item
-	if idxRange.Lowest == sdVariables.destination.Index {
-		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Lowest-1024, sdVariables.source.ID, chosenMap.ID)
+	if c.model.OrderDirection == "asc" && sdVariables.destination.Index == idxRange.Lowest {
+		return idxRange.Lowest - 1024, updateWithCustomIndex(idxRange.Lowest-1024, sdVariables.source.ID, chosenMap.ID)
+	} else if c.model.OrderDirection == "asc" && sdVariables.destination.Index == idxRange.Highest {
+		return idxRange.Highest + 1024, updateWithCustomIndex(idxRange.Highest+1024, sdVariables.source.ID, chosenMap.ID)
+	} else if c.model.OrderDirection == "desc" && sdVariables.destination.Index == idxRange.Highest {
+		return idxRange.Highest + 1024, updateWithCustomIndex(idxRange.Highest+1024, sdVariables.source.ID, chosenMap.ID)
+	} else if c.model.OrderDirection == "desc" && sdVariables.destination.Index == idxRange.Lowest {
+		return idxRange.Lowest - 1024, updateWithCustomIndex(idxRange.Lowest-1024, sdVariables.source.ID, chosenMap.ID)
 	}
 
 	var upperIndex float64
@@ -84,54 +84,11 @@ func (c Main) Logic() (float64, error) {
 		upperIndex = idx
 	}
 
-	fmt.Println("Upper index should be be 4096: ", upperIndex)
-	fmt.Println("Destination index should be: 5120", sdVariables.destination.Index)
-
 	newIndex := (sdVariables.destination.Index + upperIndex) / 2
 	if err := updateDestinationIndex(chosenMap.ID, sdVariables.source.ID, newIndex); err != nil {
 		return 0, appErrors.NewApplicationError(err)
 	}
 
-	fmt.Println("New index: ", newIndex)
-
-	/*	var upperIndexes []float64
-			res = storage.Gorm().Raw(fmt.Sprintf(`
-		SELECT index
-		FROM declarations.map_variables
-		WHERE map_id = ? AND index %s (SELECT index FROM declarations.map_variables WHERE id = ?) ORDER BY index DESC LIMIT 1`, upperIndexOperator), chosenMap.ID, c.model.Destination).Scan(&upperIndexes)
-
-			if res.Error != nil {
-				return 0, appErrors.NewValidationError(map[string]string{
-					"invalidSourceDestination": "Incomplete declaration map",
-				})
-			}
-
-			if res.RowsAffected == 0 {
-				return 0, appErrors.NewValidationError(map[string]string{
-					"invalidSourceDestination": "Incomplete declaration map",
-				})
-			}
-	*/
-	/*	var realIndex float64
-			if res.RowsAffected != 0 {
-				realIndex = upperIndexes[0]
-			}
-
-			res = storage.Gorm().Exec(fmt.Sprintf(`
-		UPDATE %s
-		SET index = round(((coalesce(?, 1000) + (SELECT index FROM declarations.map_variables WHERE id = ?)) / 2)::numeric, 10)  WHERE id = ? AND map_id = ?
-		`,
-				(declarations.MapVariable{}).TableName(),
-			), realIndex, c.model.Destination, c.model.Source, chosenMap.ID)
-
-			if res.Error != nil {
-				return 0, appErrors.NewApplicationError(res.Error)
-			}
-
-			if res.RowsAffected == 0 {
-				return 0, appErrors.NewNotFoundError(errors.New("Could not switch map variables."))
-			}
-	*/
 	return newIndex, nil
 }
 

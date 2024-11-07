@@ -16,7 +16,7 @@ var _ = ginkgo.Describe("Declaration map variable tests", func() {
 		source := idsAndIndexes[0]
 		destination := idsAndIndexes[5]
 
-		handler := New(NewModel(projectId, "list", source["id"], destination["id"]), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, "list", source["id"], destination["id"], "desc"), auth.NewTestingAuthentication(false, ""))
 		_, err := handler.Handle()
 		testAssertErrNil(err)
 	})
@@ -35,7 +35,7 @@ var _ = ginkgo.Describe("Declaration map variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "list", source["id"], destination["id"]), auth.NewTestingAuthentication(false, ""))
+				handler := New(NewModel(projectId, "list", source["id"], destination["id"], "asc"), auth.NewTestingAuthentication(false, ""))
 				_, err := handler.Handle()
 				testAssertErrNil(err)
 			}()
@@ -74,7 +74,7 @@ var _ = ginkgo.Describe("Declaration map variable tests", func() {
 				defer ginkgo.GinkgoRecover()
 				defer wg.Done()
 
-				handler := New(NewModel(projectId, "list", ids[sourceIdx]["id"], ids[destinationIdx]["id"]), auth.NewTestingAuthentication(false, ""))
+				handler := New(NewModel(projectId, "list", ids[sourceIdx]["id"], ids[destinationIdx]["id"], "desc"), auth.NewTestingAuthentication(false, ""))
 				_, err := handler.Handle()
 				testAssertErrNil(err)
 			}()
