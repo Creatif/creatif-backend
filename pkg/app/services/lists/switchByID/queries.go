@@ -97,3 +97,60 @@ SET index = ? WHERE id = ? AND list_id = ?
 
 	return nil
 }
+
+/*
+*
+Gets the index the one before the destination.
+*/
+func getIndexDesc(mapId string, destinationIndex float64) (float64, error) {
+	sql := fmt.Sprintf("SELECT index FROM %s AS vg WHERE vg.list_id = ? AND vg.index > ? ORDER BY vg.index ASC LIMIT 1", (declarations.ListVariable{}).TableName())
+	var idx float64
+	res := storage.Gorm().Raw(sql, mapId, destinationIndex).Scan(&idx)
+
+	if res.Error != nil {
+		return 0, res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		return 0, errors.New("Destination upper index not found")
+	}
+
+	return idx, nil
+}
+
+func getIndexAsc(mapId string, destinationIndex float64) (float64, error) {
+	sql := fmt.Sprintf(`
+SELECT index 
+FROM (
+    SELECT index 
+    FROM %s AS vg 
+    WHERE vg.list_id = ?
+      AND vg.index < ?
+    ORDER BY vg.index ASC
+) AS sorted_results
+ORDER BY index DESC 
+LIMIT 1;
+`, (declarations.ListVariable{}).TableName())
+	var idx float64
+	res := storage.Gorm().Raw(sql, mapId, destinationIndex).Scan(&idx)
+
+	if res.Error != nil {
+		return 0, res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		return 0, errors.New("Destination upper index not found")
+	}
+
+	return idx, nil
+}
+
+func updateDestinationIndex(mapId, destinationVariableId string, index float64) error {
+	sql := fmt.Sprintf("UPDATE %s SET index = ? WHERE id = ? AND list_id = ?", (declarations.ListVariable{}).TableName())
+
+	if res := storage.Gorm().Exec(sql, index, destinationVariableId, mapId); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
+}

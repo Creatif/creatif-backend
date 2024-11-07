@@ -147,7 +147,7 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/lists/items/:projectID/:name", lists.PaginateListItemsHandler())
 	group.GET("/lists/:projectID", lists.PaginateListsHandler())
 	group.GET("/list/query-id/:projectID/:name/:itemId", lists.QueryListByIDHandler())
-	group.POST("/list/rearrange/:projectID/:name/:source/:destination", lists.SwitchByIDHandler())
+	group.POST("/list/rearrange/:projectID/:name/:source/:destination/:orderDirection", lists.SwitchByIDHandler())
 	group.POST("/list/update/:projectID/:name", lists.UpdateListHandler())
 	group.POST("/list/update-item-by-id/:projectID/:name/:itemID", lists.UpdateListItemByIDHandler())
 

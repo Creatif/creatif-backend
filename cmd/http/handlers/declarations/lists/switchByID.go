@@ -24,6 +24,7 @@ func SwitchByIDHandler() func(e echo.Context) error {
 			model.Name,
 			model.Source,
 			model.Destination,
+			model.OrderDirection,
 		), authentication)
 
 		return request.SendResponse[switchByID.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
