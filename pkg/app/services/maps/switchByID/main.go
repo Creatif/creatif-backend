@@ -57,63 +57,70 @@ func (c Main) Logic() (float64, error) {
 		return 0, appErrors.NewApplicationError(err)
 	}
 
+	// these if statements are only here if the destination is the first item
 	if idxRange.Highest == sdVariables.destination.Index {
-		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Highest+1, sdVariables.source.ID, chosenMap.ID)
+		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Highest+1024, sdVariables.source.ID, chosenMap.ID)
 	}
 
+	// this if statement is here only if the destination is the last item
 	if idxRange.Lowest == sdVariables.destination.Index {
-		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Lowest-1, sdVariables.source.ID, chosenMap.ID)
+		return idxRange.Highest + 1, updateWithCustomIndex(idxRange.Lowest-1024, sdVariables.source.ID, chosenMap.ID)
 	}
 
-	upperIndexOperator := "<"
-	if sdVariables.source.Index < sdVariables.destination.Index {
-		upperIndexOperator = ">"
-	}
-	var upperIndexes []float64
-	res = storage.Gorm().Raw(fmt.Sprintf(`
-SELECT index 
-FROM declarations.map_variables 
-WHERE map_id = ? AND index %s (SELECT index FROM declarations.map_variables WHERE id = ?) ORDER BY index DESC LIMIT 1`, upperIndexOperator), chosenMap.ID, c.model.Destination).Scan(&upperIndexes)
-
-	if res.Error != nil {
-		return 0, appErrors.NewValidationError(map[string]string{
-			"invalidSourceDestination": "Incomplete declaration map",
-		})
+	upperIndex, err := getIndexBeforeDestination(chosenMap.ID, sdVariables.destination.Index)
+	if err != nil {
+		return 0, appErrors.NewApplicationError(err)
 	}
 
-	if res.RowsAffected == 0 {
-		return 0, appErrors.NewValidationError(map[string]string{
-			"invalidSourceDestination": "Incomplete declaration map",
-		})
+	fmt.Println("Found index should be be 6144: ", upperIndex)
+	fmt.Println("Destination index should be: 5120", sdVariables.destination.Index)
+
+	newIndex := (sdVariables.destination.Index + upperIndex) / 2
+	if err := updateDestinationIndex(chosenMap.ID, sdVariables.source.ID, newIndex); err != nil {
+		return 0, appErrors.NewApplicationError(err)
 	}
 
-	var realIndex float64
-	if res.RowsAffected != 0 {
-		realIndex = upperIndexes[0]
-	}
+	fmt.Println("New index: ", newIndex)
 
-	res = storage.Gorm().Exec(fmt.Sprintf(`
-UPDATE %s
-SET index = round(((coalesce(?, 1000) + (SELECT index FROM declarations.map_variables WHERE id = ?)) / 2)::numeric, 10)  WHERE id = ? AND map_id = ?
-`,
-		(declarations.MapVariable{}).TableName(),
-	), realIndex, c.model.Destination, c.model.Source, chosenMap.ID)
+	/*	var upperIndexes []float64
+			res = storage.Gorm().Raw(fmt.Sprintf(`
+		SELECT index
+		FROM declarations.map_variables
+		WHERE map_id = ? AND index %s (SELECT index FROM declarations.map_variables WHERE id = ?) ORDER BY index DESC LIMIT 1`, upperIndexOperator), chosenMap.ID, c.model.Destination).Scan(&upperIndexes)
 
-	if res.Error != nil {
-		return 0, appErrors.NewApplicationError(res.Error)
-	}
+			if res.Error != nil {
+				return 0, appErrors.NewValidationError(map[string]string{
+					"invalidSourceDestination": "Incomplete declaration map",
+				})
+			}
 
-	if res.RowsAffected == 0 {
-		return 0, appErrors.NewNotFoundError(errors.New("Could not switch map variables."))
-	}
+			if res.RowsAffected == 0 {
+				return 0, appErrors.NewValidationError(map[string]string{
+					"invalidSourceDestination": "Incomplete declaration map",
+				})
+			}
+	*/
+	/*	var realIndex float64
+			if res.RowsAffected != 0 {
+				realIndex = upperIndexes[0]
+			}
 
-	var emptyVariableWithIndex declarations.MapVariable
-	res = storage.Gorm().Where("id = ?", c.model.Source).Select("index").First(&emptyVariableWithIndex)
-	if res.Error != nil {
-		return 0, appErrors.NewNotFoundError(errors.New("Could not switch map variables."))
-	}
+			res = storage.Gorm().Exec(fmt.Sprintf(`
+		UPDATE %s
+		SET index = round(((coalesce(?, 1000) + (SELECT index FROM declarations.map_variables WHERE id = ?)) / 2)::numeric, 10)  WHERE id = ? AND map_id = ?
+		`,
+				(declarations.MapVariable{}).TableName(),
+			), realIndex, c.model.Destination, c.model.Source, chosenMap.ID)
 
-	return emptyVariableWithIndex.Index, nil
+			if res.Error != nil {
+				return 0, appErrors.NewApplicationError(res.Error)
+			}
+
+			if res.RowsAffected == 0 {
+				return 0, appErrors.NewNotFoundError(errors.New("Could not switch map variables."))
+			}
+	*/
+	return newIndex, nil
 }
 
 func (c Main) Handle() (float64, error) {
