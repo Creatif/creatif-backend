@@ -81,9 +81,9 @@ func main() {
 		is important to know that. For more information how these are used, take a look below to the comment above
 		concurrencyCoordinator() function.
 	*/
-	propertiesWorkQueue := newListWorkQueue(50, 50)
+	propertiesWorkQueue := newListWorkQueue(60, 60)
 	propertyWorkQueueDone := propertiesWorkQueue.start()
-	accountWorkQueue := newMapWorkQueue(50, 50, propertiesWorkQueue)
+	accountWorkQueue := newMapWorkQueue(60, 60, propertiesWorkQueue)
 	accountWorkQueueDone := accountWorkQueue.start()
 
 	fmt.Printf("Seeding...\n")
