@@ -12,7 +12,7 @@ var gormHandle *gorm.DB
 func Connect(dsn string) error {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		SkipDefaultTransaction: true,
-		PrepareStmt:            false,
+		PrepareStmt:            true,
 		Logger:                 logger.Default.LogMode(logger.Silent),
 	})
 
@@ -30,8 +30,8 @@ func Connect(dsn string) error {
 	}
 
 	d.SetMaxIdleConns(100)
-	d.SetMaxOpenConns(10000)
-	d.SetConnMaxLifetime(time.Hour)
+	d.SetMaxOpenConns(500)
+	d.SetConnMaxLifetime(30 * time.Minute) // Set the maximum connection lifetime
 
 	gormHandle = db
 
