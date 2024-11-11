@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type PublishedFile struct {
+type PublishedGroups struct {
 	ID        string    `gorm:"primarykey;type:text"`
 	VersionID string    `gorm:"primarykey:type:text"`
 	ProjectID string    `gorm:"primarykey;type:text"`
@@ -17,6 +17,6 @@ type PublishedFile struct {
 	UpdatedAt time.Time
 }
 
-func (PublishedFile) TableName() string {
-	return fmt.Sprintf("%s.%s", "published", domain.PUBLISHED_FILES_TABLE)
+func (PublishedGroups) TableName() string {
+	return fmt.Sprintf("%s.%s", "published", domain.PUBLISHED_GROUPS_TABLE)
 }
