@@ -54,46 +54,6 @@ type ConnectionItem struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql(placeholders map[string]interface{}, defs defaults, subQrs subQueries) (string, map[string]interface{}, error) {
-	return fmt.Sprintf(`
-SELECT 
-    v.project_id,
-	lv.id,
-	lv.short_id,
-	lv.name AS structure_name,
-	lv.variable_name AS variable_name,
-	lv.variable_id AS variable_id,
-	lv.variable_short_id AS variable_short_id,
-	lv.value,
-	lv.behaviour,
-	lv.locale_id,
-	lv.index,
-	lv.created_at,
-	lv.updated_at,
-	lv.groups
-FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = @projectId AND v.id = @versionId AND v.id = lv.version_id 
-AND (lv.name = @structureIdentifier OR lv.id = @structureIdentifier OR lv.short_id = @structureIdentifier)
-%s
-%s
-%s
-%s
-ORDER BY %s %s
-OFFSET @offset
-LIMIT %d
-`,
-		(published.PublishedList{}).TableName(),
-		(published.Version{}).TableName(),
-		subQrs.search,
-		subQrs.groups,
-		subQrs.locales,
-		subQrs.query,
-		subQrs.sortBy,
-		defs.orderDirections,
-		defs.limit,
-	), placeholders, nil
-}
-
 func getVersion(projectId, versionName string) (published.Version, error) {
 	var version published.Version
 	var res *gorm.DB

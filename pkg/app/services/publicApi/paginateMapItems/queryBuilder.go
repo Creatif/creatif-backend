@@ -1,4 +1,4 @@
-package paginateListItems
+package paginateMapItems
 
 import (
 	"creatif/pkg/app/domain/declarations"

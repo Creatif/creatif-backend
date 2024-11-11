@@ -4,13 +4,11 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/publicApi/publicApiError"
-	"creatif/pkg/app/services/shared/queryProcessor"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
-	"strings"
 	"time"
 )
 
@@ -31,81 +29,6 @@ type Item struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-}
-
-func getItemSql(structureIdentifier string, page, limit int, order, sortBy, search string, lcls, groups []string, query []queryProcessor.Query) (string, map[string]interface{}, error) {
-	offset := (page - 1) * limit
-	placeholders := make(map[string]interface{})
-	placeholders["offset"] = offset
-	placeholders["structureIdentifier"] = structureIdentifier
-
-	var searchSql string
-	if search != "" {
-		searchSql = fmt.Sprintf("AND (%s ILIKE @searchOne OR %s ILIKE @searchTwo OR %s ILIKE @searchThree OR %s ILIKE @searchFour)", "lv.variable_name", "lv.variable_name", "lv.variable_name", "lv.variable_name")
-		placeholders["searchOne"] = fmt.Sprintf("%%%s", search)
-		placeholders["searchTwo"] = fmt.Sprintf("%s%%", search)
-		placeholders["searchThree"] = fmt.Sprintf("%%%s%%", search)
-		placeholders["searchFour"] = search
-	}
-
-	var groupsSql string
-	if len(groups) > 0 {
-		groupsSql = fmt.Sprintf("AND'{%s}'::text[] && lv.groups ", strings.Join(groups, ","))
-	}
-
-	var localesSql string
-	if len(lcls) > 0 {
-		placeholders["locales"] = lcls
-		localesSql = fmt.Sprintf("AND lv.locale_id IN (@locales)")
-	}
-
-	var querySql string
-	if len(query) != 0 {
-		s, err := queryProcessor.CreateSql(query)
-		if err != nil {
-			return "", nil, err
-		}
-
-		querySql = fmt.Sprintf("AND %s", s)
-	}
-
-	return fmt.Sprintf(`
-SELECT 
-    v.project_id,
-	lv.id,
-	lv.short_id,
-	lv.name AS structure_name,
-	lv.variable_name AS variable_name,
-	lv.variable_id AS variable_id,
-	lv.variable_short_id AS variable_short_id,
-	lv.value,
-	lv.behaviour,
-	lv.locale_id,
-	lv.index,
-	lv.created_at,
-	lv.updated_at,
-	lv.groups
-FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = @projectId AND v.name = @versionName AND v.id = lv.version_id 
-AND (lv.name = @structureIdentifier OR lv.id = @structureIdentifier OR lv.short_id = @structureIdentifier)
-%s
-%s
-%s
-%s
-ORDER BY %s %s
-OFFSET @offset
-LIMIT %d
-`,
-		(published.PublishedMap{}).TableName(),
-		(published.Version{}).TableName(),
-		searchSql,
-		groupsSql,
-		localesSql,
-		querySql,
-		sortBy,
-		order,
-		limit,
-	), placeholders, nil
 }
 
 func getVersion(projectId, versionName string) (published.Version, error) {
@@ -152,7 +75,7 @@ func getGroups(ids []string) (map[string][]string, error) {
 	var groups []Group
 	res := storage.Gorm().Raw(sql, ids).Scan(&groups)
 	if res.Error != nil {
-		return nil, publicApiError.NewError("getListItemById", map[string]string{
+		return nil, publicApiError.NewError("paginateMapItems", map[string]string{
 			"internalError": res.Error.Error(),
 		}, publicApiError.DatabaseError)
 	}
@@ -174,10 +97,64 @@ func getGroupIdsByName(projectId string, groups []string) ([]string, error) {
 
 	var groupIds []string
 	if res := storage.Gorm().Raw(sql, groups, projectId).Scan(&groupIds); res.Error != nil {
-		return nil, publicApiError.NewError("getListItemById", map[string]string{
+		return nil, publicApiError.NewError("paginateMapItems", map[string]string{
 			"internalError": res.Error.Error(),
 		}, publicApiError.DatabaseError)
 	}
 
 	return groupIds, nil
+}
+
+func getItem(placeholders map[string]interface{}, defs defaults, subQrs subQueries) ([]Item, error) {
+	sql := fmt.Sprintf(`
+SELECT 
+    v.project_id,
+	lv.id,
+	lv.short_id,
+	lv.name AS structure_name,
+	lv.variable_name AS variable_name,
+	lv.variable_id AS variable_id,
+	lv.variable_short_id AS variable_short_id,
+	lv.value,
+	lv.behaviour,
+	lv.locale_id,
+	lv.index,
+	lv.created_at,
+	lv.updated_at,
+	lv.groups
+FROM %s AS lv
+INNER JOIN %s AS v ON v.project_id = @projectId AND v.id = @versionId AND v.id = lv.version_id 
+AND (lv.name = @structureIdentifier OR lv.id = @structureIdentifier OR lv.short_id = @structureIdentifier)
+%s
+%s
+%s
+%s
+ORDER BY %s %s
+OFFSET @offset
+LIMIT %d
+`,
+		(published.PublishedMap{}).TableName(),
+		(published.Version{}).TableName(),
+		subQrs.search,
+		subQrs.groups,
+		subQrs.locales,
+		subQrs.query,
+		subQrs.sortBy,
+		defs.orderDirections,
+		defs.limit,
+	)
+
+	var items []Item
+	res := storage.Gorm().Raw(sql, placeholders).Scan(&items)
+	if res.Error != nil {
+		return nil, publicApiError.NewError("paginateMapItems", map[string]string{
+			"error": res.Error.Error(),
+		}, publicApiError.ApplicationError)
+	}
+
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+
+	return items, nil
 }
