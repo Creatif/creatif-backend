@@ -8,7 +8,6 @@ import (
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
-	"time"
 )
 
 type SingleItem struct {
@@ -147,47 +146,6 @@ FROM %s AS l WHERE l.project_id = ?`,
 		(declarations.File{}).TableName(),
 	)
 
-	if res := tx.WithContext(ctx).Exec(sql, projectId); res.Error != nil {
-		return res.Error
-	}
-
-	return nil
-}
-
-func publishReferences(tx *gorm.DB, projectId, versionId string, ctx context.Context) error {
-	sql := fmt.Sprintf(`
-INSERT INTO %s (
-    id,
-    project_id, 
-    version_id, 
-    name, 
-    parent_type, 
-    child_type, 
-    parent_structure_id, 
-    child_structure_id, 
-    parent_id, 
-    child_id
-)
-SELECT
-    r.id,
-    '%s' AS project_id,
-    '%s' AS version_id,
-    r.name,
-    r.parent_type,
-    r.child_type,
-    r.parent_structure_id,
-    r.child_structure_id,
-    r.parent_id,
-    r.child_id
-FROM %s AS r WHERE r.project_id = ?`,
-		(published.PublishedReference{}).TableName(),
-		projectId,
-		versionId,
-		(declarations.Reference{}).TableName(),
-	)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
 	if res := tx.WithContext(ctx).Exec(sql, projectId); res.Error != nil {
 		return res.Error
 	}

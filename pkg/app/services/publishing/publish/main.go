@@ -67,9 +67,6 @@ func (c Main) Logic() (published.Version, error) {
 		if err := publishMaps(tx, c.model.ProjectID, version.ID, mapCtx); err != nil {
 			return err
 		}
-		if err := publishReferences(tx, c.model.ProjectID, version.ID, refCtx); err != nil {
-			return err
-		}
 		if err := publishFiles(tx, c.model.ProjectID, version.ID, refCtx); err != nil {
 			return err
 		}

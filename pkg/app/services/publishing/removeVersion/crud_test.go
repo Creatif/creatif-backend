@@ -25,10 +25,5 @@ var _ = ginkgo.Describe("Publishing", func() {
 		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_maps").Scan(&mapsCount)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(mapsCount).Should(gomega.Equal(int64(0)))
-
-		var referenceCount int64
-		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_references").Scan(&referenceCount)
-		gomega.Expect(res.Error).Should(gomega.BeNil())
-		gomega.Expect(referenceCount).Should(gomega.Equal(int64(0)))
 	})
 })

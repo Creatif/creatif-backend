@@ -120,11 +120,6 @@ var _ = ginkgo.Describe("Publish updating", func() {
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(mapsCount).Should(gomega.Equal(int64(302)))
 
-		var referenceCount int64
-		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_references").Scan(&referenceCount)
-		gomega.Expect(res.Error).Should(gomega.BeNil())
-		gomega.Expect(referenceCount).Should(gomega.Equal(int64(400)))
-
 		updateHandler := New(NewModel(projectId, "version name"), auth.NewTestingAuthentication(false, ""))
 		updateModel, err := updateHandler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -138,10 +133,6 @@ var _ = ginkgo.Describe("Publish updating", func() {
 		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_maps").Scan(&mapsCount)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(mapsCount).Should(gomega.Equal(int64(302)))
-
-		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_references").Scan(&referenceCount)
-		gomega.Expect(res.Error).Should(gomega.BeNil())
-		gomega.Expect(referenceCount).Should(gomega.Equal(int64(400)))
 
 		fileInfo, err := os.Stat(fmt.Sprintf("/app/public/%s/%s", projectId, "version name"))
 		gomega.Expect(err).Should(gomega.BeNil())
