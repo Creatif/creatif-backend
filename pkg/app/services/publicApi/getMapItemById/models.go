@@ -90,9 +90,8 @@ type View struct {
 }
 
 type LogicModel struct {
-	Item        Item
-	Connections connections
-	Options     Options
+	Item    Item
+	Options Options
 }
 
 func newView(model LogicModel) interface{} {
@@ -100,11 +99,6 @@ func newView(model LogicModel) interface{} {
 		var m map[string]interface{}
 		// ok to ignore
 		json.Unmarshal(model.Item.Value, &m)
-
-		m["connections"] = ConnectionsView{
-			Parents:  model.Connections.parents,
-			Children: model.Connections.children,
-		}
 	}
 
 	locale, _ := locales.GetAlphaWithID(model.Item.Locale)
@@ -121,12 +115,8 @@ func newView(model LogicModel) interface{} {
 		Groups:           model.Item.Groups,
 		Behaviour:        model.Item.Behaviour,
 		Value:            model.Item.Value,
-		Connections: ConnectionsView{
-			Parents:  model.Connections.parents,
-			Children: model.Connections.children,
-		},
-		CreatedAt: nil,
-		UpdatedAt: nil,
+		CreatedAt:        nil,
+		UpdatedAt:        nil,
 	}
 
 	if !model.Options.ValueOnly {

@@ -2,10 +2,8 @@ package getMapItemById
 
 import (
 	"creatif/pkg/app/auth"
-	connections2 "creatif/pkg/app/services/publicApi/connections"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
-	"creatif/pkg/lib/storage"
 )
 
 type Main struct {
@@ -41,45 +39,21 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, err
 	}
 
-	var mapItem Item
-	res := storage.Gorm().Raw(getItemSql(c.model.Options), c.model.ProjectID, version.Name, c.model.ItemID).Scan(&mapItem)
-	if res.Error != nil {
-		return LogicModel{}, publicApiError.NewError("getMapItemById", map[string]string{
-			"data": res.Error.Error(),
-		}, publicApiError.ApplicationError)
-	}
-
-	if res.RowsAffected == 0 {
-		return LogicModel{}, publicApiError.NewError("getMapItemById", map[string]string{
-			"data": "This item does not exist",
-		}, publicApiError.NotFoundError)
-	}
-
-	connections := newConnections()
-	parents := make([]string, 0)
-	children := make([]string, 0)
-	models, err := connections2.GetConnections(version.ID, c.model.ProjectID, c.model.ItemID)
+	item, err := getItem(c.model.ProjectID, version.ID, c.model.ItemID, c.model.Options)
 	if err != nil {
 		return LogicModel{}, err
 	}
 
-	for _, model := range models {
-		if model.Parent == c.model.ItemID {
-			children = append(children, model.Child)
-		}
-
-		if model.Child == c.model.ItemID {
-			parents = append(parents, model.Parent)
-		}
+	groups, err := getGroups(c.model.ItemID)
+	if err != nil {
+		return LogicModel{}, err
 	}
 
-	connections.parents = parents
-	connections.children = children
+	item.Groups = groups
 
 	return LogicModel{
-		Item:        mapItem,
-		Connections: connections,
-		Options:     c.model.Options,
+		Item:    item,
+		Options: c.model.Options,
 	}, nil
 }
 

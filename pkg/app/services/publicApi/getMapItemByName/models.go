@@ -69,23 +69,6 @@ func (a Model) Validate() map[string]string {
 	return nil
 }
 
-type ConnectionsView struct {
-	Parents  []string `json:"parents"`
-	Children []string `json:"children"`
-}
-
-type connections struct {
-	parents  []string
-	children []string
-}
-
-func newConnections() connections {
-	return connections{
-		parents:  []string{},
-		children: []string{},
-	}
-}
-
 type View struct {
 	StructureID      string `json:"structureId"`
 	StructureShortID string `json:"structureShortId"`
@@ -102,16 +85,13 @@ type View struct {
 	Behaviour string      `json:"behaviour"`
 	Value     interface{} `json:"value"`
 
-	Connections ConnectionsView `json:"connections"`
-
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type LogicModel struct {
-	Item        Item
-	Connections connections
-	Options     Options
+	Item    Item
+	Options Options
 }
 
 func newView(model LogicModel) interface{} {
@@ -119,11 +99,6 @@ func newView(model LogicModel) interface{} {
 		var m map[string]interface{}
 		// ok to ignore
 		json.Unmarshal(model.Item.Value, &m)
-
-		m["connections"] = ConnectionsView{
-			Parents:  model.Connections.parents,
-			Children: model.Connections.children,
-		}
 
 		return m
 	}
@@ -143,11 +118,7 @@ func newView(model LogicModel) interface{} {
 		Groups:           model.Item.Groups,
 		Behaviour:        model.Item.Behaviour,
 		Value:            model.Item.Value,
-		Connections: ConnectionsView{
-			Parents:  model.Connections.parents,
-			Children: model.Connections.children,
-		},
-		CreatedAt: model.Item.CreatedAt,
-		UpdatedAt: model.Item.UpdatedAt,
+		CreatedAt:        model.Item.CreatedAt,
+		UpdatedAt:        model.Item.UpdatedAt,
 	}
 }

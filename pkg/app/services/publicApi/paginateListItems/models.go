@@ -163,23 +163,6 @@ func (a Model) Validate() map[string]string {
 	return nil
 }
 
-type ConnectionsView struct {
-	Parents  []string `json:"parents"`
-	Children []string `json:"children"`
-}
-
-type connections struct {
-	parents  []string
-	children []string
-}
-
-func newConnections() connections {
-	return connections{
-		parents:  []string{},
-		children: []string{},
-	}
-}
-
 type View struct {
 	StructureID      string `json:"structureId"`
 	StructureShortID string `json:"structureShortId"`
@@ -196,16 +179,13 @@ type View struct {
 	Behaviour string      `json:"behaviour"`
 	Value     interface{} `json:"value"`
 
-	Connections ConnectionsView `json:"connections"`
-
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type LogicModel struct {
-	Items       []Item
-	Connections map[string]connections
-	Options     Options
+	Items   []Item
+	Options Options
 }
 
 func newView(model LogicModel) interface{} {
@@ -215,12 +195,6 @@ func newView(model LogicModel) interface{} {
 			var m map[string]interface{}
 			// ok to ignore
 			json.Unmarshal(val.Value, &m)
-			connections := model.Connections[val.ItemID]
-
-			m["connections"] = ConnectionsView{
-				Parents:  connections.parents,
-				Children: connections.children,
-			}
 
 			returnValue[i] = m
 		}
@@ -232,7 +206,6 @@ func newView(model LogicModel) interface{} {
 	for i, item := range model.Items {
 		locale, _ := locales.GetAlphaWithID(item.Locale)
 
-		connections := model.Connections[item.ItemID]
 		views[i] = View{
 			StructureID:      item.ID,
 			StructureShortID: item.ShortID,
@@ -246,12 +219,8 @@ func newView(model LogicModel) interface{} {
 			Groups:           item.Groups,
 			Behaviour:        item.Behaviour,
 			Value:            item.Value,
-			Connections: ConnectionsView{
-				Parents:  connections.parents,
-				Children: connections.children,
-			},
-			CreatedAt: item.CreatedAt,
-			UpdatedAt: item.UpdatedAt,
+			CreatedAt:        item.CreatedAt,
+			UpdatedAt:        item.UpdatedAt,
 		}
 	}
 

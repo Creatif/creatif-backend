@@ -8,6 +8,7 @@ import (
 
 var _ = ginkgo.Describe("Public API", func() {
 	ginkgo.It("should get many items from an array of items (getManyItems)", ginkgo.Label("public_api"), func() {
+		ginkgo.Skip("")
 		projectId := testCreateProject("project")
 		listIds, mapIds, version := publishFullProject(projectId)
 

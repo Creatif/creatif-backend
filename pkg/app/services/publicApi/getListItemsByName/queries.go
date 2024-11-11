@@ -1,6 +1,7 @@
 package getListItemsByName
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	"creatif/pkg/lib/storage"
@@ -53,9 +54,9 @@ type ConnectionItem struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql(locale string, options Options) string {
+func getItem(placeholders map[string]interface{}, options Options) ([]Item, error) {
 	localeSql := ""
-	if locale != "" {
+	if placeholders["localeId"].(string) != "" {
 		localeSql = "AND lv.locale_id = @localeId"
 	}
 
@@ -82,13 +83,13 @@ func getItemSql(locale string, options Options) string {
 `)
 	}
 
-	return fmt.Sprintf(`
+	sql := fmt.Sprintf(`
 SELECT 
     %s
 FROM %s AS lv
 INNER JOIN %s AS v ON 
     v.project_id = @projectId AND 
-    v.name = @versionName AND 
+    v.id = @versionId AND 
     v.id = lv.version_id AND 
     (lv.name = @structureName OR lv.id = @structureName OR 
     lv.short_id = @structureName) AND 
@@ -99,35 +100,23 @@ INNER JOIN %s AS v ON
 		(published.Version{}).TableName(),
 		localeSql,
 	)
-}
 
-func getConnectionsSql() string {
-	return fmt.Sprintf(`
-SELECT 
-    v.project_id,
-    c.name AS connection_name,
-    c.child_type AS connection_type,
-	lv.id,
-	lv.short_id,
-	lv.name AS structure_name,
-	lv.variable_name AS variable_name,
-	lv.variable_id AS variable_id,
-	lv.variable_short_id AS variable_short_id,
-	lv.value,
-	lv.behaviour,
-	lv.locale_id,
-	lv.index,
-	lv.created_at,
-	lv.updated_at,
-	lv.groups
-FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_id IN(?)
-INNER JOIN %s AS c ON c.project_id = ? AND c.project_id = v.project_id AND v.name = ? AND v.id = c.version_id AND c.child_id IN (?)
-`,
-		(published.PublishedList{}).TableName(),
-		(published.Version{}).TableName(),
-		(published.PublishedReference{}).TableName(),
-	)
+	var items []Item
+	res := storage.Gorm().Raw(
+		sql,
+		placeholders,
+	).Scan(&items)
+	if res.Error != nil {
+		return nil, publicApiError.NewError("getListItemsByName", map[string]string{
+			"error": res.Error.Error(),
+		}, publicApiError.DatabaseError)
+	}
+
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
+
+	return items, nil
 }
 
 func getVersion(projectId, versionName string) (published.Version, error) {
@@ -141,7 +130,7 @@ func getVersion(projectId, versionName string) (published.Version, error) {
 			Scan(&version)
 	} else {
 		res = storage.Gorm().Raw(
-			fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND name = ?", (published.Version{}).TableName()), projectId, versionName).Scan(&version)
+			fmt.Sprintf("SELECT id, name FROM %s WHERE project_id = ? AND name = ?", (published.Version{}).TableName()), projectId, versionName).Scan(&version)
 	}
 
 	if res.Error != nil {
@@ -157,4 +146,36 @@ func getVersion(projectId, versionName string) (published.Version, error) {
 	}
 
 	return version, nil
+}
+
+func getGroups(ids []string) (map[string][]string, error) {
+	sql := fmt.Sprintf(
+		"SELECT g.name, vg.variable_id FROM %s AS g INNER JOIN %s AS vg ON vg.variable_id IN(?) AND g.id = ANY(vg.groups) GROUP BY g.name, vg.variable_id",
+		(declarations.Group{}).TableName(),
+		(declarations.VariableGroup{}).TableName(),
+	)
+
+	type Group struct {
+		Name       string `gorm:"column:name"`
+		VariableID string `gorm:"column:variable_id"`
+	}
+
+	var groups []Group
+	res := storage.Gorm().Raw(sql, ids).Scan(&groups)
+	if res.Error != nil {
+		return nil, publicApiError.NewError("getListItemById", map[string]string{
+			"internalError": res.Error.Error(),
+		}, publicApiError.DatabaseError)
+	}
+
+	results := make(map[string][]string, 0)
+	for _, v := range groups {
+		if _, ok := results[v.VariableID]; !ok {
+			results[v.VariableID] = make([]string, 0)
+		}
+
+		results[v.VariableID] = append(results[v.VariableID], v.Name)
+	}
+
+	return results, nil
 }

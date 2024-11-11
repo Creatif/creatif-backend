@@ -32,7 +32,7 @@ type Item struct {
 	UpdatedAt time.Time
 }
 
-func getItemSql(options Options) string {
+func getItem(projectId, versionId, itemId string, options Options) (Item, error) {
 	selectFields := fmt.Sprintf(`
     v.project_id,
 	lv.id,
@@ -57,16 +57,32 @@ func getItemSql(options Options) string {
 `)
 	}
 
-	return fmt.Sprintf(`
+	sql := fmt.Sprintf(`
 SELECT 
     %s
 FROM %s AS lv
-INNER JOIN %s AS v ON v.project_id = ? AND v.name = ? AND v.id = lv.version_id AND lv.variable_id = ?  
+INNER JOIN %s AS v ON v.project_id = ? AND v.id = ? AND v.id = lv.version_id AND lv.variable_id = ?  
 `,
 		selectFields,
 		(published.PublishedMap{}).TableName(),
 		(published.Version{}).TableName(),
 	)
+
+	var item Item
+	res := storage.Gorm().Raw(sql, projectId, versionId, itemId).Scan(&item)
+	if res.Error != nil {
+		return Item{}, publicApiError.NewError("getMapItemById", map[string]string{
+			"data": res.Error.Error(),
+		}, publicApiError.ApplicationError)
+	}
+
+	if res.RowsAffected == 0 {
+		return Item{}, publicApiError.NewError("getMapItemById", map[string]string{
+			"data": "This item does not exist",
+		}, publicApiError.NotFoundError)
+	}
+
+	return item, nil
 }
 
 func getVersion(projectId, versionName string) (published.Version, error) {
@@ -96,4 +112,22 @@ func getVersion(projectId, versionName string) (published.Version, error) {
 	}
 
 	return version, nil
+}
+
+func getGroups(itemId string) ([]string, error) {
+	sql := fmt.Sprintf(
+		"SELECT g.name FROM %s AS g INNER JOIN %s AS vg ON vg.variable_id = ? AND g.id = ANY(vg.groups)",
+		(declarations.Group{}).TableName(),
+		(declarations.VariableGroup{}).TableName(),
+	)
+
+	var groups []string
+	res := storage.Gorm().Raw(sql, itemId).Scan(&groups)
+	if res.Error != nil {
+		return nil, publicApiError.NewError("getMapItemById", map[string]string{
+			"internalError": res.Error.Error(),
+		}, publicApiError.DatabaseError)
+	}
+
+	return groups, nil
 }

@@ -3,7 +3,6 @@ package paginateMapItems
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/locales"
-	connections2 "creatif/pkg/app/services/publicApi/connections"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/sdk"
@@ -64,7 +63,12 @@ func (c Main) Logic() (LogicModel, error) {
 		lcls[i] = alpha
 	}
 
-	itemsSql, placeholders, err := getItemSql(c.model.StructureName, c.model.Page, c.model.Limit, order, sortBy, c.model.Search, lcls, c.model.Groups, c.model.Query)
+	groups, err := getGroupIdsByName(c.model.ProjectID, c.model.Groups)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
+	itemsSql, placeholders, err := getItemSql(c.model.StructureName, c.model.Page, c.model.Limit, order, sortBy, c.model.Search, lcls, groups, c.model.Query)
 	if err != nil {
 		return LogicModel{}, publicApiError.NewError("paginateListItems", map[string]string{
 			"error": err.Error(),
@@ -82,44 +86,27 @@ func (c Main) Logic() (LogicModel, error) {
 
 	if res.RowsAffected == 0 {
 		return LogicModel{
-			Items:       []Item{},
-			Connections: nil,
+			Items: []Item{},
 		}, nil
 	}
 
-	childIds := sdk.Map(items, func(idx int, value Item) string {
+	normalizedGroups, err := getGroups(sdk.Map(items, func(idx int, value Item) string {
 		return value.ItemID
-	})
-
-	mappedConnections := make(map[string]connections)
-	connections := newConnections()
-	models, err := connections2.GetManyConnections(version.ID, c.model.ProjectID, childIds)
+	}))
 	if err != nil {
 		return LogicModel{}, err
 	}
 
-	for _, item := range items {
-		parents := make([]string, 0)
-		children := make([]string, 0)
-		for _, model := range models {
-			if model.Parent == item.ItemID {
-				children = append(children, model.Child)
-			}
-
-			if model.Child == item.ItemID {
-				parents = append(parents, model.Parent)
-			}
+	for i, item := range items {
+		if _, ok := normalizedGroups[item.ItemID]; ok {
+			item.Groups = normalizedGroups[item.ItemID]
+			items[i] = item
 		}
-
-		connections.parents = parents
-		connections.children = children
-		mappedConnections[item.ItemID] = connections
 	}
 
 	return LogicModel{
-		Items:       items,
-		Connections: mappedConnections,
-		Options:     c.model.Options,
+		Items:   items,
+		Options: c.model.Options,
 	}, nil
 }
 
