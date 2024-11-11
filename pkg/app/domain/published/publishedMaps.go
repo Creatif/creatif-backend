@@ -9,8 +9,8 @@ import (
 )
 
 type PublishedMap struct {
-	ID      string `gorm:"primaryKey;type:text"`
-	ShortID string `gorm:"primaryKey;type:text"`
+	StructureID string `gorm:"primaryKey;type:text"`
+	ShortID     string `gorm:"primaryKey;type:text"`
 
 	VersionID string  `gorm:"primaryKey;type:text"`
 	Version   Version `gorm:"foreignKey:VersionID"`
@@ -20,7 +20,6 @@ type PublishedMap struct {
 	VariableName    string         `gorm:"primaryKey;type:text"`
 	VariableID      string         `gorm:"primaryKey;type:text"`
 	VariableShortID string         `gorm:"primaryKey;type:text"`
-	StructureID     string         `gorm:"type:text"`
 	Index           float64        `gorm:"type:float"`
 	Behaviour       string         `gorm:"not null"`
 	Value           datatypes.JSON `gorm:"type:jsonb"`
@@ -29,36 +28,6 @@ type PublishedMap struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-}
-
-func NewPublishedMap(
-	id,
-	shortId,
-	versionId,
-	name,
-	variableName,
-	variableId,
-	variableShortId,
-	behaviour,
-	locale string,
-	value datatypes.JSON,
-	groups []string,
-	index float64,
-) PublishedMap {
-	return PublishedMap{
-		Name:            name,
-		ID:              id,
-		ShortID:         shortId,
-		VersionID:       versionId,
-		VariableName:    variableName,
-		VariableID:      variableId,
-		VariableShortID: variableShortId,
-		Behaviour:       behaviour,
-		LocaleID:        locale,
-		Value:           value,
-		Groups:          groups,
-		Index:           index,
-	}
 }
 
 func (PublishedMap) TableName() string {

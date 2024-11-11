@@ -13,7 +13,7 @@ import (
 )
 
 type Item struct {
-	ID            string `gorm:"column:id"`
+	StructureID   string `gorm:"column:structure_id"`
 	ShortID       string `gorm:"column:short_id"`
 	StructureName string `gorm:"column:structure_name"`
 	ProjectID     string `gorm:"column:project_id"`
@@ -55,7 +55,7 @@ type ConnectionItem struct {
 func getItem(projectId, versionId, itemId string, options Options) (Item, error) {
 	selectFields := fmt.Sprintf(`
     v.project_id,
-	lv.id,
+	lv.structure_id,
 	lv.short_id,
 	lv.name AS structure_name,
 	lv.variable_name AS variable_name,

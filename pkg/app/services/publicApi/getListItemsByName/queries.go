@@ -13,7 +13,7 @@ import (
 )
 
 type Item struct {
-	ID            string `gorm:"column:id"`
+	StructureID   string `gorm:"column:structure_id"`
 	ShortID       string `gorm:"column:short_id"`
 	StructureName string `gorm:"column:structure_name"`
 	ProjectID     string `gorm:"column:project_id"`
@@ -62,7 +62,7 @@ func getItem(placeholders map[string]interface{}, options Options) ([]Item, erro
 
 	selectFields := fmt.Sprintf(`
     v.project_id,
-	lv.id,
+	lv.structure_id,
 	lv.short_id,
 	lv.name AS structure_name,
 	lv.variable_name AS variable_name,
@@ -91,7 +91,7 @@ INNER JOIN %s AS v ON
     v.project_id = @projectId AND 
     v.id = @versionId AND 
     v.id = lv.version_id AND 
-    (lv.name = @structureName OR lv.id = @structureName OR 
+    (lv.name = @structureName OR lv.structure_id = @structureName OR 
     lv.short_id = @structureName) AND 
     lv.variable_name = @variableName %s 
 `,

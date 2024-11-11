@@ -9,8 +9,8 @@ import (
 )
 
 type PublishedList struct {
-	ID      string `gorm:"primaryKey;type:text"`
-	ShortID string `gorm:"type:text"`
+	StructureID string `gorm:"primaryKey;type:text"`
+	ShortID     string `gorm:"type:text"`
 
 	VersionID string  `gorm:"primaryKey;type:text"`
 	Version   Version `gorm:"foreignKey:VersionID"`
@@ -28,36 +28,6 @@ type PublishedList struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-}
-
-func NewPublishedList(
-	id,
-	shortId,
-	versionId,
-	name,
-	variableName,
-	variableId,
-	variableShortId,
-	behaviour,
-	locale string,
-	value []byte,
-	groups []string,
-	index float64,
-) PublishedList {
-	return PublishedList{
-		Name:            name,
-		ID:              id,
-		ShortID:         shortId,
-		VersionID:       versionId,
-		VariableName:    variableName,
-		VariableID:      variableId,
-		VariableShortID: variableShortId,
-		Behaviour:       behaviour,
-		LocaleID:        locale,
-		Value:           value,
-		Groups:          groups,
-		Index:           index,
-	}
 }
 
 func (PublishedList) TableName() string {

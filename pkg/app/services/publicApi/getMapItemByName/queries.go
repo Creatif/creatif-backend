@@ -13,7 +13,7 @@ import (
 )
 
 type Item struct {
-	ID            string `gorm:"column:id"`
+	StructureID   string `gorm:"column:structure_id"`
 	ShortID       string `gorm:"column:short_id"`
 	StructureName string `gorm:"column:structure_name"`
 	ProjectID     string `gorm:"column:project_id"`
@@ -40,7 +40,7 @@ func getItem(placeholders map[string]interface{}) (Item, error) {
 	sql := fmt.Sprintf(`
 SELECT 
     v.project_id,
-	lv.id,
+	lv.structure_id,
 	lv.short_id,
 	lv.name AS structure_name,
 	lv.variable_name AS variable_name,

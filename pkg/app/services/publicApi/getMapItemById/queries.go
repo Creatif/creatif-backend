@@ -13,7 +13,6 @@ import (
 )
 
 type Item struct {
-	ID            string `gorm:"column:id"`
 	ShortID       string `gorm:"column:short_id"`
 	StructureName string `gorm:"column:structure_name"`
 	StructureID   string `gorm:"column:structure_id"`
@@ -35,7 +34,7 @@ type Item struct {
 func getItem(projectId, versionId, itemId string, options Options) (Item, error) {
 	selectFields := fmt.Sprintf(`
     v.project_id,
-	lv.id,
+	lv.structure_id,
 	lv.short_id,
 	lv.name AS structure_name,
 	lv.structure_id AS structure_id,

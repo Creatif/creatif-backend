@@ -105,7 +105,7 @@ func newView(model LogicModel) interface{} {
 	locale, _ := locales.GetAlphaWithID(model.Item.Locale)
 
 	view := View{
-		StructureID:      model.Item.ID,
+		StructureID:      model.Item.StructureID,
 		StructureShortID: model.Item.ShortID,
 		StructureName:    model.Item.StructureName,
 		Name:             model.Item.ItemName,

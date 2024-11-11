@@ -13,7 +13,7 @@ import (
 )
 
 type Item struct {
-	ID            string `gorm:"column:id"`
+	StructureID   string `gorm:"column:structure_id"`
 	ShortID       string `gorm:"column:short_id"`
 	StructureName string `gorm:"column:structure_name"`
 	ProjectID     string `gorm:"column:project_id"`
@@ -132,7 +132,7 @@ func getItem(placeholders map[string]interface{}, defs defaults, subQrs subQueri
 	sql := fmt.Sprintf(`
 SELECT 
     v.project_id,
-	lv.id,
+	lv.structure_id,
 	lv.short_id,
 	lv.name AS structure_name,
 	lv.variable_name AS variable_name,
@@ -147,7 +147,7 @@ SELECT
 	lv.groups
 FROM %s AS lv
 INNER JOIN %s AS v ON v.project_id = @projectId AND v.id = @versionId AND v.id = lv.version_id 
-AND (lv.name = @structureIdentifier OR lv.id = @structureIdentifier OR lv.short_id = @structureIdentifier)
+AND (lv.name = @structureIdentifier OR lv.structure_id = @structureIdentifier OR lv.short_id = @structureIdentifier)
 %s
 %s
 %s
