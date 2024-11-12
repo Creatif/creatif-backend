@@ -1,7 +1,7 @@
 package paginateMapItems
 
 import (
-	"creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/domain/published"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared/queryProcessor"
 	"fmt"
@@ -100,7 +100,7 @@ func createSubQueries(
 
 	var groupsSql string
 	if len(groups) > 0 {
-		groupsSql = fmt.Sprintf("INNER JOIN %s AS g ON lv.id = g.variable_id AND '{%s}'::text[] && g.groups", (declarations.VariableGroup{}).TableName(), strings.Join(groups, ","))
+		groupsSql = fmt.Sprintf("INNER JOIN %s AS g ON lv.variable_id = g.variable_id AND '{%s}'::text[] && g.groups", (published.PublishedGroups{}).TableName(), strings.Join(groups, ","))
 	}
 
 	var localesSql string

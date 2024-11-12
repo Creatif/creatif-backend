@@ -38,9 +38,14 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, err
 	}
 
+	groups, err := getGroupIdsByName(c.model.ProjectID, c.model.Groups)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
 	defs := createDefaults(c.model.Page, c.model.Limit, c.model.Order)
 	placeholders := createPlaceholders(c.model.ProjectID, version.ID, defs.page, defs.limit, c.model.StructureName, c.model.Locales, c.model.Search)
-	subQrs, err := createSubQueries(c.model.SortBy, c.model.Search, c.model.Groups, placeholders["locales"].([]string), c.model.Query)
+	subQrs, err := createSubQueries(c.model.SortBy, c.model.Search, groups, placeholders["locales"].([]string), c.model.Query)
 	if err != nil {
 		return LogicModel{}, publicApiError.NewError("paginateListItems", map[string]string{
 			"error": err.Error(),

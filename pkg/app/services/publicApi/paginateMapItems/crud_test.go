@@ -90,8 +90,6 @@ var _ = ginkgo.Describe("Public API", func() {
 	})
 
 	ginkgo.It("should get paginated list of map items based on group", ginkgo.Label("public_api"), func() {
-		ginkgo.Skip("")
-
 		projectId := testCreateProject("project")
 		items, publishView := publishFullProject(projectId)
 
@@ -119,8 +117,6 @@ var _ = ginkgo.Describe("Public API", func() {
 	})
 
 	ginkgo.It("should get paginated list of map items based on group and locale", ginkgo.Label("public_api"), func() {
-		ginkgo.Skip("")
-
 		projectId := testCreateProject("project")
 		items, publishView := publishFullProject(projectId)
 
@@ -148,8 +144,6 @@ var _ = ginkgo.Describe("Public API", func() {
 	})
 
 	ginkgo.It("should get paginated list of map items based on group, locale and search", ginkgo.Label("public_api"), func() {
-		ginkgo.Skip("")
-
 		projectId := testCreateProject("project")
 		items, publishView := publishFullProject(projectId)
 
