@@ -3,8 +3,10 @@ package removeVersion
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/lib/storage"
+	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
+	"os"
 )
 
 var _ = ginkgo.Describe("Publishing", func() {
@@ -25,5 +27,18 @@ var _ = ginkgo.Describe("Publishing", func() {
 		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_maps").Scan(&mapsCount)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(mapsCount).Should(gomega.Equal(int64(0)))
+
+		var groupsCount int64
+		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_maps").Scan(&groupsCount)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
+		gomega.Expect(groupsCount).Should(gomega.Equal(int64(0)))
+
+		var filesCount int64
+		res = storage.Gorm().Raw("SELECT count(*) FROM published.published_files").Scan(&filesCount)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
+		gomega.Expect(filesCount).Should(gomega.Equal(int64(0)))
+
+		_, err = os.Stat(fmt.Sprintf("/app/public/%s/%s", projectId, "version name"))
+		gomega.Expect(os.IsNotExist(err)).Should(gomega.BeTrue())
 	})
 })

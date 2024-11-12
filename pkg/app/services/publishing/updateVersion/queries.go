@@ -184,3 +184,31 @@ func deleteVersion(projectId, versionId string) error {
 
 	return nil
 }
+
+func publishGroups(tx *gorm.DB, projectId, versionId string, ctx context.Context) error {
+	sql := fmt.Sprintf(`
+INSERT INTO %s (
+    variable_id, 
+    version_id,
+    project_id,
+    groups
+)
+SELECT
+    DISTINCT ON (vg.variable_id) vg.variable_id AS variable_id,
+    '%s' AS version_id,
+    '%s' AS project_id,
+ 	vg.groups AS groups
+FROM %s AS vg INNER JOIN %s AS g ON g.project_id = ?`,
+		(published.PublishedGroups{}).TableName(),
+		versionId,
+		projectId,
+		(declarations.VariableGroup{}).TableName(),
+		(declarations.Group{}).TableName(),
+	)
+
+	if res := tx.WithContext(ctx).Exec(sql, projectId); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
+}

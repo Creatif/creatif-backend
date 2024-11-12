@@ -56,21 +56,22 @@ I know that password is weak, but there is a plan to put a password strength int
 `
 
 const (
-	PROJECT_TABLE              = "projects"
-	USERS_TABLE                = "users"
-	MAP_VARIABLES              = "map_variables"
-	VARIABLE_MAP               = "maps"
-	LIST_TABLE                 = "lists"
-	GROUPS_TABLE               = "groups"
-	VARIABLE_GROUPS_TABLE      = "variable_groups"
-	REFERENCE_TABLES           = "references"
-	LIST_VARIABLES_TABLE       = "list_variables"
-	PUBLISHED_LISTS_TABLE      = "published_lists"
-	PUBLISHED_MAPS_TABLE       = "published_maps"
-	VERSION_TABLE              = "versions"
-	FILE_TABLE                 = "files"
-	PUBLISHED_FILES_TABLE      = "published_files"
-	PUBLISHED_REFERENCES_TABLE = "published_references"
+	PROJECT_TABLE          = "projects"
+	USERS_TABLE            = "users"
+	MAP_VARIABLES          = "map_variables"
+	VARIABLE_MAP           = "maps"
+	LIST_TABLE             = "lists"
+	GROUPS_TABLE           = "groups"
+	VARIABLE_GROUPS_TABLE  = "variable_groups"
+	REFERENCE_TABLES       = "references"
+	LIST_VARIABLES_TABLE   = "list_variables"
+	PUBLISHED_LISTS_TABLE  = "published_lists"
+	PUBLISHED_MAPS_TABLE   = "published_maps"
+	VERSION_TABLE          = "versions"
+	FILE_TABLE             = "files"
+	PUBLISHED_FILES_TABLE  = "published_files"
+	PUBLISHED_GROUPS_TABLE = "published_groups"
+	đ
 )
 
 var printers = map[string]*color.Color{

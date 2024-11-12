@@ -3,18 +3,14 @@ package published
 import (
 	"creatif/pkg/app/domain"
 	"fmt"
-	"time"
+	"github.com/lib/pq"
 )
 
 type PublishedGroups struct {
-	ID        string    `gorm:"primarykey;type:text"`
-	VersionID string    `gorm:"primarykey:type:text"`
-	ProjectID string    `gorm:"primarykey;type:text"`
-	Name      string    `gorm:"type:text"`
-	FileName  string    `gorm:"type:text"`
-	MimeType  string    `gorm:"type:text"`
-	CreatedAt time.Time `gorm:"<-:create"`
-	UpdatedAt time.Time
+	VariableID string         `gorm:"index;type:text"`
+	VersionID  string         `gorm:"index:type:text"`
+	ProjectID  string         `gorm:"index;type:text"`
+	Groups     pq.StringArray `gorm:"type:text[];not_null"`
 }
 
 func (PublishedGroups) TableName() string {

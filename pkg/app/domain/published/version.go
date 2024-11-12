@@ -13,8 +13,10 @@ type Version struct {
 	ProjectID string `gorm:"uniqueIndex:unique_version;type:text"`
 	Name      string `gorm:"uniqueIndex:unique_version;type:text"`
 
-	Lists []PublishedList `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
-	Maps  []PublishedMap  `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
+	Lists  []PublishedList   `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
+	Maps   []PublishedMap    `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
+	Groups []PublishedGroups `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
+	Files  []PublishedFile   `gorm:"foreignKey:VersionID;constraint:OnDelete:CASCADE;"`
 
 	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time

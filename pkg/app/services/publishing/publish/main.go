@@ -57,17 +57,22 @@ func (c Main) Logic() (published.Version, error) {
 
 		listCtx, listCancel := context.WithTimeout(context.Background(), 1*time.Hour)
 		mapCtx, mapCancel := context.WithTimeout(context.Background(), 1*time.Hour)
-		refCtx, refCancel := context.WithTimeout(context.Background(), 1*time.Hour)
+		fileCtx, refCancel := context.WithTimeout(context.Background(), 1*time.Hour)
+		groupsCtx, groupsCancel := context.WithTimeout(context.Background(), 1*time.Hour)
 		defer listCancel()
 		defer mapCancel()
 		defer refCancel()
+		defer groupsCancel()
 		if err := publishLists(tx, c.model.ProjectID, version.ID, listCtx); err != nil {
 			return err
 		}
 		if err := publishMaps(tx, c.model.ProjectID, version.ID, mapCtx); err != nil {
 			return err
 		}
-		if err := publishFiles(tx, c.model.ProjectID, version.ID, refCtx); err != nil {
+		if err := publishFiles(tx, c.model.ProjectID, version.ID, fileCtx); err != nil {
+			return err
+		}
+		if err := publishGroups(tx, c.model.ProjectID, version.ID, groupsCtx); err != nil {
 			return err
 		}
 
