@@ -5,12 +5,15 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
+	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
+	"github.com/tidwall/sjson"
 	"gorm.io/gorm"
 )
 
@@ -132,6 +135,48 @@ func (c Main) Logic() (LogicModel, error) {
 			}
 
 			variable.Value = newValue
+		}
+
+		if len(c.model.References) > 0 {
+			conns := sdk.Map(c.model.References, func(idx int, value shared.Reference) connections.Connection {
+				return connections.Connection{
+					Path:          value.Name,
+					StructureType: value.StructureType,
+					VariableID:    value.VariableID,
+				}
+			})
+
+			for _, c := range conns {
+				newValue, err := sjson.DeleteBytes(variable.Value, c.Path)
+				if err != nil {
+					return err
+				}
+
+				variable.Value = newValue
+			}
+
+			if err := connections.CheckConnectionsIntegrity(conns); err != nil {
+				return err
+			}
+
+			created := sdk.Map(conns, func(idx int, value connections.Connection) declarations.Connection {
+				return declarations.NewConnection(
+					c.model.ProjectID,
+					value.Path,
+					variable.ID,
+					"list",
+					value.VariableID,
+					value.StructureType,
+				)
+			})
+
+			if res := tx.Create(&created); res.Error != nil {
+				return res.Error
+			}
+
+			// 1. transform into connections
+			// 2. check integrity
+			// 3. save the connections
 		}
 
 		if res := tx.Create(&variable); res.Error != nil {

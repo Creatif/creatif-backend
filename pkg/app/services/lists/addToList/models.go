@@ -102,10 +102,6 @@ func (a *Model) Validate() map[string]string {
 							return errors.New("Invalid reference. Name cannot be blank")
 						}
 
-						if r.StructureName == "" {
-							return errors.New("Invalid reference. StructureName cannot be blank")
-						}
-
 						if sdk.Includes(names, r.Name) {
 							return errors.New(fmt.Sprintf("Invalid reference. Duplicate reference are not possible. Structure name: %s; Structure type: %s; VariableID: %s", r.StructureName, r.StructureType, r.VariableID))
 						}
