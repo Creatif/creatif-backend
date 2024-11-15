@@ -3,7 +3,7 @@ package getListGroups
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/addToList"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -17,7 +17,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		listVariables := make([]addToList.View, 0)
 		for i := 0; i < 10; i++ {
-			listVariables = append(listVariables, testAddToList(projectId, view.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+			listVariables = append(listVariables, testAddToList(projectId, view.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, groups))
 		}
 
 		handler := New(NewModel(view.ID, listVariables[0].ID, projectId), auth.NewTestingAuthentication(true, ""))

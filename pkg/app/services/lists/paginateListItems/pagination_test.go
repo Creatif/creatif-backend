@@ -4,7 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
@@ -38,7 +38,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 50; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
@@ -57,7 +57,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
@@ -77,7 +77,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
@@ -96,7 +96,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
@@ -115,7 +115,7 @@ var _ = ginkgo.Describe("List items pagination tests", func() {
 		list := testCreateList(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToList(projectId, list.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}

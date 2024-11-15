@@ -8,7 +8,7 @@ import (
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -101,6 +101,8 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.CONNECTIONS_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
 func testAssertErrNil(err error) {
@@ -158,7 +160,7 @@ func testCreateList(projectId, name string) createList2.View {
 	return list
 }
 
-func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) addToList.View {
+func testAddToList(projectId, name, variableName string, connections []connections.Connection, groups []string) addToList.View {
 	variableModel := addToList.VariableModel{
 		Name:      variableName,
 		Metadata:  nil,
@@ -168,7 +170,7 @@ func testAddToList(projectId, name, variableName string, references []shared.Ref
 		Behaviour: "modifiable",
 	}
 
-	model := addToList.NewModel(projectId, name, variableModel, references, []string{})
+	model := addToList.NewModel(projectId, name, variableModel, connections, []string{})
 	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()

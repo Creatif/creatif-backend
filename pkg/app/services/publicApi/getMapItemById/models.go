@@ -55,18 +55,6 @@ type ConnectionsView struct {
 	Children []string `json:"children"`
 }
 
-type connections struct {
-	parents  []string
-	children []string
-}
-
-func newConnections() connections {
-	return connections{
-		parents:  []string{},
-		children: []string{},
-	}
-}
-
 type View struct {
 	StructureID      string `json:"structureId,omitempty"`
 	StructureShortID string `json:"structureShortId,omitempty"`

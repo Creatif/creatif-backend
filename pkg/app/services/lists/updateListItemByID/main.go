@@ -246,13 +246,7 @@ func (c Main) Logic() (LogicResult, error) {
 				return res.Error
 			}
 		}
-
-		if sdk.Includes(c.model.Fields, "references") {
-			if err := shared.UpdateReferences(c.model.References, list.ID, updated.ID, c.model.ProjectID, tx); err != nil {
-				return err
-			}
-		}
-
+		
 		return nil
 	}); transactionErr != nil {
 		errString := transactionErr.Error()

@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -57,7 +58,7 @@ SELECT COUNT(id) FROM %s WHERE project_id = ? AND (parent_structure_id = ? OR ch
 		m := testCreateList(p, "list")
 
 		for i := 0; i < 100; i++ {
-			testAddToList(p, m.ID, fmt.Sprintf("list-%d", i), []shared.Reference{}, []string{})
+			testAddToList(p, m.ID, fmt.Sprintf("list-%d", i), []connections.Connection{}, []string{})
 		}
 
 		handler := New(NewModel(p, m.ID, "list"), auth.NewTestingAuthentication(false, ""))

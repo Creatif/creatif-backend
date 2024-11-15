@@ -5,7 +5,7 @@ import (
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/addToList"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -28,10 +28,9 @@ func AddToListHandler() func(e echo.Context) error {
 			Groups:    model.Variable.Groups,
 			Behaviour: model.Variable.Behaviour,
 			Value:     []byte(model.Variable.Value),
-		}, sdk.Map(model.References, func(idx int, value lists.Reference) shared.Reference {
-			return shared.Reference{
-				Name:          value.Name,
-				StructureName: value.StructureName,
+		}, sdk.Map(model.Connections, func(idx int, value lists.Connection) connections.Connection {
+			return connections.Connection{
+				Path:          value.Name,
 				StructureType: value.StructureType,
 				VariableID:    value.VariableID,
 			}

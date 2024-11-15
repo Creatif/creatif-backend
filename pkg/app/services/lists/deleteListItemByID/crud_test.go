@@ -3,7 +3,7 @@ package deleteListItemByID
 import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -14,22 +14,20 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		projectId := testCreateProject("project")
 		groups := testCreateGroups(projectId)
 		_, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 99)
-		referenceListName, referenceListId, _ := testCreateListAndReturnNameAndID(projectId, "referenceName", 100)
+		_, referenceListId, _ := testCreateListAndReturnNameAndID(projectId, "referenceName", 100)
 
 		var referenceListItems []declarations2.ListVariable
 		res := storage.Gorm().Where("list_id = ?", referenceListId).Select("id").Find(&referenceListItems)
 		testAssertErrNil(res.Error)
 
-		addToListVariable := testAddToList(projectId, listId, []shared.Reference{
+		addToListVariable := testAddToList(projectId, listId, []connections.Connection{
 			{
-				Name:          "first",
-				StructureName: referenceListName,
+				Path:          "first",
 				StructureType: "list",
 				VariableID:    referenceListItems[0].ID,
 			},
 			{
-				Name:          "second",
-				StructureName: referenceListName,
+				Path:          "second",
 				StructureType: "list",
 				VariableID:    referenceListItems[1].ID,
 			},

@@ -45,7 +45,7 @@ func getChildConnectionVariable(childStructureType, childVariableId string) (Que
 	return connectionVariable, nil
 }
 
-func removeParentConnections(variableId string) error {
+func RemoveParentConnections(variableId string) error {
 	res := storage.Gorm().Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_variable_id = ?", (declarations.Connection{}).TableName()), variableId)
 	if res.Error != nil {
 		return res.Error

@@ -9,7 +9,6 @@ import (
 	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
-	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
@@ -136,16 +135,15 @@ func (c Main) Logic() (LogicModel, error) {
 			variable.Value = newValue
 		}
 
-		if len(c.model.References) > 0 {
-			conns := sdk.Map(c.model.References, func(idx int, value shared.Reference) connections.Connection {
-				return connections.Connection{
-					Path:          value.Name,
-					StructureType: value.StructureType,
-					VariableID:    value.VariableID,
-				}
-			})
+		if len(c.model.Connections) > 0 {
+			newValue, newConnections, err := connections.CreateConnections(
+				c.model.ProjectID,
+				variable.ID,
+				"list",
+				c.model.Connections,
+				variable.Value,
+			)
 
-			newValue, newConnections, err := connections.CreateConnections(c.model.ProjectID, variable.ID, "list", conns, variable.Value)
 			if err != nil {
 				return err
 			}
@@ -154,10 +152,6 @@ func (c Main) Logic() (LogicModel, error) {
 			if res := tx.Create(&newConnections); res.Error != nil {
 				return res.Error
 			}
-
-			// 1. transform into connections
-			// 2. check integrity
-			// 3. save the connections
 		}
 
 		if res := tx.Create(&variable); res.Error != nil {
@@ -169,19 +163,6 @@ func (c Main) Logic() (LogicModel, error) {
 			if res := tx.Create(&newGroup); res.Error != nil {
 				return res.Error
 			}
-		}
-
-		if len(c.model.References) > 0 {
-			references, err := shared.CreateDeclarationReferences(c.model.References, m.ID, variable.ID, "list", c.model.ProjectID)
-			if err != nil {
-				return err
-			}
-
-			if res := tx.Create(&references); res.Error != nil {
-				return res.Error
-			}
-
-			refs = references
 		}
 
 		return nil

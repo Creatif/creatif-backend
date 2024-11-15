@@ -82,6 +82,10 @@ func (c Main) Logic() (*struct{}, error) {
 			return res.Error
 		}
 
+		if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_variable_id = ?", (declarations.Connection{}).TableName()), c.model.ItemID); res.Error != nil {
+			return res.Error
+		}
+
 		if err := shared.RemoveAsParent(c.model.ItemID, tx); err != nil {
 			return err
 		}

@@ -3,7 +3,7 @@ package addToList
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
@@ -21,11 +21,11 @@ type VariableModel struct {
 }
 
 type Model struct {
-	Entry      VariableModel
-	Name       string
-	ProjectID  string
-	References []shared.Reference
-	ImagePaths []string
+	Entry       VariableModel
+	Name        string
+	ProjectID   string
+	Connections []connections.Connection
+	ImagePaths  []string
 }
 
 type LogicModel struct {
@@ -34,24 +34,24 @@ type LogicModel struct {
 	Groups     []string
 }
 
-func NewModel(projectId, name string, entry VariableModel, references []shared.Reference, imagePaths []string) Model {
+func NewModel(projectId, name string, entry VariableModel, connections []connections.Connection, imagePaths []string) Model {
 	return Model{
-		Name:       name,
-		ProjectID:  projectId,
-		Entry:      entry,
-		References: references,
-		ImagePaths: imagePaths,
+		Name:        name,
+		ProjectID:   projectId,
+		Entry:       entry,
+		Connections: connections,
+		ImagePaths:  imagePaths,
 	}
 }
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"groups":          a.Entry.Groups,
-		"name":            a.Name,
-		"projectID":       a.ProjectID,
-		"locale":          a.Entry.Locale,
-		"behaviour":       a.Entry.Behaviour,
-		"referencesValid": nil,
+		"groups":           a.Entry.Groups,
+		"name":             a.Name,
+		"projectID":        a.ProjectID,
+		"locale":           a.Entry.Locale,
+		"behaviour":        a.Entry.Behaviour,
+		"connectionsValid": nil,
 	}
 
 	if err := validation.Validate(v,
@@ -86,27 +86,27 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("referencesValid", validation.By(func(value interface{}) error {
-				if len(a.References) > 100 {
+			validation.Key("connectionsValid", validation.By(func(value interface{}) error {
+				if len(a.Connections) > 100 {
 					return errors.New("Invalid reference number. Maximum number of references is 100.")
 				}
 
-				if len(a.References) > 0 {
-					names := make([]string, len(a.References))
-					for _, r := range a.References {
+				if len(a.Connections) > 0 {
+					names := make([]string, len(a.Connections))
+					for _, r := range a.Connections {
 						if r.StructureType != "map" && r.StructureType != "list" && r.StructureType != "variable" {
-							return errors.New("Invalid reference structure type. Structure can can be one of: map, variable or list")
+							return errors.New("Invalid connection structure type. Structure can can be one of: map, variable or list")
 						}
 
-						if r.Name == "" {
-							return errors.New("Invalid reference. Name cannot be blank")
+						if r.Path == "" {
+							return errors.New("Invalid connection. Path cannot be blank")
 						}
 
-						if sdk.Includes(names, r.Name) {
-							return errors.New(fmt.Sprintf("Invalid reference. Duplicate reference are not possible. Structure name: %s; Structure type: %s; VariableID: %s", r.StructureName, r.StructureType, r.VariableID))
+						if sdk.Includes(names, r.Path) {
+							return errors.New(fmt.Sprintf("Invalid connection. Duplicate connections are not possible. Structure type: %s; VariableID: %s", r.StructureType, r.VariableID))
 						}
 
-						names = append(names, r.Name)
+						names = append(names, r.Path)
 					}
 
 				}

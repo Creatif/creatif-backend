@@ -6,11 +6,11 @@ import (
 )
 
 type AddToList struct {
-	ProjectID  string        `param:"projectID"`
-	Variable   VariableModel `json:"variable"`
-	Name       string        `json:"name"`
-	References []Reference   `json:"references"`
-	ImagePaths []string      `json:"imagePaths"`
+	ProjectID   string        `param:"projectID"`
+	Variable    VariableModel `json:"variable"`
+	Name        string        `json:"name"`
+	Connections []Connection  `json:"connections"`
+	ImagePaths  []string      `json:"imagePaths"`
 }
 
 type VariableModel struct {
@@ -22,9 +22,8 @@ type VariableModel struct {
 	Behaviour string   `json:"behaviour"`
 }
 
-type Reference struct {
+type Connection struct {
 	Name          string `json:"name"`
-	StructureName string `json:"structureName"`
 	StructureType string `json:"structureType"`
 	VariableID    string `json:"variableId"`
 }
@@ -47,10 +46,9 @@ func SanitizeAddToList(model AddToList) AddToList {
 
 	model.Variable = variable
 
-	model.References = sdk.Map(model.References, func(idx int, value Reference) Reference {
-		return Reference{
+	model.Connections = sdk.Map(model.Connections, func(idx int, value Connection) Connection {
+		return Connection{
 			Name:          p.Sanitize(value.Name),
-			StructureName: p.Sanitize(value.StructureName),
 			StructureType: p.Sanitize(value.StructureType),
 			VariableID:    p.Sanitize(value.VariableID),
 		}

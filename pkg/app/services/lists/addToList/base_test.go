@@ -7,7 +7,7 @@ import (
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
@@ -157,7 +157,7 @@ func testCreateGroups(projectId string, numOfGroups int) []string {
 	})
 }
 
-func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) View {
+func testAddToList(projectId, name, variableName string, connections []connections.Connection, groups []string) View {
 	variableModel := VariableModel{
 		Name:      variableName,
 		Metadata:  nil,
@@ -167,7 +167,7 @@ func testAddToList(projectId, name, variableName string, references []shared.Ref
 		Behaviour: "modifiable",
 	}
 
-	model := NewModel(projectId, name, variableModel, references, []string{})
+	model := NewModel(projectId, name, variableModel, connections, []string{})
 	handler := New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()

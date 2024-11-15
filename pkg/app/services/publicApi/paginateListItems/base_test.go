@@ -12,6 +12,7 @@ import (
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/publishing/publish"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
@@ -105,6 +106,8 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_GROUPS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.CONNECTIONS_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
 func testAssertErrNil(err error) {
@@ -192,7 +195,7 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 	return view
 }
 
-func testAddToList(projectId, name, variableName string, references []shared.Reference, groups []string) addToList.View {
+func testAddToList(projectId, name, variableName string, connections []connections.Connection, groups []string) addToList.View {
 	b, err := json.Marshal(map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -211,7 +214,7 @@ func testAddToList(projectId, name, variableName string, references []shared.Ref
 		Behaviour: "modifiable",
 	}
 
-	model := addToList.NewModel(projectId, name, variableModel, references, []string{})
+	model := addToList.NewModel(projectId, name, variableModel, connections, []string{})
 	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
@@ -234,37 +237,33 @@ func publishFullProject(projectId string) ([]addToList.View, publish.View) {
 	}))
 
 	referenceList := testCreateList(projectId, "referenceList")
-	referenceListItem1 := testAddToList(projectId, referenceList.ID, "reference-list-1", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+	referenceListItem1 := testAddToList(projectId, referenceList.ID, "reference-list-1", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 		return value.ID
 	}))
-	referenceListItem2 := testAddToList(projectId, referenceList.ID, "reference-list-2", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+	referenceListItem2 := testAddToList(projectId, referenceList.ID, "reference-list-2", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 		return value.ID
 	}))
 
 	views := make([]addToList.View, 0)
 	for i := 0; i < 200; i++ {
-		addToListModel := testAddToList(projectId, paginationList.ID, fmt.Sprintf("name-%d", i), []shared.Reference{
+		addToListModel := testAddToList(projectId, paginationList.ID, fmt.Sprintf("name-%d", i), []connections.Connection{
 			{
-				Name:          "first",
-				StructureName: referenceMap.Name,
+				Path:          "first",
 				StructureType: "map",
 				VariableID:    referenceMapItem1.ID,
 			},
 			{
-				Name:          "second",
-				StructureName: referenceMap.Name,
+				Path:          "second",
 				StructureType: "map",
 				VariableID:    referenceMapItem2.ID,
 			},
 			{
-				Name:          "third",
-				StructureName: paginationList.Name,
+				Path:          "third",
 				StructureType: "list",
 				VariableID:    referenceListItem1.ID,
 			},
 			{
-				Name:          "fourth",
-				StructureName: paginationList.Name,
+				Path:          "fourth",
 				StructureType: "list",
 				VariableID:    referenceListItem2.ID,
 			},

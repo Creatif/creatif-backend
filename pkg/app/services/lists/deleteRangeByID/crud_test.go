@@ -4,7 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/lists/addToList"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -17,7 +17,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		projectId := testCreateProject("project")
 		groups := testCreateGroups(projectId)
 		listName, listId, _ := testCreateListAndReturnNameAndID(projectId, "name", 15)
-		referenceListName, referenceListId, _ := testCreateListAndReturnNameAndID(projectId, "referenceList", 10)
+		_, referenceListId, _ := testCreateListAndReturnNameAndID(projectId, "referenceList", 10)
 
 		var referenceListItems []declarations2.ListVariable
 		res := storage.Gorm().Where("list_id = ?", referenceListId).Select("id").Find(&referenceListItems)
@@ -25,16 +25,14 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 
 		addedMapsWithReferences := make([]addToList.View, 0)
 		for i := 0; i < 10; i++ {
-			addToMapVariable := testAddToList(projectId, listId, fmt.Sprintf("newAdd-%d", i), []shared.Reference{
+			addToMapVariable := testAddToList(projectId, listId, fmt.Sprintf("newAdd-%d", i), []connections.Connection{
 				{
-					Name:          "first",
-					StructureName: referenceListName,
+					Path:          "first",
 					StructureType: "list",
 					VariableID:    referenceListItems[0].ID,
 				},
 				{
-					Name:          "second",
-					StructureName: referenceListName,
+					Path:          "second",
 					StructureType: "list",
 					VariableID:    referenceListItems[1].ID,
 				},
@@ -62,7 +60,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		gomega.Expect(len(remainingItems)).Should(gomega.Equal(0))
 
 		var count int
-		res = storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		res = storage.Gorm().Raw("SELECT count(child_variable_id) AS count FROM declarations.connections").Scan(&count)
 		testAssertErrNil(res.Error)
 		gomega.Expect(count).Should(gomega.Equal(0))
 	})

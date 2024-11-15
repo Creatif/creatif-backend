@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -34,10 +35,10 @@ var _ = ginkgo.Describe("Publishing", func() {
 		}))
 
 		referenceList := testCreateList(projectId, "referenceList")
-		referenceListItem1 := testAddToList(projectId, referenceList.ID, "reference-list-1", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+		referenceListItem1 := testAddToList(projectId, referenceList.ID, "reference-list-1", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 			return value.ID
 		}))
-		referenceListItem2 := testAddToList(projectId, referenceList.ID, "reference-list-2", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+		referenceListItem2 := testAddToList(projectId, referenceList.ID, "reference-list-2", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 			return value.ID
 		}))
 
@@ -73,16 +74,14 @@ var _ = ginkgo.Describe("Publishing", func() {
 		}
 
 		for i := 0; i < 100; i++ {
-			testAddToList(projectId, list1.ID, fmt.Sprintf("list-%d", i), []shared.Reference{
+			testAddToList(projectId, list1.ID, fmt.Sprintf("list-%d", i), []connections.Connection{
 				{
-					Name:          "first",
-					StructureName: referenceList.Name,
+					Path:          "first",
 					StructureType: "list",
 					VariableID:    referenceListItem1.ID,
 				},
 				{
-					Name:          "second",
-					StructureName: referenceList.Name,
+					Path:          "second",
 					StructureType: "list",
 					VariableID:    referenceListItem2.ID,
 				},
@@ -92,13 +91,13 @@ var _ = ginkgo.Describe("Publishing", func() {
 		}
 
 		for i := 100; i < 200; i++ {
-			testAddToList(projectId, list2.ID, fmt.Sprintf("list-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToList(projectId, list2.ID, fmt.Sprintf("list-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
 
 		for i := 200; i < 300; i++ {
-			testAddToList(projectId, list3.ID, fmt.Sprintf("list-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToList(projectId, list3.ID, fmt.Sprintf("list-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}

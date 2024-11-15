@@ -2,7 +2,7 @@ package addToList
 
 import (
 	"creatif/pkg/app/auth"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 
 		listVariables := make([]View, 0)
 		for i := 0; i < 10; i++ {
-			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, groups))
 		}
 
 		handler := New(NewModel(projectId, reference.ID, VariableModel{
@@ -28,22 +28,19 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{
+		}, []connections.Connection{
 			{
-				Name:          "first",
-				StructureName: reference.Name,
+				Path:          "first",
 				StructureType: "list",
 				VariableID:    listVariables[0].ID,
 			},
 			{
-				Name:          "second",
-				StructureName: reference.Name,
+				Path:          "second",
 				StructureType: "list",
 				VariableID:    listVariables[1].ID,
 			},
 			{
-				Name:          "third",
-				StructureName: reference.Name,
+				Path:          "third",
 				StructureType: "list",
 				VariableID:    listVariables[2].ID,
 			},
@@ -53,7 +50,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		var count int
-		res := storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		res := storage.Gorm().Raw("SELECT count(child_variable_id) AS count FROM declarations.connections").Scan(&count)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(count).Should(gomega.Equal(3))
 	})
@@ -62,11 +59,11 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		projectId := testCreateProject("project")
 		m := testCreateList(projectId, "mapName")
 		groups := testCreateGroups(projectId, 5)
-		reference := testCreateList(projectId, "referenceMap")
+		testCreateList(projectId, "referenceMap")
 
 		listVariables := make([]View, 0)
 		for i := 0; i < 10; i++ {
-			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, groups))
 		}
 
 		handler := New(NewModel(projectId, m.ShortID, VariableModel{
@@ -76,22 +73,19 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{
+		}, []connections.Connection{
 			{
-				Name:          "first",
-				StructureName: reference.Name,
+				Path:          "first",
 				StructureType: "list",
 				VariableID:    listVariables[0].ID,
 			},
 			{
-				Name:          "second",
-				StructureName: reference.Name,
+				Path:          "second",
 				StructureType: "list",
 				VariableID:    listVariables[0].ID,
 			},
 			{
-				Name:          "first",
-				StructureName: reference.Name,
+				Path:          "first",
 				StructureType: "list",
 				VariableID:    listVariables[2].ID,
 			},
@@ -108,7 +102,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 
 		listVariables := make([]View, 0)
 		for i := 0; i < 10; i++ {
-			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, groups))
 		}
 
 		handler := New(NewModel(projectId, m.ShortID, VariableModel{
@@ -118,7 +112,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""))
+		}, []connections.Connection{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
@@ -131,7 +125,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 
 		listVariables := make([]View, 0)
 		for i := 0; i < 10; i++ {
-			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups))
+			listVariables = append(listVariables, testAddToList(projectId, m.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, groups))
 		}
 
 		handler := New(NewModel(projectId, m.ID, VariableModel{
@@ -141,7 +135,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""))
+		}, []connections.Connection{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		testAssertErrNil(err)
