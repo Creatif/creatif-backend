@@ -5,7 +5,7 @@ import (
 	"creatif/cmd/http/request/declarations/lists"
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/lists/updateListItemByID"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -21,12 +21,11 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 		model.Fields = c.QueryParam("fields")
 
 		model = lists.SanitizeUpdateListItemByID(model)
-		references := make([]shared.UpdateReference, 0)
-		if len(model.References) > 0 {
-			references = sdk.Map(model.References, func(idx int, value lists.UpdateReference) shared.UpdateReference {
-				return shared.UpdateReference{
-					Name:          value.Name,
-					StructureName: value.StructureName,
+		conns := make([]connections.Connection, 0)
+		if len(model.Connections) > 0 {
+			conns = sdk.Map(model.Connections, func(idx int, value lists.UpdateConnection) connections.Connection {
+				return connections.Connection{
+					Path:          value.Name,
 					StructureType: value.StructureType,
 					VariableID:    value.VariableID,
 				}
@@ -45,7 +44,7 @@ func UpdateListItemByIDHandler() func(e echo.Context) error {
 			model.Values.Groups,
 			[]byte(model.Values.Metadata),
 			[]byte(model.Values.Value),
-			references,
+			conns,
 			model.ImagePaths,
 		), authentication)
 

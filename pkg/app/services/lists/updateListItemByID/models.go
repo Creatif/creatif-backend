@@ -3,7 +3,7 @@ package updateListItemByID
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
@@ -33,13 +33,13 @@ type ModelValues struct {
 }
 
 type Model struct {
-	Fields     []string
-	ListName   string
-	ItemID     string
-	Values     ModelValues
-	ProjectID  string
-	ImagePaths []string
-	References []shared.UpdateReference
+	Fields      []string
+	ListName    string
+	ItemID      string
+	Values      ModelValues
+	ProjectID   string
+	ImagePaths  []string
+	Connections []connections.Connection
 }
 
 type LogicResult struct {
@@ -58,15 +58,15 @@ func NewModel(
 	groups []string,
 	metadata,
 	value []byte,
-	references []shared.UpdateReference,
+	connections []connections.Connection,
 	imagePaths []string,
 ) Model {
 	return Model{
-		Fields:     fields,
-		ProjectID:  projectId,
-		ListName:   listName,
-		ItemID:     itemId,
-		References: references,
+		Fields:      fields,
+		ProjectID:   projectId,
+		ListName:    listName,
+		ItemID:      itemId,
+		Connections: connections,
 		Values: ModelValues{
 			Name:      updatingName,
 			Metadata:  metadata,

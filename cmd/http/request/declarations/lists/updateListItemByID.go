@@ -16,20 +16,19 @@ type UpdateListItemByIDValues struct {
 }
 
 type UpdateListItemByID struct {
-	Name       string                   `param:"name"`
-	ItemID     string                   `param:"itemID"`
-	Values     UpdateListItemByIDValues `json:"values"`
-	ProjectID  string                   `param:"projectID"`
-	Fields     string                   `query:"fields"`
-	References []UpdateReference        `json:"references"`
-	ImagePaths []string                 `json:"imagePaths"`
+	Name        string                   `param:"name"`
+	ItemID      string                   `param:"itemID"`
+	Values      UpdateListItemByIDValues `json:"values"`
+	ProjectID   string                   `param:"projectID"`
+	Fields      string                   `query:"fields"`
+	Connections []UpdateConnection       `json:"connections"`
+	ImagePaths  []string                 `json:"imagePaths"`
 
 	ResolvedFields []string
 }
 
-type UpdateReference struct {
+type UpdateConnection struct {
 	Name          string `json:"name"`
-	StructureName string `json:"structureName"`
 	StructureType string `json:"structureType"`
 	VariableID    string `json:"variableId"`
 }
@@ -61,11 +60,10 @@ func SanitizeUpdateListItemByID(model UpdateListItemByID) UpdateListItemByID {
 		Value:    model.Values.Value,
 	}
 
-	if len(model.References) != 0 {
-		model.References = sdk.Map(model.References, func(idx int, value UpdateReference) UpdateReference {
-			return UpdateReference{
+	if len(model.Connections) != 0 {
+		model.Connections = sdk.Map(model.Connections, func(idx int, value UpdateConnection) UpdateConnection {
+			return UpdateConnection{
 				Name:          p.Sanitize(value.Name),
-				StructureName: p.Sanitize(value.StructureName),
 				StructureType: p.Sanitize(value.StructureType),
 				VariableID:    p.Sanitize(value.VariableID),
 			}

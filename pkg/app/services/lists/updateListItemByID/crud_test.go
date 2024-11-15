@@ -4,7 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/groups/addGroups"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
@@ -43,7 +43,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			[]string{},
 			[]byte{},
 			v,
-			[]shared.UpdateReference{},
+			[]connections.Connection{},
 			[]string{},
 		), auth.NewTestingAuthentication(false, ""))
 
@@ -83,7 +83,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 		m := "text value"
 		v, err := json.Marshal(m)
 		gomega.Expect(err).Should(gomega.BeNil())
-		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ID, singleItem.ID, "newName", "readonly", []string{g[0], g[1], g[2]}, []byte{}, v, []shared.UpdateReference{}, []string{}), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, "eng", []string{"name", "groups", "value"}, view.ID, singleItem.ID, "newName", "readonly", []string{g[0], g[1], g[2]}, []byte{}, v, []connections.Connection{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		updated, err := handler.Handle()
 		testAssertErrNil(err)
@@ -131,7 +131,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			[]string{g[0], g[1], g[2]},
 			[]byte{},
 			v,
-			[]shared.UpdateReference{},
+			[]connections.Connection{},
 			[]string{},
 		), auth.NewTestingAuthentication(false, ""))
 
@@ -178,7 +178,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			[]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"},
 			[]byte{},
 			v,
-			[]shared.UpdateReference{},
+			[]connections.Connection{},
 			[]string{},
 		),
 			auth.NewTestingAuthentication(false, ""),
@@ -220,7 +220,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) variable tests", func() {
 			nil,
 			[]byte{},
 			v,
-			[]shared.UpdateReference{},
+			[]connections.Connection{},
 			[]string{},
 		),
 			auth.NewTestingAuthentication(false, ""),

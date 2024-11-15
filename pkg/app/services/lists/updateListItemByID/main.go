@@ -226,16 +226,8 @@ func (c Main) Logic() (LogicResult, error) {
 			}
 		}
 
-		if sdk.Includes(c.model.Fields, "references") {
-			conns := sdk.Map(c.model.References, func(idx int, value shared.UpdateReference) connections.Connection {
-				return connections.Connection{
-					Path:          value.Name,
-					StructureType: value.StructureType,
-					VariableID:    value.VariableID,
-				}
-			})
-
-			newValue, newConnections, err := connections.RecreateConnections(c.model.ProjectID, existing.ID, "list", conns, existing.Value)
+		if sdk.Includes(c.model.Fields, "connections") {
+			newValue, newConnections, err := connections.RecreateConnections(c.model.ProjectID, existing.ID, "list", c.model.Connections, existing.Value)
 			if err != nil {
 				return err
 			}
@@ -246,7 +238,7 @@ func (c Main) Logic() (LogicResult, error) {
 				return res.Error
 			}
 		}
-		
+
 		return nil
 	}); transactionErr != nil {
 		errString := transactionErr.Error()
