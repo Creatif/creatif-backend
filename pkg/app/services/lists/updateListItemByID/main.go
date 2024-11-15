@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -222,6 +223,27 @@ func (c Main) Logic() (LogicResult, error) {
 				if res := tx.Create(&newGroup); res.Error != nil {
 					return res.Error
 				}
+			}
+		}
+
+		if sdk.Includes(c.model.Fields, "references") {
+			conns := sdk.Map(c.model.References, func(idx int, value shared.UpdateReference) connections.Connection {
+				return connections.Connection{
+					Path:          value.Name,
+					StructureType: value.StructureType,
+					VariableID:    value.VariableID,
+				}
+			})
+
+			newValue, newConnections, err := connections.RecreateConnections(c.model.ProjectID, existing.ID, "list", conns, existing.Value)
+			if err != nil {
+				return err
+			}
+
+			existing.Value = newValue
+
+			if res := tx.Create(&newConnections); res.Error != nil {
+				return res.Error
 			}
 		}
 

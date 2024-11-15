@@ -13,7 +13,6 @@ import (
 	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
-	"github.com/tidwall/sjson"
 	"gorm.io/gorm"
 )
 
@@ -146,31 +145,13 @@ func (c Main) Logic() (LogicModel, error) {
 				}
 			})
 
-			for _, c := range conns {
-				newValue, err := sjson.DeleteBytes(variable.Value, c.Path)
-				if err != nil {
-					return err
-				}
-
-				variable.Value = newValue
-			}
-
-			if err := connections.CheckConnectionsIntegrity(conns); err != nil {
+			newValue, newConnections, err := connections.CreateConnections(c.model.ProjectID, variable.ID, "list", conns, variable.Value)
+			if err != nil {
 				return err
 			}
+			variable.Value = newValue
 
-			created := sdk.Map(conns, func(idx int, value connections.Connection) declarations.Connection {
-				return declarations.NewConnection(
-					c.model.ProjectID,
-					value.Path,
-					variable.ID,
-					"list",
-					value.VariableID,
-					value.StructureType,
-				)
-			})
-
-			if res := tx.Create(&created); res.Error != nil {
+			if res := tx.Create(&newConnections); res.Error != nil {
 				return res.Error
 			}
 
