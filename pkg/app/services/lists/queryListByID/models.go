@@ -29,8 +29,6 @@ func NewModel(projectId, name, itemID string) Model {
 }
 
 type ConnectionView struct {
-	ProjectID string `json:"projectId"`
-
 	Path                string `json:"path"`
 	ParentVariableID    string `json:"parentVariableId"`
 	ParentStructureType string `json:"parentStructureType"`

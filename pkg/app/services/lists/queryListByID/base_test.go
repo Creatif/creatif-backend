@@ -3,14 +3,13 @@ package queryListByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
-	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/lists/addToList"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/maps/addToMap"
+	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/shared/connections"
-	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -125,60 +124,23 @@ func testCreateProject(name string) string {
 	return model.ID
 }
 
-func testCreateListAndReturnIds(projectId, name string, varNum int) (string, []map[string]string) {
-	variables := make([]createList2.Variable, varNum)
-	for i := 0; i < varNum; i++ {
-		variables[i] = createList2.Variable{
-			Name:      fmt.Sprintf("one-%d", i),
-			Metadata:  nil,
-			Groups:    nil,
-			Locale:    "eng",
-			Behaviour: "readonly",
-			Value:     nil,
-		}
-	}
+func testCreateMap(projectId, name string) mapCreate.View {
+	entries := make([]mapCreate.VariableModel, 0)
 
-	handler := createList2.New(createList2.NewModel(projectId, name, variables), auth.NewTestingAuthentication(false, ""))
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""))
 
-	list, err := handler.Handle()
-	gomega.Expect(err).Should(gomega.BeNil())
-	testAssertIDValid(list.ID)
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
 
-	gomega.Expect(list.Name).Should(gomega.Equal(name))
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
 
-	var savedVariables []declarations.ListVariable
-	res := storage2.Gorm().Where("list_id = ?", list.ID).Find(&savedVariables)
-	gomega.Expect(res.Error).Should(gomega.BeNil())
-
-	return list.ID, sdk.Map(savedVariables, func(idx int, value declarations.ListVariable) map[string]string {
-		return map[string]string{
-			"id":   value.ID,
-			"name": value.Name,
-		}
-	})
+	return view
 }
 
-func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
-	groups := make([]addGroups.GroupModel, numOfGroups)
-	for i := 0; i < numOfGroups; i++ {
-		groups[i] = addGroups.GroupModel{
-			ID:     "",
-			Name:   fmt.Sprintf("group-%d", i),
-			Type:   "new",
-			Action: "create",
-		}
-	}
-
-	handler := addGroups.New(addGroups.NewModel(projectId, groups), auth.NewTestingAuthentication(false, projectId))
-	model, err := handler.Handle()
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	return model
-}
-
-func testAddToList(projectId, name string, connections []connections.Connection, groups []string) addToList.View {
-	variableModel := addToList.VariableModel{
-		Name:      fmt.Sprintf("new add variable"),
+func testAddToMap(projectId, variableName, mapId string, connections []connections.Connection, groups []string) addToMap.View {
+	variableModel := addToMap.VariableModel{
+		Name:      variableName,
 		Metadata:  nil,
 		Groups:    groups,
 		Value:     nil,
@@ -186,7 +148,38 @@ func testAddToList(projectId, name string, connections []connections.Connection,
 		Behaviour: "modifiable",
 	}
 
-	model := addToList.NewModel(projectId, name, variableModel, connections, []string{})
+	model := addToMap.NewModel(projectId, mapId, variableModel, connections, []string{})
+	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
+
+	view, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return view
+}
+
+func testCreateList(projectId, name string) createList2.View {
+	handler := createList2.New(createList2.NewModel(projectId, name, nil), auth.NewTestingAuthentication(false, ""))
+
+	list, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
+
+	return list
+}
+
+func testAddToList(projectId, variableName, listId string, connections []connections.Connection, groups []string) addToList.View {
+	variableModel := addToList.VariableModel{
+		Name:      variableName,
+		Metadata:  nil,
+		Groups:    groups,
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToList.NewModel(projectId, listId, variableModel, connections, []string{})
 	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()

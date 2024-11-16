@@ -7,17 +7,17 @@ import (
 )
 
 func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []byte, error) {
-	connections, err := getConnections(variableId)
+	conns, err := getConnections(variableId)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if len(connections) == 0 {
+	if len(conns) == 0 {
 		return nil, value, nil
 	}
 
 	// get all child variables
-	for _, c := range connections {
+	for _, c := range conns {
 		connectionVariable, err := getChildConnectionVariable(c.ChildStructureType, c.ChildVariableID)
 		if err != nil {
 			return nil, value, err
@@ -33,8 +33,8 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 			return nil, nil, err
 		}
 
-		return nil, updatedValue, nil
+		value = updatedValue
 	}
 
-	return connections, value, nil
+	return conns, value, nil
 }
