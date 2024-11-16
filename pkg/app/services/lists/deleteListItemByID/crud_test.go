@@ -44,7 +44,7 @@ var _ = ginkgo.Describe("Declaration list item delete tests", func() {
 		gomega.Expect(len(listItems)).Should(gomega.Equal(99))
 
 		var count int
-		res = storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		res = storage.Gorm().Raw("SELECT count(child_variable_id) AS count FROM declarations.connections").Scan(&count)
 		testAssertErrNil(res.Error)
 		gomega.Expect(count).Should(gomega.Equal(0))
 	})

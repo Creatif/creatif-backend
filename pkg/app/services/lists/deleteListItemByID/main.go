@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/events"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -22,13 +21,6 @@ type Main struct {
 func (c Main) Validate() error {
 	if errs := c.model.Validate(); errs != nil {
 		return appErrors.NewValidationError(errs)
-	}
-
-	err := shared.IsParent(c.model.ItemID)
-	if err != nil {
-		return appErrors.NewValidationError(map[string]string{
-			"isParent": "This variable is a parent and cannot be deleted",
-		})
 	}
 
 	return nil
@@ -84,13 +76,6 @@ func (c Main) Logic() (*struct{}, error) {
 
 		if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_variable_id = ?", (declarations.Connection{}).TableName()), c.model.ItemID); res.Error != nil {
 			return res.Error
-		}
-
-		if err := shared.RemoveAsParent(c.model.ItemID, tx); err != nil {
-			return err
-		}
-		if err := shared.RemoveAsChild(c.model.ItemID, tx); err != nil {
-			return err
 		}
 
 		for _, path := range paths {

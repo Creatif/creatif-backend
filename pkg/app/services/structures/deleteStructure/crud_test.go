@@ -43,10 +43,14 @@ INNER JOIN %s AS m ON project_id = ? AND m.id = ? AND mv.map_id = m.id
 		var refCount int
 		res = storage.Gorm().
 			Raw(fmt.Sprintf(`
-SELECT COUNT(id) FROM %s WHERE project_id = ? AND (parent_structure_id = ? OR child_structure_id = ?)
+SELECT COUNT(child_variable_id) FROM %s AS c
+INNER JOIN %s AS v ON c.project_id = ?
+INNER JOIN %s AS vg ON (vg.id = c.child_variable_id OR vg.id = c.parent_variable_id) AND vg.map_id = v.id
 `,
-				(declarations.Reference{}).TableName(),
-			), p, m.ID, m.ID).Scan(&count)
+				(declarations.Connection{}).TableName(),
+				(declarations.Map{}).TableName(),
+				(declarations.MapVariable{}).TableName(),
+			), p).Scan(&count)
 
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(refCount).Should(gomega.Equal(0))
@@ -87,10 +91,14 @@ INNER JOIN %s AS m ON project_id = ? AND m.id = ? AND mv.list_id = m.id
 		var refCount int
 		res = storage.Gorm().
 			Raw(fmt.Sprintf(`
-SELECT COUNT(id) FROM %s WHERE project_id = ? AND (parent_structure_id = ? OR child_structure_id = ?)
+SELECT COUNT(child_variable_id) FROM %s AS c
+INNER JOIN %s AS v ON c.project_id = ?
+INNER JOIN %s AS vg ON (vg.id = c.child_variable_id OR vg.id = c.parent_variable_id) AND vg.list_id = v.id
 `,
-				(declarations.Reference{}).TableName(),
-			), p, m.ID, m.ID).Scan(&count)
+				(declarations.Connection{}).TableName(),
+				(declarations.List{}).TableName(),
+				(declarations.ListVariable{}).TableName(),
+			), p).Scan(&count)
 
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(refCount).Should(gomega.Equal(0))

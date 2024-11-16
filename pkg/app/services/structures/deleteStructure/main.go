@@ -50,8 +50,14 @@ func (c Main) Logic() (interface{}, error) {
 					return errors.New(res.Error.Error())
 				}
 
-				referenceSql := fmt.Sprintf("DELETE FROM %s WHERE project_id = ? AND (parent_structure_id = ? OR child_structure_id = ?)", (declarations.Reference{}).TableName())
-				if res := tx.Exec(referenceSql, c.model.ProjectID, c.model.ID, c.model.ID); res.Error != nil {
+				connectionsSql := fmt.Sprintf(
+					"DELETE FROM %s AS c USING %s AS v, %s AS vg WHERE c.project_id = ? AND (vg.id = child_variable_id OR vg.id = parent_variable_id) AND vg.map_id = v.id AND (c.parent_variable_id = ? OR c.child_variable_id = ?)",
+					(declarations.Connection{}).TableName(),
+					(declarations.Map{}).TableName(),
+					(declarations.MapVariable{}).TableName(),
+				)
+
+				if res := tx.Exec(connectionsSql, c.model.ProjectID, c.model.ID, c.model.ID); res.Error != nil {
 					return errors.New(res.Error.Error())
 				}
 
@@ -69,8 +75,14 @@ func (c Main) Logic() (interface{}, error) {
 			return errors.New(res.Error.Error())
 		}
 
-		referenceSql := fmt.Sprintf("DELETE FROM %s WHERE project_id = ? AND (parent_structure_id = ? OR child_structure_id = ?)", (declarations.Reference{}).TableName())
-		if res := tx.Exec(referenceSql, c.model.ProjectID, c.model.ID, c.model.ID); res.Error != nil {
+		connectionsSql := fmt.Sprintf(
+			"DELETE FROM %s AS c USING %s AS v, %s AS vg WHERE c.project_id = ? AND (vg.id = child_variable_id OR vg.id = parent_variable_id) AND vg.list_id = v.id AND (c.parent_variable_id = ? OR c.child_variable_id = ?)",
+			(declarations.Connection{}).TableName(),
+			(declarations.List{}).TableName(),
+			(declarations.ListVariable{}).TableName(),
+		)
+
+		if res := tx.Exec(connectionsSql, c.model.ProjectID, c.model.ID, c.model.ID); res.Error != nil {
 			return errors.New(res.Error.Error())
 		}
 

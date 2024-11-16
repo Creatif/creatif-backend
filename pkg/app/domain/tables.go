@@ -10,7 +10,6 @@ const (
 	LIST_TABLE             = "lists"
 	GROUPS_TABLE           = "groups"
 	VARIABLE_GROUPS_TABLE  = "variable_groups"
-	REFERENCE_TABLES       = "references"
 	CONNECTIONS_TABLE      = "connections"
 	LIST_VARIABLES_TABLE   = "list_variables"
 	PUBLISHED_LISTS_TABLE  = "published_lists"

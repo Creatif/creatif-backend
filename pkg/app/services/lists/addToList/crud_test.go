@@ -55,7 +55,7 @@ var _ = ginkgo.Describe("Declaration (ADD) list entry tests", func() {
 		gomega.Expect(count).Should(gomega.Equal(3))
 	})
 
-	ginkgo.It("should fail to add an entry because of a duplicate reference", func() {
+	ginkgo.It("should fail to add an entry because of a duplicate connection", func() {
 		projectId := testCreateProject("project")
 		m := testCreateList(projectId, "mapName")
 		groups := testCreateGroups(projectId, 5)

@@ -4,7 +4,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/events"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -25,13 +24,6 @@ func (c Main) Validate() error {
 func (c Main) Authenticate() error {
 	if err := c.auth.Authenticate(); err != nil {
 		return appErrors.NewAuthenticationError(err)
-	}
-
-	err := shared.IsParent(c.model.VariableName)
-	if err != nil {
-		return appErrors.NewValidationError(map[string]string{
-			"isParent": "This variable is a parent and cannot be deleted",
-		})
 	}
 
 	return nil

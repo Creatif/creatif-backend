@@ -181,10 +181,6 @@ func createDatabase() {
 			log.Fatalln(err)
 		}
 
-		if err := storage2.Gorm().AutoMigrate(declarations.Reference{}); err != nil {
-			log.Fatalln(err)
-		}
-
 		if err := storage2.Gorm().AutoMigrate(declarations.Connection{}); err != nil {
 			log.Fatalln(err)
 		}
@@ -254,7 +250,7 @@ func isMigrationPerformed() (bool, error) {
 		return false, res.Error
 	}
 
-	return count == 19, nil
+	return count == 18, nil
 }
 
 func createSchemas() *sql.DB {
