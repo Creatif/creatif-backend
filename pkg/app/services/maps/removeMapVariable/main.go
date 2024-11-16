@@ -77,11 +77,8 @@ func (c Main) Logic() (interface{}, error) {
 			return res.Error
 		}
 
-		if err := shared.RemoveAsParent(c.model.VariableName, tx); err != nil {
-			return err
-		}
-		if err := shared.RemoveAsChild(c.model.VariableName, tx); err != nil {
-			return err
+		if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_variable_id = ?", (declarations.Connection{}).TableName()), c.model.VariableName); res.Error != nil {
+			return res.Error
 		}
 
 		for _, path := range paths {

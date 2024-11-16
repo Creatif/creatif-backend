@@ -101,7 +101,7 @@ func (c Main) Logic() (LogicModel, error) {
 	variable := declarations.NewListVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Value)
 	variable.Index = highestIndex + 1024
 
-	var refs []declarations.Reference
+	var conns []declarations.Connection
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if len(c.model.ImagePaths) != 0 {
 			newValue, err := fileProcessor.UploadFiles(
@@ -152,6 +152,8 @@ func (c Main) Logic() (LogicModel, error) {
 			if res := tx.Create(&newConnections); res.Error != nil {
 				return res.Error
 			}
+
+			conns = newConnections
 		}
 
 		if res := tx.Create(&variable); res.Error != nil {
@@ -171,9 +173,9 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	return LogicModel{
-		Variable:   variable,
-		References: refs,
-		Groups:     c.model.Entry.Groups,
+		Variable:    variable,
+		Connections: conns,
+		Groups:      c.model.Entry.Groups,
 	}, nil
 }
 

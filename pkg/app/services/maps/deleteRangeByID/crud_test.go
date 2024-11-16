@@ -5,7 +5,7 @@ import (
 	declarations2 "creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/maps/addToMap"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
@@ -21,14 +21,14 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 
 		addedMapsWithReferences := make([]addToMap.LogicModel, 0)
 		for i := 0; i < 10; i++ {
-			addToMapVariable := testAddToMap(projectId, mapView.ID, []shared.Reference{
+			addToMapVariable := testAddToMap(projectId, mapView.ID, []connections.Connection{
 				{
-					StructureName: referenceView.Name,
+					Path:          "first",
 					StructureType: "map",
 					VariableID:    referenceView.Variables[0].ID,
 				},
 				{
-					StructureName: referenceView.Name,
+					Path:          "second",
 					StructureType: "map",
 					VariableID:    referenceView.Variables[1].ID,
 				},
@@ -58,7 +58,7 @@ var _ = ginkgo.Describe("Declaration map item delete tests", func() {
 		gomega.Expect(len(remainingItems)).Should(gomega.Equal(0))
 
 		var count int
-		res = storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		res = storage.Gorm().Raw("SELECT count(child_variable_id) AS count FROM declarations.connections").Scan(&count)
 		testAssertErrNil(res.Error)
 		gomega.Expect(count).Should(gomega.Equal(0))
 	})

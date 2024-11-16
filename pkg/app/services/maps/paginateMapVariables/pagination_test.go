@@ -4,7 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
@@ -18,7 +18,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		mapView := testCreateMap(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
@@ -37,7 +37,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		mapView := testCreateMap(projectId, "name")
 
 		for i := 0; i < 50; i++ {
-			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
@@ -54,7 +54,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		mapView := testCreateMap(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, []string{})
+			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, []string{})
 		}
 
 		localeId, _ := locales.GetIDWithAlpha("eng")
@@ -71,7 +71,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		mapView := testCreateMap(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}
@@ -88,7 +88,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		mapView := testCreateMap(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, []string{})
+			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, []string{})
 		}
 
 		handler := New(NewModel(projectId, []string{}, mapView.ID, "created_at", "1", "desc", 10, 1, []string{}, nil, "", []string{}), auth.NewTestingAuthentication(false, ""))
@@ -104,7 +104,7 @@ var _ = ginkgo.Describe("Map variables pagination tests", func() {
 		mapView := testCreateMap(projectId, "name")
 
 		for i := 0; i < 100; i++ {
-			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+			testAddToMap(projectId, mapView.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 				return value.ID
 			}))
 		}

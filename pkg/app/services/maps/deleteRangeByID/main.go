@@ -5,7 +5,6 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/events"
-	"creatif/pkg/app/services/shared"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
@@ -75,11 +74,8 @@ func (c Main) Logic() (*struct{}, error) {
 			return res.Error
 		}
 
-		if err := shared.RemoveManyAsParent(c.model.Items, tx); err != nil {
-			return err
-		}
-		if err := shared.RemoveManyAsChild(c.model.Items, tx); err != nil {
-			return err
+		if res := tx.Exec(fmt.Sprintf("DELETE FROM %s WHERE parent_variable_id IN(?)", (declarations.Connection{}).TableName()), c.model.Items); res.Error != nil {
+			return res.Error
 		}
 
 		for _, path := range paths {

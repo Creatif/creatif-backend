@@ -3,7 +3,6 @@ package truncateStructure
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/shared"
 	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/storage"
 	"fmt"
@@ -17,7 +16,7 @@ var _ = ginkgo.Describe("Truncating structures", func() {
 		m := testCreateMap(p, "map")
 
 		for i := 0; i < 100; i++ {
-			testAddToMap(p, m.ID, fmt.Sprintf("map-%d", i), []shared.Reference{}, []string{})
+			testAddToMap(p, m.ID, fmt.Sprintf("map-%d", i), []connections.Connection{}, []string{})
 		}
 
 		handler := New(NewModel(p, m.ID, "map"), auth.NewTestingAuthentication(false, ""))

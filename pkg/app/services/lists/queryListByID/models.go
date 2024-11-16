@@ -1,8 +1,8 @@
 package queryListByID
 
 import (
+	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
 	"creatif/pkg/lib/sdk"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/lib/pq"
@@ -16,20 +16,8 @@ type Model struct {
 }
 
 type LogicModel struct {
-	Variable  QueryVariable
-	Reference []shared.QueryReference
-}
-
-type QueryReference struct {
-	ID                string
-	Name              string
-	ParentType        string
-	ChildType         string
-	ParentID          string
-	ChildID           string
-	ChildStructureID  string
-	ParentStructureID string
-	StructureName     string
+	Variable    QueryVariable
+	Connections []declarations.Connection
 }
 
 func NewModel(projectId, name, itemID string) Model {
@@ -40,29 +28,29 @@ func NewModel(projectId, name, itemID string) Model {
 	}
 }
 
-type ReferenceView struct {
-	ID                string `json:"id"`
-	Name              string `json:"name"`
-	ParentType        string `json:"parentType"`
-	ChildType         string `json:"childType"`
-	ParentID          string `json:"parentId"`
-	ChildID           string `json:"childId"`
-	ChildStructureID  string `json:"childStructureId"`
-	ParentStructureID string `json:"parentStructureId"`
-	StructureName     string `json:"structureName"`
+type ConnectionView struct {
+	ProjectID string `json:"projectId"`
+
+	Path                string `json:"path"`
+	ParentVariableID    string `json:"parentVariableId"`
+	ParentStructureType string `json:"parentStructureType"`
+
+	ChildVariableID    string `json:"childVariableId"`
+	ChildStructureType string `json:"childStructureType"`
+
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type View struct {
-	ID        string         `json:"id"`
-	Locale    string         `json:"locale"`
-	ShortID   string         `json:"shortId"`
-	Name      string         `json:"name"`
-	Behaviour string         `json:"behaviour"`
-	Groups    pq.StringArray `json:"groups"`
-	Metadata  interface{}    `json:"metadata"`
-	Value     interface{}    `json:"value"`
-
-	References []ReferenceView `json:"references"`
+	ID          string           `json:"id"`
+	Locale      string           `json:"locale"`
+	ShortID     string           `json:"shortId"`
+	Name        string           `json:"name"`
+	Behaviour   string           `json:"behaviour"`
+	Groups      pq.StringArray   `json:"groups"`
+	Metadata    interface{}      `json:"metadata"`
+	Value       interface{}      `json:"value"`
+	Connections []ConnectionView `json:"connections"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -81,17 +69,14 @@ func newView(model LogicModel) View {
 		Value:     model.Variable.Value,
 		CreatedAt: model.Variable.CreatedAt,
 		UpdatedAt: model.Variable.UpdatedAt,
-		References: sdk.Map(model.Reference, func(idx int, value shared.QueryReference) ReferenceView {
-			return ReferenceView{
-				ID:                value.ID,
-				Name:              value.Name,
-				ParentStructureID: value.ParentStructureID,
-				ChildStructureID:  value.ChildStructureID,
-				ParentID:          value.ParentID,
-				ChildID:           value.ChildID,
-				ParentType:        value.ParentType,
-				ChildType:         value.ChildType,
-				StructureName:     value.StructureName,
+		Connections: sdk.Map(model.Connections, func(idx int, value declarations.Connection) ConnectionView {
+			return ConnectionView{
+				Path:                value.Path,
+				ParentVariableID:    value.ParentVariableID,
+				ParentStructureType: value.ParentStructureType,
+				ChildVariableID:     value.ChildVariableID,
+				ChildStructureType:  value.ChildStructureType,
+				CreatedAt:           value.CreatedAt,
 			}
 		}),
 	}

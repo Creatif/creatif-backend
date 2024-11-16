@@ -3,7 +3,7 @@ package queryMapVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -14,7 +14,7 @@ var _ = ginkgo.Describe("Declaration maps variable tests", func() {
 		projectId := testCreateProject("project")
 		groups := testCreateGroups(projectId, 5)
 		mapView := testCreateMap(projectId, "name")
-		variable := testAddToMap(projectId, mapView.ID, []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+		variable := testAddToMap(projectId, mapView.ID, []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 			return value.ID
 		}))
 

@@ -11,7 +11,6 @@ import (
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/publishing/publish"
-	"creatif/pkg/app/services/shared"
 	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
@@ -176,7 +175,7 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	return model
 }
 
-func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.View {
+func testAddToMap(projectId, name, variableName string, connections []connections.Connection, groups []string) addToMap.View {
 	variableModel := addToMap.VariableModel{
 		Name:      variableName,
 		Metadata:  nil,
@@ -186,7 +185,7 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 		Behaviour: "modifiable",
 	}
 
-	model := addToMap.NewModel(projectId, name, variableModel, references, []string{})
+	model := addToMap.NewModel(projectId, name, variableModel, connections, []string{})
 	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
@@ -229,10 +228,10 @@ func publishFullProject(projectId string) ([]addToList.View, publish.View) {
 	paginationList := testCreateList(projectId, "paginationList")
 
 	referenceMap := testCreateMap(projectId, "referenceMap")
-	referenceMapItem1 := testAddToMap(projectId, referenceMap.ID, "reference-map-1", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+	referenceMapItem1 := testAddToMap(projectId, referenceMap.ID, "reference-map-1", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 		return value.ID
 	}))
-	referenceMapItem2 := testAddToMap(projectId, referenceMap.ID, "reference-map-2", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+	referenceMapItem2 := testAddToMap(projectId, referenceMap.ID, "reference-map-2", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 		return value.ID
 	}))
 

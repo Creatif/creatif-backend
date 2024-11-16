@@ -5,7 +5,7 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	addToMap2 "creatif/pkg/app/services/maps/addToMap"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -28,10 +28,9 @@ func AddToMapHandler() func(e echo.Context) error {
 			Groups:    model.Variable.Groups,
 			Behaviour: model.Variable.Behaviour,
 			Value:     []byte(model.Variable.Value),
-		}, sdk.Map(model.References, func(idx int, value maps.Reference) shared.Reference {
-			return shared.Reference{
-				Name:          value.Name,
-				StructureName: value.StructureName,
+		}, sdk.Map(model.Connections, func(idx int, value maps.Connection) connections.Connection {
+			return connections.Connection{
+				Path:          value.Path,
 				StructureType: value.StructureType,
 				VariableID:    value.VariableID,
 			}

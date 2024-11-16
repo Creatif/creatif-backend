@@ -11,7 +11,6 @@ import (
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/publishing/publish"
-	"creatif/pkg/app/services/shared"
 	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
@@ -176,7 +175,7 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	return model
 }
 
-func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.View {
+func testAddToMap(projectId, name, variableName string, connections []connections.Connection, groups []string) addToMap.View {
 	b, err := json.Marshal(map[string]interface{}{
 		"one":   "one",
 		"two":   []string{"one", "two", "three"},
@@ -195,7 +194,7 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 		Behaviour: "modifiable",
 	}
 
-	model := addToMap.NewModel(projectId, name, variableModel, references, []string{})
+	model := addToMap.NewModel(projectId, name, variableModel, connections, []string{})
 	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Handle()
@@ -237,37 +236,33 @@ func publishFullProject(projectId string) ([]addToMap.View, publish.View) {
 	}))
 
 	referenceMap := testCreateMap(projectId, "referenceMap")
-	referenceMapItem1 := testAddToMap(projectId, referenceMap.ID, "reference-map-1", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+	referenceMapItem1 := testAddToMap(projectId, referenceMap.ID, "reference-map-1", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 		return value.ID
 	}))
-	referenceMapItem2 := testAddToMap(projectId, referenceMap.ID, "reference-map-2", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+	referenceMapItem2 := testAddToMap(projectId, referenceMap.ID, "reference-map-2", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 		return value.ID
 	}))
 
 	views := make([]addToMap.View, 0)
 	for i := 0; i < 200; i++ {
-		addToListModel := testAddToMap(projectId, paginationList.ID, fmt.Sprintf("name-%d", i), []shared.Reference{
+		addToListModel := testAddToMap(projectId, paginationList.ID, fmt.Sprintf("name-%d", i), []connections.Connection{
 			{
-				Name:          "first",
-				StructureName: referenceMap.Name,
+				Path:          "first",
 				StructureType: "map",
 				VariableID:    referenceMapItem1.ID,
 			},
 			{
-				Name:          "second",
-				StructureName: referenceMap.Name,
+				Path:          "second",
 				StructureType: "map",
 				VariableID:    referenceMapItem2.ID,
 			},
 			{
-				Name:          "third",
-				StructureName: paginationList.Name,
+				Path:          "third",
 				StructureType: "list",
 				VariableID:    referenceListItem1.ID,
 			},
 			{
-				Name:          "fourth",
-				StructureName: paginationList.Name,
+				Path:          "fourth",
 				StructureType: "list",
 				VariableID:    referenceListItem2.ID,
 			},

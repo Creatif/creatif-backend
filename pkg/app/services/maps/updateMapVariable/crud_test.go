@@ -4,7 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/maps/addToMap"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/appErrors"
 	"creatif/pkg/lib/storage"
 	"encoding/json"
@@ -22,29 +22,26 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		m := testCreateMap(projectId, "map")
 		referenceMap := testCreateMap(projectId, "referenceMap")
 
-		referenceVar1 := testAddToMap(projectId, referenceMap.ID, "name-1", []shared.Reference{}, groups, "")
-		referenceVar2 := testAddToMap(projectId, referenceMap.ID, "name-2", []shared.Reference{}, groups, "")
-		referenceVar3 := testAddToMap(projectId, referenceMap.ID, "name-3", []shared.Reference{}, groups, "")
+		referenceVar1 := testAddToMap(projectId, referenceMap.ID, "name-1", []connections.Connection{}, groups, "")
+		referenceVar2 := testAddToMap(projectId, referenceMap.ID, "name-2", []connections.Connection{}, groups, "")
+		referenceVar3 := testAddToMap(projectId, referenceMap.ID, "name-3", []connections.Connection{}, groups, "")
 
-		referenceVar4 := testAddToMap(projectId, referenceMap.ID, "name-4", []shared.Reference{}, groups, "")
-		referenceVar5 := testAddToMap(projectId, referenceMap.ID, "name-5", []shared.Reference{}, groups, "")
+		referenceVar4 := testAddToMap(projectId, referenceMap.ID, "name-4", []connections.Connection{}, groups, "")
+		referenceVar5 := testAddToMap(projectId, referenceMap.ID, "name-5", []connections.Connection{}, groups, "")
 
-		addToMapView := testAddToMap(projectId, m.ID, "name-0", []shared.Reference{
+		addToMapView := testAddToMap(projectId, m.ID, "name-0", []connections.Connection{
 			{
-				Name:          "myName",
-				StructureName: referenceMap.Name,
+				Path:          "myName",
 				StructureType: "map",
 				VariableID:    referenceVar1.ID,
 			},
 			{
-				Name:          "another",
-				StructureName: referenceMap.Name,
+				Path:          "another",
 				StructureType: "map",
 				VariableID:    referenceVar2.ID,
 			},
 			{
-				Name:          "three",
-				StructureName: referenceMap.Name,
+				Path:          "three",
 				StructureType: "map",
 				VariableID:    referenceVar3.ID,
 			},
@@ -62,16 +59,14 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{groups[1], groups[2]},
 			Behaviour: "readonly",
 			Value:     v,
-		}, []shared.UpdateReference{
+		}, []connections.Connection{
 			{
-				Name:          addToMapView.References[0].Name,
-				StructureName: "referenceMap",
+				Path:          addToMapView.Connections[0].Path,
 				StructureType: "map",
 				VariableID:    referenceVar4.ID,
 			},
 			{
-				Name:          "new entry",
-				StructureName: "referenceMap",
+				Path:          "new entry",
 				StructureType: "map",
 				VariableID:    referenceVar5.ID,
 			},
@@ -94,7 +89,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("readonly"))
 
 		var count int
-		res := storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		res := storage.Gorm().Raw("SELECT count(child_variable_id) AS count FROM declarations.connections").Scan(&count)
 		testAssertErrNil(res.Error)
 		gomega.Expect(count).Should(gomega.Equal(3))
 
@@ -116,7 +111,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 
 		variables := make([]addToMap.View, 0)
 		for i := 0; i < 10; i++ {
-			variables = append(variables, testAddToMap(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups, ""))
+			variables = append(variables, testAddToMap(projectId, m.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, groups, ""))
 		}
 
 		b, err := json.Marshal("this is metadata")
@@ -149,7 +144,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 
 		variables := make([]addToMap.View, 0)
 		for i := 0; i < 10; i++ {
-			variables = append(variables, testAddToMap(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups, "readonly"))
+			variables = append(variables, testAddToMap(projectId, m.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, groups, "readonly"))
 		}
 
 		b, err := json.Marshal("this is metadata")
@@ -182,7 +177,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 
 		variables := make([]addToMap.View, 0)
 		for i := 0; i < 10; i++ {
-			variables = append(variables, testAddToMap(projectId, m.ID, fmt.Sprintf("name-%d", i), []shared.Reference{}, groups, ""))
+			variables = append(variables, testAddToMap(projectId, m.ID, fmt.Sprintf("name-%d", i), []connections.Connection{}, groups, ""))
 		}
 
 		b, err := json.Marshal("this is metadata")

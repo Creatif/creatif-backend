@@ -11,7 +11,6 @@ import (
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
 	"creatif/pkg/app/services/publishing/publish"
-	"creatif/pkg/app/services/shared"
 	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	storage2 "creatif/pkg/lib/storage"
@@ -175,7 +174,7 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	return model
 }
 
-func testAddToMap(projectId, name, variableName string, references []shared.Reference, groups []string) addToMap.LogicModel {
+func testAddToMap(projectId, name, variableName string, connections []connections.Connection, groups []string) addToMap.LogicModel {
 	variableModel := addToMap.VariableModel{
 		Name:      variableName,
 		Metadata:  nil,
@@ -185,7 +184,7 @@ func testAddToMap(projectId, name, variableName string, references []shared.Refe
 		Behaviour: "modifiable",
 	}
 
-	model := addToMap.NewModel(projectId, name, variableModel, references, []string{})
+	model := addToMap.NewModel(projectId, name, variableModel, connections, []string{})
 	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Logic()
@@ -225,10 +224,10 @@ func publishFullProject(projectId string) {
 	list3 := testCreateList(projectId, "list3")
 
 	referenceMap := testCreateMap(projectId, "referenceMap")
-	referenceMapItem1 := testAddToMap(projectId, referenceMap.ID, "reference-map-1", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+	referenceMapItem1 := testAddToMap(projectId, referenceMap.ID, "reference-map-1", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 		return value.ID
 	}))
-	referenceMapItem2 := testAddToMap(projectId, referenceMap.ID, "reference-map-2", []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+	referenceMapItem2 := testAddToMap(projectId, referenceMap.ID, "reference-map-2", []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 		return value.ID
 	}))
 
@@ -241,16 +240,14 @@ func publishFullProject(projectId string) {
 	}))
 
 	for i := 0; i < 5; i++ {
-		testAddToMap(projectId, map1.ID, fmt.Sprintf("map-%d", i), []shared.Reference{
+		testAddToMap(projectId, map1.ID, fmt.Sprintf("map-%d", i), []connections.Connection{
 			{
-				Name:          "first",
-				StructureName: referenceMap.Name,
+				Path:          "first",
 				StructureType: "map",
 				VariableID:    referenceMapItem1.Variable.ID,
 			},
 			{
-				Name:          "second",
-				StructureName: referenceMap.Name,
+				Path:          "second",
 				StructureType: "map",
 				VariableID:    referenceMapItem2.Variable.ID,
 			},
@@ -260,13 +257,13 @@ func publishFullProject(projectId string) {
 	}
 
 	for i := 0; i < 5; i++ {
-		testAddToMap(projectId, map2.ID, fmt.Sprintf("map-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+		testAddToMap(projectId, map2.ID, fmt.Sprintf("map-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 			return value.ID
 		}))
 	}
 
 	for i := 0; i < 5; i++ {
-		testAddToMap(projectId, map3.ID, fmt.Sprintf("map-%d", i), []shared.Reference{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
+		testAddToMap(projectId, map3.ID, fmt.Sprintf("map-%d", i), []connections.Connection{}, sdk.Map(groups, func(idx int, value addGroups.View) string {
 			return value.ID
 		}))
 	}

@@ -3,7 +3,6 @@ package queryListByID
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/shared"
 	"creatif/pkg/app/services/shared/connections"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -68,20 +67,15 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, appErrors.NewNotFoundError(errors.New("No rows found")).AddError("queryMapVariable.Logic", nil)
 	}
 
-	replacedValue, err := connections.ReplaceJson(variable.Value, variable.ID)
+	conns, replacedValue, err := connections.ReplaceJson(variable.Value, variable.ID)
 	if err != nil {
 		return LogicModel{}, appErrors.NewApplicationError(err)
 	}
 	variable.Value = replacedValue
 
-	references, err := shared.QueryReferences(variable.ID, c.model.ProjectID)
-	if err != nil {
-		return LogicModel{}, err
-	}
-
 	return LogicModel{
-		Variable:  variable,
-		Reference: references,
+		Variable:    variable,
+		Connections: conns,
 	}, nil
 }
 

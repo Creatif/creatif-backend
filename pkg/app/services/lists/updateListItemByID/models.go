@@ -19,7 +19,7 @@ var validUpdateableFields = []string{
 	"groups",
 	"behaviour",
 	"value",
-	"references",
+	"connections",
 	"locale",
 }
 

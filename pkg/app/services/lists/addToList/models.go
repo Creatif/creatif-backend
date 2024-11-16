@@ -29,9 +29,9 @@ type Model struct {
 }
 
 type LogicModel struct {
-	Variable   declarations.ListVariable
-	References []declarations.Reference
-	Groups     []string
+	Variable    declarations.ListVariable
+	Connections []declarations.Connection
+	Groups      []string
 }
 
 func NewModel(projectId, name string, entry VariableModel, connections []connections.Connection, imagePaths []string) Model {

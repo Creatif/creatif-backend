@@ -5,6 +5,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/app/services/shared/fileProcessor"
 	pkg "creatif/pkg/lib"
 	"creatif/pkg/lib/appErrors"
@@ -100,7 +101,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 	variable := declarations.NewMapVariable(m.ID, localeID, c.model.Entry.Name, c.model.Entry.Behaviour, c.model.Entry.Metadata, c.model.Entry.Value)
 	variable.Index = highestIndex + 1024
-	var refs []declarations.Reference
+	var conns []declarations.Connection
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
 		if len(c.model.ImagePaths) != 0 {
 			newValue, err := fileProcessor.UploadFiles(
@@ -145,17 +146,26 @@ func (c Main) Logic() (LogicModel, error) {
 			}
 		}
 
-		if len(c.model.References) > 0 {
-			references, err := shared.CreateDeclarationReferences(c.model.References, m.ID, variable.ID, "map", c.model.ProjectID)
+		if len(c.model.Connections) > 0 {
+			newValue, newConnections, err := connections.CreateConnections(
+				c.model.ProjectID,
+				variable.ID,
+				"map",
+				c.model.Connections,
+				variable.Value,
+			)
+
 			if err != nil {
 				return err
 			}
 
-			if res := tx.Create(&references); res.Error != nil {
+			variable.Value = newValue
+
+			if res := tx.Create(&newConnections); res.Error != nil {
 				return res.Error
 			}
 
-			refs = references
+			conns = newConnections
 		}
 
 		return nil
@@ -172,9 +182,9 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	return LogicModel{
-		Variable:   variable,
-		References: refs,
-		Groups:     c.model.Entry.Groups,
+		Variable:    variable,
+		Connections: conns,
+		Groups:      c.model.Entry.Groups,
 	}, nil
 }
 

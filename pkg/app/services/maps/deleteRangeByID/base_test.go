@@ -8,7 +8,7 @@ import (
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	storage2 "creatif/pkg/lib/storage"
 	"encoding/json"
 	"fmt"
@@ -205,7 +205,7 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	return model
 }
 
-func testAddToMap(projectId, name string, references []shared.Reference, groups []string) addToMap.LogicModel {
+func testAddToMap(projectId, name string, connections []connections.Connection, groups []string) addToMap.LogicModel {
 	variableModel := addToMap.VariableModel{
 		Name:      fmt.Sprintf("new add variable"),
 		Metadata:  nil,
@@ -215,7 +215,7 @@ func testAddToMap(projectId, name string, references []shared.Reference, groups 
 		Behaviour: "modifiable",
 	}
 
-	model := addToMap.NewModel(projectId, name, variableModel, references, []string{})
+	model := addToMap.NewModel(projectId, name, variableModel, connections, []string{})
 	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
 
 	view, err := handler.Logic()

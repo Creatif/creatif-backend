@@ -4,7 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/groups/addGroups"
 	getMap2 "creatif/pkg/app/services/maps/getMap"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"creatif/pkg/lib/storage"
 	"github.com/onsi/ginkgo/v2"
@@ -31,22 +31,19 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{
+		}, []connections.Connection{
 			{
-				Name:          "first",
-				StructureName: reference.Name,
+				Path:          "first",
 				StructureType: "map",
 				VariableID:    reference.Variables[0].ID,
 			},
 			{
-				Name:          "second",
-				StructureName: reference.Name,
+				Path:          "second",
 				StructureType: "map",
 				VariableID:    reference.Variables[1].ID,
 			},
 			{
-				Name:          "third",
-				StructureName: reference.Name,
+				Path:          "third",
 				StructureType: "map",
 				VariableID:    reference.Variables[2].ID,
 			},
@@ -62,7 +59,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(maps.ProjectID).Should(gomega.Equal(projectId))
 
 		var count int
-		res := storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		res := storage.Gorm().Raw("SELECT count(child_variable_id) AS count FROM declarations.connections").Scan(&count)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 		gomega.Expect(count).Should(gomega.Equal(3))
 	})
@@ -79,22 +76,19 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{
+		}, []connections.Connection{
 			{
-				Name:          "first",
-				StructureName: reference.Name,
+				Path:          "first",
 				StructureType: "map",
 				VariableID:    reference.Variables[0].ID,
 			},
 			{
-				Name:          "second",
-				StructureName: reference.Name,
+				Path:          "second",
 				StructureType: "map",
 				VariableID:    reference.Variables[0].ID,
 			},
 			{
-				Name:          "first",
-				StructureName: reference.Name,
+				Path:          "first",
 				StructureType: "map",
 				VariableID:    reference.Variables[2].ID,
 			},
@@ -115,7 +109,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""))
+		}, []connections.Connection{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -138,7 +132,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Locale:    "eng",
 			Behaviour: "readonly",
 			Value:     nil,
-		}, []shared.Reference{}, []string{}), auth.NewTestingAuthentication(false, ""))
+		}, []connections.Connection{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		_, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())

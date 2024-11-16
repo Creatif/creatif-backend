@@ -7,21 +7,17 @@ import (
 	"time"
 )
 
-type ReferenceView struct {
-	ID string `json:"id"`
+type ConnectionView struct {
+	ProjectID string `json:"projectId"`
 
-	Name string `json:"name"`
+	Path                string `json:"path"`
+	ParentVariableID    string `json:"parentVariableId"`
+	ParentStructureType string `json:"parentStructureType"`
 
-	ParentType string `json:"parentType"`
-	ChildType  string `json:"childType"`
-
-	// must be structure type item
-	ParentID string `json:"parentId"`
-	// must be entire structure
-	ChildID string `json:"childId"`
+	ChildVariableID    string `json:"childVariableId"`
+	ChildStructureType string `json:"childStructureType"`
 
 	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type View struct {
@@ -40,7 +36,7 @@ type View struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 
-	References []ReferenceView `json:"references"`
+	Connections []ConnectionView `json:"connections"`
 }
 
 func newView(model LogicModel) View {
@@ -66,16 +62,14 @@ func newView(model LogicModel) View {
 		Locale:    model.Variable.LocaleID,
 		CreatedAt: model.Variable.CreatedAt,
 		UpdatedAt: model.Variable.UpdatedAt,
-		References: sdk.Map(model.References, func(idx int, value declarations.Reference) ReferenceView {
-			return ReferenceView{
-				ID:         value.ID,
-				Name:       value.Name,
-				ParentType: value.ParentType,
-				ChildType:  value.ChildType,
-				ParentID:   value.ParentID,
-				ChildID:    value.ChildID,
-				CreatedAt:  value.CreatedAt,
-				UpdatedAt:  value.UpdatedAt,
+		Connections: sdk.Map(model.Connections, func(idx int, value declarations.Connection) ConnectionView {
+			return ConnectionView{
+				Path:                value.Path,
+				ParentVariableID:    value.ParentVariableID,
+				ParentStructureType: value.ParentStructureType,
+				ChildVariableID:     value.ChildVariableID,
+				ChildStructureType:  value.ChildStructureType,
+				CreatedAt:           value.CreatedAt,
 			}
 		}),
 	}

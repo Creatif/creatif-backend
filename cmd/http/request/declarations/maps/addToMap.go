@@ -9,14 +9,13 @@ type AddToMap struct {
 	ProjectID string                 `param:"projectID"`
 	Variable  CreateMapVariableModel `json:"variable"`
 	// Name is the name or ID of the structure
-	Name       string      `json:"name"`
-	References []Reference `json:"references"`
-	ImagePaths []string    `json:"imagePaths"`
+	Name        string       `json:"name"`
+	Connections []Connection `json:"connections"`
+	ImagePaths  []string     `json:"imagePaths"`
 }
 
-type Reference struct {
-	Name          string `json:"name"`
-	StructureName string `json:"structureName"`
+type Connection struct {
+	Path          string `json:"name"`
 	StructureType string `json:"structureType"`
 	VariableID    string `json:"variableId"`
 }
@@ -39,10 +38,9 @@ func SanitizeAddToMap(model AddToMap) AddToMap {
 
 	model.Variable = variable
 
-	model.References = sdk.Map(model.References, func(idx int, value Reference) Reference {
-		return Reference{
-			Name:          p.Sanitize(value.Name),
-			StructureName: p.Sanitize(value.StructureName),
+	model.Connections = sdk.Map(model.Connections, func(idx int, value Connection) Connection {
+		return Connection{
+			Path:          p.Sanitize(value.Path),
 			StructureType: p.Sanitize(value.StructureType),
 			VariableID:    p.Sanitize(value.VariableID),
 		}

@@ -3,7 +3,7 @@ package updateMapVariable
 import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/app/services/locales"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/constants"
 	"creatif/pkg/lib/sdk"
 	"errors"
@@ -19,7 +19,7 @@ var validUpdateableFields = []string{
 	"groups",
 	"locale",
 	"behaviour",
-	"references",
+	"connections",
 	"value",
 }
 
@@ -38,18 +38,18 @@ type Model struct {
 	MapName      string
 	VariableName string
 	ProjectID    string
-	References   []shared.UpdateReference
+	Connections  []connections.Connection
 	ImagePaths   []string
 }
 
-func NewModel(projectId, mapName, variableName string, fields []string, values VariableModel, reference []shared.UpdateReference, imagePaths []string) Model {
+func NewModel(projectId, mapName, variableName string, fields []string, values VariableModel, conns []connections.Connection, imagePaths []string) Model {
 	return Model{
 		MapName:      mapName,
 		Fields:       fields,
 		ProjectID:    projectId,
 		Values:       values,
 		VariableName: variableName,
-		References:   reference,
+		Connections:  conns,
 		ImagePaths:   imagePaths,
 	}
 }
@@ -68,7 +68,7 @@ func (a *Model) Validate() map[string]string {
 		"behaviour":    a.Values.Behaviour,
 		"projectID":    a.ProjectID,
 		"locale":       a.Values.Locale,
-		"references":   nil,
+		"connections":  nil,
 	}
 
 	if err := validation.Validate(v,
@@ -125,26 +125,22 @@ func (a *Model) Validate() map[string]string {
 
 				return nil
 			})),
-			validation.Key("references", validation.By(func(value interface{}) error {
-				if len(a.References) == 0 {
+			validation.Key("connections", validation.By(func(value interface{}) error {
+				if len(a.Connections) == 0 {
 					return nil
 				}
 
-				for _, ref := range a.References {
+				for _, ref := range a.Connections {
 					if ref.StructureType != "map" && ref.StructureType != "list" && ref.StructureType != "variable" {
-						return errors.New(fmt.Sprintf("Invalid reference. StructureType is invalid. %s given for one of the structure types", ref.StructureType))
+						return errors.New(fmt.Sprintf("Invalid connection. StructureType is invalid. %s given for one of the structure types", ref.StructureType))
 					}
 
-					if ref.Name == "" {
-						return errors.New("Invalid reference. Name cannot be blank.")
+					if ref.Path == "" {
+						return errors.New("Invalid connection. Path cannot be blank.")
 					}
 
 					if ref.VariableID == "" {
-						return errors.New("Invalid reference. VariableID cannot be blank.")
-					}
-
-					if ref.StructureName == "" {
-						return errors.New("Invalid reference. StructureName cannot be blank.")
+						return errors.New("Invalid conection. VariableID cannot be blank.")
 					}
 				}
 

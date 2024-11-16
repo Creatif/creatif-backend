@@ -3,7 +3,7 @@ package removeMapVariable
 import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/storage"
 	"errors"
 	"github.com/onsi/ginkgo/v2"
@@ -17,19 +17,17 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 		view := testCreateMap(projectId, "mapName")
 		referenceView := testCreateMap(projectId, "referenceMap")
 
-		referenceVar1 := testAddToMap(projectId, referenceView.ID, []shared.Reference{})
-		referenceVar2 := testAddToMap(projectId, referenceView.ID, []shared.Reference{})
+		referenceVar1 := testAddToMap(projectId, referenceView.ID, []connections.Connection{})
+		referenceVar2 := testAddToMap(projectId, referenceView.ID, []connections.Connection{})
 
-		addToMapVariable := testAddToMap(projectId, view.ID, []shared.Reference{
+		addToMapVariable := testAddToMap(projectId, view.ID, []connections.Connection{
 			{
-				Name:          "one",
-				StructureName: referenceView.Name,
+				Path:          "one",
 				StructureType: "map",
 				VariableID:    referenceVar1.Variable.ID,
 			},
 			{
-				Name:          "two",
-				StructureName: referenceView.Name,
+				Path:          "two",
 				StructureType: "map",
 				VariableID:    referenceVar2.Variable.ID,
 			},
@@ -44,7 +42,7 @@ var _ = ginkgo.Describe("Declaration (DELETE) map entry tests", func() {
 		gomega.Expect(errors.Is(res.Error, gorm.ErrRecordNotFound)).Should(gomega.BeTrue())
 
 		var count int
-		res = storage.Gorm().Raw("SELECT count(id) AS count FROM declarations.references").Scan(&count)
+		res = storage.Gorm().Raw("SELECT count(child_variable_id) AS count FROM declarations.connections").Scan(&count)
 		testAssertErrNil(res.Error)
 		gomega.Expect(count).Should(gomega.Equal(0))
 	})

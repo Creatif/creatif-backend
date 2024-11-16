@@ -5,7 +5,7 @@ import (
 	"creatif/cmd/http/request/declarations/maps"
 	"creatif/pkg/app/auth"
 	updateMapVariable2 "creatif/pkg/app/services/maps/updateMapVariable"
-	"creatif/pkg/app/services/shared"
+	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/sdk"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -20,12 +20,11 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 		model.Fields = c.QueryParam("fields")
 
 		model = maps.SanitizeUpdateMapVariable(model)
-		references := make([]shared.UpdateReference, 0)
-		if len(model.References) > 0 {
-			references = sdk.Map(model.References, func(idx int, value maps.UpdateReference) shared.UpdateReference {
-				return shared.UpdateReference{
-					Name:          value.Name,
-					StructureName: value.StructureName,
+		conns := make([]connections.Connection, 0)
+		if len(model.Connections) > 0 {
+			conns = sdk.Map(model.Connections, func(idx int, value maps.UpdateConnection) connections.Connection {
+				return connections.Connection{
+					Path:          value.Path,
 					StructureType: value.StructureType,
 					VariableID:    value.VariableID,
 				}
@@ -40,7 +39,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 			Groups:    model.Variable.Groups,
 			Behaviour: model.Variable.Behaviour,
 			Value:     []byte(model.Variable.Value),
-		}, references, model.ImagePaths), authentication)
+		}, conns, model.ImagePaths), authentication)
 
 		return request.SendResponse[updateMapVariable2.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {
 			if authentication.ShouldRefresh() {

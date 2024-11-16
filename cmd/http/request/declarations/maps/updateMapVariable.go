@@ -16,20 +16,19 @@ type UpdateMapVariableModel struct {
 }
 
 type UpdateMapVariable struct {
-	ProjectID  string                 `param:"projectID"`
-	Name       string                 `param:"name"`
-	ItemID     string                 `param:"itemId"`
-	Fields     string                 `query:"fields"`
-	Variable   UpdateMapVariableModel `json:"variable"`
-	References []UpdateReference      `json:"references"`
-	ImagePaths []string               `json:"imagePaths"`
+	ProjectID   string                 `param:"projectID"`
+	Name        string                 `param:"name"`
+	ItemID      string                 `param:"itemId"`
+	Fields      string                 `query:"fields"`
+	Variable    UpdateMapVariableModel `json:"variable"`
+	Connections []UpdateConnection     `json:"connections"`
+	ImagePaths  []string               `json:"imagePaths"`
 
 	ResolvedFields []string
 }
 
-type UpdateReference struct {
-	Name          string `json:"name"`
-	StructureName string `json:"structureName"`
+type UpdateConnection struct {
+	Path          string `json:"path"`
 	StructureType string `json:"structureType"`
 	VariableID    string `json:"variableId"`
 }
@@ -59,11 +58,10 @@ func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
 
 	model.Variable = variable
 
-	if len(model.References) != 0 {
-		model.References = sdk.Map(model.References, func(idx int, value UpdateReference) UpdateReference {
-			return UpdateReference{
-				Name:          p.Sanitize(value.Name),
-				StructureName: p.Sanitize(value.StructureName),
+	if len(model.Connections) != 0 {
+		model.Connections = sdk.Map(model.Connections, func(idx int, value UpdateConnection) UpdateConnection {
+			return UpdateConnection{
+				Path:          p.Sanitize(value.Path),
 				StructureType: p.Sanitize(value.StructureType),
 				VariableID:    p.Sanitize(value.VariableID),
 			}
