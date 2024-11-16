@@ -4,6 +4,8 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/groups/addGroups"
+	"creatif/pkg/app/services/lists/addToList"
+	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/maps/mapCreate"
@@ -142,9 +144,9 @@ func testCreateGroups(projectId string, numOfGroups int) []addGroups.View {
 	return model
 }
 
-func testAddToMap(projectId, name string, connections []connections.Connection, groups []string) addToMap.LogicModel {
+func testAddToMap(projectId, mapId, variableName string, connections []connections.Connection, groups []string) addToMap.View {
 	variableModel := addToMap.VariableModel{
-		Name:      fmt.Sprintf("new add variable"),
+		Name:      variableName,
 		Metadata:  nil,
 		Groups:    groups,
 		Value:     nil,
@@ -152,10 +154,10 @@ func testAddToMap(projectId, name string, connections []connections.Connection, 
 		Behaviour: "modifiable",
 	}
 
-	model := addToMap.NewModel(projectId, name, variableModel, connections, []string{})
+	model := addToMap.NewModel(projectId, mapId, variableModel, connections, []string{})
 	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
 
-	view, err := handler.Logic()
+	view, err := handler.Handle()
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	return view
@@ -171,6 +173,37 @@ func testCreateMap(projectId, name string) mapCreate.View {
 	testAssertIDValid(view.ID)
 
 	gomega.Expect(name).Should(gomega.Equal(view.Name))
+
+	return view
+}
+
+func testCreateList(projectId, name string) createList2.View {
+	handler := createList2.New(createList2.NewModel(projectId, name, nil), auth.NewTestingAuthentication(false, ""))
+
+	list, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+	testAssertIDValid(list.ID)
+
+	gomega.Expect(list.Name).Should(gomega.Equal(name))
+
+	return list
+}
+
+func testAddToList(projectId, listId, variableName string, connections []connections.Connection, groups []string) addToList.View {
+	variableModel := addToList.VariableModel{
+		Name:      variableName,
+		Metadata:  nil,
+		Groups:    groups,
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToList.NewModel(projectId, listId, variableModel, connections, []string{})
+	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""))
+
+	view, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
 
 	return view
 }
