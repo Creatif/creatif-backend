@@ -28,7 +28,7 @@ type UpdateMapVariable struct {
 }
 
 type UpdateConnection struct {
-	Path          string `json:"path"`
+	Name          string `json:"name"`
 	StructureType string `json:"structureType"`
 	VariableID    string `json:"variableId"`
 }
@@ -61,7 +61,7 @@ func SanitizeUpdateMapVariable(model UpdateMapVariable) UpdateMapVariable {
 	if len(model.Connections) != 0 {
 		model.Connections = sdk.Map(model.Connections, func(idx int, value UpdateConnection) UpdateConnection {
 			return UpdateConnection{
-				Path:          p.Sanitize(value.Path),
+				Name:          p.Sanitize(value.Name),
 				StructureType: p.Sanitize(value.StructureType),
 				VariableID:    p.Sanitize(value.VariableID),
 			}

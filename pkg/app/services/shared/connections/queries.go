@@ -12,6 +12,13 @@ type QueryVariable struct {
 	StructureType string `json:"structureType"`
 }
 
+type ConnectionVariable struct {
+	VariableID    string `json:"variableId"`
+	Value         string `json:"value"`
+	Path          string `json:"path"`
+	StructureType string `json:"structureType"`
+}
+
 func getConnections(parentVariableId string) ([]declarations.Connection, error) {
 	var connections []declarations.Connection
 	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE parent_variable_id = ?", (declarations.Connection{}).TableName()), parentVariableId).Scan(&connections)
@@ -29,8 +36,8 @@ func getChildConnectionVariable(childStructureType, childVariableId string) (Que
 		if res.Error != nil {
 			return QueryVariable{}, res.Error
 		}
-		connectionVariable.StructureType = "map"
 
+		connectionVariable.StructureType = "map"
 	}
 
 	if childStructureType == "list" {

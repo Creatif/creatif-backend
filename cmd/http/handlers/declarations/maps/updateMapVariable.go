@@ -24,7 +24,7 @@ func UpdateMapVariableHandler() func(e echo.Context) error {
 		if len(model.Connections) > 0 {
 			conns = sdk.Map(model.Connections, func(idx int, value maps.UpdateConnection) connections.Connection {
 				return connections.Connection{
-					Path:          value.Path,
+					Path:          value.Name,
 					StructureType: value.StructureType,
 					VariableID:    value.VariableID,
 				}

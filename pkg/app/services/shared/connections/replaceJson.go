@@ -23,7 +23,14 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 			return nil, value, err
 		}
 
-		b, err := json.Marshal(connectionVariable)
+		conn := ConnectionVariable{
+			VariableID:    connectionVariable.VariableID,
+			Value:         connectionVariable.Name,
+			Path:          c.Path,
+			StructureType: c.ChildStructureType,
+		}
+
+		b, err := json.Marshal(conn)
 		if err != nil {
 			return nil, nil, err
 		}
