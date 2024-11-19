@@ -9,7 +9,7 @@ import (
 type QueryVariable struct {
 	VariableID    string `gorm:"primarykey;type:text;column:id" json:"variableId"`
 	Name          string `json:"name" gorm:"column:name"`
-	StructureType string `json:"structureType"`
+	StructureType string `json:"structureType" gorm:"column:structure_type"`
 }
 
 type ConnectionVariable struct {
@@ -19,7 +19,7 @@ type ConnectionVariable struct {
 	StructureType string `json:"structureType"`
 }
 
-func getConnections(parentVariableId string) ([]declarations.Connection, error) {
+func getChildConnectionFromParent(parentVariableId string) ([]declarations.Connection, error) {
 	var connections []declarations.Connection
 	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE parent_variable_id = ?", (declarations.Connection{}).TableName()), parentVariableId).Scan(&connections)
 	if res.Error != nil {
@@ -27,6 +27,37 @@ func getConnections(parentVariableId string) ([]declarations.Connection, error) 
 	}
 
 	return connections, nil
+}
+
+func getBulkConnectionVariablesFromConnections(conns []declarations.Connection) ([]QueryVariable, error) {
+	mapVariableIds := make([]string, 0)
+	listVariableIds := make([]string, 0)
+
+	for _, c := range conns {
+		if c.ChildStructureType == "map" {
+			mapVariableIds = append(mapVariableIds, c.ChildVariableID)
+		}
+
+		if c.ChildStructureType == "list" {
+			listVariableIds = append(listVariableIds, c.ChildVariableID)
+		}
+	}
+
+	var mapVariables []QueryVariable
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name, 'map' AS structure_type FROM %s WHERE id IN(?)", (declarations.MapVariable{}).TableName()), mapVariableIds).Scan(&mapVariables)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	var listVariables []QueryVariable
+	res = storage.Gorm().Raw(fmt.Sprintf("SELECT id, name, 'list' AS structure_type FROM %s WHERE id IN(?)", (declarations.ListVariable{}).TableName()), listVariableIds).Scan(&listVariables)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	mapVariables = append(mapVariables, listVariables...)
+
+	return mapVariables, nil
 }
 
 func getChildConnectionVariable(childStructureType, childVariableId string) (QueryVariable, error) {
