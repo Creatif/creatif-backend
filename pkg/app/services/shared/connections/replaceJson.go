@@ -12,6 +12,7 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 	all child connections of this variableId.
 	*/
 	conns, err := getChildConnectionFromParent(variableId)
+
 	if err != nil {
 		return nil, nil, err
 	}
@@ -21,6 +22,7 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 	}
 
 	connectionVariables, err := getBulkConnectionVariablesFromConnections(conns)
+
 	if err != nil {
 		return nil, value, err
 	}
@@ -39,10 +41,11 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 		conn := connsMap[cv.VariableID]
 
 		viewConnection := ConnectionVariable{
-			VariableID:    cv.VariableID,
-			Value:         cv.Name,
-			Path:          conn.Path,
-			StructureType: cv.StructureType,
+			VariableID:             cv.VariableID,
+			Value:                  cv.Name,
+			Path:                   conn.Path,
+			StructureType:          cv.StructureType,
+			CreatifSpecialVariable: true,
 		}
 
 		b, err := json.Marshal(viewConnection)
@@ -57,6 +60,6 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 
 		value = updatedValue
 	}
-	
+
 	return conns, value, nil
 }

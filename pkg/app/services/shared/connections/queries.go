@@ -13,10 +13,11 @@ type QueryVariable struct {
 }
 
 type ConnectionVariable struct {
-	VariableID    string `json:"variableId"`
-	Value         string `json:"value"`
-	Path          string `json:"path"`
-	StructureType string `json:"structureType"`
+	VariableID             string `json:"variableId"`
+	Value                  string `json:"value"`
+	Path                   string `json:"path"`
+	StructureType          string `json:"structureType"`
+	CreatifSpecialVariable bool   `json:"creatif_special_variable"`
 }
 
 func getChildConnectionFromParent(parentVariableId string) ([]declarations.Connection, error) {
