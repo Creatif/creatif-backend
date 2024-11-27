@@ -47,7 +47,7 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 			StructureType:          cv.StructureType,
 			CreatifSpecialVariable: true,
 		}
-
+		
 		b, err := json.Marshal(viewConnection)
 		if err != nil {
 			return nil, nil, err
