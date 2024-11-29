@@ -134,6 +134,7 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 		publishingListeners[i] = projectProductResult
 
 		reporter.AddProjectID(projectProductResult.projectId)
+
 		groupIds := projectProductResult.groupIds
 		projectId := projectProductResult.projectId
 		accountStructureId := projectProductResult.accountStructureId

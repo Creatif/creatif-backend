@@ -64,7 +64,6 @@ func (wq listWorkQueue) start() chan bool {
 				case <-done:
 					return
 				case j := <-wq.listeners[i]:
-					wq.balancer.removeJob(i)
 					handleHttpError(addToList(
 						j.client,
 						j.projectId,
@@ -73,6 +72,8 @@ func (wq listWorkQueue) start() chan bool {
 						j.references,
 						j.imagePaths,
 					))
+
+					wq.balancer.removeJob(i)
 
 					wq.jobDoneQueue <- true
 				}

@@ -215,7 +215,12 @@ func generateSingleAccount(groupIds []string) (account, error) {
 	}
 
 	uniqueName := uuid.New().String()
-	return newAccount(uniqueName, nil, []string{"profileImage"}, newAccountVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3))), nil
+	return newAccount(
+		uniqueName,
+		nil,
+		[]string{"profileImage"},
+		newAccountVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)),
+	), nil
 }
 
 func generatePropertiesStructureData(accountId string, groupIds []string) ([]property, error) {
