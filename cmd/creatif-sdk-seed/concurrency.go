@@ -50,15 +50,6 @@ func newJoinedStructureAccount(
 	}
 }
 
-func newAccountProduct(projectId, accountId, propertyStructureId string, groupIds []string) accountProduct {
-	return accountProduct{
-		projectId:           projectId,
-		accountId:           accountId,
-		groupIds:            groupIds,
-		propertyStructureId: propertyStructureId,
-	}
-}
-
 func newProjectProduct(projectId, accountStructureId, propertyStructureId string, groupIds []string) projectProduct {
 	return projectProduct{
 		projectId:           projectId,
@@ -154,7 +145,7 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 				genAccount,
 			)
 
-			wq.addJob(newMapWorkQueueJob(
+			wq.addJob(newAccountWorkQueueJob(
 				client,
 				joinedAccount.projectId,
 				joinedAccount.accountStructureId,

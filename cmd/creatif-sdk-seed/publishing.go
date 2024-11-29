@@ -48,7 +48,6 @@ func publish(client *http.Client, projectId, name string) http2.HttpResult {
 	}
 
 	if response != nil && response.Body != nil {
-		fmt.Println("response body is closed")
 		defer response.Body.Close()
 	}
 

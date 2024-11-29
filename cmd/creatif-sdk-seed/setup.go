@@ -45,10 +45,11 @@ func doOperations(operations []string) {
 	}
 }
 
-func processFlags() (int, error) {
+func processFlags() (int, int, error) {
 	defaultNumberOfProjects := 1
+	defaultPropertiesPerStatus := 1
 	if len(os.Args) == 1 {
-		return defaultNumberOfProjects, nil
+		return defaultNumberOfProjects, defaultNumberOfProjects, nil
 	}
 
 	// validation first
@@ -58,14 +59,29 @@ func processFlags() (int, error) {
 		if len(matches) > 1 {
 			numOfProjects, err := strconv.ParseInt(matches[1], 10, 32)
 			if err != nil {
-				return 0, err
+				return 0, 0, err
 			}
 
 			if numOfProjects < 1 || numOfProjects > 10 {
-				return 0, errors.New("Number of projects must be minimal 1 and below 10")
+				return 0, 0, errors.New("Number of projects must be minimal 1 and below 10")
 			}
 
 			defaultNumberOfProjects = int(numOfProjects)
+		}
+
+		re = regexp.MustCompile(`^--properties-per-status=(\d+)$`)
+		matches = re.FindStringSubmatch(os.Args[i])
+		if len(matches) > 1 {
+			propertiesPerStatus, err := strconv.ParseInt(matches[1], 10, 32)
+			if err != nil {
+				return 0, 0, err
+			}
+
+			if propertiesPerStatus < 1 || propertiesPerStatus > 10 {
+				return 0, 0, errors.New("Number of properties per status must be minimal 1 and below 10")
+			}
+
+			defaultPropertiesPerStatus = int(propertiesPerStatus)
 		}
 	}
 
@@ -93,12 +109,12 @@ func processFlags() (int, error) {
 		optionalArgs := strings.Split(os.Args[i], "=")
 		// if there are no optional flags, just continue
 		if len(optionalArgs) == 0 {
-			return defaultNumberOfProjects, nil
+			return defaultNumberOfProjects, defaultPropertiesPerStatus, nil
 		}
 	}
 
 	doOperations(operations)
-	return defaultNumberOfProjects, nil
+	return defaultNumberOfProjects, defaultPropertiesPerStatus, nil
 }
 
 func preSeedAuthAndSetup(client *http.Client) *http.Client {

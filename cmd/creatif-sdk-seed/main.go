@@ -55,7 +55,7 @@ import (
 func main() {
 	loadEnv()
 	runDb()
-	numOfProjects, err := processFlags()
+	numOfProjects, propertiesPerStatus, err := processFlags()
 	if err != nil {
 		printNewlineSandwich(printers["error"], err.Error())
 		os.Exit(1)
@@ -83,13 +83,13 @@ func main() {
 	*/
 	propertiesQueue := newPropertiesWorkQueue(50, 50)
 	propertyWorkQueueDone := propertiesQueue.start()
-	accountQueue := newAccountWorkQueue(50, 50, propertiesQueue)
+	accountQueue := newAccountWorkQueue(50, 50, propertiesQueue, propertiesPerStatus)
 	accountWorkQueueDone := accountQueue.start()
 
 	fmt.Printf("Seeding...\n")
 	fmt.Println("")
 
-	numOfAllOperations := (numOfProjects * 10) * 600
+	numOfAllOperations := (numOfProjects * 10) * (5 * 3 * 4 * propertiesPerStatus)
 	progressBarNotifier, progressBarDone := generateProgressBar(numOfAllOperations)
 
 	/**

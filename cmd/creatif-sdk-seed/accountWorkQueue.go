@@ -14,13 +14,14 @@ type accountWorkQueueJob struct {
 }
 
 type accountWorkQueue struct {
-	listeners     []chan accountWorkQueueJob
-	listWorkQueue propertiesWorkQueue
-	jobDoneQueue  chan bool
-	balancer      *balancer
+	listeners           []chan accountWorkQueueJob
+	listWorkQueue       propertiesWorkQueue
+	jobDoneQueue        chan bool
+	balancer            *balancer
+	propertiesPerStatus int
 }
 
-func newMapWorkQueueJob(
+func newAccountWorkQueueJob(
 	client *http.Client,
 	projectId,
 	accountStructureId string,
@@ -38,17 +39,18 @@ func newMapWorkQueueJob(
 	}
 }
 
-func newAccountWorkQueue(workersNum int, buffer int, listWorkQueue propertiesWorkQueue) *accountWorkQueue {
+func newAccountWorkQueue(workersNum int, buffer int, listWorkQueue propertiesWorkQueue, propertiesPerStatus int) *accountWorkQueue {
 	listeners := make([]chan accountWorkQueueJob, workersNum)
 	for i := 0; i < workersNum; i++ {
 		listeners[i] = make(chan accountWorkQueueJob, buffer)
 	}
 
 	return &accountWorkQueue{
-		listeners:     listeners,
-		listWorkQueue: listWorkQueue,
-		jobDoneQueue:  make(chan bool),
-		balancer:      newBalancer(workersNum),
+		listeners:           listeners,
+		listWorkQueue:       listWorkQueue,
+		jobDoneQueue:        make(chan bool),
+		balancer:            newBalancer(workersNum),
+		propertiesPerStatus: propertiesPerStatus,
 	}
 }
 
@@ -66,7 +68,6 @@ func (wq *accountWorkQueue) start() chan bool {
 				case <-done:
 					return
 				case j := <-wq.listeners[i]:
-					wq.balancer.removeJob(i)
 					accountId := addToMapAndGetAccountId(
 						j.client,
 						j.projectId,
@@ -76,14 +77,22 @@ func (wq *accountWorkQueue) start() chan bool {
 
 					wq.jobDoneQueue <- true
 
+					wq.balancer.removeJob(i)
+
 					propertiesGen := newPropertiesGenerator()
 					for {
 						newSequence, ok := propertiesGen.generate()
+
 						if !ok {
 							break
 						}
 
-						for a := 0; a < 10; a++ {
+						/**
+						There are 5 locales, 3 property statuses and 4 property types. For every property type, generate 10 properties.
+						Every locale generate 120 properties. That is property status * property type * num of locales * 10.
+						The calculation is then 5 * 3 * 4 * 10
+						*/
+						for a := 0; a < wq.propertiesPerStatus; a++ {
 							singleProperty, err := generateSingleProperty(accountId, newSequence.locale, newSequence.propertyStatus, newSequence.propertyType, j.groupIds)
 							if err != nil {
 								handleAppError(err, Cannot_Continue_Procedure)
