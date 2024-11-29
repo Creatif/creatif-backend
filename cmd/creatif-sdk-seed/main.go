@@ -61,10 +61,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	var m int = 5
-	fmt.Println(5 / 0)
-	os.Exit(1)
-
 	report := newReporter()
 
 	anonymousClient := createAnonymousClient()

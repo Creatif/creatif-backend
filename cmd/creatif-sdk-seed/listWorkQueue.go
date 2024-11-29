@@ -16,6 +16,7 @@ type listWorkQueueJob struct {
 type listWorkQueue struct {
 	listeners    []chan listWorkQueueJob
 	jobDoneQueue chan bool
+	balancer     *balancer
 }
 
 func newListWorkQueueJob(
@@ -45,11 +46,12 @@ func newListWorkQueue(workersNum int, buffer int) listWorkQueue {
 	return listWorkQueue{
 		listeners:    listeners,
 		jobDoneQueue: make(chan bool),
+		balancer:     newBalancer(workersNum),
 	}
 }
 
 func (wq listWorkQueue) addJob(j listWorkQueueJob) {
-	worker := randomBetween(1, len(wq.listeners)-1)
+	worker := wq.balancer.addJob()
 	wq.listeners[worker] <- j
 }
 
@@ -62,6 +64,7 @@ func (wq listWorkQueue) start() chan bool {
 				case <-done:
 					return
 				case j := <-wq.listeners[i]:
+					wq.balancer.removeJob(i)
 					handleHttpError(addToList(
 						j.client,
 						j.projectId,

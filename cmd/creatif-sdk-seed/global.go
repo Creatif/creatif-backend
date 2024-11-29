@@ -186,6 +186,7 @@ func handleAppError(err error, flag string) {
 	// ignore the error, it is not serious enough
 }
 
+// Deprecated: This function has been replaced by a balancer
 func randomBetween(min, max int) int {
 	// Seed the random number generator
 	rand.New(rand.NewSource(time.Now().UnixNano()))

@@ -17,6 +17,7 @@ type mapWorkQueue struct {
 	listeners     []chan mapWorkQueueJob
 	listWorkQueue listWorkQueue
 	jobDoneQueue  chan bool
+	balancer      *balancer
 }
 
 func newMapWorkQueueJob(
@@ -47,11 +48,12 @@ func newMapWorkQueue(workersNum int, buffer int, listWorkQueue listWorkQueue) *m
 		listeners:     listeners,
 		listWorkQueue: listWorkQueue,
 		jobDoneQueue:  make(chan bool),
+		balancer:      newBalancer(workersNum),
 	}
 }
 
 func (wq *mapWorkQueue) addJob(j mapWorkQueueJob) {
-	worker := randomBetween(1, len(wq.listeners)-1)
+	worker := wq.balancer.addJob()
 	wq.listeners[worker] <- j
 }
 
@@ -64,6 +66,7 @@ func (wq *mapWorkQueue) start() chan bool {
 				case <-done:
 					return
 				case j := <-wq.listeners[i]:
+					wq.balancer.removeJob(i)
 					accountId := addToMapAndGetAccountId(
 						j.client,
 						j.projectId,
