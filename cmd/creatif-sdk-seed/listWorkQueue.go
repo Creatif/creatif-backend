@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-type listWorkQueueJob struct {
+type propertyWorkQueueJob struct {
 	client              *http.Client
 	projectId           string
 	propertyStructureId string
@@ -13,21 +13,21 @@ type listWorkQueueJob struct {
 	imagePaths          []string
 }
 
-type listWorkQueue struct {
-	listeners    []chan listWorkQueueJob
+type propertiesWorkQueue struct {
+	listeners    []chan propertyWorkQueueJob
 	jobDoneQueue chan bool
 	balancer     *balancer
 }
 
-func newListWorkQueueJob(
+func newPropertyWorkQueueJoby(
 	client *http.Client,
 	projectId,
 	propertyStructureId string,
 	propertyVariable propertyVariable,
 	references []map[string]string,
 	imagePaths []string,
-) listWorkQueueJob {
-	return listWorkQueueJob{
+) propertyWorkQueueJob {
+	return propertyWorkQueueJob{
 		client:              client,
 		projectId:           projectId,
 		propertyStructureId: propertyStructureId,
@@ -37,25 +37,25 @@ func newListWorkQueueJob(
 	}
 }
 
-func newListWorkQueue(workersNum int, buffer int) listWorkQueue {
-	listeners := make([]chan listWorkQueueJob, workersNum)
+func newPropertiesWorkQueue(workersNum int, buffer int) propertiesWorkQueue {
+	listeners := make([]chan propertyWorkQueueJob, workersNum)
 	for i := 0; i < workersNum; i++ {
-		listeners[i] = make(chan listWorkQueueJob, buffer)
+		listeners[i] = make(chan propertyWorkQueueJob, buffer)
 	}
 
-	return listWorkQueue{
+	return propertiesWorkQueue{
 		listeners:    listeners,
 		jobDoneQueue: make(chan bool),
 		balancer:     newBalancer(workersNum),
 	}
 }
 
-func (wq listWorkQueue) addJob(j listWorkQueueJob) {
+func (wq propertiesWorkQueue) addJob(j propertyWorkQueueJob) {
 	worker := wq.balancer.addJob()
 	wq.listeners[worker] <- j
 }
 
-func (wq listWorkQueue) start() chan bool {
+func (wq propertiesWorkQueue) start() chan bool {
 	done := make(chan bool)
 	for i := 0; i < len(wq.listeners); i++ {
 		go func(i int) {

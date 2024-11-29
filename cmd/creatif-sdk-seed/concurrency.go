@@ -127,7 +127,7 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 	return producers
 }
 
-func accountProducer(client *http.Client, projectProducers []chan projectProduct, wq *mapWorkQueue, reporter *reporter) []projectProduct {
+func accountProducer(client *http.Client, projectProducers []chan projectProduct, wq *accountWorkQueue, reporter *reporter) []projectProduct {
 	publishingListeners := make([]projectProduct, len(projectProducers))
 	for i, producer := range projectProducers {
 		projectProductResult := <-producer
@@ -169,8 +169,8 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 }
 
 func concurrencyCoordinator(
-	propertiesWorkQueue listWorkQueue,
-	accountWorkQueue *mapWorkQueue,
+	propertiesWorkQueue propertiesWorkQueue,
+	accountWorkQueue *accountWorkQueue,
 	progressBarNotifier chan bool,
 	propertyWorkQueueDone chan bool,
 	accountWorkQueueDone chan bool,

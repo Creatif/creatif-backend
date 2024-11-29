@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-type mapWorkQueueJob struct {
+type accountWorkQueueJob struct {
 	client              *http.Client
 	projectId           string
 	accountStructureId  string
@@ -13,9 +13,9 @@ type mapWorkQueueJob struct {
 	account             account
 }
 
-type mapWorkQueue struct {
-	listeners     []chan mapWorkQueueJob
-	listWorkQueue listWorkQueue
+type accountWorkQueue struct {
+	listeners     []chan accountWorkQueueJob
+	listWorkQueue propertiesWorkQueue
 	jobDoneQueue  chan bool
 	balancer      *balancer
 }
@@ -27,8 +27,8 @@ func newMapWorkQueueJob(
 	propertyStructureId string,
 	groupIds []string,
 	account account,
-) mapWorkQueueJob {
-	return mapWorkQueueJob{
+) accountWorkQueueJob {
+	return accountWorkQueueJob{
 		client:              client,
 		projectId:           projectId,
 		accountStructureId:  accountStructureId,
@@ -38,13 +38,13 @@ func newMapWorkQueueJob(
 	}
 }
 
-func newMapWorkQueue(workersNum int, buffer int, listWorkQueue listWorkQueue) *mapWorkQueue {
-	listeners := make([]chan mapWorkQueueJob, workersNum)
+func newAccountWorkQueue(workersNum int, buffer int, listWorkQueue propertiesWorkQueue) *accountWorkQueue {
+	listeners := make([]chan accountWorkQueueJob, workersNum)
 	for i := 0; i < workersNum; i++ {
-		listeners[i] = make(chan mapWorkQueueJob, buffer)
+		listeners[i] = make(chan accountWorkQueueJob, buffer)
 	}
 
-	return &mapWorkQueue{
+	return &accountWorkQueue{
 		listeners:     listeners,
 		listWorkQueue: listWorkQueue,
 		jobDoneQueue:  make(chan bool),
@@ -52,12 +52,12 @@ func newMapWorkQueue(workersNum int, buffer int, listWorkQueue listWorkQueue) *m
 	}
 }
 
-func (wq *mapWorkQueue) addJob(j mapWorkQueueJob) {
+func (wq *accountWorkQueue) addJob(j accountWorkQueueJob) {
 	worker := wq.balancer.addJob()
 	wq.listeners[worker] <- j
 }
 
-func (wq *mapWorkQueue) start() chan bool {
+func (wq *accountWorkQueue) start() chan bool {
 	done := make(chan bool)
 	for i := 0; i < len(wq.listeners); i++ {
 		go func(i int) {
@@ -89,7 +89,7 @@ func (wq *mapWorkQueue) start() chan bool {
 								handleAppError(err, Cannot_Continue_Procedure)
 							}
 
-							wq.listWorkQueue.addJob(newListWorkQueueJob(
+							wq.listWorkQueue.addJob(newPropertyWorkQueueJoby(
 								j.client,
 								j.projectId,
 								j.propertyStructureId,

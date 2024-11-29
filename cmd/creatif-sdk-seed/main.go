@@ -71,8 +71,8 @@ func main() {
 		50 workers and each of them produce 50 channels that others can send work to. Very important thing to note is that
 		these are not generic work queues. Both of them are specialized to produce either Account or a Property.
 
-		Below, accountProducer sends a job to mapWorkQueue for a Account to be created. After that, it creates a job for
-		the listWorkQueue for a property to be created. That way, they do not block each other. Every worker has its own
+		Below, accountProducer sends a job to accountWorkQueue for a Account to be created. After that, it creates a job for
+		the propertiesWorkQueue for a property to be created. That way, they do not block each other. Every worker has its own
 		channel that is buffered. That is the second argument.
 
 		These queues can be started before any job is sent to them.
@@ -81,10 +81,10 @@ func main() {
 		is important to know that. For more information how these are used, take a look below to the comment above
 		concurrencyCoordinator() function.
 	*/
-	propertiesWorkQueue := newListWorkQueue(50, 50)
-	propertyWorkQueueDone := propertiesWorkQueue.start()
-	accountWorkQueue := newMapWorkQueue(50, 50, propertiesWorkQueue)
-	accountWorkQueueDone := accountWorkQueue.start()
+	propertiesQueue := newPropertiesWorkQueue(50, 50)
+	propertyWorkQueueDone := propertiesQueue.start()
+	accountQueue := newAccountWorkQueue(50, 50, propertiesQueue)
+	accountWorkQueueDone := accountQueue.start()
 
 	fmt.Printf("Seeding...\n")
 	fmt.Println("")
@@ -100,11 +100,11 @@ func main() {
 	*/
 	projectProducerListeners := projectProducer(authenticatedClient, numOfProjects)
 	/**
-	accountProducer listens to when a project is created and sends it to mapWorkQueue. More on mapWorkQueue, just scroll
-	up. Not complicated, for every project, there are 10 Accounts created and send to mapWorkQueue which is just another
+	accountProducer listens to when a project is created and sends it to accountWorkQueue. More on accountWorkQueue, just scroll
+	up. Not complicated, for every project, there are 10 Accounts created and send to accountWorkQueue which is just another
 	work queue.
 	*/
-	projectPublishingListeners := accountProducer(authenticatedClient, projectProducerListeners, accountWorkQueue, report)
+	projectPublishingListeners := accountProducer(authenticatedClient, projectProducerListeners, accountQueue, report)
 
 	/**
 	    This function blocks until all work queues are done with their jobs. But this is not the join point. Every work queue exposes
@@ -118,8 +118,8 @@ func main() {
 		seeded everything that needs to be seeded and work queues can be closed.
 	*/
 	concurrencyCoordinator(
-		propertiesWorkQueue,
-		accountWorkQueue,
+		propertiesQueue,
+		accountQueue,
 		progressBarNotifier,
 		propertyWorkQueueDone,
 		accountWorkQueueDone,
