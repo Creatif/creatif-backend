@@ -69,6 +69,11 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		gomega.Expect(view.Name).Should(gomega.Equal(variables[4].Name))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 		gomega.Expect(len(view.Connections)).Should(gomega.Equal(5))
+		gomega.Expect(len(view.ChildStructures)).Should(gomega.Equal(1))
+
+		gomega.Expect(view.ChildStructures[0].StructureID).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(view.ChildStructures[0].StructureType).Should(gomega.Equal("list"))
+		gomega.Expect(view.ChildStructures[0].StructureName).Should(gomega.Equal("connection list"))
 
 		for _, c := range view.Connections {
 			gomega.Expect(c.ParentVariableID).Should(gomega.Equal(selectedVariableId))
@@ -90,7 +95,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 	ginkgo.It("should query a list variable by ID with map connections", func() {
 		projectId := testCreateProject("project")
 		list := testCreateList(projectId, "name")
-		connectionList := testCreateMap(projectId, "connection list")
+		connectionList := testCreateMap(projectId, "connection map")
 
 		connsViews := make([]addToMap.View, 5)
 		for i := 0; i < 5; i++ {
@@ -122,6 +127,11 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		gomega.Expect(view.Name).Should(gomega.Equal(variables[4].Name))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 		gomega.Expect(len(view.Connections)).Should(gomega.Equal(5))
+		gomega.Expect(len(view.ChildStructures)).Should(gomega.Equal(1))
+
+		gomega.Expect(view.ChildStructures[0].StructureID).ShouldNot(gomega.BeEmpty())
+		gomega.Expect(view.ChildStructures[0].StructureType).Should(gomega.Equal("map"))
+		gomega.Expect(view.ChildStructures[0].StructureName).Should(gomega.Equal("connection map"))
 
 		for _, c := range view.Connections {
 			gomega.Expect(c.ParentVariableID).Should(gomega.Equal(selectedVariableId))
@@ -202,6 +212,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 		gomega.Expect(view.Name).Should(gomega.Equal(variables[4].Name))
 		gomega.Expect(view.Locale).Should(gomega.Equal("eng"))
 		gomega.Expect(len(view.Connections)).Should(gomega.Equal(10))
+		gomega.Expect(len(view.ChildStructures)).Should(gomega.Equal(2))
 
 		listConnections := sdk.Filter(view.Connections, func(idx int, value ConnectionView) bool {
 			return value.ChildStructureType == "list"

@@ -44,8 +44,8 @@ func getBulkConnectionVariablesFromConnections(conns []declarations.Connection) 
 		}
 	}
 
-	var mapVariables []QueryVariable
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name, 'map' AS structure_type FROM %s WHERE id IN(?)", (declarations.MapVariable{}).TableName()), mapVariableIds).Scan(&mapVariables)
+	var bufferVariables []QueryVariable
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name, 'map' AS structure_type FROM %s WHERE id IN(?)", (declarations.MapVariable{}).TableName()), mapVariableIds).Scan(&bufferVariables)
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -56,9 +56,9 @@ func getBulkConnectionVariablesFromConnections(conns []declarations.Connection) 
 		return nil, res.Error
 	}
 
-	mapVariables = append(mapVariables, listVariables...)
+	bufferVariables = append(bufferVariables, listVariables...)
 
-	return mapVariables, nil
+	return bufferVariables, nil
 }
 
 func getChildConnectionVariable(childStructureType, childVariableId string) (QueryVariable, error) {

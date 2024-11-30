@@ -103,7 +103,7 @@ func (wq *accountWorkQueue) start() chan bool {
 								j.projectId,
 								j.propertyStructureId,
 								singleProperty.variable,
-								singleProperty.references,
+								singleProperty.connections,
 								singleProperty.imagePaths,
 							))
 						}

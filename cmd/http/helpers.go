@@ -29,7 +29,7 @@ func loadEnv() {
 
 func runDb() {
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Zagreb application_name=creatif",
 		os.Getenv("DATABASE_HOST"),
 		os.Getenv("DATABASE_USER"),
 		os.Getenv("DATABASE_PASSWORD"),

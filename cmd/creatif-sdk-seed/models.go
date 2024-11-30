@@ -19,17 +19,17 @@ type propertyVariable struct {
 }
 
 type account struct {
-	name       string
-	references []map[string]string
-	imagePaths []string
-	variable   accountVariable
+	name        string
+	connections []map[string]string
+	imagePaths  []string
+	variable    accountVariable
 }
 
 type property struct {
-	name       string
-	references []map[string]string
-	imagePaths []string
-	variable   propertyVariable
+	name        string
+	connections []map[string]string
+	imagePaths  []string
+	variable    propertyVariable
 }
 
 func newAccountVariable(name, locale, behaviour, metadata, value string, groups []string) accountVariable {
@@ -43,21 +43,21 @@ func newAccountVariable(name, locale, behaviour, metadata, value string, groups 
 	}
 }
 
-func newAccount(name string, references []map[string]string, imagePaths []string, variable accountVariable) account {
+func newAccount(name string, connections []map[string]string, imagePaths []string, variable accountVariable) account {
 	return account{
-		name:       name,
-		references: references,
-		imagePaths: imagePaths,
-		variable:   variable,
+		name:        name,
+		connections: connections,
+		imagePaths:  imagePaths,
+		variable:    variable,
 	}
 }
 
-func newProperty(name string, references []map[string]string, imagePaths []string, variable propertyVariable) property {
+func newProperty(name string, connections []map[string]string, imagePaths []string, variable propertyVariable) property {
 	return property{
-		name:       name,
-		references: references,
-		imagePaths: imagePaths,
-		variable:   variable,
+		name:        name,
+		connections: connections,
+		imagePaths:  imagePaths,
+		variable:    variable,
 	}
 }
 

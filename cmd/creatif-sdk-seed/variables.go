@@ -54,7 +54,7 @@ func addToMap(client *http.Client, projectId, name string, variable accountVaria
 	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func addToList(client *http.Client, projectId, name string, variable propertyVariable, references []map[string]string, imagePaths []string) http2.HttpResult {
+func addToList(client *http.Client, projectId, name string, variable propertyVariable, connections []map[string]string, imagePaths []string) http2.HttpResult {
 	body := map[string]interface{}{
 		"name": name,
 		"variable": map[string]interface{}{
@@ -65,8 +65,8 @@ func addToList(client *http.Client, projectId, name string, variable propertyVar
 			"metadata":  "",
 			"value":     variable.value,
 		},
-		"references": references,
-		"imagePaths": imagePaths,
+		"connections": connections,
+		"imagePaths":  imagePaths,
 	}
 
 	b, err := json.Marshal(body)
@@ -102,7 +102,7 @@ func addToList(client *http.Client, projectId, name string, variable propertyVar
 
 func addToMapAndGetAccountId(client *http.Client, projectId string, accountId string, account account) string {
 	var genAccountId string
-	httpResult := handleHttpError(addToMap(client, projectId, accountId, account.variable, account.references, account.imagePaths))
+	httpResult := handleHttpError(addToMap(client, projectId, accountId, account.variable, account.connections, account.imagePaths))
 	res := httpResult.Response()
 
 	if res.StatusCode < 200 || res.StatusCode > 299 {
@@ -300,7 +300,6 @@ func generateSingleProperty(accountId, locale, propertyStatus, propertyType stri
 		[]map[string]string{
 			{
 				"name":          "accounts",
-				"structureName": "Accounts",
 				"structureType": "map",
 				"variableId":    accountId,
 			},

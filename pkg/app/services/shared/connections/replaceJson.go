@@ -21,6 +21,9 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 		return nil, value, nil
 	}
 
+	/**
+	Get all variables based on the connections
+	*/
 	connectionVariables, err := getBulkConnectionVariablesFromConnections(conns)
 
 	if err != nil {
@@ -47,7 +50,7 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 			StructureType:          cv.StructureType,
 			CreatifSpecialVariable: true,
 		}
-		
+
 		b, err := json.Marshal(viewConnection)
 		if err != nil {
 			return nil, nil, err
