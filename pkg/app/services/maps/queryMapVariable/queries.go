@@ -1,4 +1,4 @@
-package queryListByID
+package queryMapVariable
 
 import (
 	"creatif/pkg/app/domain/declarations"
@@ -50,8 +50,8 @@ func getVariable(projectId, structureId, variableId string) (QueryVariable, erro
 			    lv.updated_at, 
 			    lv.locale_id
 			FROM %s AS l INNER JOIN %s AS lv
-			ON l.project_id = ? AND l.id = ? AND lv.list_id = l.id AND lv.id = ?`,
-		(declarations.VariableGroup{}).TableName(), (declarations.Group{}).TableName(), (declarations.List{}).TableName(), (declarations.ListVariable{}).TableName())
+			ON l.project_id = ? AND l.id = ? AND lv.map_id = l.id AND lv.id = ?`,
+		(declarations.VariableGroup{}).TableName(), (declarations.Group{}).TableName(), (declarations.Map{}).TableName(), (declarations.MapVariable{}).TableName())
 
 	var variable QueryVariable
 	res := storage.Gorm().
