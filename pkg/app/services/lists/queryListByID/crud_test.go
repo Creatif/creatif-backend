@@ -23,7 +23,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariableId := variables[4].ID
 
-		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connection"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
@@ -60,7 +60,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariableId := variables[4].ID
 
-		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connection"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
@@ -118,7 +118,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariableId := variables[4].ID
 
-		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connection"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
@@ -203,7 +203,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariableId := variables[4].ID
 
-		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connection"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
@@ -223,5 +223,69 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 			return value.ChildStructureType == "map"
 		})
 		gomega.Expect(len(mapConnections)).Should(gomega.Equal(5))
+	})
+
+	ginkgo.It("should query a list variable by ID with mixed connections and with each connection variable view", func() {
+		projectId := testCreateProject("project")
+		list := testCreateList(projectId, "name")
+		connectionList := testCreateList(projectId, "connection list")
+		connectionMap := testCreateMap(projectId, "connection map")
+
+		createMapConnections := func() []connections.Connection {
+			connsViews := make([]addToMap.View, 5)
+			for i := 0; i < 5; i++ {
+				connsViews[i] = testAddToMap(projectId, fmt.Sprintf("variable-%d", i), connectionMap.ID, []connections.Connection{}, []string{})
+			}
+
+			conns := make([]connections.Connection, 5)
+			for i, c := range connsViews {
+				conns[i] = connections.Connection{
+					Path:          fmt.Sprintf("conn-map-%d", i),
+					StructureType: "map",
+					VariableID:    c.ID,
+				}
+			}
+
+			return conns
+		}
+
+		createListConnections := func() []connections.Connection {
+			connsViews := make([]addToList.View, 5)
+			for i := 0; i < 5; i++ {
+				connsViews[i] = testAddToList(projectId, fmt.Sprintf("variable-%d", i), connectionList.ID, []connections.Connection{}, []string{})
+			}
+
+			conns := make([]connections.Connection, 5)
+			for i, c := range connsViews {
+				conns[i] = connections.Connection{
+					Path:          fmt.Sprintf("conn-list-%d", i),
+					StructureType: "list",
+					VariableID:    c.ID,
+				}
+			}
+
+			return conns
+		}
+
+		var conns []connections.Connection
+		conns = append(conns, createListConnections()...)
+		conns = append(conns, createMapConnections()...)
+
+		variables := make([]addToList.View, 5)
+		for i := 0; i < 5; i++ {
+			variables[i] = testAddToList(projectId, fmt.Sprintf("variable-%d", i), list.ID, conns, []string{})
+		}
+
+		selectedVariableId := variables[4].ID
+
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connection"), auth.NewTestingAuthentication(false, ""))
+		view, err := handler.Handle()
+		gomega.Expect(err).Should(gomega.BeNil())
+		testAssertIDValid(view.ID)
+
+		handler = New(NewModel(projectId, list.ID, selectedVariableId, "value"), auth.NewTestingAuthentication(false, ""))
+		view, err = handler.Handle()
+		gomega.Expect(err).Should(gomega.BeNil())
+		testAssertIDValid(view.ID)
 	})
 })

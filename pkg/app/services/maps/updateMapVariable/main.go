@@ -204,7 +204,7 @@ func (c Main) Logic() (LogicResult, error) {
 		}
 
 		if sdk.Includes(c.model.Fields, "connections") {
-			newValue, newConnections, err := connections.RecreateConnections(c.model.ProjectID, existing.ID, "map", c.model.Connections, existing.Value)
+			newValue, newConnections, err := connections.RecreateConnections(tx, c.model.ProjectID, existing.ID, "map", c.model.Connections, existing.Value)
 			if err != nil {
 				return err
 			}

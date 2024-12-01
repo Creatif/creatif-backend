@@ -148,6 +148,7 @@ func (c Main) Logic() (LogicModel, error) {
 
 		if len(c.model.Connections) > 0 {
 			newValue, newConnections, err := connections.CreateConnections(
+				tx,
 				c.model.ProjectID,
 				variable.ID,
 				"map",

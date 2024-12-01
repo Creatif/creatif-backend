@@ -21,7 +21,7 @@ var _ = ginkgo.Describe("Declaration maps variable tests", func() {
 			return value.ID
 		}))
 
-		handler := New(NewModel(projectId, mapView.ID, variable.ID, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, mapView.ID, variable.ID, "connection"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -62,7 +62,7 @@ var _ = ginkgo.Describe("Declaration maps variable tests", func() {
 			return value.ID
 		}))
 
-		handler := New(NewModel(projectId, mapView.ID, variable.ID, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, mapView.ID, variable.ID, "connection"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -124,7 +124,7 @@ var _ = ginkgo.Describe("Declaration maps variable tests", func() {
 			return value.ID
 		}))
 
-		handler := New(NewModel(projectId, mapView.ID, variable.ID, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, mapView.ID, variable.ID, "connection"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)
@@ -211,7 +211,7 @@ var _ = ginkgo.Describe("Declaration maps variable tests", func() {
 			return value.ID
 		}))
 
-		handler := New(NewModel(projectId, mapView.ID, variable.ID, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, mapView.ID, variable.ID, "connection"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		testAssertErrNil(err)
 		testAssertIDValid(view.ID)

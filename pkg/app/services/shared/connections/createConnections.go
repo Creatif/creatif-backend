@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/domain/declarations"
 	"creatif/pkg/lib/sdk"
 	"github.com/tidwall/sjson"
+	"gorm.io/gorm"
 )
 
 func RemoveJsonConnectionValuePaths(conns []Connection, value []byte) ([]byte, error) {
@@ -19,13 +20,13 @@ func RemoveJsonConnectionValuePaths(conns []Connection, value []byte) ([]byte, e
 	return value, nil
 }
 
-func CreateConnections(projectId, parentVariableId, structureType string, conns []Connection, currentValue []byte) ([]byte, []declarations.Connection, error) {
+func CreateConnections(tx *gorm.DB, projectId, parentVariableId, structureType string, conns []Connection, currentValue []byte) ([]byte, []declarations.Connection, error) {
 	newValue, err := RemoveJsonConnectionValuePaths(conns, currentValue)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if err := CheckConnectionsIntegrity(conns); err != nil {
+	if err := CheckConnectionsIntegrity(tx, conns); err != nil {
 		return nil, nil, err
 	}
 

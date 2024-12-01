@@ -2,9 +2,9 @@ package connections
 
 import (
 	"creatif/pkg/app/domain/declarations"
-	"creatif/pkg/lib/storage"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 )
 
 type Connection struct {
@@ -13,11 +13,11 @@ type Connection struct {
 	VariableID    string
 }
 
-func CheckConnectionsIntegrity(connections []Connection) error {
+func CheckConnectionsIntegrity(tx *gorm.DB, connections []Connection) error {
 	for _, c := range connections {
 		var id string
 		if c.StructureType == "map" {
-			res := storage.Gorm().Raw(fmt.Sprintf("SELECT id FROM %s WHERE id = ?", (declarations.MapVariable{}).TableName()), c.VariableID).Scan(&id)
+			res := tx.Raw(fmt.Sprintf("SELECT id FROM %s WHERE id = ?", (declarations.MapVariable{}).TableName()), c.VariableID).Scan(&id)
 			if res.Error != nil {
 				return res.Error
 			}
@@ -28,7 +28,7 @@ func CheckConnectionsIntegrity(connections []Connection) error {
 		}
 
 		if c.StructureType == "list" {
-			res := storage.Gorm().Raw(fmt.Sprintf("SELECT id FROM %s WHERE id = ?", (declarations.ListVariable{}).TableName()), c.VariableID).Scan(&id)
+			res := tx.Raw(fmt.Sprintf("SELECT id FROM %s WHERE id = ?", (declarations.ListVariable{}).TableName()), c.VariableID).Scan(&id)
 			if res.Error != nil {
 				return res.Error
 			}

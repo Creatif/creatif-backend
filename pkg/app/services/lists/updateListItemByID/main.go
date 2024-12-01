@@ -227,7 +227,7 @@ func (c Main) Logic() (LogicResult, error) {
 		}
 
 		if sdk.Includes(c.model.Fields, "connections") {
-			newValue, newConnections, err := connections.RecreateConnections(c.model.ProjectID, existing.ID, "list", c.model.Connections, existing.Value)
+			newValue, newConnections, err := connections.RecreateConnections(tx, c.model.ProjectID, existing.ID, "list", c.model.Connections, existing.Value)
 			if err != nil {
 				return err
 			}
@@ -249,7 +249,7 @@ func (c Main) Logic() (LogicResult, error) {
 			})
 		}
 
-		return LogicResult{}, appErrors.NewApplicationError(transactionErr).AddError("updateMapVariable.Logic", nil)
+		return LogicResult{}, appErrors.NewApplicationError(transactionErr).AddError("updateListVariable.Logic", nil)
 	}
 
 	var groups []declarations.Group

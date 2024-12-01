@@ -8,22 +8,22 @@ import (
 )
 
 type Model struct {
-	Name                    string
-	ItemID                  string
-	ProjectID               string
-	ConnectionReplaceMethod string
+	Name               string
+	ItemID             string
+	ProjectID          string
+	ConnectionViewType string
 }
 
-func NewModel(projectId, name, itemID, connectionReplaceMethod string) Model {
-	if connectionReplaceMethod == "" {
-		connectionReplaceMethod = "connectionOnly"
+func NewModel(projectId, name, itemID, connectionViewType string) Model {
+	if connectionViewType == "" {
+		connectionViewType = "connection"
 	}
 
 	return Model{
-		ProjectID:               projectId,
-		Name:                    name,
-		ItemID:                  itemID,
-		ConnectionReplaceMethod: connectionReplaceMethod,
+		ProjectID:          projectId,
+		Name:               name,
+		ItemID:             itemID,
+		ConnectionViewType: connectionViewType,
 	}
 }
 
@@ -35,10 +35,10 @@ type LogicModel struct {
 
 func (a *Model) Validate() map[string]string {
 	v := map[string]interface{}{
-		"name":                    a.Name,
-		"itemId":                  a.ItemID,
-		"projectID":               a.ProjectID,
-		"connectionReplaceMethod": a.ConnectionReplaceMethod,
+		"name":               a.Name,
+		"itemId":             a.ItemID,
+		"projectID":          a.ProjectID,
+		"connectionViewType": a.ConnectionViewType,
 	}
 
 	if err := validation.Validate(v,
@@ -46,15 +46,15 @@ func (a *Model) Validate() map[string]string {
 			validation.Key("name", validation.Required),
 			validation.Key("itemId", validation.Required),
 			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
-			validation.Key("connectionReplaceMethod", validation.Required, validation.By(func(value interface{}) error {
+			validation.Key("connectionViewType", validation.Required, validation.By(func(value interface{}) error {
 				method := value.(string)
 
 				if method == "" {
 					return nil
 				}
 
-				if method != "fullReplacement" && method != "connectionOnly" {
-					return errors.New("Connection replace method must be either empty or 'fullReplacement' and 'connectionOnly'. Default is 'connectionOnly'")
+				if method != "connection" && method != "value" && method != "variable" {
+					return errors.New("Connection replace method must be either empty or 'connection', 'value' or 'variable'. Default is 'connection'")
 				}
 
 				return nil
