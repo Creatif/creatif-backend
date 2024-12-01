@@ -3,13 +3,11 @@ package connections
 import (
 	"creatif/pkg/app/domain/declarations"
 	"encoding/json"
-	"fmt"
 	"github.com/tidwall/sjson"
 )
 
 func ReplaceJson(conns []declarations.Connection, value []byte, connectionViewMethod string) ([]byte, error) {
 	if connectionViewMethod == "connection" {
-		fmt.Println("ENTERS CONNECTION")
 		/**
 		Get all variables based on the connections
 		*/
