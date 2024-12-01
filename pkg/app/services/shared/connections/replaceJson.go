@@ -6,28 +6,14 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []byte, error) {
-	/**
-	Gets all connections where variableId is the parent. This will effectively return
-	all child connections of this variableId.
-	*/
-	conns, err := getChildConnectionFromParent(variableId)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if len(conns) == 0 {
-		return nil, value, nil
-	}
-
+func ReplaceJson(conns []declarations.Connection, value []byte, connectionReplaceMethod string) ([]byte, error) {
 	/**
 	Get all variables based on the connections
 	*/
-	connectionVariables, err := getBulkConnectionVariablesFromConnections(conns)
+	connectionVariables, err := getBulkVariablesFromConnections(conns)
 
 	if err != nil {
-		return nil, value, err
+		return value, err
 	}
 
 	/**
@@ -53,16 +39,16 @@ func ReplaceJson(value []byte, variableId string) ([]declarations.Connection, []
 
 		b, err := json.Marshal(viewConnection)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
 		updatedValue, err := sjson.SetRawBytes(value, conn.Path, b)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
 		value = updatedValue
 	}
 
-	return conns, value, nil
+	return value, nil
 }

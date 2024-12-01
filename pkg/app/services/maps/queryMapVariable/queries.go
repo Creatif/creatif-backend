@@ -110,3 +110,18 @@ SELECT DISTINCT ON(l.id) l.id AS structure_id, l.name as structure_name, 'list' 
 
 	return finalProduct, nil
 }
+
+/*
+*
+Gets all connections where variableId is the parent. This will effectively return
+all child connections of this variableId.
+*/
+func getChildConnectionFromParent(parentVariableId string) ([]declarations.Connection, error) {
+	var connections []declarations.Connection
+	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE parent_variable_id = ?", (declarations.Connection{}).TableName()), parentVariableId).Scan(&connections)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return connections, nil
+}

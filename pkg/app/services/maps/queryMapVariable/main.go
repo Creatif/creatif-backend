@@ -38,9 +38,14 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, err
 	}
 
+	conns, err := getChildConnectionFromParent(variable.ID)
+	if err != nil {
+		return LogicModel{}, appErrors.NewApplicationError(err)
+	}
+
 	// replace the jsonb connections with actual variables.
 	// this directly modifies the jsonb array and replaces the variable.Value.
-	conns, replacedValue, err := connections.ReplaceJson(variable.Value, variable.ID)
+	replacedValue, err := connections.ReplaceJson(conns, variable.Value, c.model.ConnectionReplaceMethod)
 	if err != nil {
 		return LogicModel{}, appErrors.NewApplicationError(err)
 	}

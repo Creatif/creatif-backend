@@ -20,17 +20,7 @@ type ConnectionVariable struct {
 	CreatifSpecialVariable bool   `json:"creatif_special_variable"`
 }
 
-func getChildConnectionFromParent(parentVariableId string) ([]declarations.Connection, error) {
-	var connections []declarations.Connection
-	res := storage.Gorm().Raw(fmt.Sprintf("SELECT * FROM %s WHERE parent_variable_id = ?", (declarations.Connection{}).TableName()), parentVariableId).Scan(&connections)
-	if res.Error != nil {
-		return nil, res.Error
-	}
-
-	return connections, nil
-}
-
-func getBulkConnectionVariablesFromConnections(conns []declarations.Connection) ([]QueryVariable, error) {
+func getBulkVariablesFromConnections(conns []declarations.Connection) ([]QueryVariable, error) {
 	mapVariableIds := make([]string, 0)
 	listVariableIds := make([]string, 0)
 
@@ -59,29 +49,6 @@ func getBulkConnectionVariablesFromConnections(conns []declarations.Connection) 
 	bufferVariables = append(bufferVariables, listVariables...)
 
 	return bufferVariables, nil
-}
-
-func getChildConnectionVariable(childStructureType, childVariableId string) (QueryVariable, error) {
-	var connectionVariable QueryVariable
-	if childStructureType == "map" {
-		res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name from %s WHERE id = ?", (declarations.MapVariable{}).TableName()), childVariableId).Scan(&connectionVariable)
-		if res.Error != nil {
-			return QueryVariable{}, res.Error
-		}
-
-		connectionVariable.StructureType = "map"
-	}
-
-	if childStructureType == "list" {
-		res := storage.Gorm().Raw(fmt.Sprintf("SELECT id, name from %s WHERE id = ?", (declarations.ListVariable{}).TableName()), childVariableId).Scan(&connectionVariable)
-		if res.Error != nil {
-			return QueryVariable{}, res.Error
-		}
-
-		connectionVariable.StructureType = "list"
-	}
-
-	return connectionVariable, nil
 }
 
 func RemoveParentConnections(variableId string) error {

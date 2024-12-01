@@ -22,6 +22,7 @@ func QueryListByIDHandler() func(e echo.Context) error {
 			model.ProjectID,
 			model.Name,
 			model.ItemID,
+			model.ConnectionReplaceMethod,
 		), authentication)
 
 		return request.SendResponse[queryListByID.Model](handler, c, http.StatusOK, func(c echo.Context, model interface{}) error {

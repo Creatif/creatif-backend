@@ -23,7 +23,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariableId := variables[4].ID
 
-		handler := New(NewModel(projectId, list.ID, selectedVariableId), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
@@ -60,7 +60,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariableId := variables[4].ID
 
-		handler := New(NewModel(projectId, list.ID, selectedVariableId), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
@@ -118,7 +118,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariableId := variables[4].ID
 
-		handler := New(NewModel(projectId, list.ID, selectedVariableId), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
@@ -203,7 +203,7 @@ var _ = ginkgo.Describe("Declaration list variable tests", func() {
 
 		selectedVariableId := variables[4].ID
 
-		handler := New(NewModel(projectId, list.ID, selectedVariableId), auth.NewTestingAuthentication(false, ""))
+		handler := New(NewModel(projectId, list.ID, selectedVariableId, "connectionOnly"), auth.NewTestingAuthentication(false, ""))
 		view, err := handler.Handle()
 		gomega.Expect(err).Should(gomega.BeNil())
 		testAssertIDValid(view.ID)
