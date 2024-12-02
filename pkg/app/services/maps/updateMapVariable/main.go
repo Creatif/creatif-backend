@@ -211,8 +211,10 @@ func (c Main) Logic() (LogicResult, error) {
 
 			existing.Value = newValue
 
-			if res := tx.Create(&newConnections); res.Error != nil {
-				return res.Error
+			if len(newConnections) != 0 {
+				if res := tx.Create(&newConnections); res.Error != nil {
+					return res.Error
+				}
 			}
 		}
 

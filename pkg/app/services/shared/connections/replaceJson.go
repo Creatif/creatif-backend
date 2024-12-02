@@ -17,24 +17,19 @@ func ReplaceJson(conns []declarations.Connection, value []byte, connectionViewMe
 			return value, err
 		}
 
-		/**
-		Connections and its variables are linked. We need data from both to construct ConnectionVariable struct.
-		Because of that, we can group them into a single structure (a map) for faster lookup in order to not
-		do that in the below iteration.
-		*/
-		connsMap := make(map[string]declarations.Connection)
 		for _, c := range conns {
-			connsMap[c.ChildVariableID] = c
-		}
-
-		for _, cv := range connectionVariables {
-			conn := connsMap[cv.VariableID]
+			var connectionVariable QueryConnectionView
+			for _, cv := range connectionVariables {
+				if c.ChildVariableID == cv.VariableID {
+					connectionVariable = cv
+				}
+			}
 
 			viewConnection := ConnectionVariable{
-				VariableID:             cv.VariableID,
-				Value:                  cv.Name,
-				Path:                   conn.Path,
-				StructureType:          cv.StructureType,
+				VariableID:             connectionVariable.VariableID,
+				Value:                  connectionVariable.Name,
+				Path:                   c.Path,
+				StructureType:          connectionVariable.StructureType,
 				CreatifSpecialVariable: true,
 			}
 
@@ -43,7 +38,7 @@ func ReplaceJson(conns []declarations.Connection, value []byte, connectionViewMe
 				return nil, err
 			}
 
-			updatedValue, err := sjson.SetRawBytes(value, conn.Path, b)
+			updatedValue, err := sjson.SetRawBytes(value, c.Path, b)
 			if err != nil {
 				return nil, err
 			}
@@ -62,20 +57,15 @@ func ReplaceJson(conns []declarations.Connection, value []byte, connectionViewMe
 			return value, err
 		}
 
-		/**
-		Connections and its variables are linked. We need data from both to construct ConnectionVariable struct.
-		Because of that, we can group them into a single structure (a map) for faster lookup in order to not
-		do that in the below iteration.
-		*/
-		connsMap := make(map[string]declarations.Connection)
 		for _, c := range conns {
-			connsMap[c.ChildVariableID] = c
-		}
+			var connectionVariable QueryValueView
+			for _, cv := range connectionVariables {
+				if c.ChildVariableID == cv.VariableID {
+					connectionVariable = cv
+				}
+			}
 
-		for _, cv := range connectionVariables {
-			conn := connsMap[cv.VariableID]
-
-			updatedValue, err := sjson.SetRawBytes(value, conn.Path, cv.Value)
+			updatedValue, err := sjson.SetRawBytes(value, c.Path, connectionVariable.Value)
 			if err != nil {
 				return nil, err
 			}
