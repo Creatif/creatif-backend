@@ -3,6 +3,7 @@ package updateMapVariable
 import (
 	"creatif/pkg/app/auth"
 	declarations2 "creatif/pkg/app/domain/declarations"
+	"creatif/pkg/app/services/lists/addToList"
 	"creatif/pkg/app/services/maps/addToMap"
 	"creatif/pkg/app/services/shared/connections"
 	"creatif/pkg/lib/appErrors"
@@ -20,32 +21,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		projectId := testCreateProject("project")
 		groups := testCreateGroups(projectId, []string{"one", "two", "three", "four", "five"})
 		m := testCreateMap(projectId, "map")
-		referenceMap := testCreateMap(projectId, "referenceMap")
-
-		referenceVar1 := testAddToMap(projectId, referenceMap.ID, "name-1", []connections.Connection{}, groups, "")
-		referenceVar2 := testAddToMap(projectId, referenceMap.ID, "name-2", []connections.Connection{}, groups, "")
-		referenceVar3 := testAddToMap(projectId, referenceMap.ID, "name-3", []connections.Connection{}, groups, "")
-
-		referenceVar4 := testAddToMap(projectId, referenceMap.ID, "name-4", []connections.Connection{}, groups, "")
-		referenceVar5 := testAddToMap(projectId, referenceMap.ID, "name-5", []connections.Connection{}, groups, "")
-
-		addToMapView := testAddToMap(projectId, m.ID, "name-0", []connections.Connection{
-			{
-				Path:          "myName",
-				StructureType: "map",
-				VariableID:    referenceVar1.ID,
-			},
-			{
-				Path:          "another",
-				StructureType: "map",
-				VariableID:    referenceVar2.ID,
-			},
-			{
-				Path:          "three",
-				StructureType: "map",
-				VariableID:    referenceVar3.ID,
-			},
-		}, groups, "")
+		addToMapView := testAddToMap(projectId, m.ID, "name-0", []connections.Connection{}, groups, "")
 
 		b, err := json.Marshal("this is metadata")
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -59,18 +35,7 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 			Groups:    []string{groups[1], groups[2]},
 			Behaviour: "readonly",
 			Value:     v,
-		}, []connections.Connection{
-			{
-				Path:          addToMapView.Connections[0].Path,
-				StructureType: "map",
-				VariableID:    referenceVar4.ID,
-			},
-			{
-				Path:          "new entry",
-				StructureType: "map",
-				VariableID:    referenceVar5.ID,
-			},
-		}, []string{}), auth.NewTestingAuthentication(false, ""))
+		}, []connections.Connection{}, []string{}), auth.NewTestingAuthentication(false, ""))
 
 		view, err := handler.Handle()
 
@@ -88,17 +53,12 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 		gomega.Expect(value).Should(gomega.Equal("this is value"))
 		gomega.Expect(view.Behaviour).Should(gomega.Equal("readonly"))
 
-		var count int
-		res := storage.Gorm().Raw("SELECT count(child_variable_id) AS count FROM declarations.connections").Scan(&count)
-		testAssertErrNil(res.Error)
-		gomega.Expect(count).Should(gomega.Equal(3))
-
 		type SelectedGroups struct {
 			Groups pq.StringArray `gorm:"column:groups;type:text[]"`
 		}
 
 		var selGroups SelectedGroups
-		res = storage.Gorm().Raw(fmt.Sprintf("SELECT groups::text[] FROM %s WHERE variable_id = ?", (declarations2.VariableGroup{}).TableName()), addToMapView.ID).Scan(&selGroups)
+		res := storage.Gorm().Raw(fmt.Sprintf("SELECT groups::text[] FROM %s WHERE variable_id = ?", (declarations2.VariableGroup{}).TableName()), addToMapView.ID).Scan(&selGroups)
 		gomega.Expect(res.Error).Should(gomega.BeNil())
 
 		gomega.Expect(len(selGroups.Groups)).Should(gomega.Equal(2))
@@ -202,5 +162,179 @@ var _ = ginkgo.Describe("Declaration (UPDATE) map entry tests", func() {
 
 		errs := validationError.Data()
 		gomega.Expect(errs["exists"]).ShouldNot(gomega.BeEmpty())
+	})
+
+	ginkgo.It("should update an entry in the map with mixed connections", ginkgo.Label("map", "map_update"), func() {
+		projectId := testCreateProject("project")
+		groups := testCreateGroups(projectId, []string{"one", "two", "three", "four", "five"})
+		m := testCreateMap(projectId, "map")
+		addToMapView := testAddToMap(projectId, m.ID, "name-0", []connections.Connection{}, groups, "")
+
+		connectionList := testCreateList(projectId, "connection list")
+		connectionMap := testCreateMap(projectId, "connection map")
+
+		createMapConnections := func() []connections.Connection {
+			connsViews := make([]addToMap.View, 5)
+			for i := 0; i < 5; i++ {
+				connsViews[i] = testAddToMap(projectId, connectionMap.ID, fmt.Sprintf("variable-%d", i), []connections.Connection{}, []string{}, "")
+			}
+
+			conns := make([]connections.Connection, 5)
+			for i, c := range connsViews {
+				conns[i] = connections.Connection{
+					Path:          fmt.Sprintf("conn-map-%d", i),
+					StructureType: "map",
+					VariableID:    c.ID,
+				}
+			}
+
+			return conns
+		}
+
+		createListConnections := func() []connections.Connection {
+			connsViews := make([]addToList.View, 5)
+			for i := 0; i < 5; i++ {
+				connsViews[i] = testAddToList(projectId, connectionList.ID, fmt.Sprintf("variable-%d", i), []connections.Connection{}, []string{})
+			}
+
+			conns := make([]connections.Connection, 5)
+			for i, c := range connsViews {
+				conns[i] = connections.Connection{
+					Path:          fmt.Sprintf("conn-list-%d", i),
+					StructureType: "list",
+					VariableID:    c.ID,
+				}
+			}
+
+			return conns
+		}
+
+		var conns []connections.Connection
+		conns = append(conns, createListConnections()...)
+		conns = append(conns, createMapConnections()...)
+
+		b, err := json.Marshal("this is metadata")
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		v, err := json.Marshal("this is value")
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		handler := New(NewModel(projectId, m.ShortID, addToMapView.ID, []string{"connections"}, VariableModel{
+			Name:      "new name",
+			Metadata:  b,
+			Groups:    []string{groups[1], groups[2]},
+			Behaviour: "modifiable",
+			Value:     v,
+		}, conns, []string{}), auth.NewTestingAuthentication(false, ""))
+
+		view, err := handler.Handle()
+
+		testAssertErrNil(err)
+		testAssertIDValid(view.ID)
+
+		var connectionsCount int
+		res := storage.Gorm().Raw(
+			fmt.Sprintf("SELECT COUNT(*) as count FROM %s WHERE parent_variable_id = ?", (declarations2.Connection{}).TableName()),
+			view.ID,
+		).Scan(&connectionsCount)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
+		gomega.Expect(connectionsCount).Should(gomega.Equal(10))
+	})
+
+	ginkgo.It("should update an entry in the map with mixed connections and remove them if connections is empty", ginkgo.Label("map", "map_update"), func() {
+		projectId := testCreateProject("project")
+		groups := testCreateGroups(projectId, []string{"one", "two", "three", "four", "five"})
+		m := testCreateMap(projectId, "map")
+		addToMapView := testAddToMap(projectId, m.ID, "name-0", []connections.Connection{}, groups, "")
+
+		connectionList := testCreateList(projectId, "connection list")
+		connectionMap := testCreateMap(projectId, "connection map")
+
+		createMapConnections := func() []connections.Connection {
+			connsViews := make([]addToMap.View, 5)
+			for i := 0; i < 5; i++ {
+				connsViews[i] = testAddToMap(projectId, connectionMap.ID, fmt.Sprintf("variable-%d", i), []connections.Connection{}, []string{}, "")
+			}
+
+			conns := make([]connections.Connection, 5)
+			for i, c := range connsViews {
+				conns[i] = connections.Connection{
+					Path:          fmt.Sprintf("conn-map-%d", i),
+					StructureType: "map",
+					VariableID:    c.ID,
+				}
+			}
+
+			return conns
+		}
+
+		createListConnections := func() []connections.Connection {
+			connsViews := make([]addToList.View, 5)
+			for i := 0; i < 5; i++ {
+				connsViews[i] = testAddToList(projectId, connectionList.ID, fmt.Sprintf("variable-%d", i), []connections.Connection{}, []string{})
+			}
+
+			conns := make([]connections.Connection, 5)
+			for i, c := range connsViews {
+				conns[i] = connections.Connection{
+					Path:          fmt.Sprintf("conn-list-%d", i),
+					StructureType: "list",
+					VariableID:    c.ID,
+				}
+			}
+
+			return conns
+		}
+
+		var conns []connections.Connection
+		conns = append(conns, createListConnections()...)
+		conns = append(conns, createMapConnections()...)
+
+		b, err := json.Marshal("this is metadata")
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		v, err := json.Marshal("this is value")
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		handler := New(NewModel(projectId, m.ShortID, addToMapView.ID, []string{"connections"}, VariableModel{
+			Name:      "new name",
+			Metadata:  b,
+			Groups:    []string{groups[1], groups[2]},
+			Behaviour: "modifiable",
+			Value:     v,
+		}, conns, []string{}), auth.NewTestingAuthentication(false, ""))
+
+		view, err := handler.Handle()
+
+		testAssertErrNil(err)
+		testAssertIDValid(view.ID)
+
+		var connectionsCount int
+		res := storage.Gorm().Raw(
+			fmt.Sprintf("SELECT COUNT(*) as count FROM %s WHERE parent_variable_id = ?", (declarations2.Connection{}).TableName()),
+			view.ID,
+		).Scan(&connectionsCount)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
+		gomega.Expect(connectionsCount).Should(gomega.Equal(10))
+
+		handler = New(NewModel(projectId, m.ShortID, addToMapView.ID, []string{"connections"}, VariableModel{
+			Name:      "new name",
+			Metadata:  b,
+			Groups:    []string{groups[1], groups[2]},
+			Behaviour: "modifiable",
+			Value:     v,
+		}, []connections.Connection{}, []string{}), auth.NewTestingAuthentication(false, ""))
+
+		view, err = handler.Handle()
+
+		testAssertErrNil(err)
+		testAssertIDValid(view.ID)
+
+		res = storage.Gorm().Raw(
+			fmt.Sprintf("SELECT COUNT(*) as count FROM %s WHERE parent_variable_id = ?", (declarations2.Connection{}).TableName()),
+			view.ID,
+		).Scan(&connectionsCount)
+		gomega.Expect(res.Error).Should(gomega.BeNil())
+		gomega.Expect(connectionsCount).Should(gomega.Equal(0))
 	})
 })
