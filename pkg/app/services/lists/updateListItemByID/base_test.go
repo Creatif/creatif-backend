@@ -4,9 +4,13 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/domain"
 	"creatif/pkg/app/services/groups/addGroups"
+	"creatif/pkg/app/services/lists/addToList"
 	createList2 "creatif/pkg/app/services/lists/createList"
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/maps/addToMap"
+	"creatif/pkg/app/services/maps/mapCreate"
 	createProject2 "creatif/pkg/app/services/projects/createProject"
+	"creatif/pkg/app/services/shared/connections"
 	storage2 "creatif/pkg/lib/storage"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -168,4 +172,56 @@ func testCreateList(projectId, name string, varNum int, addGroups bool, behaviou
 	gomega.Expect(list.Name).Should(gomega.Equal(name))
 
 	return list
+}
+
+func testCreateMap(projectId, name string) mapCreate.View {
+	entries := make([]mapCreate.VariableModel, 0)
+
+	handler := mapCreate.New(mapCreate.NewModel(projectId, name, entries), auth.NewTestingAuthentication(false, ""))
+
+	view, err := handler.Handle()
+	testAssertErrNil(err)
+	testAssertIDValid(view.ID)
+
+	gomega.Expect(name).Should(gomega.Equal(view.Name))
+
+	return view
+}
+
+func testAddToMap(projectId, variableName, mapId string, connections []connections.Connection, groups []string) addToMap.View {
+	variableModel := addToMap.VariableModel{
+		Name:      variableName,
+		Metadata:  nil,
+		Groups:    groups,
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToMap.NewModel(projectId, mapId, variableModel, connections, []string{})
+	handler := addToMap.New(model, auth.NewTestingAuthentication(false, ""))
+
+	view, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return view
+}
+
+func testAddToList(projectId, variableName, listId string, connections []connections.Connection, groups []string) addToList.View {
+	variableModel := addToList.VariableModel{
+		Name:      variableName,
+		Metadata:  nil,
+		Groups:    groups,
+		Value:     nil,
+		Locale:    "eng",
+		Behaviour: "modifiable",
+	}
+
+	model := addToList.NewModel(projectId, listId, variableModel, connections, []string{})
+	handler := addToList.New(model, auth.NewTestingAuthentication(false, ""))
+
+	view, err := handler.Handle()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return view
 }
