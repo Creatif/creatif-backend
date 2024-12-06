@@ -125,8 +125,8 @@ func (c Main) Logic() (LogicResult, error) {
 
 	var updated declarations.MapVariable
 	if err := storage.Transaction(func(tx *gorm.DB) error {
-		var images []declarations.File
-		if res := tx.Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND map_id = ?", (declarations.File{}).TableName()), c.model.ProjectID, c.model.VariableName).Scan(&images); res.Error != nil {
+		var files []declarations.File
+		if res := tx.Raw(fmt.Sprintf("SELECT * FROM %s WHERE project_id = ? AND map_id = ?", (declarations.File{}).TableName()), c.model.ProjectID, c.model.VariableName).Scan(&files); res.Error != nil {
 			return res.Error
 		}
 
@@ -134,7 +134,7 @@ func (c Main) Logic() (LogicResult, error) {
 			c.model.ProjectID,
 			c.model.Values.Value,
 			c.model.ImagePaths,
-			images,
+			files,
 			func(fileSystemFilePath, path, mimeType, extension, fileName string) (string, error) {
 				image := declarations.NewFile(
 					c.model.ProjectID,

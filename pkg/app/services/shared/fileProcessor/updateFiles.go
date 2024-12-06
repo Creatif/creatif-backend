@@ -11,11 +11,16 @@ import (
 	"os"
 )
 
+/*
+*
+Updating reuploads all the files again. That means everything that was before gets deleted and
+all new is created.
+*/
 func UpdateFiles(
 	projectId string,
 	value []byte,
 	imagePaths []string,
-	currentImages []declarations.File,
+	currentFiles []declarations.File,
 	createCallback callbackCreateFn,
 	deleteCallback callbackDeleteFn,
 ) ([]byte, error) {
@@ -33,28 +38,19 @@ func UpdateFiles(
 		}
 	}()
 
-	// questions:
-	// 1. What if a field was a single file upload but changes to multiple files?
-	// 2. What if a field was a multiple file upload but becomes a single file upload?
-	// 3. What if multiple files changes with more or less files uploaded?
-
-	// answers:
-	// 1. That single file must be deleted along with db entry and multiple files must be created
-	// 2. Those multiple files must be deleted and a single entry must be created
-	// 3. Files that exist, must be updated. Files that don't exist anymore must be deleted. Files that are new, must be created
-
-	// 1. Create a map with field name -> file list grouping
-
-	groupedFiles := createFileGrouping(currentImages)
+	groupedFiles := createFileGrouping(currentFiles)
 	uploadedPaths = make([]string, 0)
 
 	for fieldName, files := range groupedFiles {
-		firstFile := files[0]
 		shouldSkip, newValue, err := doDeleteIfNotExists(projectId, files, imagePaths, value, deleteCallback)
 		if err != nil {
 			return nil, err
 		}
 
+		/**
+		Skipping happens if the user removed the field entirely on the frontend or renames the field
+		on the frontend.
+		*/
 		if shouldSkip {
 			value = newValue
 			continue
@@ -62,7 +58,21 @@ func UpdateFiles(
 
 		pathValue := gjson.GetBytes(value, fieldName)
 
+		/**
+		if this is true, it means that only one file has been uploaded, therefor,
+		we can take that file and delete the rest
+		*/
 		if pathValue.Type == gjson.String {
+			firstFile := files[0]
+
+			/**
+			Since only a single file has been uploaded, we can safely delete all
+			the db files since they are no longer valid and do not exist by field name
+			since field name is unique.
+			This might happen if the user has multiple=true on frontend and changed
+			it. That means that the previous state had multiple files under the same
+			field name. All those files can now be removed
+			*/
 			for _, f := range files {
 				if err := deleteCallback(f.ID, f.FieldName); err != nil {
 					processingError = err
@@ -94,9 +104,14 @@ func UpdateFiles(
 			value = modifiedValue
 		}
 
+		/**
+		If this path is entered, it means that this field name has multiple files associated with it.
+		In this case, previous files can be safely deleted and new files are then uploaded
+		*/
 		if pathValue.Type == gjson.JSON {
+			firstFile := files[0]
 			// checking that this field is cleared on the user end.
-			// this means that user pressed the X button or that no values have been uploaded on update
+			// this means that user pressed the X button or that no values have been uploaded on update.
 			// either way, this code must delete all files and db entries associated with this field name
 			if len(pathValue.Array()) == 0 {
 				for _, f := range files {
@@ -157,7 +172,7 @@ func UpdateFiles(
 		// this check ensures that this path is already handled
 		// by the above code that makes a diff based on db files.
 		// no need to process in that case so its ok to skip
-		exists := sdk.IncludesFn(currentImages, func(item declarations.File) bool {
+		exists := sdk.IncludesFn(currentFiles, func(item declarations.File) bool {
 			return item.FieldName == uploadingPath
 		})
 
@@ -192,8 +207,6 @@ func UpdateFiles(
 
 			uploadedPaths = append(uploadedPaths, uploadedFile.FileSystemFilePath)
 			value = modifiedValue
-
-			return value, nil
 		}
 
 		if pathValue.Type == gjson.JSON && len(pathValue.Array()) != 0 {
@@ -264,7 +277,7 @@ func doDeleteIfNotExists(projectId string, files []declarations.File, filePaths 
 			}
 		}
 
-		return true, nil, nil
+		return true, value, nil
 	}
 
 	if !existsInPath && raw.Type != gjson.Null {
@@ -288,6 +301,12 @@ func doDeleteIfNotExists(projectId string, files []declarations.File, filePaths 
 	return false, value, nil
 }
 
+/*
+*
+Groups file by field name into a map. FieldName is the name gotten from the frontend and is the name
+of the frontend component. This method maps all field names to its files because there could be multiple
+files in one field name.
+*/
 func createFileGrouping(dbFiles []declarations.File) map[string][]declarations.File {
 	m := make(map[string][]declarations.File)
 

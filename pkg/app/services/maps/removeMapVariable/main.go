@@ -40,12 +40,12 @@ func (c Main) Logic() (interface{}, error) {
 			return err
 		}
 
-		deleteImagesSql := fmt.Sprintf(
-			`DELETE FROM %s WHERE list_id = ? AND project_id = ?`,
+		deleteListImages := fmt.Sprintf(
+			`DELETE FROM %s WHERE (list_id = ? OR map_id = ?) AND project_id = ?`,
 			(declarations.File{}).TableName(),
 		)
 
-		res := tx.Exec(deleteImagesSql, c.model.VariableName, c.model.ProjectID)
+		res := tx.Exec(deleteListImages, c.model.VariableName, c.model.VariableName, c.model.ProjectID)
 		if res.Error != nil {
 			return appErrors.NewDatabaseError(res.Error).AddError("deleteListItemByID.Logic", nil)
 		}

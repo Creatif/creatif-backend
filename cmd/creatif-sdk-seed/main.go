@@ -61,6 +61,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	b := [...]string{"Penn", "Teller"}
+	fmt.Println(b, len(b), cap(b))
+
+	b = append(b, "Mario")
+	os.Exit(1)
+
 	report := newReporter()
 
 	anonymousClient := createAnonymousClient()
