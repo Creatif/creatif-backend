@@ -267,11 +267,11 @@ func doDeleteIfNotExists(projectId string, files []declarations.File, filePaths 
 
 	// if the file has not been sent in request but exists in db, it means that it is removed. Remove it here
 	if raw.Type == gjson.Null {
-		if err := os.Remove(firstFile.Name); err != nil {
-			events.DispatchEvent(events.NewFileNotRemoveEvent(firstFile.Name, "", projectId))
-		}
-
 		for _, f := range files {
+			if err := os.Remove(f.Name); err != nil {
+				events.DispatchEvent(events.NewFileNotRemoveEvent(f.Name, "", projectId))
+			}
+
 			if err := deleteCallback(f.ID, ""); err != nil {
 				return false, nil, err
 			}
