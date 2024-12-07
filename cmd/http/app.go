@@ -7,6 +7,7 @@ import (
 	appHandlers "creatif/cmd/http/handlers/app/project"
 	"creatif/cmd/http/handlers/app/stats"
 	"creatif/cmd/http/handlers/app/structures"
+	"creatif/cmd/http/handlers/declarations/connections"
 	"creatif/cmd/http/handlers/declarations/files"
 	"creatif/cmd/http/handlers/declarations/lists"
 	"creatif/cmd/http/handlers/declarations/locale"
@@ -161,6 +162,8 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/maps/items/:projectID/:name", maps.PaginateMapVariables())
 	group.GET("/maps/:projectID", maps.PaginateMapsHandler())
 	group.GET("/map/:projectID/:name", maps.GetMapHandler())
+
+	group.GET("/connections/:projectID/:structureID/:structureType", connections.PaginateConnectionsHandler())
 }
 
 func publishingRoutes(group *echo.Group) {
