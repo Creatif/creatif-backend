@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/dataGeneration"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,7 +17,7 @@ type joinedStructureAccount struct {
 	accountStructureId  string
 	propertyStructureId string
 
-	account account
+	account dataGeneration.Account
 }
 
 type projectProduct struct {
@@ -39,7 +40,7 @@ func newJoinedStructureAccount(
 	propertyStructureId string,
 	groupIds []string,
 
-	account account,
+	account dataGeneration.Account,
 ) joinedStructureAccount {
 	return joinedStructureAccount{
 		projectId:           projectId,
@@ -132,7 +133,7 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 		propertyStructureId := projectProductResult.propertyStructureId
 
 		for a := 0; a < 10; a++ {
-			genAccount, err := generateSingleAccount(groupIds)
+			genAccount, err := dataGeneration.GenerateSingleAccount(groupIds)
 			if err != nil {
 				handleAppError(err, Cannot_Continue_Procedure)
 			}

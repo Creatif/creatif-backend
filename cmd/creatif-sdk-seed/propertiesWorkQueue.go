@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/dataGeneration"
 	"net/http"
 )
 
@@ -8,7 +9,7 @@ type propertyWorkQueueJob struct {
 	client              *http.Client
 	projectId           string
 	propertyStructureId string
-	propertyVariable    propertyVariable
+	propertyVariable    dataGeneration.PropertyVariable
 	references          []map[string]string
 	imagePaths          []string
 }
@@ -23,7 +24,7 @@ func newPropertyWorkQueueJoby(
 	client *http.Client,
 	projectId,
 	propertyStructureId string,
-	propertyVariable propertyVariable,
+	propertyVariable dataGeneration.PropertyVariable,
 	references []map[string]string,
 	imagePaths []string,
 ) propertyWorkQueueJob {

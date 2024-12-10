@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/dataGeneration"
 	"net/http"
 )
 
@@ -10,7 +11,7 @@ type accountWorkQueueJob struct {
 	accountStructureId  string
 	propertyStructureId string
 	groupIds            []string
-	account             account
+	account             dataGeneration.Account
 }
 
 type accountWorkQueue struct {
@@ -27,7 +28,7 @@ func newAccountWorkQueueJob(
 	accountStructureId string,
 	propertyStructureId string,
 	groupIds []string,
-	account account,
+	account dataGeneration.Account,
 ) accountWorkQueueJob {
 	return accountWorkQueueJob{
 		client:              client,
@@ -93,7 +94,7 @@ func (wq *accountWorkQueue) start() chan bool {
 						The calculation is then 5 * 3 * 4 * 10
 						*/
 						for a := 0; a < wq.propertiesPerStatus; a++ {
-							singleProperty, err := generateSingleProperty(accountId, newSequence.locale, newSequence.propertyStatus, newSequence.propertyType, j.groupIds)
+							singleProperty, err := dataGeneration.GenerateSingleProperty(accountId, newSequence.locale, newSequence.propertyStatus, newSequence.propertyType, j.groupIds)
 							if err != nil {
 								handleAppError(err, Cannot_Continue_Procedure)
 							}
@@ -102,9 +103,9 @@ func (wq *accountWorkQueue) start() chan bool {
 								j.client,
 								j.projectId,
 								j.propertyStructureId,
-								singleProperty.variable,
-								singleProperty.connections,
-								singleProperty.imagePaths,
+								singleProperty.Variable,
+								singleProperty.Connections,
+								singleProperty.ImagePaths,
 							))
 						}
 					}
