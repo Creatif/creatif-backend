@@ -61,12 +61,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	b := [...]string{"Penn", "Teller"}
-	fmt.Println(b, len(b), cap(b))
-
-	b = append(b, "Mario")
-	os.Exit(1)
-
 	report := newReporter()
 
 	anonymousClient := createAnonymousClient()
@@ -95,6 +89,14 @@ func main() {
 	fmt.Printf("Seeding...\n")
 	fmt.Println("")
 
+	/**
+	The properties are generated in this way:
+		5 - number of languages per property
+	    3 - number of property statuses (Rent, Sell, Buy)
+	    4 - number of property types (House, Apartment, Land, Studio)
+
+	For every propertiesPerStatus, one of property status, property type and language is created.
+	*/
 	numOfAllOperations := (numOfProjects * 10) * (5 * 3 * 4 * propertiesPerStatus)
 	progressBarNotifier, progressBarDone := generateProgressBar(numOfAllOperations)
 

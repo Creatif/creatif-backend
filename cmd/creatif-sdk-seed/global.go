@@ -45,6 +45,10 @@ Flags:
     This will do what --cleanup does but will run other commands. Basically, you tell the program to wipe the database out start over
 --projects={\d} 
     For how many projects should it seed the application. More will be slower.
+--properties-per-type
+    For every property type (House, Apartment, Land, Studio), generate that many properties. Every property is generated
+    with 5 languages and 3 property statuses. That means for every language and every property status, generate that many
+	properties per type. For example, if --properties-per-type=10, then 5 * 3 * 4 * 10 (600) properties will be generated.
 --help
     If used, will output help. If used with any other flags, it will ignore them and just print help, i.e. it will ignore all other flags. 
 
@@ -63,7 +67,7 @@ const (
 	LIST_TABLE             = "lists"
 	GROUPS_TABLE           = "groups"
 	VARIABLE_GROUPS_TABLE  = "variable_groups"
-	REFERENCE_TABLES       = "references"
+	CONNECTIONS_TABLE      = "connections"
 	LIST_VARIABLES_TABLE   = "list_variables"
 	PUBLISHED_LISTS_TABLE  = "published_lists"
 	PUBLISHED_MAPS_TABLE   = "published_maps"

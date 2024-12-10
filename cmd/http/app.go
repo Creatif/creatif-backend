@@ -163,7 +163,7 @@ func declarationRoutes(group *echo.Group) {
 	group.GET("/maps/:projectID", maps.PaginateMapsHandler())
 	group.GET("/map/:projectID/:name", maps.GetMapHandler())
 
-	group.GET("/connections/:projectID/:structureID/:structureType", connections.PaginateConnectionsHandler())
+	group.GET("/connections/:projectID/:structureID/:structureType/:parentVariableId", connections.PaginateConnectionsHandler())
 }
 
 func publishingRoutes(group *echo.Group) {

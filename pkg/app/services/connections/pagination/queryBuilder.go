@@ -186,6 +186,7 @@ func createPaginationSql(structureType string, sq subQueries, defs defaults) str
 			sq.returnableFields,
 			(declarations.MapVariable{}).TableName(),
 			(declarations.Map{}).TableName(),
+			(declarations.Connection{}).TableName(),
 			sq.locale,
 			sq.search,
 			sq.groups,
