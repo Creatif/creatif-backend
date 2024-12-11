@@ -2,6 +2,7 @@ package main
 
 import (
 	"creatif-sdk-seed/dataGeneration"
+	"creatif-sdk-seed/errorHandler"
 	"net/http"
 )
 
@@ -96,7 +97,7 @@ func (wq *accountWorkQueue) start() chan bool {
 						for a := 0; a < wq.propertiesPerStatus; a++ {
 							singleProperty, err := dataGeneration.GenerateSingleProperty(accountId, newSequence.locale, newSequence.propertyStatus, newSequence.propertyType, j.groupIds)
 							if err != nil {
-								handleAppError(err, Cannot_Continue_Procedure)
+								errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 							}
 
 							wq.listWorkQueue.addJob(newPropertyWorkQueueJoby(

@@ -1,11 +1,11 @@
 package main
 
 import (
+	"creatif-sdk-seed/errorHandler"
 	http2 "creatif-sdk-seed/http"
 	"fmt"
 	"github.com/fatih/color"
 	"io"
-	"math/rand"
 	"os"
 	"time"
 )
@@ -140,7 +140,7 @@ func handleHttpError(result http2.HttpResult) http2.HttpResult {
 			}
 		}
 
-		completeCleanup()
+		errorHandler.CompleteCleanup()
 		os.Exit(1)
 	}
 
@@ -161,38 +161,9 @@ func handleHttpError(result http2.HttpResult) http2.HttpResult {
 			printNewlineSandwich(printers["error"], string(b))
 		}
 		fmt.Println("")
-		completeCleanup()
+		errorHandler.CompleteCleanup()
 		os.Exit(1)
 	}
 
 	return result
-}
-
-func handleAppError(err error, flag string) {
-	if flag == Cannot_Continue_Procedure {
-		printNewlineSandwich(printers["error"], fmt.Sprintf("An app error occurred: %s. The program is forced to quit.", err.Error()))
-		printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
-		printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
-		fmt.Println("")
-		completeCleanup()
-		os.Exit(1)
-	}
-
-	if err.Error() == "invalid_num_images" {
-		printNewlineSandwich(printers["error"], fmt.Sprintf("An app error occurred: %s. The program is forced to quit.", err.Error()))
-		printNewlineSandwich(printers["error"], "The program is forced to clean up everything that happened up until now.\nThat means a complete database wipe out.\nRun this command again for a clean start.")
-		printNewlineSandwich(printers["error"], "IMPORTANT: cleanup truncates every table it the database but does not check if it errors.\nIt is perfectly fine to delete the docker volume to start again.")
-		fmt.Println("")
-		completeCleanup()
-		os.Exit(1)
-	}
-	// ignore the error, it is not serious enough
-}
-
-// Deprecated: This function has been replaced by a balancer
-func randomBetween(min, max int) int {
-	// Seed the random number generator
-	rand.New(rand.NewSource(time.Now().UnixNano()))
-	// Generate a random number between min and max
-	return rand.Intn(max-min+1) + min
 }

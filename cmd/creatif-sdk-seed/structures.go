@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/errorHandler"
 	http2 "creatif-sdk-seed/http"
 	"encoding/json"
 	"errors"
@@ -79,18 +80,18 @@ func createAccountStructureAndReturnID(client *http.Client, projectId string) st
 	res := result.Response()
 
 	if res.Body == nil {
-		handleAppError(errors.New("createPropertiesStructureAndReturnID() does not have a body"), Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(errors.New("createPropertiesStructureAndReturnID() does not have a body"), Cannot_Continue_Procedure)
 	}
 
 	defer res.Body.Close()
 	var m map[string]interface{}
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		handleAppError(err, Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
 	if err := json.Unmarshal(b, &m); err != nil {
-		handleAppError(err, Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
 	id = m["id"].(string)
@@ -104,18 +105,18 @@ func createPropertiesStructureAndReturnID(client *http.Client, projectId string)
 	res := result.Response()
 
 	if res.Body == nil {
-		handleAppError(errors.New("createPropertiesStructureAndReturnID() does not have a body"), Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(errors.New("createPropertiesStructureAndReturnID() does not have a body"), Cannot_Continue_Procedure)
 	}
 
 	defer res.Body.Close()
 	var m map[string]interface{}
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		handleAppError(err, Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
 	if err := json.Unmarshal(b, &m); err != nil {
-		handleAppError(err, Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
 	id = m["id"].(string)

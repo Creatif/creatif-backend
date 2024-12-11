@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/storage"
 	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -30,7 +31,7 @@ func runDb() {
 		os.Getenv("DATABASE_PORT"),
 	)
 
-	err := Connect(dsn)
+	err := storage.Connect(dsn)
 
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("Cannot connect to database: %s", err.Error()))

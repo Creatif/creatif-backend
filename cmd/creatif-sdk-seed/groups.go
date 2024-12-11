@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/errorHandler"
 	http2 "creatif-sdk-seed/http"
 	"encoding/json"
 	"errors"
@@ -57,18 +58,18 @@ func createGroupsAndGetGroupIds(client *http.Client, projectId string) []string 
 	res := result.Response()
 
 	if res == nil || res.Body == nil {
-		handleAppError(errors.New("createGroupsAndGetGroupIds() is trying to work on nil body"), Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(errors.New("createGroupsAndGetGroupIds() is trying to work on nil body"), Cannot_Continue_Procedure)
 	}
 
 	defer res.Body.Close()
 	b, _ := io.ReadAll(res.Body)
 	var groups []map[string]string
 	if err := json.Unmarshal(b, &groups); err != nil {
-		handleAppError(err, Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
 	if err := res.Body.Close(); err != nil {
-		handleAppError(err, Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
 	for _, g := range groups {

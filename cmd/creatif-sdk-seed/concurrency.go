@@ -2,6 +2,7 @@ package main
 
 import (
 	"creatif-sdk-seed/dataGeneration"
+	"creatif-sdk-seed/errorHandler"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -87,22 +88,22 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 			res := result.Response()
 
 			if res != nil && res.Body == nil {
-				handleAppError(errors.New("projectProducer() is trying to work on a nil body"), Cannot_Continue_Procedure)
+				errorHandler.HandleAppError(errors.New("projectProducer() is trying to work on a nil body"), Cannot_Continue_Procedure)
 			}
 
 			defer res.Body.Close()
 			var m map[string]interface{}
 			b, err := io.ReadAll(res.Body)
 			if err != nil {
-				handleAppError(err, Cannot_Continue_Procedure)
+				errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 			}
 
 			if err := json.Unmarshal(b, &m); err != nil {
-				handleAppError(err, Cannot_Continue_Procedure)
+				errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 			}
 
 			if res.StatusCode < 200 && res.StatusCode > 299 {
-				handleAppError(errors.New(fmt.Sprintf("Creating project failed with status %d and body %s", res.StatusCode, string(b))), Cannot_Continue_Procedure)
+				errorHandler.HandleAppError(errors.New(fmt.Sprintf("Creating project failed with status %d and body %s", res.StatusCode, string(b))), Cannot_Continue_Procedure)
 			}
 
 			projectId = m["id"].(string)
@@ -135,7 +136,7 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 		for a := 0; a < 10; a++ {
 			genAccount, err := dataGeneration.GenerateSingleAccount(groupIds)
 			if err != nil {
-				handleAppError(err, Cannot_Continue_Procedure)
+				errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 			}
 
 			joinedAccount := newJoinedStructureAccount(

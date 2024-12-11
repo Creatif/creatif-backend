@@ -2,6 +2,7 @@ package main
 
 import (
 	"creatif-sdk-seed/dataGeneration"
+	"creatif-sdk-seed/errorHandler"
 	http2 "creatif-sdk-seed/http"
 	"encoding/json"
 	"errors"
@@ -107,22 +108,22 @@ func addToMapAndGetAccountId(client *http.Client, projectId string, accountId st
 		if res.Body != nil {
 			res.Body.Close()
 		}
-		handleAppError(errors.New(fmt.Sprintf("Generating one of the accounts return a status code %d", res.StatusCode)), Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(errors.New(fmt.Sprintf("Generating one of the accounts return a status code %d", res.StatusCode)), Cannot_Continue_Procedure)
 	}
 
 	if res.Body == nil {
-		handleAppError(errors.New("addToMapAndGetAccountId() was trying to get a response body on a nil body"), Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(errors.New("addToMapAndGetAccountId() was trying to get a response body on a nil body"), Cannot_Continue_Procedure)
 	}
 
 	b, err := io.ReadAll(res.Body)
 	defer res.Body.Close()
 	if err != nil {
-		handleAppError(err, Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
 	var m map[string]interface{}
 	if err := json.Unmarshal(b, &m); err != nil {
-		handleAppError(err, Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
 	genAccountId = m["id"].(string)
