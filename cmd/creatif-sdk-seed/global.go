@@ -16,12 +16,12 @@ var help = `
 WARNING: THIS IS A DESTRUCTIVE COMMAND. IN CASE OF CERTAIN ERRORS, IT MIGHT DESTROY ALL THE DATA THAT YOU HAVE IN THE DATABASE. USE WITH CAUTION!!!
 
 IMPORTANT:
-This seed actually uploads images. Every account gets one image and every property gets 3 images. It would be wise to from time to time, just delete the 'var' and 'public' directories because they might get very large if you execute this function over and over again.
+This seed actually uploads images. Every clientVariable gets one image and every property gets 3 images. It would be wise to from time to time, just delete the 'var' and 'public' directories because they might get very large if you execute this function over and over again.
 
 This program cannot start if you don't have the server up, so make sure that you open up a new terminal tab, hit 'docker compose up' on the main project
 and only then execute this command.
 
-This command seeds the initial application with seed data from real estate project. It has two structures: Accounts and Properties. Accounts is a map and Properties is a list. It generates five projects with those structure. Each project has 200 Account maps and 1000 (one thousand) Properties in 5 different locales. That means that this command will generate 5200 "entities" per project. There will be 5 projects so 26 thousand "entities" will be created in total.
+This command seeds the initial application with seed data from real estate project. It has two structures: Clients and Properties. Clients is a map and Properties is a list. It generates five projects with those structure. Each project has 200 Client maps and 1000 (one thousand) Properties in 5 different locales. That means that this command will generate 5200 "entities" per project. There will be 5 projects so 26 thousand "entities" will be created in total.
 
 This command will be used to test public SDKs. For now, there is only javascript SDK but hopefully, there will be more.
 

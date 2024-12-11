@@ -11,52 +11,45 @@ import (
 	"time"
 )
 
-type joinedStructureAccount struct {
+type joinedStructureClient struct {
 	projectId           string
 	groupIds            []string
-	accountId           string
-	accountStructureId  string
+	clientId            string
+	clientStructureId   string
 	propertyStructureId string
 
-	account dataGeneration.Account
+	client dataGeneration.Client
 }
 
 type projectProduct struct {
 	projectId           string
 	groupIds            []string
-	accountStructureId  string
+	clientStructureId   string
 	propertyStructureId string
 }
 
-type accountProduct struct {
-	projectId           string
-	groupIds            []string
-	accountId           string
-	propertyStructureId string
-}
-
-func newJoinedStructureAccount(
+func newJoinedStructureClient(
 	projectId,
-	accountStructureId,
+	clientStructureId,
 	propertyStructureId string,
 	groupIds []string,
 
-	account dataGeneration.Account,
-) joinedStructureAccount {
-	return joinedStructureAccount{
+	client dataGeneration.Client,
+) joinedStructureClient {
+	return joinedStructureClient{
 		projectId:           projectId,
 		groupIds:            groupIds,
-		accountStructureId:  accountStructureId,
+		clientStructureId:   clientStructureId,
 		propertyStructureId: propertyStructureId,
-		account:             account,
+		client:              client,
 	}
 }
 
-func newProjectProduct(projectId, accountStructureId, propertyStructureId string, groupIds []string) projectProduct {
+func newProjectProduct(projectId, clientStructureId, propertyStructureId string, groupIds []string) projectProduct {
 	return projectProduct{
 		projectId:           projectId,
 		groupIds:            groupIds,
-		accountStructureId:  accountStructureId,
+		clientStructureId:   clientStructureId,
 		propertyStructureId: propertyStructureId,
 	}
 }
@@ -109,10 +102,10 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 			projectId = m["id"].(string)
 
 			groupIds := createGroupsAndGetGroupIds(client, projectId)
-			accountStructureId := createAccountStructureAndReturnID(client, projectId)
+			clientStructureId := createClientStructureAndReturnId(client, projectId)
 			propertyStructureId := createPropertiesStructureAndReturnID(client, projectId)
 
-			producers[i] <- newProjectProduct(projectId, accountStructureId, propertyStructureId, groupIds)
+			producers[i] <- newProjectProduct(projectId, clientStructureId, propertyStructureId, groupIds)
 			close(producers[i])
 		}
 	}()
@@ -120,7 +113,7 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 	return producers
 }
 
-func accountProducer(client *http.Client, projectProducers []chan projectProduct, wq *accountWorkQueue, reporter *reporter) []projectProduct {
+func clientProducer(client *http.Client, projectProducers []chan projectProduct, wq *clientWorkQueue, reporter *reporter) []projectProduct {
 	publishingListeners := make([]projectProduct, len(projectProducers))
 	for i, producer := range projectProducers {
 		projectProductResult := <-producer
@@ -130,30 +123,30 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 
 		groupIds := projectProductResult.groupIds
 		projectId := projectProductResult.projectId
-		accountStructureId := projectProductResult.accountStructureId
+		clientStructureId := projectProductResult.clientStructureId
 		propertyStructureId := projectProductResult.propertyStructureId
 
-		for a := 0; a < 10; a++ {
-			genAccount, err := dataGeneration.GenerateSingleAccount(groupIds)
+		for a := 0; a < 100; a++ {
+			getClient, err := dataGeneration.GenerateSingleClient(groupIds)
 			if err != nil {
 				errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 			}
 
-			joinedAccount := newJoinedStructureAccount(
+			joinedClient := newJoinedStructureClient(
 				projectId,
-				accountStructureId,
+				clientStructureId,
 				propertyStructureId,
 				groupIds,
-				genAccount,
+				getClient,
 			)
 
-			wq.addJob(newAccountWorkQueueJob(
+			wq.addJob(newClientWorkQueueJob(
 				client,
-				joinedAccount.projectId,
-				joinedAccount.accountStructureId,
-				joinedAccount.propertyStructureId,
-				joinedAccount.groupIds,
-				joinedAccount.account,
+				joinedClient.projectId,
+				joinedClient.clientStructureId,
+				joinedClient.propertyStructureId,
+				joinedClient.groupIds,
+				joinedClient.client,
 			))
 		}
 	}
@@ -163,10 +156,10 @@ func accountProducer(client *http.Client, projectProducers []chan projectProduct
 
 func concurrencyCoordinator(
 	propertiesWorkQueue propertiesWorkQueue,
-	accountWorkQueue *accountWorkQueue,
+	clientWorkQueue *clientWorkQueue,
 	progressBarNotifier chan bool,
 	propertyWorkQueueDone chan bool,
-	accountWorkQueueDone chan bool,
+	clientWorkQueueDone chan bool,
 	reporter *reporter,
 ) {
 	go func() {
@@ -177,24 +170,24 @@ func concurrencyCoordinator(
 				progressBarNotifier <- true
 				reporter.AddProperty()
 				workQueueTimeout = time.After(5 * time.Second)
-			case <-accountWorkQueue.jobDoneQueue:
+			case <-clientWorkQueue.jobDoneQueue:
 				progressBarNotifier <- true
-				reporter.AddAccount()
+				reporter.AddClient()
 				workQueueTimeout = time.After(5 * time.Second)
 			case <-workQueueTimeout:
 				close(propertyWorkQueueDone)
-				close(accountWorkQueueDone)
+				close(clientWorkQueueDone)
 				return
 			}
 		}
 	}()
 }
 
-func mergeDoneQueues(accountQueue chan bool, propertyQueue chan bool) chan bool {
+func mergeDoneQueues(clientQueue chan bool, propertyQueue chan bool) chan bool {
 	done := make(chan bool)
 
 	go func() {
-		<-accountQueue
+		<-clientQueue
 		<-propertyQueue
 
 		done <- true

@@ -6,48 +6,48 @@ import (
 	"net/http"
 )
 
-type accountWorkQueueJob struct {
+type clientWorkQueueJob struct {
 	client              *http.Client
 	projectId           string
-	accountStructureId  string
+	clientStructureId   string
 	propertyStructureId string
 	groupIds            []string
-	account             dataGeneration.Account
+	clientVariable      dataGeneration.Client
 }
 
-type accountWorkQueue struct {
-	listeners           []chan accountWorkQueueJob
+type clientWorkQueue struct {
+	listeners           []chan clientWorkQueueJob
 	listWorkQueue       propertiesWorkQueue
 	jobDoneQueue        chan bool
 	balancer            *balancer
 	propertiesPerStatus int
 }
 
-func newAccountWorkQueueJob(
+func newClientWorkQueueJob(
 	client *http.Client,
 	projectId,
-	accountStructureId string,
+	clientStructureId string,
 	propertyStructureId string,
 	groupIds []string,
-	account dataGeneration.Account,
-) accountWorkQueueJob {
-	return accountWorkQueueJob{
+	clientVariable dataGeneration.Client,
+) clientWorkQueueJob {
+	return clientWorkQueueJob{
 		client:              client,
 		projectId:           projectId,
-		accountStructureId:  accountStructureId,
+		clientStructureId:   clientStructureId,
 		propertyStructureId: propertyStructureId,
 		groupIds:            groupIds,
-		account:             account,
+		clientVariable:      clientVariable,
 	}
 }
 
-func newAccountWorkQueue(workersNum int, buffer int, listWorkQueue propertiesWorkQueue, propertiesPerStatus int) *accountWorkQueue {
-	listeners := make([]chan accountWorkQueueJob, workersNum)
+func newClientWorkQueue(workersNum int, buffer int, listWorkQueue propertiesWorkQueue, propertiesPerStatus int) *clientWorkQueue {
+	listeners := make([]chan clientWorkQueueJob, workersNum)
 	for i := 0; i < workersNum; i++ {
-		listeners[i] = make(chan accountWorkQueueJob, buffer)
+		listeners[i] = make(chan clientWorkQueueJob, buffer)
 	}
 
-	return &accountWorkQueue{
+	return &clientWorkQueue{
 		listeners:           listeners,
 		listWorkQueue:       listWorkQueue,
 		jobDoneQueue:        make(chan bool),
@@ -56,12 +56,12 @@ func newAccountWorkQueue(workersNum int, buffer int, listWorkQueue propertiesWor
 	}
 }
 
-func (wq *accountWorkQueue) addJob(j accountWorkQueueJob) {
+func (wq *clientWorkQueue) addJob(j clientWorkQueueJob) {
 	worker := wq.balancer.addJob()
 	wq.listeners[worker] <- j
 }
 
-func (wq *accountWorkQueue) start() chan bool {
+func (wq *clientWorkQueue) start() chan bool {
 	done := make(chan bool)
 	for i := 0; i < len(wq.listeners); i++ {
 		go func(i int) {
@@ -70,20 +70,20 @@ func (wq *accountWorkQueue) start() chan bool {
 				case <-done:
 					return
 				case j := <-wq.listeners[i]:
-					accountId := addToMapAndGetAccountId(
+					clientId := addToMapAndGetClientId(
 						j.client,
 						j.projectId,
-						j.accountStructureId,
-						j.account,
+						j.clientStructureId,
+						j.clientVariable,
 					)
 
 					wq.jobDoneQueue <- true
 
 					wq.balancer.removeJob(i)
 
-					propertiesGen := newPropertiesGenerator()
+					propertiesGen := dataGeneration.NewPropertiesGenerator()
 					for {
-						newSequence, ok := propertiesGen.generate()
+						newSequence, ok := propertiesGen.Generate()
 
 						if !ok {
 							break
@@ -95,7 +95,7 @@ func (wq *accountWorkQueue) start() chan bool {
 						The calculation is then 5 * 3 * 4 * 10
 						*/
 						for a := 0; a < wq.propertiesPerStatus; a++ {
-							singleProperty, err := dataGeneration.GenerateSingleProperty(accountId, newSequence.locale, newSequence.propertyStatus, newSequence.propertyType, j.groupIds)
+							singleProperty, err := dataGeneration.GenerateSingleProperty(clientId, newSequence.Locale, newSequence.PropertyStatus, newSequence.PropertyType, j.groupIds)
 							if err != nil {
 								errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 							}

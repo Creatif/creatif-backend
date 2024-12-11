@@ -14,7 +14,7 @@ var printers = map[string]*color.Color{
 	"warning": color.New(color.FgYellow).Add(color.Bold),
 }
 
-type AccountVariable struct {
+type ClientVariable struct {
 	Name      string
 	Locale    string
 	Behaviour string
@@ -23,15 +23,15 @@ type AccountVariable struct {
 	Value     string
 }
 
-type Account struct {
+type Client struct {
 	Name        string
 	Connections []map[string]string
 	ImagePaths  []string
-	Variable    AccountVariable
+	Variable    ClientVariable
 }
 
-func newAccountVariable(name, locale, behaviour, metadata, value string, groups []string) AccountVariable {
-	return AccountVariable{
+func newClientVariable(name, locale, behaviour, metadata, value string, groups []string) ClientVariable {
+	return ClientVariable{
 		Name:      name,
 		Locale:    locale,
 		Behaviour: behaviour,
@@ -63,13 +63,13 @@ func generateBase64Images(dir string, numOfImages int) ([]string, error) {
 	return b64Images, nil
 }
 
-func GenerateSingleAccount(groupIds []string) (Account, error) {
+func GenerateSingleClient(groupIds []string) (Client, error) {
 	images, err := generateBase64Images("images/profileImages", 1)
 	if err != nil {
-		printers["warning"].Printf("Unable to generate base64 image in Accounts generator %s\n", err.Error())
+		printers["warning"].Printf("Unable to generate base64 image in Clients generator %s\n", err.Error())
 	}
 
-	accountValueData := map[string]string{
+	clientValueData := map[string]string{
 		"name":       faker.FirstName(),
 		"lastName":   faker.LastName(),
 		"address":    faker.GetRealAddress().Address,
@@ -78,25 +78,25 @@ func GenerateSingleAccount(groupIds []string) (Account, error) {
 	}
 
 	if len(images) == 1 {
-		accountValueData["profileImage"] = images[0]
+		clientValueData["profileImage"] = images[0]
 	}
 
-	b, err := json.Marshal(accountValueData)
+	b, err := json.Marshal(clientValueData)
 	if err != nil {
-		return Account{}, err
+		return Client{}, err
 	}
 
 	uniqueName := uuid.New().String()
-	return newAccount(
+	return newClient(
 		uniqueName,
 		nil,
 		[]string{"profileImage"},
-		newAccountVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)),
+		newClientVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)),
 	), nil
 }
 
-func newAccount(name string, connections []map[string]string, imagePaths []string, variable AccountVariable) Account {
-	return Account{
+func newClient(name string, connections []map[string]string, imagePaths []string, variable ClientVariable) Client {
+	return Client{
 		Name:        name,
 		Connections: connections,
 		ImagePaths:  imagePaths,

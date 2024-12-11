@@ -74,9 +74,9 @@ func createListStructure(client *http.Client, projectId, name string) http2.Http
 	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func createAccountStructureAndReturnID(client *http.Client, projectId string) string {
+func createClientStructureAndReturnId(client *http.Client, projectId string) string {
 	var id string
-	result := errorHandler.HandleHttpError(createMapStructure(client, projectId, "Accounts"))
+	result := errorHandler.HandleHttpError(createMapStructure(client, projectId, "Clients"))
 	res := result.Response()
 
 	if res.Body == nil {

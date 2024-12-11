@@ -23,10 +23,10 @@ type Property struct {
 	Variable    PropertyVariable
 }
 
-func GenerateSingleProperty(accountId, locale, propertyStatus, propertyType string, groupIds []string) (Property, error) {
+func GenerateSingleProperty(clientId, locale, propertyStatus, propertyType string, groupIds []string) (Property, error) {
 	images, err := generateBase64Images("images/propertyImages", 3)
 	if err != nil {
-		printers["warning"].Printf("Unable to generate base64 image in Accounts generator %s\n", err.Error())
+		printers["warning"].Printf("Unable to generate base64 image in Clients generator %s\n", err.Error())
 	}
 
 	p := generateSinglePropertyVariable(propertyType)
@@ -44,9 +44,9 @@ func GenerateSingleProperty(accountId, locale, propertyStatus, propertyType stri
 		uniqueName,
 		[]map[string]string{
 			{
-				"name":          "accounts",
+				"name":          "clients",
 				"structureType": "map",
-				"variableId":    accountId,
+				"variableId":    clientId,
 			},
 		},
 		[]string{"propertyImages"},

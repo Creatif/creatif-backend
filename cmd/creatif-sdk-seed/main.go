@@ -3,16 +3,16 @@ WARNING: THIS IS A DESTRUCTIVE COMMAND. IN CASE OF CERTAIN ERRORS, IT MIGHT DEST
 		 IN THE DATABASE. USE WITH CAUTION!!!
 
 IMPORTANT:
-This seed actually uploads images. Every account gets one image and every property gets 3 images. It would be wise
+This seed actually uploads images. Every clientVariable gets one image and every property gets 3 images. It would be wise
 to from time to time, just delete the 'var' and 'public' directories because they might get very large if you execute
 this function over and over again.
 
 This program cannot start if you don't have the server up, so make sure that you open up a new terminal tab, hit 'docker compose up' on the main project
 and only then execute this command.
 
-This command seeds the initial application with seed data from real estate project. It has two structures: Accounts and
-Properties. Accounts is a map and Properties is a list. It generates five projects with those structure. Each project has
-200 Account maps and 1000 (one thousand) Properties in 5 different locales. That means that this command will generate 5200
+This command seeds the initial application with seed data from real estate project. It has two structures: Clients and
+Properties. Clients is a map and Properties is a list. It generates five projects with those structure. Each project has
+200 Client maps and 1000 (one thousand) Properties in 5 different locales. That means that this command will generate 5200
 "entities" per project. There will be 5 projects so 26 thousand "entities" will be created in total.
 
 This command will be used to test public SDKs. For now, there is only javascript SDK but hopefully, there will be more.
@@ -67,11 +67,11 @@ func main() {
 	authenticatedClient := preSeedAuthAndSetup(anonymousClient)
 
 	/**
-		These are the work queues where Accounts and Properties are created. Each of them has 50 workers that produce
+		These are the work queues where Clients and Properties are created. Each of them has 50 workers that produce
 		50 workers and each of them produce 50 channels that others can send work to. Very important thing to note is that
-		these are not generic work queues. Both of them are specialized to produce either Account or a Property.
+		these are not generic work queues. Both of them are specialized to produce either Client or a Property.
 
-		Below, accountProducer sends a job to accountWorkQueue for a Account to be created. After that, it creates a job for
+		Below, clientProducer sends a job to clientWorkQueue for a Client to be created. After that, it creates a job for
 		the propertiesWorkQueue for a property to be created. That way, they do not block each other. Every worker has its own
 		channel that is buffered. That is the second argument.
 
@@ -81,10 +81,10 @@ func main() {
 		is important to know that. For more information how these are used, take a look below to the comment above
 		concurrencyCoordinator() function.
 	*/
-	propertiesQueue := newPropertiesWorkQueue(50, 50)
+	propertiesQueue := newPropertiesWorkQueue(60, 60)
 	propertyWorkQueueDone := propertiesQueue.start()
-	accountQueue := newAccountWorkQueue(50, 50, propertiesQueue, propertiesPerStatus)
-	accountWorkQueueDone := accountQueue.start()
+	clientQueue := newClientWorkQueue(60, 60, propertiesQueue, propertiesPerStatus)
+	clientWorkQueueDone := clientQueue.start()
 
 	fmt.Printf("Seeding...\n")
 	fmt.Println("")
@@ -97,7 +97,7 @@ func main() {
 
 	For every propertiesPerStatus, one of property status, property type and language is created.
 	*/
-	numOfAllOperations := (numOfProjects * 10) * (5 * 3 * 4 * propertiesPerStatus)
+	numOfAllOperations := (numOfProjects * 100) * (5 * 3 * 4 * propertiesPerStatus)
 	progressBarNotifier, progressBarDone := generateProgressBar(numOfAllOperations)
 
 	/**
@@ -108,18 +108,18 @@ func main() {
 	*/
 	projectProducerListeners := projectProducer(authenticatedClient, numOfProjects)
 	/**
-	accountProducer listens to when a project is created and sends it to accountWorkQueue. More on accountWorkQueue, just scroll
-	up. Not complicated, for every project, there are 10 Accounts created and send to accountWorkQueue which is just another
+	clientProducer listens to when a project is created and sends it to clientWorkQueue. More on clientWorkQueue, just scroll
+	up. Not complicated, for every project, there are 10 Clients created and send to clientWorkQueue which is just another
 	work queue.
 	*/
-	projectPublishingListeners := accountProducer(authenticatedClient, projectProducerListeners, accountQueue, report)
+	projectPublishingListeners := clientProducer(authenticatedClient, projectProducerListeners, clientQueue, report)
 
 	/**
 	    This function blocks until all work queues are done with their jobs. But this is not the join point. Every work queue exposes
 		a channel that signals when a job is done. A reporter is here just to write to stdout to the user of this program
 		a user-friendly message how many jobs have been done.
 
-	    propertyWorkQueueDone and accountWorkQueueDone are channels that signal to these work queues that their job is done,
+	    propertyWorkQueueDone and clientWorkQueueDone are channels that signal to these work queues that their job is done,
 		and they can be garbage collected. The way they know that is a timeout. If any of the worker has nothing to do
 		for more than 2 seconds, the queues are closed and garbage collected. This is OK because the program is made so that,
 		if there is work to be done, there will always be work. If there is not work in both queues, that means that we have
@@ -127,10 +127,10 @@ func main() {
 	*/
 	concurrencyCoordinator(
 		propertiesQueue,
-		accountQueue,
+		clientQueue,
 		progressBarNotifier,
 		propertyWorkQueueDone,
-		accountWorkQueueDone,
+		clientWorkQueueDone,
 		report,
 	)
 
@@ -138,7 +138,7 @@ func main() {
 	This is the join point to block the work queues until they are finished. close() function on these two channels
 	is called in concurrencyCoordinator() after all the work is done.
 	*/
-	<-mergeDoneQueues(accountWorkQueueDone, propertyWorkQueueDone)
+	<-mergeDoneQueues(clientWorkQueueDone, propertyWorkQueueDone)
 	progressBarDone <- true
 
 	fmt.Println("")

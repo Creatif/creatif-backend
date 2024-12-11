@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func addToMap(client *http.Client, projectId, name string, variable dataGeneration.AccountVariable, connections []map[string]string, imagePaths []string) http2.HttpResult {
+func addToMap(client *http.Client, projectId, name string, variable dataGeneration.ClientVariable, connections []map[string]string, imagePaths []string) http2.HttpResult {
 	body := map[string]interface{}{
 		"name": name,
 		"variable": map[string]interface{}{
@@ -99,20 +99,20 @@ func addToList(client *http.Client, projectId, name string, variable dataGenerat
 	return http2.NewHttpResult(response, err, response.StatusCode, response.StatusCode >= 200 && response.StatusCode <= 299, Cannot_Continue_Procedure)
 }
 
-func addToMapAndGetAccountId(client *http.Client, projectId string, accountId string, account dataGeneration.Account) string {
-	var genAccountId string
-	httpResult := errorHandler.HandleHttpError(addToMap(client, projectId, accountId, account.Variable, account.Connections, account.ImagePaths))
+func addToMapAndGetClientId(client *http.Client, projectId string, clientId string, clientVariable dataGeneration.Client) string {
+	var getClientId string
+	httpResult := errorHandler.HandleHttpError(addToMap(client, projectId, clientId, clientVariable.Variable, clientVariable.Connections, clientVariable.ImagePaths))
 	res := httpResult.Response()
 
 	if res.StatusCode < 200 || res.StatusCode > 299 {
 		if res.Body != nil {
 			res.Body.Close()
 		}
-		errorHandler.HandleAppError(errors.New(fmt.Sprintf("Generating one of the accounts return a status code %d", res.StatusCode)), Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(errors.New(fmt.Sprintf("Generating one of the clients return a status code %d", res.StatusCode)), Cannot_Continue_Procedure)
 	}
 
 	if res.Body == nil {
-		errorHandler.HandleAppError(errors.New("addToMapAndGetAccountId() was trying to get a response body on a nil body"), Cannot_Continue_Procedure)
+		errorHandler.HandleAppError(errors.New("addToMapAndGetClientId() was trying to get a response body on a nil body"), Cannot_Continue_Procedure)
 	}
 
 	b, err := io.ReadAll(res.Body)
@@ -126,7 +126,7 @@ func addToMapAndGetAccountId(client *http.Client, projectId string, accountId st
 		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 	}
 
-	genAccountId = m["id"].(string)
+	getClientId = m["id"].(string)
 
-	return genAccountId
+	return getClientId
 }
