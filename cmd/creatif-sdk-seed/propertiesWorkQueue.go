@@ -2,6 +2,7 @@ package main
 
 import (
 	"creatif-sdk-seed/dataGeneration"
+	"creatif-sdk-seed/errorHandler"
 	"net/http"
 )
 
@@ -65,7 +66,7 @@ func (wq propertiesWorkQueue) start() chan bool {
 				case <-done:
 					return
 				case j := <-wq.listeners[i]:
-					handleHttpError(addToList(
+					errorHandler.HandleHttpError(addToList(
 						j.client,
 						j.projectId,
 						j.propertyStructureId,

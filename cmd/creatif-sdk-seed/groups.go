@@ -54,7 +54,7 @@ func createGroups(client *http.Client, projectId string) http2.HttpResult {
 
 func createGroupsAndGetGroupIds(client *http.Client, projectId string) []string {
 	groupIds := make([]string, 0)
-	result := handleHttpError(createGroups(client, projectId))
+	result := errorHandler.HandleHttpError(createGroups(client, projectId))
 	res := result.Response()
 
 	if res == nil || res.Body == nil {

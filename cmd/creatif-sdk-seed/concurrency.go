@@ -84,7 +84,7 @@ func projectProducer(client *http.Client, numOfProjects int) []chan projectProdu
 		for i := 0; i < numOfProjects; i++ {
 			projectName := projectNames[i]
 			var projectId string
-			result := handleHttpError(createProject(client, projectName))
+			result := errorHandler.HandleHttpError(createProject(client, projectName))
 			res := result.Response()
 
 			if res != nil && res.Body == nil {

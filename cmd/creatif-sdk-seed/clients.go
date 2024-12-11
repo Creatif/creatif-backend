@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/errorHandler"
 	http2 "creatif-sdk-seed/http"
 	"crypto/tls"
 	"net/http"
@@ -20,7 +21,7 @@ func createAnonymousClient() *http.Client {
 func createAuthenticatedClient(authToken string) *http.Client {
 	cookieJar, err := cookiejar.New(nil)
 	if err != nil {
-		handleHttpError(http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure))
+		errorHandler.HandleHttpError(http2.NewHttpResult(nil, err, 0, false, Cannot_Continue_Procedure))
 	}
 
 	var cookies []*http.Cookie

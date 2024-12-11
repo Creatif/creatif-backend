@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/errorHandler"
 	http2 "creatif-sdk-seed/http"
 	"encoding/json"
 	"fmt"
@@ -67,7 +68,7 @@ func publishProjects(client *http.Client, projectProducts []projectProduct) {
 			defer wg.Done()
 			fmt.Println("Publishing project version v1")
 
-			handleHttpError(publish(client, product.projectId, "v1"))
+			errorHandler.HandleHttpError(publish(client, product.projectId, "v1"))
 		}(projectListener, i)
 	}
 

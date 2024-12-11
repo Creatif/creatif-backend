@@ -101,7 +101,7 @@ func addToList(client *http.Client, projectId, name string, variable dataGenerat
 
 func addToMapAndGetAccountId(client *http.Client, projectId string, accountId string, account dataGeneration.Account) string {
 	var genAccountId string
-	httpResult := handleHttpError(addToMap(client, projectId, accountId, account.Variable, account.Connections, account.ImagePaths))
+	httpResult := errorHandler.HandleHttpError(addToMap(client, projectId, accountId, account.Variable, account.Connections, account.ImagePaths))
 	res := httpResult.Response()
 
 	if res.StatusCode < 200 || res.StatusCode > 299 {

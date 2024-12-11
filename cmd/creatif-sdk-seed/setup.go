@@ -1,6 +1,7 @@
 package main
 
 import (
+	"creatif-sdk-seed/errorHandler"
 	"creatif-sdk-seed/storage"
 	"errors"
 	"fmt"
@@ -125,9 +126,9 @@ func preSeedAuthAndSetup(client *http.Client) *http.Client {
 	}
 
 	printers["info"].Println("Creating admin and logging in")
-	handleHttpError(createAdmin(client, Email, Password))
+	errorHandler.HandleHttpError(createAdmin(client, Email, Password))
 
-	authToken := extractAuthenticationCookie(handleHttpError(login(client, Email, Password)))
+	authToken := extractAuthenticationCookie(errorHandler.HandleHttpError(login(client, Email, Password)))
 
 	return createAuthenticatedClient(authToken)
 }

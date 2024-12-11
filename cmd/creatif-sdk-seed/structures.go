@@ -76,7 +76,7 @@ func createListStructure(client *http.Client, projectId, name string) http2.Http
 
 func createAccountStructureAndReturnID(client *http.Client, projectId string) string {
 	var id string
-	result := handleHttpError(createMapStructure(client, projectId, "Accounts"))
+	result := errorHandler.HandleHttpError(createMapStructure(client, projectId, "Accounts"))
 	res := result.Response()
 
 	if res.Body == nil {
@@ -101,7 +101,7 @@ func createAccountStructureAndReturnID(client *http.Client, projectId string) st
 
 func createPropertiesStructureAndReturnID(client *http.Client, projectId string) string {
 	var id string
-	result := handleHttpError(createListStructure(client, projectId, "Properties"))
+	result := errorHandler.HandleHttpError(createListStructure(client, projectId, "Properties"))
 	res := result.Response()
 
 	if res.Body == nil {
