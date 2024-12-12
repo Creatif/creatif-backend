@@ -8,11 +8,10 @@ import (
 
 type clientWorkQueueJob struct {
 	client              *http.Client
+	clientId            string
 	projectId           string
-	clientStructureId   string
 	propertyStructureId string
 	groupIds            []string
-	clientVariable      dataGeneration.Client
 }
 
 type clientWorkQueue struct {
@@ -26,18 +25,14 @@ type clientWorkQueue struct {
 func newClientWorkQueueJob(
 	client *http.Client,
 	projectId,
-	clientStructureId string,
 	propertyStructureId string,
 	groupIds []string,
-	clientVariable dataGeneration.Client,
 ) clientWorkQueueJob {
 	return clientWorkQueueJob{
 		client:              client,
 		projectId:           projectId,
-		clientStructureId:   clientStructureId,
 		propertyStructureId: propertyStructureId,
 		groupIds:            groupIds,
-		clientVariable:      clientVariable,
 	}
 }
 
@@ -70,13 +65,6 @@ func (wq *clientWorkQueue) start() chan bool {
 				case <-done:
 					return
 				case j := <-wq.listeners[i]:
-					clientId := addToMapAndGetClientId(
-						j.client,
-						j.projectId,
-						j.clientStructureId,
-						j.clientVariable,
-					)
-
 					wq.jobDoneQueue <- true
 
 					wq.balancer.removeJob(i)
@@ -95,7 +83,7 @@ func (wq *clientWorkQueue) start() chan bool {
 						The calculation is then 5 * 3 * 4 * 10
 						*/
 						for a := 0; a < wq.propertiesPerStatus; a++ {
-							singleProperty, err := dataGeneration.GenerateSingleProperty(clientId, newSequence.Locale, newSequence.PropertyStatus, newSequence.PropertyType, j.groupIds)
+							singleProperty, err := dataGeneration.GenerateSingleProperty(j.clientId, newSequence.Locale, newSequence.PropertyStatus, newSequence.PropertyType, j.groupIds)
 							if err != nil {
 								errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 							}

@@ -1,13 +1,10 @@
 package dataGeneration
 
 import (
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/fatih/color"
 	"github.com/go-faker/faker/v4"
 	"github.com/google/uuid"
-	"os"
 )
 
 var printers = map[string]*color.Color{
@@ -41,26 +38,13 @@ func newClientVariable(name, locale, behaviour, metadata, value string, groups [
 	}
 }
 
-func generateBase64Images(dir string, numOfImages int) ([]string, error) {
-	images, err := pickImages(dir, numOfImages)
-	if err != nil {
-		return nil, err
+func newClient(name string, connections []map[string]string, imagePaths []string, variable ClientVariable) Client {
+	return Client{
+		Name:        name,
+		Connections: connections,
+		ImagePaths:  imagePaths,
+		Variable:    variable,
 	}
-
-	b64Images := make([]string, numOfImages)
-	for i, img := range images {
-		imagePath := fmt.Sprintf("%s/%s", dir, img.Name())
-		bytes, err := os.ReadFile(imagePath)
-		if err != nil {
-			return nil, err
-		}
-
-		b64 := fmt.Sprintf("data:image/webp#webp;base64,%s", base64.StdEncoding.EncodeToString(bytes))
-
-		b64Images[i] = b64
-	}
-
-	return b64Images, nil
 }
 
 func GenerateSingleClient(groupIds []string) (Client, error) {
@@ -93,13 +77,4 @@ func GenerateSingleClient(groupIds []string) (Client, error) {
 		[]string{"profileImage"},
 		newClientVariable(uniqueName, "eng", "modifiable", "", string(b), pickRandomUniqueGroups(groupIds, 3)),
 	), nil
-}
-
-func newClient(name string, connections []map[string]string, imagePaths []string, variable ClientVariable) Client {
-	return Client{
-		Name:        name,
-		Connections: connections,
-		ImagePaths:  imagePaths,
-		Variable:    variable,
-	}
 }

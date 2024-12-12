@@ -99,6 +99,31 @@ func createClientStructureAndReturnId(client *http.Client, projectId string) str
 	return id
 }
 
+func createManagersStructureAndReturnId(client *http.Client, projectId string) string {
+	var id string
+	result := errorHandler.HandleHttpError(createMapStructure(client, projectId, "Managers"))
+	res := result.Response()
+
+	if res.Body == nil {
+		errorHandler.HandleAppError(errors.New("createManagersStructureAndReturnId() does not have a body"), Cannot_Continue_Procedure)
+	}
+
+	defer res.Body.Close()
+	var m map[string]interface{}
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
+	}
+
+	if err := json.Unmarshal(b, &m); err != nil {
+		errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
+	}
+
+	id = m["id"].(string)
+
+	return id
+}
+
 func createPropertiesStructureAndReturnID(client *http.Client, projectId string) string {
 	var id string
 	result := errorHandler.HandleHttpError(createListStructure(client, projectId, "Properties"))

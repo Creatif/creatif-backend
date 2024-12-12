@@ -87,14 +87,10 @@ func (a *Model) Validate() map[string]string {
 				return nil
 			})),
 			validation.Key("connectionsValid", validation.By(func(value interface{}) error {
-				if len(a.Connections) > 100 {
-					return errors.New("Invalid reference number. Maximum number of references is 100.")
-				}
-
 				if len(a.Connections) > 0 {
 					names := make([]string, len(a.Connections))
 					for _, r := range a.Connections {
-						if r.StructureType != "map" && r.StructureType != "list" && r.StructureType != "variable" {
+						if r.StructureType != "map" && r.StructureType != "list" {
 							return errors.New("Invalid connection structure type. Structure can can be one of: map or list")
 						}
 

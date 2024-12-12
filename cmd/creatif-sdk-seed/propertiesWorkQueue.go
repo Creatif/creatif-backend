@@ -66,7 +66,7 @@ func (wq propertiesWorkQueue) start() chan bool {
 				case <-done:
 					return
 				case j := <-wq.listeners[i]:
-					errorHandler.HandleHttpError(addToList(
+					errorHandler.HandleHttpError(createProperty(
 						j.client,
 						j.projectId,
 						j.propertyStructureId,

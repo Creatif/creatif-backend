@@ -62,88 +62,40 @@ func main() {
 	}
 
 	report := newReporter()
+	numOfClients := 10
 
 	anonymousClient := createAnonymousClient()
 	authenticatedClient := preSeedAuthAndSetup(anonymousClient)
 
-	/**
-		These are the work queues where Clients and Properties are created. Each of them has 50 workers that produce
-		50 workers and each of them produce 50 channels that others can send work to. Very important thing to note is that
-		these are not generic work queues. Both of them are specialized to produce either Client or a Property.
-
-		Below, clientProducer sends a job to clientWorkQueue for a Client to be created. After that, it creates a job for
-		the propertiesWorkQueue for a property to be created. That way, they do not block each other. Every worker has its own
-		channel that is buffered. That is the second argument.
-
-		These queues can be started before any job is sent to them.
-
-	    start() function returns a to be closed when all work is done. These workers will ALWAYS have work to be done. It
-		is important to know that. For more information how these are used, take a look below to the comment above
-		concurrencyCoordinator() function.
-	*/
-	propertiesQueue := newPropertiesWorkQueue(60, 60)
-	propertyWorkQueueDone := propertiesQueue.start()
-	clientQueue := newClientWorkQueue(60, 60, propertiesQueue, propertiesPerStatus)
-	clientWorkQueueDone := clientQueue.start()
-
-	fmt.Printf("Seeding...\n")
+	fmt.Printf("Seeding %d Properties\n", (numOfProjects*numOfClients)*5*4*3*propertiesPerStatus)
 	fmt.Println("")
 
-	/**
-	The properties are generated in this way:
-		5 - number of languages per property
-	    3 - number of property statuses (Rent, Sell, Buy)
-	    4 - number of property types (House, Apartment, Land, Studio)
+	projects := projectProducer(authenticatedClient, numOfProjects)
 
-	For every propertiesPerStatus, one of property status, property type and language is created.
-	*/
-	numOfAllOperations := (numOfProjects * 100) * (5 * 3 * 4 * propertiesPerStatus)
-	progressBarNotifier, progressBarDone := generateProgressBar(numOfAllOperations)
+	propertiesQueue := newPropertiesWorkQueue(60, 60)
+	propertyWorkQueueDone := propertiesQueue.start()
 
-	/**
-	projectProducer produces as many producer channels as numOfProjects. You can listen to these
-	producer channels when a project has been created. This is of course done in 1 goroutine per
-	project. For example, if numOfProjects is 5, there will be 5 goroutines that will create projects
-	and this function will return 5 producer channels to listen to when a project has been created.
-	*/
-	projectProducerListeners := projectProducer(authenticatedClient, numOfProjects)
-	/**
-	clientProducer listens to when a project is created and sends it to clientWorkQueue. More on clientWorkQueue, just scroll
-	up. Not complicated, for every project, there are 10 Clients created and send to clientWorkQueue which is just another
-	work queue.
-	*/
-	projectPublishingListeners := clientProducer(authenticatedClient, projectProducerListeners, clientQueue, report)
-
-	/**
-	    This function blocks until all work queues are done with their jobs. But this is not the join point. Every work queue exposes
-		a channel that signals when a job is done. A reporter is here just to write to stdout to the user of this program
-		a user-friendly message how many jobs have been done.
-
-	    propertyWorkQueueDone and clientWorkQueueDone are channels that signal to these work queues that their job is done,
-		and they can be garbage collected. The way they know that is a timeout. If any of the worker has nothing to do
-		for more than 2 seconds, the queues are closed and garbage collected. This is OK because the program is made so that,
-		if there is work to be done, there will always be work. If there is not work in both queues, that means that we have
-		seeded everything that needs to be seeded and work queues can be closed.
-	*/
 	concurrencyCoordinator(
 		propertiesQueue,
-		clientQueue,
-		progressBarNotifier,
 		propertyWorkQueueDone,
-		clientWorkQueueDone,
 		report,
 	)
 
-	/**
-	This is the join point to block the work queues until they are finished. close() function on these two channels
-	is called in concurrencyCoordinator() after all the work is done.
-	*/
-	<-mergeDoneQueues(clientWorkQueueDone, propertyWorkQueueDone)
-	progressBarDone <- true
+	startSeeding(
+		numOfClients,
+		authenticatedClient,
+		projects,
+		&propertiesQueue,
+		report,
+		propertiesPerStatus,
+	)
+
+	<-propertyWorkQueueDone
+	//<-mergeDoneQueues(propertyWorkQueueDone)
 
 	fmt.Println("")
 	printers["info"].Println("Publishing projects...")
-	publishProjects(authenticatedClient, projectPublishingListeners)
+	publishProjects(authenticatedClient, projects)
 	printers["info"].Println("Projects published")
 
 	fmt.Println("")

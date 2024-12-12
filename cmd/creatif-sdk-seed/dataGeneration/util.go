@@ -1,7 +1,9 @@
 package dataGeneration
 
 import (
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"math/rand"
 	randv2 "math/rand/v2"
 	"os"
@@ -58,6 +60,28 @@ func pickRandomUniqueGroups(groupIds []string, numOfGroups int) []string {
 			picked++
 		}
 	}
+}
+
+func generateBase64Images(dir string, numOfImages int) ([]string, error) {
+	images, err := pickImages(dir, numOfImages)
+	if err != nil {
+		return nil, err
+	}
+
+	b64Images := make([]string, numOfImages)
+	for i, img := range images {
+		imagePath := fmt.Sprintf("%s/%s", dir, img.Name())
+		bytes, err := os.ReadFile(imagePath)
+		if err != nil {
+			return nil, err
+		}
+
+		b64 := fmt.Sprintf("data:image/webp#webp;base64,%s", base64.StdEncoding.EncodeToString(bytes))
+
+		b64Images[i] = b64
+	}
+
+	return b64Images, nil
 }
 
 func randomBetween(min, max int) int {
