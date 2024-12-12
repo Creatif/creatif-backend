@@ -21,6 +21,13 @@ type joinedStructureClient struct {
 	client dataGeneration.Client
 }
 
+type createdClientVariable struct {
+	projectId           string
+	clientId            string
+	propertyStructureId string
+	groupIds            []string
+}
+
 type projectProduct struct {
 	projectId           string
 	groupIds            []string
@@ -110,14 +117,15 @@ func projectProducer(client *http.Client, numOfProjects int) []projectProduct {
 	return producers
 }
 
-func startSeeding(
+func createClientsAndManagers(
 	clientNum int,
 	client *http.Client,
 	projects []projectProduct,
-	wq *propertiesWorkQueue,
 	reporter *reporter,
-	propertiesPerStatus int,
-) {
+) []createdClientVariable {
+	clientVariables := make([]createdClientVariable, len(projects)*clientNum)
+	clientVariablesCount := 0
+	printers["info"].Println("Creating clients and managers")
 	for _, projectProductResult := range projects {
 		reporter.AddProjectID(projectProductResult.projectId)
 
@@ -127,14 +135,7 @@ func startSeeding(
 		managerStructureId := projectProductResult.managerStructureId
 		propertyStructureId := projectProductResult.propertyStructureId
 
-		type createdClientVariable struct {
-			projectId           string
-			clientId            string
-			propertyStructureId string
-			groupIds            []string
-		}
-
-		clientVariables := make([]createdClientVariable, clientNum)
+		projectClientVariables := make([]createdClientVariable, clientNum)
 		for a := 0; a < clientNum; a++ {
 			getClient, err := dataGeneration.GenerateSingleClient(groupIds)
 			if err != nil {
@@ -156,66 +157,85 @@ func startSeeding(
 				joinedClient.client,
 			)
 
-			clientVariables[a] = createdClientVariable{
+			createdVariable := createdClientVariable{
 				projectId:           projectId,
 				clientId:            clientId,
 				propertyStructureId: propertyStructureId,
 				groupIds:            groupIds,
 			}
 
+			clientVariables[clientVariablesCount] = createdVariable
+			projectClientVariables[a] = createdVariable
+
 			reporter.AddClient()
+			clientVariablesCount++
 		}
 
-		clientConnections := make([]dataGeneration.ClientConnection, len(clientVariables))
-		for i, c := range clientVariables {
+		clientConnections := make([]dataGeneration.ClientConnection, len(projectClientVariables))
+		for i, c := range projectClientVariables {
 			clientConnections[i] = dataGeneration.ClientConnection{
 				StructureType: "map",
 				VariableID:    c.clientId,
 			}
 		}
 
-		printers["info"].Println("Creating managers")
 		for i := 0; i < 100; i++ {
 			manager, err := dataGeneration.GenerateSingleManager(groupIds, clientConnections)
 			if err != nil {
 				errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 			}
 
-			errorHandler.HandleHttpError(createManager(client, managerStructureId, projectId, manager.Variable, manager.Connections, manager.ImagePaths))
+			errorHandler.HandleHttpError(createManager(
+				client,
+				managerStructureId,
+				projectId,
+				manager.Variable,
+				manager.Connections,
+				manager.ImagePaths,
+			))
 		}
-		printers["info"].Println("Managers created")
+	}
 
-		for _, clientVariable := range clientVariables {
-			propertiesGen := dataGeneration.NewPropertiesGenerator()
+	return clientVariables
+}
 
-			for {
-				newSequence, ok := propertiesGen.Generate()
+func startSeeding(
+	client *http.Client,
+	wq *propertiesWorkQueue,
+	propertiesPerStatus int,
+	clientVariables []createdClientVariable,
+) {
+	printers["info"].Println("Creating properites\n")
+	for _, clientVariable := range clientVariables {
+		propertiesGen := dataGeneration.NewPropertiesGenerator()
 
-				if !ok {
-					break
+		for {
+			newSequence, ok := propertiesGen.Generate()
+
+			if !ok {
+				break
+			}
+
+			for a := 0; a < propertiesPerStatus; a++ {
+				singleProperty, err := dataGeneration.GenerateSingleProperty(
+					clientVariable.clientId,
+					newSequence.Locale,
+					newSequence.PropertyStatus,
+					newSequence.PropertyType,
+					clientVariable.groupIds,
+				)
+				if err != nil {
+					errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
 				}
 
-				for a := 0; a < propertiesPerStatus; a++ {
-					singleProperty, err := dataGeneration.GenerateSingleProperty(
-						clientVariable.clientId,
-						newSequence.Locale,
-						newSequence.PropertyStatus,
-						newSequence.PropertyType,
-						clientVariable.groupIds,
-					)
-					if err != nil {
-						errorHandler.HandleAppError(err, Cannot_Continue_Procedure)
-					}
-
-					wq.addJob(newPropertyWorkQueueJoby(
-						client,
-						clientVariable.projectId,
-						clientVariable.propertyStructureId,
-						singleProperty.Variable,
-						singleProperty.Connections,
-						singleProperty.ImagePaths,
-					))
-				}
+				wq.addJob(newPropertyWorkQueueJoby(
+					client,
+					clientVariable.projectId,
+					clientVariable.propertyStructureId,
+					singleProperty.Variable,
+					singleProperty.Connections,
+					singleProperty.ImagePaths,
+				))
 			}
 		}
 	}
@@ -227,7 +247,7 @@ func concurrencyCoordinator(
 	reporter *reporter,
 ) {
 	go func() {
-		workQueueTimeout := time.After(10 * time.Second)
+		workQueueTimeout := time.After(5 * time.Second)
 		doneProperties := 0
 		for {
 			select {
@@ -239,7 +259,7 @@ func concurrencyCoordinator(
 					fmt.Printf("Processed %d properties\n", doneProperties)
 				}
 
-				workQueueTimeout = time.After(10 * time.Second)
+				workQueueTimeout = time.After(5 * time.Second)
 			case <-workQueueTimeout:
 				fmt.Println("work queue timeout")
 				propertyWorkQueueDone <- true
@@ -248,17 +268,4 @@ func concurrencyCoordinator(
 			}
 		}
 	}()
-}
-
-func mergeDoneQueues(clientQueue chan bool, propertyQueue chan bool) chan bool {
-	done := make(chan bool)
-
-	go func() {
-		<-clientQueue
-		<-propertyQueue
-
-		done <- true
-	}()
-
-	return done
 }

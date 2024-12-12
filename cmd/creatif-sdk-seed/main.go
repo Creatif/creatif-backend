@@ -72,9 +72,10 @@ func main() {
 
 	projects := projectProducer(authenticatedClient, numOfProjects)
 
+	clientVariables := createClientsAndManagers(numOfClients, authenticatedClient, projects, report)
+
 	propertiesQueue := newPropertiesWorkQueue(60, 60)
 	propertyWorkQueueDone := propertiesQueue.start()
-
 	concurrencyCoordinator(
 		propertiesQueue,
 		propertyWorkQueueDone,
@@ -82,16 +83,13 @@ func main() {
 	)
 
 	startSeeding(
-		numOfClients,
 		authenticatedClient,
-		projects,
 		&propertiesQueue,
-		report,
 		propertiesPerStatus,
+		clientVariables,
 	)
 
 	<-propertyWorkQueueDone
-	//<-mergeDoneQueues(propertyWorkQueueDone)
 
 	fmt.Println("")
 	printers["info"].Println("Publishing projects...")
