@@ -190,7 +190,7 @@ func testCreateMap(projectId, name string) mapCreate.View {
 	return view
 }
 
-func testAddToMap(projectId, variableName, mapId string, connections []connections.Connection, groups []string) addToMap.View {
+func testAddToMap(projectId, mapId, variableName string, connections []connections.Connection, groups []string) addToMap.View {
 	variableModel := addToMap.VariableModel{
 		Name:      variableName,
 		Metadata:  nil,

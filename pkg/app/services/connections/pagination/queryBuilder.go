@@ -42,31 +42,7 @@ type QueryVariable struct {
 	UpdatedAt time.Time
 }
 
-func createQueryPlaceholders(projectId, structureId, parentVariableId string, offset int, limit int, groups []string, behaviour, search string) map[string]interface{} {
-	placeholders := make(map[string]interface{})
-
-	placeholders["projectID"] = projectId
-	placeholders["offset"] = offset
-	placeholders["structureId"] = structureId
-	placeholders["parentVariableId"] = parentVariableId
-	placeholders["limit"] = limit
-	placeholders["groups"] = groups
-
-	if behaviour != "" {
-		placeholders["behaviour"] = behaviour
-	}
-
-	if search != "" {
-		placeholders["searchOne"] = fmt.Sprintf("%%%s", search)
-		placeholders["searchTwo"] = fmt.Sprintf("%s%%", search)
-		placeholders["searchThree"] = fmt.Sprintf("%%%s%%", search)
-		placeholders["searchFour"] = search
-	}
-
-	return placeholders
-}
-
-func createCountPlaceholders(projectId, structureId, parentVariableId string, groups []string, behaviour, search string) map[string]interface{} {
+func createQueryPlaceholders(projectId, structureId, parentVariableId string, groups []string, behaviour, search string) map[string]interface{} {
 	placeholders := make(map[string]interface{})
 
 	placeholders["projectID"] = projectId
@@ -149,8 +125,7 @@ func createPaginationSql(structureType string, sq subQueries, defs defaults) str
 		%s
 		%s
 		%s
-		ORDER BY lv.%s %s
-		OFFSET @offset LIMIT @limit`,
+		ORDER BY lv.%s %s`,
 		sq.returnableFields,
 		(declarations.ListVariable{}).TableName(),
 		(declarations.List{}).TableName(),
@@ -181,8 +156,7 @@ func createPaginationSql(structureType string, sq subQueries, defs defaults) str
 		%s
 		%s
 		%s
-		ORDER BY lv.%s %s
-		OFFSET @offset LIMIT @limit`,
+		ORDER BY lv.%s %s`,
 			sq.returnableFields,
 			(declarations.MapVariable{}).TableName(),
 			(declarations.Map{}).TableName(),
@@ -193,52 +167,6 @@ func createPaginationSql(structureType string, sq subQueries, defs defaults) str
 			sq.behaviour,
 			defs.orderBy,
 			defs.orderDirections,
-		)
-	}
-
-	return sql
-}
-
-func createCountSql(structureType string, sq subQueries) string {
-	sql := fmt.Sprintf(`
-    	SELECT 
-    	    count(lv.id) AS count
-		FROM %s AS lv
-		INNER JOIN %s AS l ON l.project_id = @projectID AND l.id = @structureId AND l.id = lv.list_id 
-		INNER JOIN %s AS c ON c.parent_variable_id = @parentVariableId AND c.child_variable_id = lv.id
-		%s 
-		%s
-    	%s
-    	%s
-	`,
-		(declarations.ListVariable{}).TableName(),
-		(declarations.List{}).TableName(),
-		(declarations.Connection{}).TableName(),
-		sq.locale,
-		sq.search,
-		sq.behaviour,
-		sq.groups,
-	)
-
-	if structureType == "map" {
-		sql = fmt.Sprintf(`
-    	SELECT 
-    	    count(lv.id) AS count
-		FROM %s AS lv
-		INNER JOIN %s AS l ON l.project_id = @projectID AND l.id = @structureId AND l.id = lv.map_id
-		INNER JOIN %s AS c ON c.parent_variable_id = @parentVariableId AND c.child_variable_id = lv.id
-		%s 
-		%s
-    	%s
-    	%s
-	`,
-			(declarations.MapVariable{}).TableName(),
-			(declarations.Map{}).TableName(),
-			(declarations.Connection{}).TableName(),
-			sq.locale,
-			sq.search,
-			sq.behaviour,
-			sq.groups,
 		)
 	}
 

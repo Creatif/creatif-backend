@@ -32,20 +32,8 @@ func (c Main) Authorize() error {
 	return nil
 }
 
-func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
-	offset := (c.model.Page - 1) * c.model.Limit
+func (c Main) Logic() ([]QueryVariable, error) {
 	queryPlaceholders := createQueryPlaceholders(
-		c.model.ProjectID,
-		c.model.StructureID,
-		c.model.ParentVariableID,
-		offset,
-		c.model.Limit,
-		c.model.Groups,
-		c.model.Behaviour,
-		c.model.Search,
-	)
-
-	countPlaceholders := createCountPlaceholders(
 		c.model.ProjectID,
 		c.model.StructureID,
 		c.model.ParentVariableID,
@@ -62,27 +50,22 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 		c.model.Search,
 	)
 
-	paginationResult, countResult := runQueriesConcurrently(c.model.StructureType, queryPlaceholders, countPlaceholders, sq, defs)
-
-	if paginationResult.error != nil {
-		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(paginationResult.error).AddError("ListItems.Paginate.Logic", nil)
+	conns, err := getConnections(c.model.StructureType, queryPlaceholders, sq, defs)
+	if err != nil {
+		return nil, appErrors.NewDatabaseError(err).AddError("ListItems.Paginate.Logic", nil)
 	}
 
-	if countResult.error != nil {
-		return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(countResult.error).AddError("ListItems.Paginate.Logic", nil)
-	}
-
-	ids := sdk.Map(paginationResult.result, func(idx int, value QueryVariable) string {
+	ids := sdk.Map(conns, func(idx int, value QueryVariable) string {
 		return value.ID
 	})
 
 	if sdk.Includes(c.model.Fields, "groups") {
 		groups, err := getItemGroups(ids)
 		if err != nil {
-			return sdk.LogicView[QueryVariable]{}, appErrors.NewDatabaseError(err).AddError("ListItems.Paginate.Logic", nil)
+			return nil, appErrors.NewDatabaseError(err).AddError("ListItems.Paginate.Logic", nil)
 		}
 
-		resultsOfPagination := paginationResult.result
+		resultsOfPagination := conns
 		for _, g := range groups {
 			for i, p := range resultsOfPagination {
 				if grps, ok := g[p.ID]; ok {
@@ -94,43 +77,36 @@ func (c Main) Logic() (sdk.LogicView[QueryVariable], error) {
 		}
 	}
 
-	return sdk.LogicView[QueryVariable]{
-		Total: countResult.result,
-		Data:  paginationResult.result,
-	}, nil
+	return conns, nil
 }
 
-func (c Main) Handle() (sdk.PaginationView[View], error) {
+func (c Main) Handle() ([]View, error) {
 	if err := c.Validate(); err != nil {
-		return sdk.PaginationView[View]{}, err
+		return nil, err
 	}
 
 	if err := c.Authenticate(); err != nil {
-		return sdk.PaginationView[View]{}, err
+		return nil, err
 	}
 
 	if err := c.Authorize(); err != nil {
-		return sdk.PaginationView[View]{}, err
+		return nil, err
 	}
 
-	model, err := c.Logic()
+	models, err := c.Logic()
 
 	if err != nil {
-		return sdk.PaginationView[View]{}, err
+		return nil, err
 	}
 
-	items, err := newView(model.Data)
+	items, err := newView(models)
 	if err != nil {
-		return sdk.PaginationView[View]{}, appErrors.NewApplicationError(err).AddError("ListItems.Paginate.Handle", nil)
+		return nil, appErrors.NewApplicationError(err).AddError("ListItems.Paginate.Handle", nil)
 	}
 
-	return sdk.PaginationView[View]{
-		Total: model.Total,
-		Page:  c.model.Page,
-		Data:  items,
-	}, nil
+	return items, nil
 }
 
-func New(model Model, auth auth.Authentication) pkg.Job[Model, sdk.PaginationView[View], sdk.LogicView[QueryVariable]] {
+func New(model Model, auth auth.Authentication) pkg.Job[Model, []View, []QueryVariable] {
 	return Main{model: model, auth: auth}
 }

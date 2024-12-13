@@ -49,3 +49,19 @@ func getItemGroups(ids []string) (groupsReturnType, error) {
 
 	return results, nil
 }
+
+func getConnections(
+	structureType string,
+	queryPlaceholders map[string]interface{},
+	sq subQueries,
+	defs defaults,
+) ([]QueryVariable, error) {
+	paginationSql := createPaginationSql(structureType, sq, defs)
+	var items []QueryVariable
+	res := storage.Gorm().Raw(paginationSql, queryPlaceholders).Scan(&items)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return items, nil
+}
