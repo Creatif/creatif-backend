@@ -212,3 +212,41 @@ FROM %s AS vg INNER JOIN %s AS g ON g.project_id = ?`,
 
 	return nil
 }
+
+func publishConnections(tx *gorm.DB, projectId, versionId string, ctx context.Context) error {
+	sql := fmt.Sprintf(`
+INSERT INTO %s (
+   version_id,
+   project_id,
+   
+   path,
+   parent_variable_id,
+   parent_structure_type,
+   
+   child_variable_id,
+   child_structure_type,
+   
+   created_at
+)
+SELECT 
+    '%s' AS version_id,
+    project_id AS project_id,
+    
+    path AS path,
+	parent_variable_id AS parent_variable_id,
+	parent_structure_type AS parent_structure_type,
+	
+	child_variable_id AS child_variable_id,
+	child_structure_type AS child_structure_type,
+    created_at
+FROM %s AS c WHERE c.project_id = ?`, (published.PublishedConnection{}).TableName(), versionId, (declarations.Connection{}).TableName())
+
+	res := tx.WithContext(ctx).Exec(sql, projectId)
+	if res.Error != nil {
+		return res.Error
+	}
+
+	fmt.Println("ROWS AFFECTED: ", res.RowsAffected)
+
+	return nil
+}

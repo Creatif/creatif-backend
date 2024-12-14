@@ -98,6 +98,8 @@ var _ = GinkgoAfterHandler(func() {
 	gomega.Expect(res.Error).Should(gomega.BeNil())
 	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE declarations.%s CASCADE", domain.CONNECTIONS_TABLE))
 	gomega.Expect(res.Error).Should(gomega.BeNil())
+	res = storage2.Gorm().Exec(fmt.Sprintf("TRUNCATE TABLE published.%s CASCADE", domain.PUBLISHED_CONNECTIONS_TABLE))
+	gomega.Expect(res.Error).Should(gomega.BeNil())
 })
 
 func testCreateMap(projectId, name string, variablesNum int) mapCreate.View {

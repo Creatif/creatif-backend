@@ -55,7 +55,6 @@ func (c Main) Logic() (published.Version, error) {
 	}
 	version := published.NewVersion(c.model.ProjectID, existingVersion.Name)
 	if transactionError := storage.Transaction(func(tx *gorm.DB) error {
-
 		publicPath := fmt.Sprintf("%s/%s/%s", constants.PublicDirectory, c.model.ProjectID, version.Name)
 		if err := deleteFilesFromProject(publicPath); err != nil {
 			return err
@@ -69,24 +68,21 @@ func (c Main) Logic() (published.Version, error) {
 			return res.Error
 		}
 
-		listCtx, listCancel := context.WithTimeout(context.Background(), 1*time.Hour)
-		mapCtx, mapCancel := context.WithTimeout(context.Background(), 1*time.Hour)
-		filesCtx, refCancel := context.WithTimeout(context.Background(), 1*time.Hour)
-		groupsCtx, groupsCancel := context.WithTimeout(context.Background(), 1*time.Hour)
-		defer listCancel()
-		defer mapCancel()
-		defer refCancel()
-		defer groupsCancel()
-		if err := publishLists(tx, c.model.ProjectID, version.ID, listCtx); err != nil {
+		timeoutCtx, cancel := context.WithTimeout(context.Background(), 1*time.Hour)
+		defer cancel()
+		if err := publishLists(tx, c.model.ProjectID, version.ID, timeoutCtx); err != nil {
 			return err
 		}
-		if err := publishMaps(tx, c.model.ProjectID, version.ID, mapCtx); err != nil {
+		if err := publishMaps(tx, c.model.ProjectID, version.ID, timeoutCtx); err != nil {
 			return err
 		}
-		if err := publishFiles(tx, c.model.ProjectID, version.ID, filesCtx); err != nil {
+		if err := publishFiles(tx, c.model.ProjectID, version.ID, timeoutCtx); err != nil {
 			return err
 		}
-		if err := publishGroups(tx, c.model.ProjectID, version.ID, groupsCtx); err != nil {
+		if err := publishGroups(tx, c.model.ProjectID, version.ID, timeoutCtx); err != nil {
+			return err
+		}
+		if err := publishConnections(tx, c.model.ProjectID, version.ID, timeoutCtx); err != nil {
 			return err
 		}
 

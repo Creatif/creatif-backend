@@ -261,7 +261,6 @@ func concurrencyCoordinator(
 
 				workQueueTimeout = time.After(5 * time.Second)
 			case <-workQueueTimeout:
-				fmt.Println("work queue timeout")
 				propertyWorkQueueDone <- true
 				close(propertyWorkQueueDone)
 				return
