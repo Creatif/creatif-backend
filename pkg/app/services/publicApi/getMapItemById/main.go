@@ -51,6 +51,14 @@ func (c Main) Logic() (LogicModel, error) {
 
 	item.Groups = groups
 
+	conns, err := getConnectionVariables(version.ID, c.model.ProjectID, c.model.ItemID)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
+	updatedValue, err := replaceConnectionJson(conns, item.Value, c.model.Options)
+	item.Value = updatedValue
+
 	return LogicModel{
 		Item:    item,
 		Options: c.model.Options,

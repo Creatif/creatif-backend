@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/schollz/progressbar/v3"
-	"io"
 	"net/http"
 	"regexp"
 	"sync"

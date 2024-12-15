@@ -59,9 +59,9 @@ type View struct {
 	StructureShortID string `json:"structureShortId,omitempty"`
 	StructureName    string `json:"structureName,omitempty"`
 
-	Name    string `json:"itemName,omitempty"`
-	ID      string `json:"itemId,omitempty"`
-	ShortID string `json:"itemShortId,omitempty"`
+	Name    string `json:"name,omitempty"`
+	ID      string `json:"id,omitempty"`
+	ShortID string `json:"shortId,omitempty"`
 
 	ProjectID string      `json:"projectId,omitempty"`
 	Locale    string      `json:"locale,omitempty"`
@@ -94,7 +94,7 @@ func newView(model LogicModel) interface{} {
 
 	view := View{
 		StructureID:      model.Item.StructureID,
-		StructureShortID: model.Item.ShortID,
+		StructureShortID: model.Item.StructureShortID,
 		StructureName:    model.Item.StructureName,
 		Name:             model.Item.ItemName,
 		ID:               model.Item.ItemID,

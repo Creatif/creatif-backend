@@ -246,7 +246,5 @@ FROM %s AS c WHERE c.project_id = ?`, (published.PublishedConnection{}).TableNam
 		return res.Error
 	}
 
-	fmt.Println("ROWS AFFECTED: ", res.RowsAffected)
-
 	return nil
 }

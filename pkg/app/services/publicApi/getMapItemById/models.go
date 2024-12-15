@@ -71,8 +71,6 @@ type View struct {
 	Behaviour string      `json:"behaviour,omitempty"`
 	Value     interface{} `json:"value"`
 
-	Connections ConnectionsView `json:"connections"`
-
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
@@ -87,6 +85,8 @@ func newView(model LogicModel) interface{} {
 		var m map[string]interface{}
 		// ok to ignore
 		json.Unmarshal(model.Item.Value, &m)
+
+		return m
 	}
 
 	locale, _ := locales.GetAlphaWithID(model.Item.Locale)
