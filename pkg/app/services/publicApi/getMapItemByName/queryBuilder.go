@@ -11,6 +11,12 @@ func createPlaceholders(projectId, versionId, structureName, variableName, local
 	placeholders["structureName"] = structureName
 	placeholders["variableName"] = variableName
 
+	if locale == "" {
+		l, _ := locales.GetIDWithAlpha("eng")
+		locale = l
+		placeholders["localeId"] = l
+	}
+
 	if locale != "" {
 		l, _ := locales.GetIDWithAlpha(locale)
 		locale = l
