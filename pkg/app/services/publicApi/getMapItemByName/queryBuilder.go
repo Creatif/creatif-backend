@@ -2,6 +2,7 @@ package getMapItemByName
 
 import (
 	"creatif/pkg/app/services/locales"
+	"creatif/pkg/app/services/publicApi/publicApiError"
 )
 
 func createPlaceholders(projectId, versionId, structureName, variableName, locale string) (map[string]interface{}, error) {
@@ -13,13 +14,17 @@ func createPlaceholders(projectId, versionId, structureName, variableName, local
 
 	if locale == "" {
 		l, _ := locales.GetIDWithAlpha("eng")
-		locale = l
 		placeholders["localeId"] = l
 	}
 
 	if locale != "" {
-		l, _ := locales.GetIDWithAlpha(locale)
-		locale = l
+		l, err := locales.GetIDWithAlpha(locale)
+		if err != nil {
+			return nil, publicApiError.NewError("getListItemsByName", map[string]string{
+				"invalidLocale": "The locale you provided is invalid and does not exist.",
+			}, publicApiError.ValidationError)
+		}
+
 		placeholders["localeId"] = l
 	}
 

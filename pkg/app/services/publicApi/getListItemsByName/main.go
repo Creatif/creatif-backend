@@ -50,6 +50,20 @@ func (c Main) Logic() (LogicModel, error) {
 		return LogicModel{}, err
 	}
 
+	ids := sdk.Map(items, func(idx int, value Item) string {
+		return value.ItemID
+	})
+
+	conns, err := getConnectionVariables(version.ID, c.model.ProjectID, ids)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
+	items, err = replaceConnectionJson(conns, items, c.model.Options)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
 	normalizedGroups, err := getGroups(sdk.Map(items, func(idx int, value Item) string {
 		return value.ItemID
 	}))
