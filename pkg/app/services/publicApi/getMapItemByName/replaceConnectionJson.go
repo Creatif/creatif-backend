@@ -74,7 +74,6 @@ func replaceConnectionJson(conns []ConnectionItem, value datatypes.JSON, options
 			}
 			updatedValue = v
 		}
-
 	}
 
 	return updatedValue, nil
