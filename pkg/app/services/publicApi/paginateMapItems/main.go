@@ -4,6 +4,7 @@ import (
 	"creatif/pkg/app/auth"
 	"creatif/pkg/app/services/publicApi/publicApiError"
 	pkg "creatif/pkg/lib"
+	"creatif/pkg/lib/sdk"
 )
 
 type Main struct {
@@ -53,6 +54,20 @@ func (c Main) Logic() (LogicModel, error) {
 	}
 
 	items, err := getItem(placeholders, defs, subQrs)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
+	ids := sdk.Map(items, func(idx int, value Item) string {
+		return value.ItemID
+	})
+
+	conns, err := getConnectionVariables(version.ID, c.model.ProjectID, ids)
+	if err != nil {
+		return LogicModel{}, err
+	}
+
+	items, err = replaceConnectionJson(conns, items, c.model.Options)
 	if err != nil {
 		return LogicModel{}, err
 	}
