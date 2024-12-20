@@ -30,7 +30,6 @@ func (a Model) Validate() map[string]string {
 		validation.Map(
 			validation.Key("name", validation.Required),
 			validation.Key("itemID", validation.Required),
-
 			validation.Key("projectID", validation.Required, validation.RuneLength(27, 27)),
 		),
 	); err != nil {
