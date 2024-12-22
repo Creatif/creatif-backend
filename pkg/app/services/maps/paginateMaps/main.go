@@ -36,11 +36,8 @@ func (c Main) Authorize() error {
 }
 
 func (c Main) Logic() (sdk.LogicView[declarations.Map], error) {
-	offset := (c.model.Page - 1) * c.model.Limit
 	placeholders := make(map[string]interface{})
 	placeholders["projectID"] = c.model.ProjectID
-	placeholders["offset"] = offset
-	placeholders["limit"] = c.model.Limit
 
 	countPlaceholders := make(map[string]interface{})
 	countPlaceholders["projectID"] = c.model.ProjectID
@@ -78,8 +75,7 @@ func (c Main) Logic() (sdk.LogicView[declarations.Map], error) {
 		FROM %s AS l
 		WHERE l.project_id = @projectID
 		%s
-		ORDER BY l.%s %s
-		OFFSET @offset LIMIT @limit`,
+		ORDER BY l.%s %s`,
 		(declarations.Map{}).TableName(),
 		search,
 		c.model.OrderBy,

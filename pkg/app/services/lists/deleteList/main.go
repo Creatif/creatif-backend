@@ -49,6 +49,10 @@ func (c Main) Logic() (*struct{}, error) {
 		return nil, appErrors.NewDatabaseError(res.Error).AddError("deleteList.Logic", nil)
 	}
 
+	if err := removeConnections(c.model.ProjectID, c.model.ID); err != nil {
+		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteList.Logic", nil)
+	}
+
 	if res.RowsAffected == 0 {
 		return nil, appErrors.NewNotFoundError(res.Error).AddError("deleteList.Logic", nil)
 	}

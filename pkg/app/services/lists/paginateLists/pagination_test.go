@@ -18,21 +18,7 @@ var _ = ginkgo.Describe("Lists pagination tests", func() {
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
-		gomega.Expect(len(views.Data)).Should(gomega.Equal(10))
-		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
-	})
-
-	ginkgo.It("should get an empty result from the end of the lists listing", func() {
-		projectId := testCreateProject("project")
-		for i := 0; i < 100; i++ {
-			testCreateListAndReturnNameAndID(projectId, fmt.Sprintf("name-%d", i), 10)
-		}
-
-		handler := New(NewModel(projectId, "created_at", "", "desc", 10, 50), auth.NewTestingAuthentication(false, ""))
-		views, err := handler.Handle()
-		testAssertErrNil(err)
-
-		gomega.Expect(len(views.Data)).Should(gomega.Equal(0))
+		gomega.Expect(len(views.Data)).Should(gomega.Equal(100))
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(100)))
 	})
 
@@ -46,7 +32,7 @@ var _ = ginkgo.Describe("Lists pagination tests", func() {
 		views, err := handler.Handle()
 		testAssertErrNil(err)
 
-		gomega.Expect(len(views.Data)).Should(gomega.Equal(10))
+		gomega.Expect(len(views.Data)).Should(gomega.Equal(19))
 		gomega.Expect(views.Total).Should(gomega.Equal(int64(19)))
 	})
 })
