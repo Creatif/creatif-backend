@@ -1,6 +1,6 @@
 services:
-  api:
-    container_name: "api"
+  creatif_api:
+    container_name: "creatif_api"
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -20,9 +20,9 @@ services:
       - .:/var/log:/app/var/log
       - .:/var/assets:/app/var/assets
     depends_on:
-      db:
+      creatif_db:
         condition: service_healthy
-  db:
+  creatif_db:
     image: "postgres:17-alpine"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U app" ]
@@ -31,7 +31,7 @@ services:
       retries: 5
     #    build:
     #      dockerfile: ./pgx_ulid/Dockerfile
-    container_name: "db"
+    container_name: "creatif_db"
     ports:
       - "54333:5432"
     restart: always
